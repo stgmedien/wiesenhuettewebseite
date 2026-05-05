@@ -14,13 +14,24 @@ const NAV = [
   { href: "/kontakt", label: "Kontakt" },
 ];
 
+const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
+const DURATION_MS = 450;
+
 export const Header = () => {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60);
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        setScrolled(window.scrollY > 60);
+        ticking = false;
+      });
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -28,27 +39,36 @@ export const Header = () => {
 
   useEffect(() => setOpen(false), [pathname]);
 
+  // Single transition declaration, identical in both states — smooth morph.
+  const morphTransition = `max-width ${DURATION_MS}ms ${EASE}, border-radius ${DURATION_MS}ms ${EASE}, box-shadow ${DURATION_MS}ms ${EASE}, margin ${DURATION_MS}ms ${EASE}`;
+  const wrapperTransition = `padding ${DURATION_MS}ms ${EASE}`;
+
   return (
     <header
-      className={cn(
-        "sticky top-0 z-40 transition-[padding] duration-300",
-        scrolled ? "px-3 sm:px-4 pt-3" : "px-0 pt-0"
-      )}
+      className="sticky top-0 z-40"
+      style={{
+        transition: wrapperTransition,
+        paddingTop: scrolled ? 12 : 0,
+        paddingLeft: scrolled ? 12 : 0,
+        paddingRight: scrolled ? 12 : 0,
+      }}
     >
       <div
-        className={cn(
-          "bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] transition-all duration-300",
-          scrolled
-            ? "mx-auto max-w-[980px] rounded-full shadow-[0_12px_32px_rgba(17,17,17,0.18),0_4px_10px_rgba(17,17,17,0.08)]"
-            : "w-full rounded-none"
-        )}
+        className="bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] mx-auto"
+        style={{
+          transition: morphTransition,
+          maxWidth: scrolled ? "980px" : "100vw",
+          borderRadius: scrolled ? 9999 : 0,
+          boxShadow: scrolled
+            ? "0 12px 32px rgba(17,17,17,0.18), 0 4px 10px rgba(17,17,17,0.08)"
+            : "0 0 0 rgba(17,17,17,0)",
+          willChange: "max-width, border-radius, box-shadow, margin",
+        }}
       >
         <div
           className={cn(
-            "flex items-center justify-between gap-3 sm:gap-4 transition-all duration-300",
-            scrolled
-              ? "h-14 px-4 sm:px-5"
-              : "max-w-[1280px] mx-auto h-16 px-5 sm:px-6 lg:px-8"
+            "flex items-center justify-between gap-3 sm:gap-4 h-14",
+            scrolled ? "px-4 sm:px-5" : "px-5 sm:px-6 lg:px-8 max-w-[1280px] mx-auto"
           )}
         >
           <Link
@@ -56,7 +76,7 @@ export const Header = () => {
             className="flex items-center gap-2.5 no-underline text-[var(--color-wh-snow)] shrink-0"
             onClick={() => setOpen(false)}
           >
-            <Mountain size={24} strokeWidth={1.6} />
+            <Mountain size={22} strokeWidth={1.6} />
             <span className="font-display text-base sm:text-lg font-bold tracking-tight leading-none">
               Wiesenhütte
             </span>
@@ -84,13 +104,13 @@ export const Header = () => {
           <div className="flex items-center gap-1.5 sm:gap-2">
             <Link
               href="/buchen"
-              className="inline-flex h-9 sm:h-10 px-4 sm:px-5 items-center rounded-full bg-[var(--color-wh-snow)] text-[var(--color-wh-deep-green)] text-sm font-semibold no-underline hover:bg-white transition-colors whitespace-nowrap"
+              className="inline-flex h-9 px-4 sm:px-5 items-center rounded-full bg-[var(--color-wh-snow)] text-[var(--color-wh-deep-green)] text-sm font-semibold no-underline hover:bg-white transition-colors whitespace-nowrap"
             >
               Buchen
             </Link>
             <button
               type="button"
-              className="md:hidden inline-flex w-9 h-9 sm:w-10 sm:h-10 items-center justify-center rounded-full text-[var(--color-wh-snow)] hover:bg-white/12 cursor-pointer transition-colors"
+              className="md:hidden inline-flex w-9 h-9 items-center justify-center rounded-full text-[var(--color-wh-snow)] hover:bg-white/12 cursor-pointer transition-colors"
               onClick={() => setOpen(!open)}
               aria-label="Menü"
               aria-expanded={open}
@@ -100,15 +120,13 @@ export const Header = () => {
           </div>
         </div>
 
-        {/* Mobile menu — schiebt sich aus der grünen Bar nach unten */}
         {open && (
           <nav
             className={cn(
-              "md:hidden bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] transition-all duration-200",
-              scrolled
-                ? "rounded-b-3xl border-t border-[var(--color-wh-deep-green-hover)] mx-auto"
-                : "border-t border-[var(--color-wh-deep-green-hover)]"
+              "md:hidden bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] border-t border-[var(--color-wh-deep-green-hover)]",
+              scrolled && "rounded-b-3xl"
             )}
+            style={{ transition: `border-radius ${DURATION_MS}ms ${EASE}` }}
           >
             <div className="px-5 py-3 flex flex-col gap-1">
               {NAV.map((n) => {
