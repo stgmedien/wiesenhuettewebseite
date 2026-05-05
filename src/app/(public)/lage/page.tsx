@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { ConsentGate } from "@/components/consent/ConsentGate";
 
 export const metadata = {
   title: "Lage & Anfahrt · Wiesenhütte Langewiese",
@@ -77,14 +78,21 @@ export default function LagePage() {
         <div className="max-w-[1080px] mx-auto">
           <div className="eyebrow">Karte</div>
           <h2 className="text-[28px] sm:text-[34px] mt-3 mb-6">Hier liegen wir.</h2>
-          <div className="aspect-[16/9] rounded-[var(--radius-card)] overflow-hidden border border-[var(--color-wh-winter-grey)]">
-            <iframe
-              title="Karte Langewiese"
-              src="https://www.openstreetmap.org/export/embed.html?bbox=8.4500%2C51.2700%2C8.5800%2C51.3300&layer=mapnik&marker=51.3000%2C8.5150"
-              className="w-full h-full"
-              loading="lazy"
-            />
-          </div>
+          <ConsentGate
+            category="functional"
+            serviceName="OpenStreetMap"
+            serviceUrl="https://wiki.openstreetmap.org/wiki/Privacy_Policy"
+            className="aspect-[16/9]"
+          >
+            <div className="aspect-[16/9] rounded-[var(--radius-card)] overflow-hidden border border-[var(--color-wh-winter-grey)]">
+              <iframe
+                title="Karte Langewiese"
+                src="https://www.openstreetmap.org/export/embed.html?bbox=8.4500%2C51.2700%2C8.5800%2C51.3300&layer=mapnik&marker=51.3000%2C8.5150"
+                className="w-full h-full"
+                loading="lazy"
+              />
+            </div>
+          </ConsentGate>
           <p className="text-sm text-[var(--color-wh-fg-muted)] mt-3">
             <a
               href="https://www.google.com/maps/search/?api=1&query=Bundesstra%C3%9Fe+6+59955+Winterberg-Langewiese"

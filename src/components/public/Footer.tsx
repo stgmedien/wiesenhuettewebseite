@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Mountain } from "lucide-react";
+import { CookieSettingsLink } from "@/components/consent/CookieBanner";
 
 export const Footer = () => (
   <footer className="bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] mt-auto">
@@ -67,6 +68,7 @@ export const Footer = () => (
           <Link className="text-[var(--color-wh-snow)]/80 no-underline hover:underline" href="/agb">
             AGB
           </Link>
+          <CookieSettingsLink />
         </nav>
       </div>
     </div>
