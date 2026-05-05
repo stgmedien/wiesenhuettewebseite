@@ -100,10 +100,3 @@
 - Bilder + Videos auf externer SSD, Backup zusätzlich in WeTransfer-Link
 - Fotos zusätzlich web-optimiert (1920 px lange Kante, JPEG 80 %)
 
-**Budget-Indikation:**
-- Foto-Tagessatz: 800–1.200 €
-- Drohne-Tagessatz (mit Pilotenschein, Versicherung): zusätzlich 400–600 €
-- Video-Tagessatz: 1.200–1.800 €
-- → ein kombinierter Sommer-Termin: ca. 2.500 €
-- → ein kombinierter Winter-Termin: ca. 2.500 €
-- Schnitt Hero-Loop + Storytelling-Clip: ~1.500 €
