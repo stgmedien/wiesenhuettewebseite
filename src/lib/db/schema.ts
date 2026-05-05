@@ -209,6 +209,43 @@ export const activityLog = pgTable("activity_log", {
 });
 
 // =============================================================
+// BLOG / CMS
+// =============================================================
+
+export const blogStatusEnum = pgEnum("blog_status", ["draft", "published", "archived"]);
+
+export const blogPosts = pgTable(
+  "blog_posts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    slug: varchar("slug", { length: 255 }).notNull().unique(),
+    title: varchar("title", { length: 255 }).notNull(),
+    excerpt: text("excerpt"),
+    contentHtml: text("content_html").notNull().default(""),
+    contentJson: jsonb("content_json"), // TipTap doc state
+    coverImageUrl: text("cover_image_url"),
+    coverImageAlt: varchar("cover_image_alt", { length: 500 }),
+    authorId: uuid("author_id").references(() => users.id, { onDelete: "set null" }),
+    status: blogStatusEnum("status").notNull().default("draft"),
+    publishedAt: timestamp("published_at"),
+    metaTitle: varchar("meta_title", { length: 255 }),
+    metaDescription: text("meta_description"),
+    readingMinutes: integer("reading_minutes").notNull().default(1),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    slugIdx: index("blog_posts_slug_idx").on(t.slug),
+    statusIdx: index("blog_posts_status_idx").on(t.status),
+    publishedIdx: index("blog_posts_published_idx").on(t.publishedAt),
+  })
+);
+
+export const blogPostsRelations = relations(blogPosts, ({ one }) => ({
+  author: one(users, { fields: [blogPosts.authorId], references: [users.id] }),
+}));
+
+// =============================================================
 // RELATIONS
 // =============================================================
 
@@ -238,3 +275,5 @@ export type Booking = typeof bookings.$inferSelect;
 export type NewBooking = typeof bookings.$inferInsert;
 export type Payment = typeof payments.$inferSelect;
 export type NewPayment = typeof payments.$inferInsert;
+export type BlogPost = typeof blogPosts.$inferSelect;
+export type NewBlogPost = typeof blogPosts.$inferInsert;

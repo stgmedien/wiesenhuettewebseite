@@ -45,6 +45,9 @@ export const Footer = () => (
         <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/esg">
           Tradition mit dem ESG
         </Link>
+        <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/blog">
+          Blog
+        </Link>
         <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/kontakt">
           Kontakt
         </Link>

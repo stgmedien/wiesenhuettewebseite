@@ -8,6 +8,13 @@
       "when": 1777972903714,
       "tag": "0000_whole_frightful_four",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1778010335844,
+      "tag": "0001_swift_stepford_cuckoos",
+      "breakpoints": true
     }
   ]
 }
