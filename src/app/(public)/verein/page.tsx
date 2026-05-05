@@ -157,8 +157,8 @@ export default function VereinPage() {
 
           <div className="relative aspect-[4/3] rounded-[var(--radius-card)] overflow-hidden">
             <Image
-              src="/media/historical/community.jpg"
-              alt="Mitglieder beim gemütlichen Beisammensein"
+              src="/media/historical/founders.jpg"
+              alt="Vorstand der Skifreunde Gütersloh"
               fill
               className="object-cover"
               sizes="(min-width: 768px) 460px, 100vw"

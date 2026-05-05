@@ -35,13 +35,24 @@ export const Header = () => {
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 transition-colors duration-200",
+        "sticky top-0 z-40 transition-colors duration-200 relative",
         overHero && !open
           ? "bg-transparent border-b border-transparent"
           : "bg-[var(--color-wh-snow)] border-b border-[var(--color-wh-winter-grey)] backdrop-blur-md"
       )}
     >
-      <div className="max-w-[1280px] mx-auto px-5 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      {/* Dunkle Abtönung NUR wenn der Header über dem Video schwebt — damit der weiße Text auf hellen Frames nicht verschwindet */}
+      {overHero && !open && (
+        <div
+          aria-hidden
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "linear-gradient(to bottom, rgba(17,17,17,0.55), rgba(17,17,17,0.15))",
+          }}
+        />
+      )}
+      <div className="relative max-w-[1280px] mx-auto px-5 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         <Link
           href="/"
           className={cn(
