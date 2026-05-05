@@ -3,7 +3,8 @@
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Upload, Loader2 } from "lucide-react";
-import { createBlogPost, importHtmlFile } from "./actions";
+import { createBlogPost } from "./actions";
+import { importHtmlFile } from "./import-actions";
 
 export const NewPostButton = () => {
   const [pending, start] = useTransition();

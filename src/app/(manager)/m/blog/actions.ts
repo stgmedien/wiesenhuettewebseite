@@ -7,10 +7,7 @@ import { blogPosts, activityLog } from "@/lib/db/schema";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { sanitizeAndRestrict } from "@/lib/blog/sanitize";
 import { ensureUniqueSlug, toSlug } from "@/lib/blog/slug";
-import readingTime from "reading-time";
-import * as cheerio from "cheerio";
 
 const upsertSchema = z.object({
   id: z.string().uuid().optional(),
@@ -26,18 +23,20 @@ const upsertSchema = z.object({
   status: z.enum(["draft", "published", "archived"]).default("draft"),
 });
 
-const computeReadingMinutes = (html: string): number => {
-  const text = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-  const stats = readingTime(text);
-  return Math.max(1, Math.round(stats.minutes));
-};
-
 const requireManager = async () => {
   const session = await auth();
   if (!session) throw new Error("Unauthorized");
   const role = (session.user as { role?: string } | undefined)?.role;
   if (role !== "manager" && role !== "admin") throw new Error("Forbidden");
   return session;
+};
+
+const computeReadingMinutes = async (html: string): Promise<number> => {
+  const text = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  // Lazy-load to keep this module light when only createBlogPost is called.
+  const readingTime = (await import("reading-time")).default;
+  const stats = readingTime(text);
+  return Math.max(1, Math.round(stats.minutes));
 };
 
 export async function createBlogPost(): Promise<void> {
@@ -66,6 +65,7 @@ export type SaveResult = { ok: true; slug: string } | { ok: false; error: string
 
 export async function saveBlogPost(raw: z.infer<typeof upsertSchema>): Promise<SaveResult> {
   const session = await requireManager();
+  void session;
   const parsed = upsertSchema.safeParse(raw);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues.map((i) => i.message).join(", ") };
@@ -73,10 +73,12 @@ export async function saveBlogPost(raw: z.infer<typeof upsertSchema>): Promise<S
   const data = parsed.data;
   if (!data.id) return { ok: false, error: "Post-ID fehlt." };
 
+  // Lazy import: dompurify (and its jsdom backend) are heavy and Node-only.
+  const { sanitizeAndRestrict } = await import("@/lib/blog/sanitize");
   const cleanHtml = sanitizeAndRestrict(data.contentHtml ?? "");
   const desiredSlug = data.slug?.trim() ? toSlug(data.slug.trim()) : toSlug(data.title);
   const slug = await ensureUniqueSlug(desiredSlug, data.id);
-  const reading = computeReadingMinutes(cleanHtml);
+  const reading = await computeReadingMinutes(cleanHtml);
 
   await db
     .update(blogPosts)
@@ -156,69 +158,4 @@ export async function deleteBlogPost(id: string): Promise<void> {
   revalidatePath("/m/blog");
   revalidatePath("/blog");
   redirect("/m/blog");
-}
-
-export type ImportResult = { ok: true; postId: string } | { ok: false; error: string };
-
-/**
- * Accept an uploaded HTML file. Extract title/meta, sanitize body, create draft.
- */
-export async function importHtmlFile(formData: FormData): Promise<ImportResult> {
-  const session = await requireManager();
-  const file = formData.get("file");
-  if (!(file instanceof File)) return { ok: false, error: "Keine Datei." };
-  if (!/(html|htm|md)$/i.test(file.name)) return { ok: false, error: "Nur .html, .htm oder .md erlaubt." };
-  if (file.size > 5 * 1024 * 1024) return { ok: false, error: "Datei zu groß (max 5 MB)." };
-
-  const raw = await file.text();
-  const $ = cheerio.load(raw);
-
-  const title =
-    $("title").first().text().trim() ||
-    $("h1").first().text().trim() ||
-    $('meta[name="wh:title"]').attr("content")?.trim() ||
-    file.name.replace(/\.[^.]+$/, "");
-
-  const excerpt =
-    $('meta[name="description"]').attr("content")?.trim() ||
-    $('meta[property="og:description"]').attr("content")?.trim() ||
-    $('meta[name="wh:excerpt"]').attr("content")?.trim() ||
-    null;
-
-  const cover =
-    $('meta[property="og:image"]').attr("content") ||
-    $('meta[name="wh:cover"]').attr("content") ||
-    null;
-
-  const slugHint =
-    $('meta[name="wh:slug"]').attr("content")?.trim() ||
-    title;
-
-  // Use body-only when full HTML doc was uploaded; otherwise the whole markup.
-  const bodyHtml = $("body").length ? $("body").html() ?? "" : raw;
-  const cleanHtml = sanitizeAndRestrict(bodyHtml);
-  const reading = computeReadingMinutes(cleanHtml);
-  const slug = await ensureUniqueSlug(toSlug(slugHint));
-
-  const inserted = await db
-    .insert(blogPosts)
-    .values({
-      title,
-      slug,
-      excerpt: excerpt ?? null,
-      contentHtml: cleanHtml,
-      coverImageUrl: cover ?? null,
-      authorId: (session.user as { id?: string } | undefined)?.id ?? null,
-      status: "draft",
-      readingMinutes: reading,
-    })
-    .returning({ id: blogPosts.id });
-
-  await db.insert(activityLog).values({
-    who: session.user?.name ?? session.user?.email ?? "Manager",
-    what: `Blog-Beitrag aus HTML-Datei importiert: ${title}`,
-  });
-
-  revalidatePath("/m/blog");
-  return { ok: true, postId: inserted[0].id };
 }
