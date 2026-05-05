@@ -19,127 +19,119 @@ export const Header = () => {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  // Only the home page has a video hero — other pages always have a solid header.
-  const overHero = pathname === "/" && !scrolled;
-
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 80);
+    const onScroll = () => setScrolled(window.scrollY > 60);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Close mobile menu when path changes
   useEffect(() => setOpen(false), [pathname]);
 
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 transition-colors duration-200 relative",
-        overHero && !open
-          ? "bg-transparent border-b border-transparent"
-          : "bg-[var(--color-wh-snow)] border-b border-[var(--color-wh-winter-grey)] backdrop-blur-md"
+        "sticky top-0 z-40 transition-[padding] duration-300",
+        scrolled ? "px-3 sm:px-4 pt-3" : "px-0 pt-0"
       )}
     >
-      {/* Dunkle Abtönung NUR wenn der Header über dem Video schwebt — damit der weiße Text auf hellen Frames nicht verschwindet */}
-      {overHero && !open && (
+      <div
+        className={cn(
+          "bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] transition-all duration-300",
+          scrolled
+            ? "mx-auto max-w-[980px] rounded-full shadow-[0_12px_32px_rgba(17,17,17,0.18),0_4px_10px_rgba(17,17,17,0.08)]"
+            : "w-full rounded-none"
+        )}
+      >
         <div
-          aria-hidden
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "linear-gradient(to bottom, rgba(17,17,17,0.55), rgba(17,17,17,0.15))",
-          }}
-        />
-      )}
-      <div className="relative max-w-[1280px] mx-auto px-5 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-        <Link
-          href="/"
           className={cn(
-            "flex items-center gap-2.5 no-underline shrink-0",
-            overHero ? "text-[var(--color-wh-snow)]" : "text-[var(--color-wh-deep-green)]"
+            "flex items-center justify-between gap-3 sm:gap-4 transition-all duration-300",
+            scrolled
+              ? "h-14 px-4 sm:px-5"
+              : "max-w-[1280px] mx-auto h-16 px-5 sm:px-6 lg:px-8"
           )}
-          onClick={() => setOpen(false)}
         >
-          <Mountain size={26} strokeWidth={1.6} />
-          <span className="font-display text-base sm:text-lg font-bold tracking-tight leading-none drop-shadow-sm">
-            Wiesenhütte
-          </span>
-        </Link>
-
-        <nav className="hidden md:flex items-center gap-1">
-          {NAV.map((n) => {
-            const active = pathname === n.href;
-            return (
-              <Link
-                key={n.href}
-                href={n.href}
-                className={cn(
-                  "px-3 py-2 text-sm font-medium no-underline rounded-md transition-colors",
-                  overHero
-                    ? "text-[var(--color-wh-snow)] hover:bg-white/15 drop-shadow-sm"
-                    : "text-[var(--color-wh-deep-green)] hover:bg-[var(--color-wh-green-soft)]",
-                  active && (overHero ? "bg-white/15" : "bg-[var(--color-wh-green-soft)]")
-                )}
-              >
-                {n.label}
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="flex items-center gap-2">
           <Link
-            href="/buchen"
-            className={cn(
-              "inline-flex h-10 px-4 sm:px-5 items-center rounded-[var(--radius-btn)] text-sm font-semibold no-underline transition-colors whitespace-nowrap",
-              overHero
-                ? "bg-[var(--color-wh-snow)] text-[var(--color-wh-deep-green)] hover:bg-white"
-                : "bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] hover:bg-[var(--color-wh-deep-green-hover)]"
-            )}
+            href="/"
+            className="flex items-center gap-2.5 no-underline text-[var(--color-wh-snow)] shrink-0"
+            onClick={() => setOpen(false)}
           >
-            Buchen
+            <Mountain size={24} strokeWidth={1.6} />
+            <span className="font-display text-base sm:text-lg font-bold tracking-tight leading-none">
+              Wiesenhütte
+            </span>
           </Link>
-          <button
-            type="button"
-            className={cn(
-              "md:hidden inline-flex w-10 h-10 items-center justify-center rounded-md cursor-pointer transition-colors",
-              overHero
-                ? "text-[var(--color-wh-snow)] hover:bg-white/15"
-                : "text-[var(--color-wh-deep-green)] hover:bg-[var(--color-wh-green-soft)]"
-            )}
-            onClick={() => setOpen(!open)}
-            aria-label="Menü"
-            aria-expanded={open}
-          >
-            {open ? <X size={22} /> : <Menu size={22} />}
-          </button>
-        </div>
-      </div>
 
-      {open && (
-        <nav className="md:hidden border-t border-[var(--color-wh-winter-grey)] bg-[var(--color-wh-snow)]">
-          <div className="max-w-[1280px] mx-auto px-5 py-3 flex flex-col">
+          <nav className="hidden md:flex items-center gap-0.5">
             {NAV.map((n) => {
               const active = pathname === n.href;
               return (
                 <Link
                   key={n.href}
                   href={n.href}
-                  onClick={() => setOpen(false)}
                   className={cn(
-                    "px-3 py-3 text-base font-medium no-underline rounded-md transition-colors",
-                    "text-[var(--color-wh-deep-green)] hover:bg-[var(--color-wh-green-soft)]",
-                    active && "bg-[var(--color-wh-green-soft)]"
+                    "px-3 py-1.5 text-sm font-medium no-underline rounded-full transition-colors",
+                    "text-[var(--color-wh-snow)]/90 hover:text-[var(--color-wh-snow)] hover:bg-white/12",
+                    active && "bg-white/15 text-[var(--color-wh-snow)]"
                   )}
                 >
                   {n.label}
                 </Link>
               );
             })}
+          </nav>
+
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <Link
+              href="/buchen"
+              className="inline-flex h-9 sm:h-10 px-4 sm:px-5 items-center rounded-full bg-[var(--color-wh-snow)] text-[var(--color-wh-deep-green)] text-sm font-semibold no-underline hover:bg-white transition-colors whitespace-nowrap"
+            >
+              Buchen
+            </Link>
+            <button
+              type="button"
+              className="md:hidden inline-flex w-9 h-9 sm:w-10 sm:h-10 items-center justify-center rounded-full text-[var(--color-wh-snow)] hover:bg-white/12 cursor-pointer transition-colors"
+              onClick={() => setOpen(!open)}
+              aria-label="Menü"
+              aria-expanded={open}
+            >
+              {open ? <X size={20} /> : <Menu size={20} />}
+            </button>
           </div>
-        </nav>
-      )}
+        </div>
+
+        {/* Mobile menu — schiebt sich aus der grünen Bar nach unten */}
+        {open && (
+          <nav
+            className={cn(
+              "md:hidden bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] transition-all duration-200",
+              scrolled
+                ? "rounded-b-3xl border-t border-[var(--color-wh-deep-green-hover)] mx-auto"
+                : "border-t border-[var(--color-wh-deep-green-hover)]"
+            )}
+          >
+            <div className="px-5 py-3 flex flex-col gap-1">
+              {NAV.map((n) => {
+                const active = pathname === n.href;
+                return (
+                  <Link
+                    key={n.href}
+                    href={n.href}
+                    onClick={() => setOpen(false)}
+                    className={cn(
+                      "px-3 py-3 text-base font-medium no-underline rounded-md transition-colors",
+                      "text-[var(--color-wh-snow)]/90 hover:bg-white/12",
+                      active && "bg-white/15 text-[var(--color-wh-snow)]"
+                    )}
+                  >
+                    {n.label}
+                  </Link>
+                );
+              })}
+            </div>
+          </nav>
+        )}
+      </div>
     </header>
   );
 };
