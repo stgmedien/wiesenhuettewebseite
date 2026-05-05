@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
 import { calculatePrice, formatEuro, RULES, type Persons } from "@/lib/pricing";
 import { createBookingAndCheckout } from "./actions";
+import { AvailabilityCalendar } from "./AvailabilityCalendar";
 
 type Step = 0 | 1 | 2 | 3;
 
@@ -34,7 +35,6 @@ export const BookingFlow = ({ blockedDates }: { blockedDates: string[] }) => {
   const [arrival, setArrival] = useState("");
   const [departure, setDeparture] = useState("");
   const [persons, setPersons] = useState<Persons>(emptyPersons);
-  const [cleaningOptedIn, setCleaningOptedIn] = useState(true);
   const [soloUse, setSoloUse] = useState(false);
   const [purpose, setPurpose] = useState("");
 
@@ -82,12 +82,10 @@ export const BookingFlow = ({ blockedDates }: { blockedDates: string[] }) => {
       arrival,
       departure,
       persons,
-      cleaningOptedIn,
       soloUse,
     });
-  }, [arrival, departure, persons, cleaningOptedIn, soloUse, datesValid, personsValid]);
+  }, [arrival, departure, persons, soloUse, datesValid, personsValid]);
 
-  // Check if any of the selected range overlaps with a blocked date
   const rangeBlocked = useMemo(() => {
     if (!datesValid) return false;
     const cur = new Date(arrival);
@@ -114,7 +112,6 @@ export const BookingFlow = ({ blockedDates }: { blockedDates: string[] }) => {
         arrival,
         departure,
         persons,
-        cleaningOptedIn,
         soloUse,
         customerType,
         firstName: firstName.trim(),
@@ -138,13 +135,24 @@ export const BookingFlow = ({ blockedDates }: { blockedDates: string[] }) => {
   };
 
   return (
-    <div className="grid lg:grid-cols-[1fr_380px] gap-8">
-      <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 sm:p-8">
+    <div className="grid lg:grid-cols-[1fr_380px] gap-6 lg:gap-8">
+      <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-4 sm:p-6 lg:p-8">
         <Stepper step={step} />
 
         {step === 0 && (
           <div className="mt-8 space-y-6">
-            <h3 className="text-[24px] m-0">Wann?</h3>
+            <h3 className="text-[22px] sm:text-[24px] m-0">Wann?</h3>
+
+            <AvailabilityCalendar
+              blockedDates={blockedDates}
+              arrival={arrival}
+              departure={departure}
+              onSelect={(a, d) => {
+                setArrival(a);
+                setDeparture(d);
+              }}
+            />
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
                 id="arrival"
@@ -169,13 +177,13 @@ export const BookingFlow = ({ blockedDates }: { blockedDates: string[] }) => {
               />
             </div>
             {rangeBlocked && (
-              <div className="text-[var(--color-wh-sunset)] text-sm">
+              <div className="text-[var(--color-wh-sunset)] text-sm font-semibold">
                 Mindestens ein Tag in diesem Zeitraum ist bereits belegt — bitte einen anderen
                 Zeitraum wählen.
               </div>
             )}
 
-            <h3 className="text-[24px] mt-12 mb-0">Wer kommt?</h3>
+            <h3 className="text-[22px] sm:text-[24px] mt-12 mb-0">Wer kommt?</h3>
             <PersonsEditor persons={persons} onChange={setPersons} />
             <div
               className={`text-sm ${
@@ -199,13 +207,16 @@ export const BookingFlow = ({ blockedDates }: { blockedDates: string[] }) => {
 
         {step === 1 && (
           <div className="mt-8 space-y-6">
-            <h3 className="text-[24px] m-0">Pauschalen & Extras</h3>
-            <ExtraToggle
-              checked={cleaningOptedIn}
-              onChange={setCleaningOptedIn}
-              title="Endreinigung — 190,00 €"
-              body="Wir übernehmen die finale Reinigung. Empfohlen für Gruppen."
-            />
+            <h3 className="text-[22px] sm:text-[24px] m-0">Pauschalen</h3>
+            <div className="bg-[var(--color-wh-green-soft)] border border-[var(--color-wh-green)]/30 rounded-[var(--radius-card)] p-5">
+              <div className="font-semibold text-[var(--color-wh-deep-green)]">
+                Endreinigung — 190,00 € (Pflicht)
+              </div>
+              <div className="text-sm text-[var(--color-wh-fg-muted)] mt-1">
+                Die finale Reinigung wird von uns durchgeführt und ist in jeder Buchung enthalten.
+              </div>
+            </div>
+
             <ExtraToggle
               checked={soloUse}
               onChange={setSoloUse}
@@ -221,9 +232,9 @@ export const BookingFlow = ({ blockedDates }: { blockedDates: string[] }) => {
               onChange={(e) => setPurpose(e.target.value)}
             />
 
-            <div className="flex justify-between pt-2">
+            <div className="flex justify-between gap-3 pt-2">
               <Button
-                variant="ghost"
+                variant="secondary"
                 onClick={() => setStep(0)}
                 iconLeft={<ArrowLeft size={18} />}
               >
@@ -242,9 +253,9 @@ export const BookingFlow = ({ blockedDates }: { blockedDates: string[] }) => {
 
         {step === 2 && (
           <div className="mt-8 space-y-6">
-            <h3 className="text-[24px] m-0">Eure Daten</h3>
+            <h3 className="text-[22px] sm:text-[24px] m-0">Eure Daten</h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
               <SegmentedControl
                 label="Wer bucht?"
                 value={customerType}
@@ -299,9 +310,9 @@ export const BookingFlow = ({ blockedDates }: { blockedDates: string[] }) => {
               </span>
             </label>
 
-            <div className="flex justify-between pt-2">
+            <div className="flex justify-between gap-3 pt-2">
               <Button
-                variant="ghost"
+                variant="secondary"
                 onClick={() => setStep(1)}
                 iconLeft={<ArrowLeft size={18} />}
               >
@@ -312,7 +323,7 @@ export const BookingFlow = ({ blockedDates }: { blockedDates: string[] }) => {
                 onClick={() => setStep(3)}
                 iconRight={<ArrowRight size={18} />}
               >
-                Übersicht & Zahlung
+                Übersicht
               </Button>
             </div>
           </div>
@@ -320,7 +331,7 @@ export const BookingFlow = ({ blockedDates }: { blockedDates: string[] }) => {
 
         {step === 3 && breakdown && (
           <div className="mt-8 space-y-6">
-            <h3 className="text-[24px] m-0">Übersicht</h3>
+            <h3 className="text-[22px] sm:text-[24px] m-0">Übersicht</h3>
             <ReviewBlock
               arrival={arrival}
               departure={departure}
@@ -330,21 +341,30 @@ export const BookingFlow = ({ blockedDates }: { blockedDates: string[] }) => {
               lastName={lastName}
               email={email}
             />
-            <div className="bg-[var(--color-wh-beige)] rounded-[var(--radius-card)] p-5">
-              <p className="text-sm text-[var(--color-wh-fg-muted)] m-0">
-                Mit Klick auf „Jetzt bezahlen" wirst Du zu Stripe weitergeleitet. Es werden
-                Übernachtungskosten, Pauschalen und Kaution gemeinsam eingezogen. Die Kaution
-                wird innerhalb von 14 Tagen nach mangelfreier Abreise zurückerstattet.
+            <div className="bg-[var(--color-wh-beige)] rounded-[var(--radius-card)] p-5 text-sm text-[var(--color-wh-black)]">
+              <p className="m-0 font-semibold mb-2">Heute fällig:</p>
+              <p className="m-0">
+                <strong>{formatEuro(breakdown.prepaymentCents)}</strong> Anzahlung (50 % der Buchungssumme) +{" "}
+                <strong>{formatEuro(breakdown.depositCents)}</strong> Kaution.
+              </p>
+              <p className="m-0 mt-3">
+                Restzahlung von <strong>{formatEuro(breakdown.remainderCents)}</strong> wird vor Anreise per
+                separater Zahlungsaufforderung eingezogen. Die Kaution wird innerhalb von 14 Tagen
+                nach mangelfreier Abreise zurückerstattet.
+              </p>
+              <p className="m-0 mt-3 text-[var(--color-wh-fg-muted)]">
+                Hinweis: Die Kurtaxe Hochsauerland wird seit Mai 2026 separat über das offizielle
+                Kurtaxen-Portal abgerechnet — Du erhältst nach der Buchung eine eigene E-Mail mit dem Link.
               </p>
             </div>
             {error && (
-              <div className="bg-[var(--color-wh-sunset)]/10 text-[var(--color-wh-sunset)] rounded-[var(--radius-md)] p-4 text-sm">
+              <div className="bg-[var(--color-wh-sunset)]/10 text-[var(--color-wh-sunset)] rounded-[var(--radius-md)] p-4 text-sm font-medium">
                 {error}
               </div>
             )}
-            <div className="flex justify-between pt-2">
+            <div className="flex flex-col sm:flex-row justify-between gap-3 pt-2">
               <Button
-                variant="ghost"
+                variant="secondary"
                 onClick={() => setStep(2)}
                 iconLeft={<ArrowLeft size={18} />}
               >
@@ -360,14 +380,14 @@ export const BookingFlow = ({ blockedDates }: { blockedDates: string[] }) => {
               >
                 {submitting
                   ? "Leite weiter ..."
-                  : `Jetzt bezahlen — ${formatEuro(breakdown.totalDueCents)}`}
+                  : `Jetzt zahlen — ${formatEuro(breakdown.totalDueCents)}`}
               </Button>
             </div>
           </div>
         )}
       </div>
 
-      <aside className="lg:sticky lg:top-20 self-start">
+      <aside className="lg:sticky lg:top-20 self-start order-first lg:order-last">
         <PriceSummary
           breakdown={breakdown}
           arrival={arrival}
@@ -382,9 +402,9 @@ export const BookingFlow = ({ blockedDates }: { blockedDates: string[] }) => {
 const Stepper = ({ step }: { step: Step }) => {
   const labels = ["Datum & Personen", "Pauschalen", "Daten", "Zahlung"];
   return (
-    <div className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm">
+    <div className="flex items-center gap-2 text-xs sm:text-sm overflow-x-auto pb-2">
       {labels.map((l, i) => (
-        <div key={l} className="flex items-center gap-2 sm:gap-4">
+        <div key={l} className="flex items-center gap-2 sm:gap-3 shrink-0">
           <span
             className={`inline-flex items-center justify-center w-7 h-7 rounded-full font-semibold ${
               i <= step
@@ -395,12 +415,14 @@ const Stepper = ({ step }: { step: Step }) => {
             {i < step ? <Check size={14} /> : i + 1}
           </span>
           <span
-            className={i <= step ? "font-semibold text-[var(--color-wh-deep-green)]" : "text-[var(--color-wh-fg-muted)]"}
+            className={`whitespace-nowrap ${
+              i <= step ? "font-semibold text-[var(--color-wh-deep-green)]" : "text-[var(--color-wh-fg-muted)]"
+            }`}
           >
             {l}
           </span>
           {i < labels.length - 1 && (
-            <span className="hidden sm:inline-block w-8 h-px bg-[var(--color-wh-winter-grey)]" />
+            <span className="hidden sm:inline-block w-6 h-px bg-[var(--color-wh-winter-grey)]" />
           )}
         </div>
       ))}
@@ -420,23 +442,25 @@ const PersonRow = ({
   onChange: (v: number) => void;
 }) => (
   <div className="flex items-center justify-between gap-4 py-3 border-b border-[var(--color-wh-winter-grey)] last:border-b-0">
-    <div>
-      <div className="font-medium">{label}</div>
+    <div className="min-w-0">
+      <div className="font-medium text-sm sm:text-base">{label}</div>
       {hint && <div className="text-xs text-[var(--color-wh-fg-muted)]">{hint}</div>}
     </div>
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 shrink-0">
       <button
         type="button"
-        className="w-8 h-8 rounded-full border border-[var(--color-wh-winter-grey)] hover:bg-[var(--color-wh-green-soft)] cursor-pointer"
+        className="w-9 h-9 rounded-full border border-[var(--color-wh-winter-grey)] text-[var(--color-wh-deep-green)] hover:bg-[var(--color-wh-green-soft)] cursor-pointer text-lg font-semibold"
         onClick={() => onChange(Math.max(0, value - 1))}
+        aria-label="Weniger"
       >
         −
       </button>
       <span className="w-8 text-center font-semibold">{value}</span>
       <button
         type="button"
-        className="w-8 h-8 rounded-full border border-[var(--color-wh-winter-grey)] hover:bg-[var(--color-wh-green-soft)] cursor-pointer"
+        className="w-9 h-9 rounded-full border border-[var(--color-wh-winter-grey)] text-[var(--color-wh-deep-green)] hover:bg-[var(--color-wh-green-soft)] cursor-pointer text-lg font-semibold"
         onClick={() => onChange(value + 1)}
+        aria-label="Mehr"
       >
         +
       </button>
@@ -501,7 +525,7 @@ const ExtraToggle = ({
       type="checkbox"
       checked={checked}
       onChange={(e) => onChange(e.target.checked)}
-      className="mt-1"
+      className="mt-1 w-5 h-5 accent-[var(--color-wh-deep-green)]"
     />
     <div>
       <div className="font-semibold text-[var(--color-wh-deep-green)]">{title}</div>
@@ -529,7 +553,7 @@ const SegmentedControl = ({
           type="button"
           key={o.value}
           onClick={() => onChange(o.value)}
-          className={`h-11 px-3 text-sm font-semibold rounded-[var(--radius-md)] cursor-pointer transition-colors ${
+          className={`h-11 px-2 sm:px-3 text-xs sm:text-sm font-semibold rounded-[var(--radius-md)] cursor-pointer transition-colors ${
             value === o.value
               ? "bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)]"
               : "bg-white border border-[var(--color-wh-winter-grey)] text-[var(--color-wh-deep-green)] hover:bg-[var(--color-wh-green-soft)]"
@@ -557,7 +581,7 @@ const PriceSummary = ({
 }) => {
   if (!breakdown) {
     return (
-      <div className="bg-[var(--color-wh-beige)] rounded-[var(--radius-card)] p-6">
+      <div className="bg-[var(--color-wh-beige)] rounded-[var(--radius-card)] p-5 sm:p-6">
         <div className="eyebrow">Preisübersicht</div>
         <p className="mt-3 text-[var(--color-wh-fg-muted)] text-sm m-0">
           Datum & Personen wählen, um die Preise zu sehen.
@@ -567,7 +591,7 @@ const PriceSummary = ({
   }
 
   return (
-    <div className="bg-[var(--color-wh-beige)] rounded-[var(--radius-card)] p-6">
+    <div className="bg-[var(--color-wh-beige)] rounded-[var(--radius-card)] p-5 sm:p-6">
       <div className="eyebrow">Preisübersicht</div>
       <div className="mt-3 text-sm font-semibold">
         {arrival} → {departure} · {breakdown.nights} Nächte · {totalPersons} Personen
@@ -575,7 +599,7 @@ const PriceSummary = ({
       <ul className="mt-5 divide-y divide-[var(--color-wh-winter-grey)]">
         {breakdown.lines.map((l) => (
           <li key={l.label + (l.detail ?? "")} className="py-2 flex items-start justify-between gap-3 text-sm">
-            <div>
+            <div className="min-w-0">
               <div className="font-medium">{l.label}</div>
               {l.detail && <div className="text-xs text-[var(--color-wh-fg-muted)]">{l.detail}</div>}
             </div>
@@ -583,14 +607,25 @@ const PriceSummary = ({
           </li>
         ))}
       </ul>
+
       <div className="border-t border-[var(--color-wh-winter-grey)] mt-4 pt-4 space-y-2 text-sm">
         <div className="flex justify-between">
-          <span>Zwischensumme</span>
+          <span>Buchungssumme</span>
           <span className="font-semibold">{formatEuro(breakdown.subtotalCents)}</span>
         </div>
-        <div className="flex justify-between text-[var(--color-wh-fg-muted)]">
-          <span>+ Kaution (Erstattung 14 Tage)</span>
-          <span>{formatEuro(breakdown.depositCents)}</span>
+      </div>
+
+      <div className="border-t border-[var(--color-wh-winter-grey)] mt-4 pt-4 space-y-2 text-sm">
+        <div className="text-xs uppercase tracking-wider text-[var(--color-wh-fg-muted)] mb-2">
+          Heute fällig
+        </div>
+        <div className="flex justify-between">
+          <span>Anzahlung 50 %</span>
+          <span className="font-semibold">{formatEuro(breakdown.prepaymentCents)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span>+ Kaution</span>
+          <span className="font-semibold">{formatEuro(breakdown.depositCents)}</span>
         </div>
         <div className="flex justify-between text-base pt-2 border-t border-[var(--color-wh-winter-grey)]">
           <span className="font-bold">Heute zu zahlen</span>
@@ -598,6 +633,14 @@ const PriceSummary = ({
             {formatEuro(breakdown.totalDueCents)}
           </span>
         </div>
+      </div>
+
+      <div className="border-t border-[var(--color-wh-winter-grey)] mt-4 pt-4 space-y-1 text-xs text-[var(--color-wh-fg-muted)]">
+        <div className="flex justify-between">
+          <span>Restzahlung (vor Anreise)</span>
+          <span>{formatEuro(breakdown.remainderCents)}</span>
+        </div>
+        <div>Kurtaxe wird separat über das Hochsauerland-Portal abgerechnet.</div>
       </div>
     </div>
   );
@@ -620,7 +663,7 @@ const ReviewBlock = ({
   lastName: string;
   email: string;
 }) => (
-  <div className="bg-[var(--color-wh-snow)] border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-5 grid grid-cols-2 gap-4 text-sm">
+  <div className="bg-[var(--color-wh-snow)] border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-5 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
     <div>
       <div className="text-xs uppercase tracking-wider text-[var(--color-wh-fg-muted)]">Zeitraum</div>
       <div className="font-semibold">
@@ -646,7 +689,7 @@ const ReviewBlock = ({
           .join(" · ")}
       </div>
     </div>
-    <div className="col-span-2 pt-3 border-t border-[var(--color-wh-winter-grey)]">
+    <div className="sm:col-span-2 pt-3 border-t border-[var(--color-wh-winter-grey)]">
       <div className="text-xs uppercase tracking-wider text-[var(--color-wh-fg-muted)]">Bucher</div>
       <div className="font-semibold">
         {firstName} {lastName}

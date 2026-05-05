@@ -62,7 +62,6 @@ async function ensureBooking(opts: {
   children: number;
   pupils: number;
   teachers: number;
-  cleaningOptedIn: boolean;
   soloUse: boolean;
   purpose: string;
   source?: string;
@@ -78,7 +77,6 @@ async function ensureBooking(opts: {
     arrival: opts.arrival,
     departure: opts.departure,
     persons,
-    cleaningOptedIn: opts.cleaningOptedIn,
     soloUse: opts.soloUse,
   });
   const totalPersons = persons.adults + persons.members + persons.children + persons.pupils + persons.teachers;
@@ -104,7 +102,7 @@ async function ensureBooking(opts: {
       persons: totalPersons,
       purpose: opts.purpose,
       accommodationCents: breakdown.accommodationCents,
-      kurtaxeCents: breakdown.kurtaxeCents,
+      kurtaxeCents: 0,
       energyFlatCents: breakdown.energyFlatCents,
       cleaningCents: breakdown.cleaningCents,
       soloSurchargeCents: breakdown.soloSurchargeCents,
@@ -113,7 +111,7 @@ async function ensureBooking(opts: {
       depositCents: breakdown.depositCents,
       totalCents: breakdown.subtotalCents,
       paidCents: paid,
-      cleaningOptedIn: opts.cleaningOptedIn,
+      cleaningOptedIn: opts.status !== "wartung",
       soloUse: opts.soloUse,
       source: opts.source ?? "Demo-Seed",
     })
@@ -189,7 +187,7 @@ async function main() {
     arrival: dayIso(-30),
     departure: dayIso(-26),
     adults: 6, members: 2, children: 4, pupils: 0, teachers: 0,
-    cleaningOptedIn: true, soloUse: false,
+    soloUse: false,
     purpose: "Familienurlaub Frühling",
   });
   await ensureBooking({
@@ -199,7 +197,7 @@ async function main() {
     arrival: dayIso(-90),
     departure: dayIso(-85),
     adults: 0, members: 0, children: 0, pupils: 25, teachers: 3,
-    cleaningOptedIn: true, soloUse: false,
+    soloUse: false,
     purpose: "ESG Skifreizeit Jgst. 11",
   });
   await ensureBooking({
@@ -209,7 +207,7 @@ async function main() {
     arrival: dayIso(14),
     departure: dayIso(17),
     adults: 4, members: 0, children: 6, pupils: 0, teachers: 0,
-    cleaningOptedIn: true, soloUse: false,
+    soloUse: false,
     purpose: "Pfingsten Familie",
   });
   await ensureBooking({
@@ -219,7 +217,7 @@ async function main() {
     arrival: dayIso(45),
     departure: dayIso(47),
     adults: 11, members: 0, children: 0, pupils: 0, teachers: 0,
-    cleaningOptedIn: true, soloUse: true,
+    soloUse: true,
     purpose: "Strategieklausur Pott & Söhne",
   });
   await ensureBooking({
@@ -229,7 +227,7 @@ async function main() {
     arrival: dayIso(120),
     departure: dayIso(124),
     adults: 8, members: 4, children: 6, pupils: 0, teachers: 0,
-    cleaningOptedIn: true, soloUse: false,
+    soloUse: false,
     purpose: "Familienurlaub Sommer",
   });
   await ensureBooking({
@@ -239,7 +237,7 @@ async function main() {
     arrival: dayIso(7),
     departure: dayIso(9),
     adults: 0, members: 0, children: 0, pupils: 0, teachers: 0,
-    cleaningOptedIn: false, soloUse: false,
+    soloUse: false,
     purpose: "WARTUNG: Heizung & Schornsteinfeger",
     source: "Intern",
   });

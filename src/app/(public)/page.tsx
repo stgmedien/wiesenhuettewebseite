@@ -85,21 +85,21 @@ const Hero = () => (
         Die Wiesenhütte der Skifreunde Gütersloh liegt in Langewiese — direkt am Rodelhang, der
         Loipe und der Hochsauerländer Natur.
       </p>
-      <div className="flex gap-3.5 flex-wrap">
+      <div className="flex gap-3 flex-wrap">
         <Link
           href="/buchen"
-          className="inline-flex h-14 px-7 items-center gap-2.5 rounded-[var(--radius-btn)] bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] font-semibold no-underline hover:bg-[var(--color-wh-deep-green-hover)] transition-all shadow-[var(--shadow-rest)] hover:shadow-[var(--shadow-float)]"
+          className="inline-flex h-14 px-6 sm:px-7 items-center gap-2.5 rounded-[var(--radius-btn)] bg-[var(--color-wh-snow)] text-[var(--color-wh-deep-green)] font-semibold no-underline hover:bg-white transition-all shadow-[var(--shadow-float)] hover:shadow-[var(--shadow-deep)]"
         >
           Verfügbarkeit prüfen
           <ArrowRight size={18} />
         </Link>
         <Link
           href="/huette"
-          className="inline-flex h-14 px-7 items-center rounded-[var(--radius-btn)] font-semibold no-underline transition-colors"
+          className="inline-flex h-14 px-6 sm:px-7 items-center rounded-[var(--radius-btn)] font-semibold no-underline transition-colors backdrop-blur-sm"
           style={{
-            background: "rgba(247,247,242,0.12)",
+            background: "rgba(17,17,17,0.35)",
             color: "var(--color-wh-snow)",
-            border: "1px solid rgba(247,247,242,0.6)",
+            border: "1px solid rgba(247,247,242,0.7)",
           }}
         >
           Mehr über die Hütte

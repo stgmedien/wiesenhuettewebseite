@@ -26,7 +26,6 @@ const inputSchema = z.object({
   arrival: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   departure: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   persons: personsSchema,
-  cleaningOptedIn: z.boolean().default(true),
   soloUse: z.boolean().default(false),
   customerType: z.enum(["privat", "mitglied", "verein", "firma"]).default("privat"),
   firstName: z.string().min(1).max(120),
@@ -63,19 +62,16 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
   const data = parsed.data;
   const persons: Persons = data.persons;
 
-  // Server-side pricing & rules validation
   const issues = validateBookingInput({
     arrival: data.arrival,
     departure: data.departure,
     persons,
-    cleaningOptedIn: data.cleaningOptedIn,
     soloUse: data.soloUse,
   });
   if (issues.length > 0) {
     return { ok: false, error: issues.map((i) => i.message).join(" "), issues };
   }
 
-  // Availability check against DB
   const free = await isRangeAvailable({
     arrival: data.arrival,
     departure: data.departure,
@@ -92,16 +88,10 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
     arrival: data.arrival,
     departure: data.departure,
     persons,
-    cleaningOptedIn: data.cleaningOptedIn,
     soloUse: data.soloUse,
   });
 
-  const totalPersons =
-    persons.adults +
-    persons.members +
-    persons.children +
-    persons.pupils +
-    persons.teachers;
+  const totalPersons = breakdown.totalPersons;
 
   const bookingNumber = generateBookingNumber();
 
@@ -133,7 +123,6 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
     }
   }
 
-  // Insert booking (status: angefragt)
   const inserted = await db
     .insert(bookings)
     .values({
@@ -151,7 +140,7 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
       persons: totalPersons,
       purpose: data.purpose ?? null,
       accommodationCents: breakdown.accommodationCents,
-      kurtaxeCents: breakdown.kurtaxeCents,
+      kurtaxeCents: 0, // Kurtaxe nicht mehr Teil der Buchung — separates Portal
       energyFlatCents: breakdown.energyFlatCents,
       cleaningCents: breakdown.cleaningCents,
       soloSurchargeCents: breakdown.soloSurchargeCents,
@@ -160,7 +149,7 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
       depositCents: breakdown.depositCents,
       totalCents: breakdown.subtotalCents,
       paidCents: 0,
-      cleaningOptedIn: data.cleaningOptedIn,
+      cleaningOptedIn: true, // Pflicht
       soloUse: data.soloUse,
       source: "Portal",
       customerMessage: data.customerMessage ?? null,
@@ -169,7 +158,6 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
 
   const bookingId = inserted[0].id;
 
-  // Stripe Checkout Session (in EUR cents)
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
@@ -182,10 +170,10 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
         quantity: 1,
         price_data: {
           currency: "eur",
-          unit_amount: breakdown.subtotalCents,
+          unit_amount: breakdown.prepaymentCents,
           product_data: {
-            name: `Wiesenhütte — ${data.arrival} bis ${data.departure}`,
-            description: `${totalPersons} Personen · ${breakdown.nights} Nächte · Buchung ${bookingNumber}`,
+            name: `Anzahlung 50 % — Wiesenhütte ${data.arrival} bis ${data.departure}`,
+            description: `${totalPersons} Personen · ${breakdown.nights} Nächte · Buchung ${bookingNumber} · Restzahlung ${formatEuro(breakdown.remainderCents)} folgt vor Anreise.`,
           },
         },
       },
@@ -195,8 +183,8 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
           currency: "eur",
           unit_amount: breakdown.depositCents,
           product_data: {
-            name: "Kaution (Erstattung innerhalb 14 Tagen)",
-            description: "Wird nach mangelfreier Abreise zurückerstattet.",
+            name: "Kaution",
+            description: "Erstattung innerhalb 14 Tagen nach mangelfreier Abreise.",
           },
         },
       },
@@ -204,30 +192,45 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
     metadata: {
       bookingId,
       bookingNumber,
+      kind: "anzahlung",
     },
     success_url: `${baseUrl}/buchen/erfolg?bn=${bookingNumber}`,
     cancel_url: `${baseUrl}/buchen/abbruch?bn=${bookingNumber}`,
   });
 
-  // Save stripe session id
   await db
     .update(bookings)
     .set({ stripeSessionId: session.id, updatedAt: new Date() })
     .where(eq(bookings.id, bookingId));
 
-  // Open payment row
-  await db.insert(payments).values({
-    bookingId,
-    kind: "vollzahlung",
-    status: "offen",
-    amountCents: breakdown.subtotalCents + breakdown.depositCents,
-    method: "Stripe Checkout",
-    stripePaymentIntentId: session.payment_intent as string | null,
-  });
+  // Open payment rows: Anzahlung + Kaution (jetzt fällig), Restzahlung (offen)
+  await db.insert(payments).values([
+    {
+      bookingId,
+      kind: "anzahlung",
+      status: "offen",
+      amountCents: breakdown.prepaymentCents,
+      method: "Stripe Checkout",
+    },
+    {
+      bookingId,
+      kind: "kaution",
+      status: "offen",
+      amountCents: breakdown.depositCents,
+      method: "Stripe Checkout",
+    },
+    {
+      bookingId,
+      kind: "restzahlung",
+      status: "offen",
+      amountCents: breakdown.remainderCents,
+      method: "noch offen",
+    },
+  ]);
 
   await db.insert(activityLog).values({
     who: "Portal",
-    what: `Neue Buchung ${bookingNumber} angelegt — ${formatEuro(breakdown.subtotalCents + breakdown.depositCents)} → Stripe`,
+    what: `Neue Buchung ${bookingNumber} angelegt — Anzahlung ${formatEuro(breakdown.prepaymentCents)} + Kaution ${formatEuro(breakdown.depositCents)} via Stripe; Restzahlung ${formatEuro(breakdown.remainderCents)} offen`,
     bookingId,
   });
 

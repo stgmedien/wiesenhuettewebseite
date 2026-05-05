@@ -2,6 +2,11 @@
 // Wiesenhütte Pricing Engine
 // Stand: 01.07.2024 (gültig ab 01.01.2025)
 // Alle Preise in Cents (Integer) für GoBD/Buchhaltung.
+//
+// Hinweis: Kurtaxe wird seit Mai 2026 NICHT mehr über die Wiesenhütte
+// abgerechnet. Der Bucher erhält nach Buchung eine separate E-Mail mit
+// einem Link zum offiziellen Kurtaxen-Portal Hochsauerland.
+// Endreinigung ist Pflicht.
 // =============================================================
 
 export const PRICES = {
@@ -12,9 +17,8 @@ export const PRICES = {
   pupilCents: 750,             // 7,50 € — Schüler bei Schulgruppen
 
   // Pauschalen
-  kurtaxePerAdultPerNightCents: 220,  // 2,20 € pro Person ab 16 / Nacht
   energyFlatPerNightCents: 2200,      // 22,00 € pro Nacht (gesamt)
-  cleaningCents: 19000,               // 190,00 € einmalig (optional)
+  cleaningCents: 19000,               // 190,00 € einmalig (PFLICHT)
   soloSurchargeCents: 5000,           // 50,00 € Aufschlag bei Allein-/Exklusivnutzung
   depositCents: 30000,                // 300,00 € Kaution (Erstattung in 14 Tagen)
 } as const;
@@ -23,10 +27,11 @@ export const RULES = {
   minNights: 2,
   minPersons: 10,
   maxPersons: 33,
+  prepaymentPercent: 50,        // Anzahlung-Anteil bei Buchung in %
 } as const;
 
 // Cancellation tiers (vom subtotal exkl. Kaution)
-// Vorschlag: > 30 Tage 0 %, 29–14 Tage 30 %, 13–7 Tage 60 %, < 7 Tage 90 %
+// > 30 Tage 0 %, 29–14 Tage 30 %, 13–7 Tage 60 %, < 7 Tage 90 %
 export const CANCELLATION_TIERS = [
   { minDaysBefore: 30, percent: 0 },
   { minDaysBefore: 14, percent: 30 },
@@ -53,16 +58,16 @@ export type ExtraLine = {
 export type PriceBreakdown = {
   nights: number;
   totalPersons: number;
-  adultsForKurtaxe: number;
   accommodationCents: number;
-  kurtaxeCents: number;
   energyFlatCents: number;
   cleaningCents: number;
   soloSurchargeCents: number;
   extrasCents: number;
   subtotalCents: number;       // ohne Kaution
   depositCents: number;        // Kaution (separat)
-  totalDueCents: number;       // subtotal + Kaution
+  prepaymentCents: number;     // 50 % Anzahlung — heute zu zahlen
+  remainderCents: number;      // 50 % Restzahlung — vor Anreise
+  totalDueCents: number;       // Anzahlung + (vorautorisierte) Kaution = heute fällig
   lines: PriceLine[];
 };
 
@@ -78,7 +83,6 @@ export type PriceInput = {
   persons: Persons;
   arrival: Date | string;
   departure: Date | string;
-  cleaningOptedIn: boolean;
   soloUse: boolean;
   extras?: ExtraLine[];
 };
@@ -131,7 +135,6 @@ export const calculatePrice = (input: PriceInput): PriceBreakdown => {
   const nights = nightsBetween(input.arrival, input.departure);
   const p = input.persons;
   const adultsNonMember = p.adults + p.teachers; // Lehrkräfte zählen als Nichtmitglieder
-  const adultsForKurtaxe = adultsNonMember + p.members; // ab 16
 
   const accommodationCents =
     adultsNonMember * PRICES.adultNonMemberCents * nights +
@@ -139,22 +142,23 @@ export const calculatePrice = (input: PriceInput): PriceBreakdown => {
     p.children * PRICES.childCents * nights +
     p.pupils * PRICES.pupilCents * nights;
 
-  const kurtaxeCents = adultsForKurtaxe * PRICES.kurtaxePerAdultPerNightCents * nights;
   const energyFlatCents = PRICES.energyFlatPerNightCents * nights;
-  const cleaningCents = input.cleaningOptedIn ? PRICES.cleaningCents : 0;
+  const cleaningCents = PRICES.cleaningCents; // Pflicht
   const soloSurchargeCents = input.soloUse ? PRICES.soloSurchargeCents : 0;
   const extrasCents = (input.extras ?? []).reduce((acc, e) => acc + e.totalCents, 0);
 
   const subtotalCents =
     accommodationCents +
-    kurtaxeCents +
     energyFlatCents +
     cleaningCents +
     soloSurchargeCents +
     extrasCents;
 
   const depositCents = PRICES.depositCents;
-  const totalDueCents = subtotalCents + depositCents;
+  const prepaymentCents = Math.round((subtotalCents * RULES.prepaymentPercent) / 100);
+  const remainderCents = subtotalCents - prepaymentCents;
+  // "Heute fällig": Anzahlung + Kaution
+  const totalDueCents = prepaymentCents + depositCents;
 
   const lines: PriceLine[] = [];
   if (adultsNonMember > 0) {
@@ -193,15 +197,6 @@ export const calculatePrice = (input: PriceInput): PriceBreakdown => {
       totalCents: p.pupils * PRICES.pupilCents * nights,
     });
   }
-  if (kurtaxeCents > 0) {
-    lines.push({
-      label: "Kurtaxe (ab 16 J.)",
-      detail: `${adultsForKurtaxe} × ${nights} Nächte × 2,20 €`,
-      qty: adultsForKurtaxe * nights,
-      unitCents: PRICES.kurtaxePerAdultPerNightCents,
-      totalCents: kurtaxeCents,
-    });
-  }
   lines.push({
     label: "Energiepauschale",
     detail: `${nights} Nächte × 22,00 €`,
@@ -209,14 +204,12 @@ export const calculatePrice = (input: PriceInput): PriceBreakdown => {
     unitCents: PRICES.energyFlatPerNightCents,
     totalCents: energyFlatCents,
   });
-  if (cleaningCents > 0) {
-    lines.push({
-      label: "Endreinigung",
-      qty: 1,
-      unitCents: PRICES.cleaningCents,
-      totalCents: cleaningCents,
-    });
-  }
+  lines.push({
+    label: "Endreinigung (Pflicht)",
+    qty: 1,
+    unitCents: PRICES.cleaningCents,
+    totalCents: cleaningCents,
+  });
   if (soloSurchargeCents > 0) {
     lines.push({
       label: "Aufschlag Allein-/Exklusivnutzung",
@@ -238,15 +231,15 @@ export const calculatePrice = (input: PriceInput): PriceBreakdown => {
   return {
     nights,
     totalPersons: sumPersons(p),
-    adultsForKurtaxe,
     accommodationCents,
-    kurtaxeCents,
     energyFlatCents,
     cleaningCents,
     soloSurchargeCents,
     extrasCents,
     subtotalCents,
     depositCents,
+    prepaymentCents,
+    remainderCents,
     totalDueCents,
     lines,
   };

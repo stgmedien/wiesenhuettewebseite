@@ -8,7 +8,6 @@ import { isRangeAvailable } from "@/lib/availability";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { generateBookingNumber } from "@/lib/utils";
-import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 const schema = z.object({
@@ -19,7 +18,6 @@ const schema = z.object({
   children: z.coerce.number().int().min(0).default(0),
   pupils: z.coerce.number().int().min(0).default(0),
   teachers: z.coerce.number().int().min(0).default(0),
-  cleaningOptedIn: z.coerce.boolean().default(true),
   soloUse: z.coerce.boolean().default(false),
   customerType: z.enum(["privat", "mitglied", "verein", "firma"]).default("privat"),
   firstName: z.string().min(1).max(120),
@@ -37,7 +35,7 @@ export async function createManualBooking(formData: FormData): Promise<{ ok: boo
 
   const raw: Record<string, unknown> = {};
   formData.forEach((v, k) => {
-    if (k === "cleaningOptedIn" || k === "soloUse") {
+    if (k === "soloUse") {
       raw[k] = v === "on" || v === "true";
     } else {
       raw[k] = v;
@@ -61,7 +59,6 @@ export async function createManualBooking(formData: FormData): Promise<{ ok: boo
     arrival: d.arrival,
     departure: d.departure,
     persons,
-    cleaningOptedIn: d.cleaningOptedIn,
     soloUse: d.soloUse,
   });
   if (issues.length > 0) {
@@ -75,11 +72,9 @@ export async function createManualBooking(formData: FormData): Promise<{ ok: boo
     arrival: d.arrival,
     departure: d.departure,
     persons,
-    cleaningOptedIn: d.cleaningOptedIn,
     soloUse: d.soloUse,
   });
 
-  // Upsert customer
   let customerId: string;
   const found = await db
     .select()
@@ -124,7 +119,7 @@ export async function createManualBooking(formData: FormData): Promise<{ ok: boo
       persons: totalPersons,
       purpose: d.purpose ?? null,
       accommodationCents: breakdown.accommodationCents,
-      kurtaxeCents: breakdown.kurtaxeCents,
+      kurtaxeCents: 0,
       energyFlatCents: breakdown.energyFlatCents,
       cleaningCents: breakdown.cleaningCents,
       soloSurchargeCents: breakdown.soloSurchargeCents,
@@ -133,7 +128,7 @@ export async function createManualBooking(formData: FormData): Promise<{ ok: boo
       depositCents: breakdown.depositCents,
       totalCents: breakdown.subtotalCents,
       paidCents: 0,
-      cleaningOptedIn: d.cleaningOptedIn,
+      cleaningOptedIn: true,
       soloUse: d.soloUse,
       source: "Manuell",
       internalNotes: d.internalNotes ?? null,

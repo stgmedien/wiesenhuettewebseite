@@ -41,14 +41,12 @@ export default function ManualBookingForm() {
         <Input id="teachers" name="teachers" type="number" min={0} defaultValue={0} label="Lehrkräfte" />
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" name="cleaningOptedIn" defaultChecked /> Endreinigung
-        </label>
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" name="soloUse" /> Allein-/Exklusivnutzung
-        </label>
+      <div className="text-sm text-[var(--color-wh-fg-muted)] bg-[var(--color-wh-green-soft)] p-3 rounded-md">
+        Endreinigung (190 €) ist Pflicht und wird automatisch berechnet.
       </div>
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" name="soloUse" className="w-4 h-4 accent-[var(--color-wh-deep-green)]" /> Allein-/Exklusivnutzung (+50 €)
+      </label>
 
       <h3 className="text-[20px] m-0 mt-4">Gast</h3>
 

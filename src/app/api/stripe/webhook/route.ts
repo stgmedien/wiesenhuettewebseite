@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { sendMail } from "@/lib/mail/send";
 import BookingConfirmedEmail from "@/lib/mail/templates/booking-confirmed";
 import BookingInternalEmail from "@/lib/mail/templates/booking-internal";
+import KurtaxeInfoEmail from "@/lib/mail/templates/kurtaxe-info";
 import { formatDateLong } from "@/lib/utils";
 import type Stripe from "stripe";
 
@@ -57,6 +58,7 @@ export async function POST(req: NextRequest) {
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const bookingId = session.metadata?.bookingId;
+  const kind = session.metadata?.kind;
   if (!bookingId) {
     console.warn("[webhook] checkout.session.completed without bookingId");
     return;
@@ -73,13 +75,42 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     return;
   }
 
-  const paidCents = (session.amount_total ?? 0) | 0;
+  const amountCents = (session.amount_total ?? 0) | 0;
 
+  // Nachbelastung / Restzahlung: nur Zahlung erfassen, Status NICHT verändern.
+  if (kind === "nachbelastung" || kind === "restzahlung") {
+    await db
+      .update(bookings)
+      .set({
+        paidCents: booking.paidCents + amountCents,
+        updatedAt: new Date(),
+      })
+      .where(eq(bookings.id, bookingId));
+
+    await db.insert(payments).values({
+      bookingId,
+      kind: kind === "restzahlung" ? "restzahlung" : "vollzahlung",
+      status: "erhalten",
+      amountCents,
+      method: "Stripe",
+      stripePaymentIntentId: (session.payment_intent as string | null) ?? null,
+      receivedAt: new Date(),
+    });
+
+    await db.insert(activityLog).values({
+      who: "Stripe",
+      what: `Zahlungseingang ${kind === "restzahlung" ? "Restzahlung" : "Nachbelastung"} ${(amountCents / 100).toFixed(2)} € — Buchung ${booking.bookingNumber}`,
+      bookingId,
+    });
+    return;
+  }
+
+  // Anzahlung (initiale Buchung): Buchung auf "bezahlt" setzen + offene Zahlungen markieren
   await db
     .update(bookings)
     .set({
       status: "bezahlt",
-      paidCents,
+      paidCents: amountCents,
       stripePaymentIntentId: (session.payment_intent as string | null) ?? null,
       updatedAt: new Date(),
     })
@@ -96,7 +127,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   await db.insert(activityLog).values({
     who: "Stripe",
-    what: `Zahlung erhalten — Buchung ${booking.bookingNumber} bestätigt (${(paidCents / 100).toFixed(2)} €)`,
+    what: `Anzahlung erhalten — Buchung ${booking.bookingNumber} bestätigt (${(amountCents / 100).toFixed(2)} €)`,
     bookingId,
   });
 
@@ -122,12 +153,36 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
           persons: booking.persons,
           totalCents: booking.subtotalCents,
           depositCents: booking.depositCents,
-          paidCents,
+          paidCents: amountCents,
           baseUrl,
         }),
       });
     } catch (err) {
       console.error("[webhook] customer mail failed", err);
+    }
+
+    // Kurtaxe-Info — separat über Hochsauerland-Portal
+    const kurtaxePortalUrl = process.env.KURTAXE_PORTAL_URL ?? "https://service.hochsauerlandkreis.de/kurtaxe";
+    const adultsForKurtaxe = booking.adults + booking.members + booking.teachers;
+    if (adultsForKurtaxe > 0) {
+      try {
+        await sendMail({
+          to: customer.email,
+          subject: `Kurtaxe Hochsauerland für Buchung ${booking.bookingNumber}`,
+          template: "kurtaxe-info",
+          bookingId,
+          react: KurtaxeInfoEmail({
+            guestName,
+            bookingNumber: booking.bookingNumber,
+            arrival: formatDateLong(booking.arrival),
+            departure: formatDateLong(booking.departure),
+            adultsForKurtaxe,
+            kurtaxePortalUrl,
+          }),
+        });
+      } catch (err) {
+        console.error("[webhook] kurtaxe mail failed", err);
+      }
     }
 
     const internalTo = process.env.MAIL_INTERNAL_TO;
@@ -149,7 +204,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
             persons: booking.persons,
             customerType: customer.type,
             totalCents: booking.subtotalCents,
-            paidCents,
+            paidCents: amountCents,
             managerUrl: `${baseUrl}/m/buchungen/${bookingId}`,
             notes: booking.customerMessage ?? undefined,
           }),

@@ -7,6 +7,7 @@ import { formatEuro } from "@/lib/pricing";
 import { formatDateLong } from "@/lib/utils";
 import { StatusPill } from "@/components/manager/StatusPill";
 import { StatusActions } from "./StatusActions";
+import { ManagerMessage } from "./ManagerMessage";
 
 export const dynamic = "force-dynamic";
 
@@ -53,6 +54,15 @@ export default async function BookingDetail({ params }: Props) {
         </div>
         <StatusActions bookingId={b.id} currentStatus={b.status} />
       </div>
+
+      {customer && (
+        <ManagerMessage
+          bookingId={b.id}
+          guestEmail={customer.email}
+          guestName={`${customer.firstName} ${customer.lastName}`.trim()}
+          bookingNumber={b.bookingNumber}
+        />
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 mt-8">
         <div className="space-y-6">
@@ -162,8 +172,6 @@ export default async function BookingDetail({ params }: Props) {
             <dl className="grid grid-cols-[1fr_auto] gap-y-2 text-sm">
               <Dt>Übernachtung</Dt>
               <Dd className="text-right">{formatEuro(b.accommodationCents)}</Dd>
-              <Dt>Kurtaxe</Dt>
-              <Dd className="text-right">{formatEuro(b.kurtaxeCents)}</Dd>
               <Dt>Energiepauschale</Dt>
               <Dd className="text-right">{formatEuro(b.energyFlatCents)}</Dd>
               <Dt>Endreinigung</Dt>
@@ -172,6 +180,12 @@ export default async function BookingDetail({ params }: Props) {
                 <>
                   <Dt>Allein-Aufschlag</Dt>
                   <Dd className="text-right">{formatEuro(b.soloSurchargeCents)}</Dd>
+                </>
+              )}
+              {b.kurtaxeCents > 0 && (
+                <>
+                  <Dt>Kurtaxe (Altbestand)</Dt>
+                  <Dd className="text-right">{formatEuro(b.kurtaxeCents)}</Dd>
                 </>
               )}
             </dl>
