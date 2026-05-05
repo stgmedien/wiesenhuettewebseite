@@ -577,11 +577,6 @@ export default function Datenschutz() {
           Skifreunde Gütersloh e.V. · Postfach 2819 · 33258 Gütersloh · Vereinsregister: AG
           Gütersloh
         </p>
-        <p className="text-xs text-[var(--color-wh-fg-muted)] italic">
-          Diese Datenschutzerklärung wurde mit Sorgfalt erstellt; sie ersetzt keine juristische
-          Beratung. Vor der Veröffentlichung empfehlen wir, sie einmalig durch eine
-          Datenschutz-Fachperson prüfen zu lassen.
-        </p>
       </div>
     </div>
   );
