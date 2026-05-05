@@ -8,6 +8,7 @@ import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { ensureUniqueSlug, toSlug } from "@/lib/blog/slug";
+import { sanitizeAndRestrict } from "@/lib/blog/sanitize";
 
 const upsertSchema = z.object({
   id: z.string().uuid().optional(),
@@ -31,12 +32,10 @@ const requireManager = async () => {
   return session;
 };
 
-const computeReadingMinutes = async (html: string): Promise<number> => {
+const computeReadingMinutes = (html: string): number => {
   const text = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-  // Lazy-load to keep this module light when only createBlogPost is called.
-  const readingTime = (await import("reading-time")).default;
-  const stats = readingTime(text);
-  return Math.max(1, Math.round(stats.minutes));
+  const words = text.split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words / 220));
 };
 
 export async function createBlogPost(): Promise<void> {
@@ -64,8 +63,7 @@ export async function createBlogPost(): Promise<void> {
 export type SaveResult = { ok: true; slug: string } | { ok: false; error: string };
 
 export async function saveBlogPost(raw: z.infer<typeof upsertSchema>): Promise<SaveResult> {
-  const session = await requireManager();
-  void session;
+  await requireManager();
   const parsed = upsertSchema.safeParse(raw);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues.map((i) => i.message).join(", ") };
@@ -73,12 +71,10 @@ export async function saveBlogPost(raw: z.infer<typeof upsertSchema>): Promise<S
   const data = parsed.data;
   if (!data.id) return { ok: false, error: "Post-ID fehlt." };
 
-  // Lazy import: dompurify (and its jsdom backend) are heavy and Node-only.
-  const { sanitizeAndRestrict } = await import("@/lib/blog/sanitize");
   const cleanHtml = sanitizeAndRestrict(data.contentHtml ?? "");
   const desiredSlug = data.slug?.trim() ? toSlug(data.slug.trim()) : toSlug(data.title);
   const slug = await ensureUniqueSlug(desiredSlug, data.id);
-  const reading = await computeReadingMinutes(cleanHtml);
+  const reading = computeReadingMinutes(cleanHtml);
 
   await db
     .update(blogPosts)

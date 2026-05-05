@@ -5,6 +5,8 @@ import { blogPosts, activityLog } from "@/lib/db/schema";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { ensureUniqueSlug, toSlug } from "@/lib/blog/slug";
+import { sanitizeAndRestrict } from "@/lib/blog/sanitize";
+import { parseHtmlForImport } from "@/lib/blog/parse-html";
 
 export type ImportResult = { ok: true; postId: string } | { ok: false; error: string };
 
@@ -16,16 +18,14 @@ const requireManager = async () => {
   return session;
 };
 
-const readMinutes = async (html: string) => {
+const readMinutes = (html: string): number => {
   const text = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-  const readingTime = (await import("reading-time")).default;
-  return Math.max(1, Math.round(readingTime(text).minutes));
+  const words = text.split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words / 220));
 };
 
 /**
  * Accept an uploaded HTML/MD file. Extract title/meta, sanitize body, create draft.
- * Heavy parsers (cheerio, dompurify) are loaded dynamically so they only enter
- * the bundle when this action is actually invoked.
  */
 export async function importHtmlFile(formData: FormData): Promise<ImportResult> {
   const session = await requireManager();
@@ -35,35 +35,13 @@ export async function importHtmlFile(formData: FormData): Promise<ImportResult> 
   if (file.size > 5 * 1024 * 1024) return { ok: false, error: "Datei zu groß (max 5 MB)." };
 
   const raw = await file.text();
-  const cheerio = await import("cheerio");
-  const { sanitizeAndRestrict } = await import("@/lib/blog/sanitize");
+  const parsed = parseHtmlForImport(raw);
 
-  const $ = cheerio.load(raw);
-
-  const title =
-    $("title").first().text().trim() ||
-    $("h1").first().text().trim() ||
-    $('meta[name="wh:title"]').attr("content")?.trim() ||
-    file.name.replace(/\.[^.]+$/, "");
-
-  const excerpt =
-    $('meta[name="description"]').attr("content")?.trim() ||
-    $('meta[property="og:description"]').attr("content")?.trim() ||
-    $('meta[name="wh:excerpt"]').attr("content")?.trim() ||
-    null;
-
-  const cover =
-    $('meta[property="og:image"]').attr("content") ||
-    $('meta[name="wh:cover"]').attr("content") ||
-    null;
-
-  const slugHint =
-    $('meta[name="wh:slug"]').attr("content")?.trim() ||
-    title;
-
-  const bodyHtml = $("body").length ? $("body").html() ?? "" : raw;
-  const cleanHtml = sanitizeAndRestrict(bodyHtml);
-  const reading = await readMinutes(cleanHtml);
+  const title = parsed.title || file.name.replace(/\.[^.]+$/, "");
+  const slugHint = parsed.whSlug || title;
+  const cover = parsed.ogImage || parsed.whCover || null;
+  const cleanHtml = sanitizeAndRestrict(parsed.bodyHtml);
+  const reading = readMinutes(cleanHtml);
   const slug = await ensureUniqueSlug(toSlug(slugHint));
 
   const inserted = await db
@@ -71,9 +49,9 @@ export async function importHtmlFile(formData: FormData): Promise<ImportResult> 
     .values({
       title,
       slug,
-      excerpt: excerpt ?? null,
+      excerpt: parsed.description ?? null,
       contentHtml: cleanHtml,
-      coverImageUrl: cover ?? null,
+      coverImageUrl: cover,
       authorId: (session.user as { id?: string } | undefined)?.id ?? null,
       status: "draft",
       readingMinutes: reading,
