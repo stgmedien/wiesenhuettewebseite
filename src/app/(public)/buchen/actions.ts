@@ -173,9 +173,10 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
-    payment_method_types: ["card", "sepa_debit"],
+    payment_method_types: ["card"],
     locale: "de",
     customer_email: data.email,
+    billing_address_collection: "auto",
     line_items: [
       {
         quantity: 1,
