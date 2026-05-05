@@ -178,10 +178,10 @@ const FeatureGrid = () => (
 const HistoryTeaser = () => (
   <section className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-20 sm:py-32">
     <div className="max-w-[1080px] mx-auto grid grid-cols-1 md:grid-cols-[1fr_1.2fr] gap-10 md:gap-16 items-center">
-      <div className="relative aspect-[4/5] rounded-[var(--radius-card)] overflow-hidden">
+      <div className="relative aspect-square rounded-[var(--radius-card)] overflow-hidden bg-[var(--color-wh-snow)]">
         <Image
-          src="/media/historical/founders.jpg"
-          alt="Historisches Foto der Skifreunde Gütersloh"
+          src="/media/photos/historical-pic-1.png"
+          alt="Historische Aufnahme der Skifreunde Gütersloh am Hang"
           fill
           className="object-cover"
           sizes="(min-width: 768px) 460px, 100vw"
