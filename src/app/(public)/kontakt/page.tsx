@@ -47,15 +47,6 @@ export default function KontaktPage() {
               { kind: "mail", value: "info@skifreunde-gt.de" },
             ]}
           />
-          <Card
-            icon={<Phone size={20} strokeWidth={1.6} />}
-            label="Buchungen telefonisch"
-            primary="Inge Kellermann"
-            secondary={[
-              { kind: "phone", value: "05241 / 56403" },
-              { kind: "info", value: "Falls Online-Buchung nicht möglich" },
-            ]}
-          />
         </div>
 
         <div className="mt-12 bg-[var(--color-wh-beige)] rounded-[var(--radius-card)] p-6 sm:p-8">

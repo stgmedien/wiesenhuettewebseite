@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Mountain, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -17,17 +17,41 @@ const NAV = [
 export const Header = () => {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  // Only the home page has a video hero — other pages always have a solid header.
+  const overHero = pathname === "/" && !scrolled;
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 80);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Close mobile menu when path changes
+  useEffect(() => setOpen(false), [pathname]);
 
   return (
-    <header className="sticky top-0 z-40 bg-[var(--color-wh-snow)]/90 backdrop-blur-md border-b border-[var(--color-wh-winter-grey)]">
+    <header
+      className={cn(
+        "sticky top-0 z-40 transition-colors duration-200",
+        overHero && !open
+          ? "bg-transparent border-b border-transparent"
+          : "bg-[var(--color-wh-snow)] border-b border-[var(--color-wh-winter-grey)] backdrop-blur-md"
+      )}
+    >
       <div className="max-w-[1280px] mx-auto px-5 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-2.5 no-underline shrink-0" onClick={() => setOpen(false)}>
-          <Mountain
-            className="text-[var(--color-wh-deep-green)]"
-            size={26}
-            strokeWidth={1.6}
-          />
-          <span className="font-display text-base sm:text-lg font-bold text-[var(--color-wh-deep-green)] tracking-tight leading-none">
+        <Link
+          href="/"
+          className={cn(
+            "flex items-center gap-2.5 no-underline shrink-0",
+            overHero ? "text-[var(--color-wh-snow)]" : "text-[var(--color-wh-deep-green)]"
+          )}
+          onClick={() => setOpen(false)}
+        >
+          <Mountain size={26} strokeWidth={1.6} />
+          <span className="font-display text-base sm:text-lg font-bold tracking-tight leading-none drop-shadow-sm">
             Wiesenhütte
           </span>
         </Link>
@@ -41,8 +65,10 @@ export const Header = () => {
                 href={n.href}
                 className={cn(
                   "px-3 py-2 text-sm font-medium no-underline rounded-md transition-colors",
-                  "text-[var(--color-wh-deep-green)] hover:bg-[var(--color-wh-green-soft)]",
-                  active && "bg-[var(--color-wh-green-soft)]"
+                  overHero
+                    ? "text-[var(--color-wh-snow)] hover:bg-white/15 drop-shadow-sm"
+                    : "text-[var(--color-wh-deep-green)] hover:bg-[var(--color-wh-green-soft)]",
+                  active && (overHero ? "bg-white/15" : "bg-[var(--color-wh-green-soft)]")
                 )}
               >
                 {n.label}
@@ -54,13 +80,23 @@ export const Header = () => {
         <div className="flex items-center gap-2">
           <Link
             href="/buchen"
-            className="inline-flex h-10 px-4 sm:px-5 items-center rounded-[var(--radius-btn)] bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] text-sm font-semibold no-underline hover:bg-[var(--color-wh-deep-green-hover)] transition-colors whitespace-nowrap"
+            className={cn(
+              "inline-flex h-10 px-4 sm:px-5 items-center rounded-[var(--radius-btn)] text-sm font-semibold no-underline transition-colors whitespace-nowrap",
+              overHero
+                ? "bg-[var(--color-wh-snow)] text-[var(--color-wh-deep-green)] hover:bg-white"
+                : "bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] hover:bg-[var(--color-wh-deep-green-hover)]"
+            )}
           >
             Buchen
           </Link>
           <button
             type="button"
-            className="md:hidden inline-flex w-10 h-10 items-center justify-center rounded-md text-[var(--color-wh-deep-green)] hover:bg-[var(--color-wh-green-soft)] cursor-pointer"
+            className={cn(
+              "md:hidden inline-flex w-10 h-10 items-center justify-center rounded-md cursor-pointer transition-colors",
+              overHero
+                ? "text-[var(--color-wh-snow)] hover:bg-white/15"
+                : "text-[var(--color-wh-deep-green)] hover:bg-[var(--color-wh-green-soft)]"
+            )}
             onClick={() => setOpen(!open)}
             aria-label="Menü"
             aria-expanded={open}

@@ -37,22 +37,23 @@ export default function EsgPage() {
   return (
     <div>
       <section className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-20 sm:py-24">
-        <div className="max-w-[1080px] mx-auto grid grid-cols-1 md:grid-cols-[1fr_auto] gap-8 items-start">
+        <div className="max-w-[1080px] mx-auto grid grid-cols-1 md:grid-cols-[1fr_auto] gap-8 md:gap-12 items-center">
           <div>
             <div className="eyebrow">ESG · Evangelisch Stiftisches Gymnasium</div>
             <h1 className="text-[44px] sm:text-[64px] mt-4">Eine Schule. Eine Hütte. Generationen.</h1>
             <p className="text-base sm:text-[18px] leading-relaxed text-[var(--color-wh-black)] max-w-2xl mt-4">
               Seit den 1970er Jahren fährt das Evangelisch Stiftische Gymnasium Gütersloh zur
-              Wiesenhütte. Aus einer einzelnen Klassenfahrt ist eine feste Tradition geworden.
+              Wiesenhütte. Aus einer einzelnen Klassenfahrt ist eine feste Tradition geworden —
+              im Jubiläumsjahr 2026 feiert das ESG sein 175-jähriges Bestehen.
             </p>
           </div>
-          <div className="relative w-32 h-32 sm:w-40 sm:h-40 shrink-0">
+          <div className="relative w-48 sm:w-64 md:w-72 aspect-[3/2] shrink-0">
             <Image
-              src="/media/logos/nature-experience.png"
-              alt="Nature Experience Badge"
+              src="/media/logos/esg-175.jpg"
+              alt="175 Jahre Evangelisch Stiftisches Gymnasium"
               fill
               className="object-contain"
-              sizes="160px"
+              sizes="(min-width: 768px) 288px, 240px"
             />
           </div>
         </div>
