@@ -7,6 +7,7 @@ import { sendMail } from "@/lib/mail/send";
 import BookingConfirmedEmail from "@/lib/mail/templates/booking-confirmed";
 import BookingInternalEmail from "@/lib/mail/templates/booking-internal";
 import KurtaxeInfoEmail from "@/lib/mail/templates/kurtaxe-info";
+import MietvertragEmail from "@/lib/mail/templates/mietvertrag";
 import { formatDateLong } from "@/lib/utils";
 import type Stripe from "stripe";
 
@@ -159,6 +160,61 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       });
     } catch (err) {
       console.error("[webhook] customer mail failed", err);
+    }
+
+    // Mietvertrag — automatisch generiert aus Buchungsdaten
+    try {
+      const subtotal = booking.subtotalCents;
+      const prepayment = Math.round(subtotal * 0.5);
+      const remainder = subtotal - prepayment;
+      await sendMail({
+        to: customer.email,
+        subject: `Mietvertrag Wiesenhütte — Buchung ${booking.bookingNumber}`,
+        template: "mietvertrag",
+        bookingId,
+        react: MietvertragEmail({
+          bookingNumber: booking.bookingNumber,
+          arrival: formatDateLong(booking.arrival),
+          departure: formatDateLong(booking.departure),
+          nights: booking.nights,
+          customer: {
+            firstName: customer.firstName,
+            lastName: customer.lastName,
+            company: customer.company,
+            email: customer.email,
+            phone: customer.phone,
+            street: customer.street,
+            zip: customer.zip,
+            city: customer.city,
+          },
+          persons: {
+            adults: booking.adults,
+            members: booking.members,
+            children: booking.children,
+            pupils: booking.pupils,
+            teachers: booking.teachers,
+            total: booking.persons,
+          },
+          pricing: {
+            accommodationCents: booking.accommodationCents,
+            energyFlatCents: booking.energyFlatCents,
+            cleaningCents: booking.cleaningCents,
+            soloSurchargeCents: booking.soloSurchargeCents,
+            subtotalCents: subtotal,
+            depositCents: booking.depositCents,
+            prepaymentCents: prepayment,
+            remainderCents: remainder,
+          },
+          signedAt: new Date().toISOString(),
+          contractDate: new Date().toLocaleDateString("de-DE", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+          }),
+        }),
+      });
+    } catch (err) {
+      console.error("[webhook] mietvertrag mail failed", err);
     }
 
     // Kurtaxe-Info — separat über Hochsauerland-Portal

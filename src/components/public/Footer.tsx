@@ -28,6 +28,9 @@ export const Footer = () => (
         <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/lage">
           Lage & Anfahrt
         </Link>
+        <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/hausordnung">
+          Hausordnung
+        </Link>
       </nav>
 
       <nav className="text-sm flex flex-col gap-2">

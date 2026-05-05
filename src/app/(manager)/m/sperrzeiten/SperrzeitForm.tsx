@@ -29,14 +29,14 @@ export default function SperrzeitForm() {
   return (
     <form
       onSubmit={onSubmit}
-      className="bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] rounded-[var(--radius-card)] p-6 space-y-4"
+      className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 space-y-4"
     >
-      <h3 className="text-[20px] m-0 text-[var(--color-wh-snow)]">Neue Sperrzeit</h3>
+      <h3 className="text-[20px] m-0">Neue Sperrzeit</h3>
       <Input id="from" name="from" type="date" label="Von" required />
       <Input id="to" name="to" type="date" label="Bis" required />
       <Input id="purpose" name="purpose" label="Grund" placeholder="z. B. Wartung Heizung" required />
       {error && (
-        <div className="text-sm bg-[var(--color-wh-sunset)]/20 text-[var(--color-wh-snow)] px-3 py-2 rounded-md">
+        <div className="text-sm bg-[var(--color-wh-sunset)]/10 text-[var(--color-wh-sunset)] px-3 py-2 rounded-md">
           {error}
         </div>
       )}
