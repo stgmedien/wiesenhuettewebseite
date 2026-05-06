@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Mountain, Menu, X } from "lucide-react";
+import { Mountain, Menu, X, UserCircle, LogIn } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +17,13 @@ const NAV = [
 const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 const DURATION_MS = 450;
 
-export const Header = () => {
+export type HeaderSession = {
+  loggedIn: boolean;
+  name?: string | null;
+  role?: string;
+};
+
+export const Header = ({ session }: { session: HeaderSession }) => {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -102,6 +108,32 @@ export const Header = () => {
           </nav>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
+            {session.loggedIn ? (
+              <Link
+                href={
+                  session.role === "manager" || session.role === "admin"
+                    ? "/m/dashboard"
+                    : "/konto"
+                }
+                className="hidden sm:inline-flex h-9 px-3 items-center gap-1.5 rounded-full text-[var(--color-wh-snow)]/90 text-sm font-medium no-underline hover:bg-white/12 transition-colors whitespace-nowrap"
+                title={session.name ?? "Mein Konto"}
+              >
+                <UserCircle size={16} />
+                <span className="hidden lg:inline">
+                  {session.role === "manager" || session.role === "admin"
+                    ? "Manager"
+                    : "Mein Konto"}
+                </span>
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                className="hidden sm:inline-flex h-9 px-3 items-center gap-1.5 rounded-full text-[var(--color-wh-snow)]/90 text-sm font-medium no-underline hover:bg-white/12 transition-colors whitespace-nowrap"
+              >
+                <LogIn size={16} />
+                Login
+              </Link>
+            )}
             <Link
               href="/buchen"
               className="inline-flex h-9 px-4 sm:px-5 items-center rounded-full bg-[var(--color-wh-snow)] text-[var(--color-wh-deep-green)] text-sm font-semibold no-underline hover:bg-white transition-colors whitespace-nowrap"
@@ -146,6 +178,43 @@ export const Header = () => {
                   </Link>
                 );
               })}
+              <div className="border-t border-white/12 mt-2 pt-2">
+                {session.loggedIn ? (
+                  <Link
+                    href={
+                      session.role === "manager" || session.role === "admin"
+                        ? "/m/dashboard"
+                        : "/konto"
+                    }
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2 px-3 py-3 text-base font-medium no-underline rounded-md text-[var(--color-wh-snow)]/90 hover:bg-white/12"
+                  >
+                    <UserCircle size={18} />
+                    {session.role === "manager" || session.role === "admin"
+                      ? "Manager-Backend"
+                      : "Mein Konto"}
+                  </Link>
+                ) : (
+                  <>
+                    <Link
+                      href="/login"
+                      onClick={() => setOpen(false)}
+                      className="flex items-center gap-2 px-3 py-3 text-base font-medium no-underline rounded-md text-[var(--color-wh-snow)]/90 hover:bg-white/12"
+                    >
+                      <LogIn size={18} />
+                      Login
+                    </Link>
+                    <Link
+                      href="/registrieren"
+                      onClick={() => setOpen(false)}
+                      className="flex items-center gap-2 px-3 py-3 text-base font-medium no-underline rounded-md text-[var(--color-wh-snow)]/90 hover:bg-white/12"
+                    >
+                      <UserCircle size={18} />
+                      Konto anlegen
+                    </Link>
+                  </>
+                )}
+              </div>
             </div>
           </nav>
         )}
