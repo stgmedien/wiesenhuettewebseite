@@ -55,54 +55,20 @@ export default function EsgPage() {
       {/* 1. Einstieg — Lead-Text */}
       {/* ---------------------------------------------------------------- */}
       <section id="einstieg" className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-16 sm:py-20">
-        <div className="max-w-[1080px] mx-auto grid grid-cols-1 md:grid-cols-[1fr_auto] gap-8 md:gap-12 items-start">
-          <div>
-            <p className="text-base sm:text-[18px] leading-relaxed text-[var(--color-wh-black)] max-w-2xl">
-              Die Wiesenhütte in Langewiese ist keine Klassenfahrt-Adresse. Sie ist ein
-              außerschulischer Lernort des Evangelisch Stiftischen Gymnasiums Gütersloh —
-              getragen seit Generationen vom Verein Skifreunde Gütersloh, geöffnet seit einigen
-              Jahren auch für die pädagogische Arbeit des ESG.
-            </p>
-            <p className="text-base sm:text-[18px] leading-relaxed text-[var(--color-wh-black)] max-w-2xl mt-4">
-              Hier gilt eine einfache Beobachtung: <strong>Manches lernt man nur dort, wo das
-              Klassenzimmer aufhört.</strong> Wenn Schüler:innen für eine Woche selbst kochen,
-              Holz schichten, miteinander durch Konflikte gehen und am Ende des Tages am Feuer
-              stehen, geschieht etwas, das zu Persönlichkeitsbildung wird — und nicht nur zu
-              Stoff. Genau dafür gibt es die Hütte.
-            </p>
-          </div>
-          <div className="relative w-40 sm:w-56 md:w-64 aspect-[3/2] shrink-0">
-            <Image
-              src="/media/logos/esg-175.jpg"
-              alt="175 Jahre Evangelisch Stiftisches Gymnasium"
-              fill
-              className="object-contain"
-              sizes="(min-width: 768px) 256px, 224px"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* In Kürze */}
-      <section className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-12 sm:py-14">
         <div className="max-w-[1080px] mx-auto">
-          <div className="eyebrow">In Kürze</div>
-          <ul className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 list-none p-0">
-            {[
-              "Eigene Hütte in Langewiese (Hochsauerland), 33 Schlafplätze, Selbstversorgung",
-              "Genutzt für Klassen-, Stufen- und AG-Fahrten der Mittelstufe (Klasse 7–9)",
-              "Pädagogisches Leitbild: Pestalozzis Trias Kopf – Herz – Hand, ergänzt um den Fuß",
-              "Eingebettet in das Schulprofil des ESG — evangelisch, humanistisch, neugierig",
-              "Getragen durch Lehrkräfte, den Förderverein und die Skifreunde Gütersloh",
-            ].map((t) => (
-              <li
-                key={t}
-                className="bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-md)] px-4 py-3 text-[15px]"
-              >
-                {t}
-              </li>
-            ))}
-          </ul>
+          <p className="text-base sm:text-[18px] leading-relaxed text-[var(--color-wh-black)] max-w-2xl">
+            Die Wiesenhütte in Langewiese ist keine Klassenfahrt-Adresse. Sie ist ein
+            außerschulischer Lernort des Evangelisch Stiftischen Gymnasiums Gütersloh —
+            getragen seit Generationen vom Verein Skifreunde Gütersloh, geöffnet seit einigen
+            Jahren auch für die pädagogische Arbeit des ESG.
+          </p>
+          <p className="text-base sm:text-[18px] leading-relaxed text-[var(--color-wh-black)] max-w-2xl mt-4">
+            Hier gilt eine einfache Beobachtung: <strong>Manches lernt man nur dort, wo das
+            Klassenzimmer aufhört.</strong> Wenn Schüler:innen für eine Woche selbst kochen,
+            Holz schichten, miteinander durch Konflikte gehen und am Ende des Tages am Feuer
+            stehen, geschieht etwas, das zu Persönlichkeitsbildung wird — und nicht nur zu
+            Stoff. Genau dafür gibt es die Hütte.
+          </p>
         </div>
       </section>
 
