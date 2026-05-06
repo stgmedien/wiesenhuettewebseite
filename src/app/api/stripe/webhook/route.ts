@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { db } from "@/lib/db";
-import { bookings, customers, payments, activityLog } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { bookings, customers, payments, activityLog, emailLog } from "@/lib/db/schema";
+import { and, eq } from "drizzle-orm";
 import { sendMail } from "@/lib/mail/send";
 import BookingConfirmedEmail from "@/lib/mail/templates/booking-confirmed";
 import BookingInternalEmail from "@/lib/mail/templates/booking-internal";
@@ -16,6 +16,27 @@ export const runtime = "nodejs"; // raw body needed
 export const dynamic = "force-dynamic";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
+
+/**
+ * Idempotenz-Helper: prueft, ob fuer (bookingId, template) bereits eine
+ * erfolgreich versendete Mail im emailLog steht. Schuetzt vor doppelten
+ * Mails bei Stripe-Webhook-Retries oder bei mehreren Stripe-Events
+ * (checkout.session.completed + async_payment_succeeded).
+ */
+async function wasMailSent(bookingId: string, template: string): Promise<boolean> {
+  const r = await db
+    .select({ id: emailLog.id })
+    .from(emailLog)
+    .where(
+      and(
+        eq(emailLog.bookingId, bookingId),
+        eq(emailLog.template, template),
+        eq(emailLog.status, "sent")
+      )
+    )
+    .limit(1);
+  return !!r[0];
+}
 
 export async function POST(req: NextRequest) {
   const sig = req.headers.get("stripe-signature");
@@ -166,39 +187,42 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   if (customer) {
     const guestName = `${customer.firstName} ${customer.lastName}`.trim();
-    try {
-      await sendMail({
-        to: customer.email,
-        subject: `Eure Buchung ${booking.bookingNumber} ist bestätigt`,
-        template: "booking-confirmed",
-        bookingId,
-        react: BookingConfirmedEmail({
-          bookingNumber: booking.bookingNumber,
-          guestName,
-          arrival: formatDateLong(booking.arrival),
-          departure: formatDateLong(booking.departure),
-          nights: booking.nights,
-          persons: booking.persons,
-          totalCents: booking.subtotalCents,
-          depositCents: booking.depositCents,
-          paidCents: amountCents,
-          baseUrl,
-        }),
-      });
-    } catch (err) {
-      console.error("[webhook] customer mail failed", err);
+    if (!(await wasMailSent(bookingId, "booking-confirmed"))) {
+      try {
+        await sendMail({
+          to: customer.email,
+          subject: `Eure Buchung ${booking.bookingNumber} ist bestätigt`,
+          template: "booking-confirmed",
+          bookingId,
+          react: BookingConfirmedEmail({
+            bookingNumber: booking.bookingNumber,
+            guestName,
+            arrival: formatDateLong(booking.arrival),
+            departure: formatDateLong(booking.departure),
+            nights: booking.nights,
+            persons: booking.persons,
+            totalCents: booking.subtotalCents,
+            depositCents: booking.depositCents,
+            paidCents: amountCents,
+            baseUrl,
+          }),
+        });
+      } catch (err) {
+        console.error("[webhook] customer mail failed", err);
+      }
     }
 
     // Mietvertrag — automatisch generiert aus Buchungsdaten
-    try {
-      const subtotal = booking.subtotalCents;
-      const prepayment = Math.round(subtotal * 0.5);
-      const remainder = subtotal - prepayment;
-      await sendMail({
-        to: customer.email,
-        subject: `Mietvertrag Wiesenhütte — Buchung ${booking.bookingNumber}`,
-        template: "mietvertrag",
-        bookingId,
+    if (!(await wasMailSent(bookingId, "mietvertrag"))) {
+      try {
+        const subtotal = booking.subtotalCents;
+        const prepayment = Math.round(subtotal * 0.5);
+        const remainder = subtotal - prepayment;
+        await sendMail({
+          to: customer.email,
+          subject: `Mietvertrag Wiesenhütte — Buchung ${booking.bookingNumber}`,
+          template: "mietvertrag",
+          bookingId,
         react: MietvertragEmail({
           bookingNumber: booking.bookingNumber,
           arrival: formatDateLong(booking.arrival),
@@ -240,14 +264,15 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
           }),
         }),
       });
-    } catch (err) {
-      console.error("[webhook] mietvertrag mail failed", err);
+      } catch (err) {
+        console.error("[webhook] mietvertrag mail failed", err);
+      }
     }
 
     // Kurtaxe-Info — separat über Hochsauerland-Portal
     const kurtaxePortalUrl = process.env.KURTAXE_PORTAL_URL ?? "https://service.hochsauerlandkreis.de/kurtaxe";
     const adultsForKurtaxe = booking.adults + booking.members + booking.teachers;
-    if (adultsForKurtaxe > 0) {
+    if (adultsForKurtaxe > 0 && !(await wasMailSent(bookingId, "kurtaxe-info"))) {
       try {
         await sendMail({
           to: customer.email,
@@ -269,7 +294,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     }
 
     const internalTo = process.env.MAIL_INTERNAL_TO;
-    if (internalTo) {
+    if (internalTo && !(await wasMailSent(bookingId, "booking-internal"))) {
       try {
         await sendMail({
           to: internalTo,
