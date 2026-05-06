@@ -30,37 +30,75 @@ const addDaysIso = (iso: string, days: number) => {
   return d.toISOString().slice(0, 10);
 };
 
+type Prefill = {
+  loggedIn: boolean;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  street?: string;
+  zip?: string;
+  city?: string;
+  customerType?: "privat" | "mitglied" | "verein" | "firma";
+  membershipVerified?: boolean;
+};
+
+type RepeatHint = {
+  adults: number;
+  members: number;
+  children: number;
+  pupils: number;
+  teachers: number;
+  soloUse: boolean;
+  arrival: string;
+  departure: string;
+};
+
 type BookingFlowProps = {
   bookedDates: string[];
   cleaningDates: string[];
   wartungDates: string[];
+  prefill?: Prefill;
+  repeatHint?: RepeatHint;
 };
 
 export const BookingFlow = ({
   bookedDates,
   cleaningDates,
   wartungDates,
+  prefill,
+  repeatHint,
 }: BookingFlowProps) => {
   // Internal: union of all unavailable days for the rangeBlocked guard.
   const blockedDates = [...bookedDates, ...cleaningDates, ...wartungDates];
   const [step, setStep] = useState<Step>(0);
-  const [arrival, setArrival] = useState("");
-  const [departure, setDeparture] = useState("");
-  const [persons, setPersons] = useState<Persons>(emptyPersons);
-  const [soloUse, setSoloUse] = useState(false);
+  const [arrival, setArrival] = useState(repeatHint?.arrival ?? "");
+  const [departure, setDeparture] = useState(repeatHint?.departure ?? "");
+  const [persons, setPersons] = useState<Persons>(
+    repeatHint
+      ? {
+          adults: repeatHint.adults,
+          members: repeatHint.members,
+          children: repeatHint.children,
+          pupils: repeatHint.pupils,
+          teachers: repeatHint.teachers,
+        }
+      : emptyPersons
+  );
+  const [soloUse, setSoloUse] = useState(repeatHint?.soloUse ?? false);
   const [purpose, setPurpose] = useState("");
 
   const [customerType, setCustomerType] = useState<"privat" | "mitglied" | "verein" | "firma">(
-    "privat"
+    prefill?.customerType ?? "privat"
   );
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const [firstName, setFirstName] = useState(prefill?.firstName ?? "");
+  const [lastName, setLastName] = useState(prefill?.lastName ?? "");
+  const [email, setEmail] = useState(prefill?.email ?? "");
+  const [phone, setPhone] = useState(prefill?.phone ?? "");
   const [company, setCompany] = useState("");
-  const [street, setStreet] = useState("");
-  const [zip, setZip] = useState("");
-  const [city, setCity] = useState("");
+  const [street, setStreet] = useState(prefill?.street ?? "");
+  const [zip, setZip] = useState(prefill?.zip ?? "");
+  const [city, setCity] = useState(prefill?.city ?? "");
   const [customerMessage, setCustomerMessage] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 

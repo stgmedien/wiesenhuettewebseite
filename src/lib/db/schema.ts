@@ -121,6 +121,9 @@ export const users = pgTable("users", {
   lastLoginAt: timestamp("last_login_at"),
   lastLoginIp: varchar("last_login_ip", { length: 45 }),
 
+  // DSGVO Soft-Delete: Kunde fordert Loeschung an, hard-delete nach Frist (30 Tage)
+  deletedAt: timestamp("deleted_at"),
+
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -176,6 +179,15 @@ export const customers = pgTable(
     membershipVerifiedAt: timestamp("membership_verified_at"),
     membershipVerifiedBy: varchar("membership_verified_by", { length: 255 }),
     membershipRejectedReason: text("membership_rejected_reason"),
+
+    // Loyalty — gecachter Counter, wird beim Setzen auf "abgereist" inkrementiert
+    completedStays: integer("completed_stays").notNull().default(0),
+    loyaltyTier: integer("loyalty_tier").notNull().default(0), // Stufe: 0=keine, 1=>=3 Aufenthalte, 2=>=10
+    loyaltyDiscountIssuedAt: timestamp("loyalty_discount_issued_at"),
+
+    // DSGVO: anonymisiert nach Konto-Loeschung. Buchungen+Rechnungen bleiben erhalten
+    // (10 Jahre handelsrechtliche Aufbewahrungspflicht), aber PII wird ueberschrieben.
+    anonymizedAt: timestamp("anonymized_at"),
 
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
@@ -669,6 +681,41 @@ export const magicLinkTokens = pgTable(
 );
 
 // =============================================================
+// DISCOUNT CODES — Loyalty-Rabatte + Manager-Codes
+// =============================================================
+
+export const discountKindEnum = pgEnum("discount_kind", ["loyalty", "manager", "promo"]);
+
+export const discountCodes = pgTable(
+  "discount_codes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    code: varchar("code", { length: 30 }).notNull().unique(),
+    kind: discountKindEnum("kind").notNull().default("manager"),
+    percentOff: integer("percent_off").notNull().default(0), // 0–100
+    fixedOffCents: integer("fixed_off_cents").notNull().default(0),
+    customerId: uuid("customer_id").references(() => customers.id, { onDelete: "set null" }),
+    issuedReason: varchar("issued_reason", { length: 255 }),
+    minSubtotalCents: integer("min_subtotal_cents").notNull().default(0),
+    validFrom: date("valid_from"),
+    validUntil: date("valid_until"),
+    maxRedemptions: integer("max_redemptions").notNull().default(1),
+    redemptions: integer("redemptions").notNull().default(0),
+    redeemedBookingId: uuid("redeemed_booking_id").references(() => bookings.id, {
+      onDelete: "set null",
+    }),
+    redeemedAt: timestamp("redeemed_at"),
+    active: boolean("active").notNull().default(true),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    codeIdx: index("discount_codes_code_idx").on(t.code),
+    customerIdx: index("discount_codes_customer_idx").on(t.customerId),
+  })
+);
+
+// =============================================================
 // PERMISSIONS — granulare Rollen-Capabilities
 // =============================================================
 
@@ -779,3 +826,5 @@ export type MagicLinkToken = typeof magicLinkTokens.$inferSelect;
 export type NewMagicLinkToken = typeof magicLinkTokens.$inferInsert;
 export type Permission = typeof permissions.$inferSelect;
 export type NewPermission = typeof permissions.$inferInsert;
+export type DiscountCode = typeof discountCodes.$inferSelect;
+export type NewDiscountCode = typeof discountCodes.$inferInsert;

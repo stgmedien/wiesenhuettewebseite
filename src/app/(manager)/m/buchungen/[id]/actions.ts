@@ -41,6 +41,16 @@ export async function setBookingStatus(bookingId: string, status: string) {
     bookingId,
   });
 
+  // Loyalty: Wechsel auf 'abgereist' triggert ggf. Treue-Rabatt-Code.
+  if (status === "abgereist" && b.status !== "abgereist" && b.customerId) {
+    try {
+      const { recordCompletedStayAndMaybeIssueDiscount } = await import("@/lib/loyalty");
+      await recordCompletedStayAndMaybeIssueDiscount(b.customerId);
+    } catch (err) {
+      console.error("[loyalty] failed:", err);
+    }
+  }
+
   revalidatePath(`/m/buchungen/${bookingId}`);
   revalidatePath("/m/buchungen");
   revalidatePath("/m/dashboard");

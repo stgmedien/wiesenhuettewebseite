@@ -7,6 +7,11 @@ import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
 import { signIn } from "@/lib/auth";
+import { sendMail } from "@/lib/mail/send";
+import WelcomeEmail from "@/lib/mail/templates/welcome";
+
+const baseUrl = () =>
+  process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.xn--wiesenhtte-geb.com";
 
 const signupSchema = z
   .object({
@@ -90,6 +95,23 @@ export async function signupAction(formData: FormData): Promise<SignupResult | v
       ? "Kunden-Konto registriert (Mitgliedschaft beantragt — Verifizierung steht aus)"
       : "Kunden-Konto registriert",
   });
+
+  // Welcome-Mail (best-effort, blockt nicht den Sign-up bei Mail-Fehler)
+  try {
+    await sendMail({
+      to: email,
+      subject: "Willkommen bei der Wiesenhütte",
+      template: "welcome",
+      react: WelcomeEmail({
+        firstName: data.firstName,
+        email,
+        membershipPending: isClaimingMembership,
+        loginUrl: `${baseUrl()}/konto`,
+      }),
+    });
+  } catch (err) {
+    console.error("[welcome-mail] failed (non-blocking):", err);
+  }
 
   // Auto-Login per Credentials-Provider
   try {

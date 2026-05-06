@@ -1,0 +1,87 @@
+import { NextResponse } from "next/server";
+import { db } from "@/lib/db";
+import { users, customers, magicLinkTokens, activityLog } from "@/lib/db/schema";
+import { eq, and, lt, isNotNull } from "drizzle-orm";
+import { cleanupExpiredMagicLinkTokens } from "@/lib/magic-link";
+
+export const dynamic = "force-dynamic";
+export const maxDuration = 60;
+
+const SOFT_DELETE_DAYS = 30;
+const ANON_PREFIX = "[Anonymisiert nach DSGVO-Antrag]";
+
+/**
+ * Vercel-Cron: laeuft taeglich.
+ *  - Magic-Link-Tokens > 24h alt loeschen
+ *  - Soft-deleted Users (deletedAt > 30 Tage) anonymisieren
+ *  - Linked Customer-Records anonymisieren (PII raus, aber Buchungen bleiben)
+ *
+ * Aufruf-Schutz: Vercel sendet "x-vercel-cron-signature" beim Cron-Trigger.
+ * Wir akzeptieren auch einen einfachen Bearer-Token (CRON_SECRET) fuer manuelle Tests.
+ */
+export async function GET(req: Request) {
+  // Aufruf-Schutz
+  const auth = req.headers.get("authorization") || "";
+  const isVercelCron = !!req.headers.get("x-vercel-cron-signature");
+  const cronSecret = process.env.CRON_SECRET;
+  if (!isVercelCron && cronSecret && auth !== `Bearer ${cronSecret}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const stats = {
+    magicLinksDeleted: 0,
+    usersAnonymized: 0,
+    customersAnonymized: 0,
+  };
+
+  // 1) Magic-Link-Tokens aufraeumen
+  await cleanupExpiredMagicLinkTokens();
+  stats.magicLinksDeleted = -1; // wir kennen den Count nicht (Drizzle delete liefert keine rowCount auf postgres-js zuverlaessig)
+
+  // 2) Soft-deleted Users finden
+  const cutoff = new Date(Date.now() - SOFT_DELETE_DAYS * 24 * 60 * 60 * 1000);
+  const toAnonymize = await db
+    .select()
+    .from(users)
+    .where(and(isNotNull(users.deletedAt), lt(users.deletedAt, cutoff)));
+
+  for (const u of toAnonymize) {
+    // Customer-Record anonymisieren (Buchungen bleiben mit anonymisiertem Namen)
+    const linked = await db.select().from(customers).where(eq(customers.userId, u.id));
+    for (const c of linked) {
+      await db
+        .update(customers)
+        .set({
+          firstName: ANON_PREFIX,
+          lastName: "",
+          email: `anon+${c.id}@wiesenhuette.invalid`,
+          phone: null,
+          street: null,
+          zip: null,
+          city: null,
+          notes: null,
+          tags: [],
+          memberId: null,
+          membershipStatus: "none",
+          membershipVerifiedAt: null,
+          membershipVerifiedBy: null,
+          membershipRejectedReason: null,
+          userId: null,
+          anonymizedAt: new Date(),
+        })
+        .where(eq(customers.id, c.id));
+      stats.customersAnonymized++;
+    }
+
+    // User selbst hard-deleten (keine Buchungen direkt am User-Record)
+    await db.delete(users).where(eq(users.id, u.id));
+    stats.usersAnonymized++;
+
+    await db.insert(activityLog).values({
+      who: "System (DSGVO-Cron)",
+      what: `Konto endgueltig anonymisiert (User-ID ${u.id}) — 30-Tage-Frist abgelaufen`,
+    });
+  }
+
+  return NextResponse.json({ ok: true, stats });
+}

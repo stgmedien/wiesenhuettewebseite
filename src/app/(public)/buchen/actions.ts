@@ -4,6 +4,7 @@ import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { bookings, customers, payments, activityLog } from "@/lib/db/schema";
+import { auth } from "@/lib/auth";
 import {
   calculatePrice,
   validateBookingInput,
@@ -95,12 +96,58 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
 
   const bookingNumber = generateBookingNumber();
 
+  // Customer-Resolution:
+  //  - Eingeloggter Kunde -> sein Customer-Record (linked via userId), Email aus Session.
+  //    Mitgliedschafts-Status NICHT durch Formular ueberschreiben (manueller Workflow).
+  //  - Nicht eingeloggt -> per Email finden oder neu anlegen.
   let customerId: string;
-  {
+  const session = await auth();
+  const sessionUserId = (session?.user as { id?: string } | undefined)?.id;
+  const sessionEmail = session?.user?.email?.toLowerCase();
+  const effectiveEmail = sessionEmail ?? data.email.toLowerCase();
+
+  if (sessionUserId) {
+    const linked = await db
+      .select()
+      .from(customers)
+      .where(eq(customers.userId, sessionUserId))
+      .limit(1);
+    if (linked[0]) {
+      customerId = linked[0].id;
+      // Optional: Profil-Felder mit Form-Daten anreichern, falls leer
+      const updates: Partial<typeof customers.$inferInsert> = {};
+      if (!linked[0].phone && data.phone) updates.phone = data.phone;
+      if (!linked[0].street && data.street) updates.street = data.street;
+      if (!linked[0].zip && data.zip) updates.zip = data.zip;
+      if (!linked[0].city && data.city) updates.city = data.city;
+      if (!linked[0].company && data.company) updates.company = data.company;
+      if (Object.keys(updates).length > 0) {
+        await db.update(customers).set(updates).where(eq(customers.id, customerId));
+      }
+    } else {
+      // User existiert, aber noch kein Customer-Record (z.B. Magic-Link-Login ohne Sign-up)
+      const inserted = await db
+        .insert(customers)
+        .values({
+          userId: sessionUserId,
+          type: data.customerType === "mitglied" ? "privat" : data.customerType,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: effectiveEmail,
+          phone: data.phone ?? null,
+          company: data.company ?? null,
+          street: data.street ?? null,
+          zip: data.zip ?? null,
+          city: data.city ?? null,
+        })
+        .returning({ id: customers.id });
+      customerId = inserted[0].id;
+    }
+  } else {
     const found = await db
       .select()
       .from(customers)
-      .where(eq(customers.email, data.email.toLowerCase()))
+      .where(eq(customers.email, effectiveEmail))
       .limit(1);
     if (found[0]) {
       customerId = found[0].id;
@@ -111,7 +158,7 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
           type: data.customerType,
           firstName: data.firstName,
           lastName: data.lastName,
-          email: data.email.toLowerCase(),
+          email: effectiveEmail,
           phone: data.phone ?? null,
           company: data.company ?? null,
           street: data.street ?? null,
@@ -159,11 +206,11 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
   const bookingId = inserted[0].id;
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
-  const session = await stripe.checkout.sessions.create({
+  const checkoutSession = await stripe.checkout.sessions.create({
     mode: "payment",
     payment_method_types: ["card"],
     locale: "de",
-    customer_email: data.email,
+    customer_email: effectiveEmail,
     billing_address_collection: "auto",
     line_items: [
       {
@@ -200,7 +247,7 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
 
   await db
     .update(bookings)
-    .set({ stripeSessionId: session.id, updatedAt: new Date() })
+    .set({ stripeSessionId: checkoutSession.id, updatedAt: new Date() })
     .where(eq(bookings.id, bookingId));
 
   // Open payment rows: Anzahlung + Kaution (jetzt fällig), Restzahlung (offen)
@@ -234,9 +281,56 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
     bookingId,
   });
 
-  if (!session.url) {
+  if (!checkoutSession.url) {
     return { ok: false, error: "Stripe-Checkout konnte nicht erstellt werden." };
   }
 
-  return { ok: true, checkoutUrl: session.url, bookingNumber };
+  return { ok: true, checkoutUrl: checkoutSession.url, bookingNumber };
+}
+
+// =============================================================
+// PREFILL — fuer eingeloggte Kunden, damit Buchen-Form vorausgefuellt wird
+// =============================================================
+
+export type BookingPrefill = {
+  loggedIn: boolean;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  street?: string;
+  zip?: string;
+  city?: string;
+  customerType?: "privat" | "mitglied" | "verein" | "firma";
+  membershipVerified?: boolean;
+};
+
+export async function getBookingPrefill(): Promise<BookingPrefill> {
+  const session = await auth();
+  if (!session?.user) return { loggedIn: false };
+
+  const userId = (session.user as { id?: string }).id;
+  if (!userId) return { loggedIn: false };
+
+  const linked = await db.select().from(customers).where(eq(customers.userId, userId)).limit(1);
+  const c = linked[0];
+  if (!c) {
+    return {
+      loggedIn: true,
+      email: session.user.email ?? undefined,
+    };
+  }
+
+  return {
+    loggedIn: true,
+    firstName: c.firstName,
+    lastName: c.lastName,
+    email: c.email,
+    phone: c.phone ?? undefined,
+    street: c.street ?? undefined,
+    zip: c.zip ?? undefined,
+    city: c.city ?? undefined,
+    customerType: c.membershipStatus === "verified" ? "mitglied" : c.type,
+    membershipVerified: c.membershipStatus === "verified",
+  };
 }

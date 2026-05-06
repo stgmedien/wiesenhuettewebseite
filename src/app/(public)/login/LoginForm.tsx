@@ -130,6 +130,18 @@ export function LoginForm() {
           >
             {pending ? "Anmelden …" : "Anmelden"}
           </button>
+          <p className="text-center text-sm">
+            <button
+              type="button"
+              onClick={() => setMode("magic")}
+              className="text-[var(--color-wh-forest)] underline hover:opacity-70"
+            >
+              Passwort vergessen?
+            </button>{" "}
+            <span className="text-[var(--color-wh-charcoal)]/60">
+              Wir schicken Dir einen Login-Link, von dem aus Du das Passwort neu setzen kannst.
+            </span>
+          </p>
         </form>
       )}
 
