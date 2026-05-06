@@ -76,8 +76,8 @@ export default async function BuchenPage({ searchParams }: Props) {
           Preise und Pauschalen werden live berechnet.
         </p>
         {prefill.loggedIn && (
-          <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--color-wh-cream)] border border-[var(--color-wh-stone)]/40 px-4 py-2 text-sm">
-            <span className="text-[var(--color-wh-forest)]">●</span>
+          <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)]/40 px-4 py-2 text-sm">
+            <span className="text-[var(--color-wh-deep-green)]">●</span>
             Eingeloggt als <strong>{prefill.email}</strong>
             {prefill.membershipVerified && (
               <span className="ml-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs">

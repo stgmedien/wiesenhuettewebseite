@@ -62,23 +62,23 @@ export default async function BuchungDetailPage({ params }: Props) {
     <div className="container max-w-3xl mx-auto px-6 py-12">
       <Link
         href="/konto"
-        className="text-sm text-[var(--color-wh-forest)] hover:underline mb-4 inline-block"
+        className="text-sm text-[var(--color-wh-deep-green)] hover:underline mb-4 inline-block"
       >
         ← Zurück zum Konto
       </Link>
 
       <div className="flex items-start justify-between gap-4 mb-8">
         <div>
-          <p className="eyebrow text-[var(--color-wh-forest)] uppercase tracking-wider text-xs font-semibold">
+          <p className="eyebrow text-[var(--color-wh-deep-green)] uppercase tracking-wider text-xs font-semibold">
             Buchung
           </p>
-          <h1 className="font-heading text-3xl text-[var(--color-wh-forest)] font-mono">
+          <h1 className="font-heading text-3xl text-[var(--color-wh-deep-green)] font-mono">
             {booking.bookingNumber}
           </h1>
-          <p className="text-[var(--color-wh-charcoal)]/80 mt-1">
+          <p className="text-[var(--color-wh-black)]/80 mt-1">
             {formatDateLong(booking.arrival)} – {formatDateLong(booking.departure)}
           </p>
-          <p className="text-sm text-[var(--color-wh-charcoal)]/60">
+          <p className="text-sm text-[var(--color-wh-black)]/60">
             {booking.persons} Personen · {booking.nights} Nächte
             {booking.purpose && ` · ${booking.purpose}`}
           </p>
@@ -87,8 +87,8 @@ export default async function BuchungDetailPage({ params }: Props) {
       </div>
 
       {/* Pricing-Aufschluesselung */}
-      <section className="rounded-2xl bg-white border border-[var(--color-wh-stone)]/40 p-6 mb-6">
-        <h2 className="font-heading text-xl text-[var(--color-wh-forest)] mb-4">
+      <section className="rounded-2xl bg-white border border-[var(--color-wh-winter-grey)]/40 p-6 mb-6">
+        <h2 className="font-heading text-xl text-[var(--color-wh-deep-green)] mb-4">
           Preisübersicht
         </h2>
         <dl className="space-y-2 text-sm">
@@ -99,21 +99,21 @@ export default async function BuchungDetailPage({ params }: Props) {
             <Row label="Aufschlag Allein-/Exklusivnutzung" value={booking.soloSurchargeCents} />
           )}
           {booking.extrasCents > 0 && <Row label="Extras" value={booking.extrasCents} />}
-          <div className="border-t border-[var(--color-wh-stone)]/30 pt-2 mt-2">
+          <div className="border-t border-[var(--color-wh-winter-grey)]/30 pt-2 mt-2">
             <Row label="Zwischensumme" value={booking.subtotalCents} bold />
             <Row label="Kaution (separat)" value={booking.depositCents} muted />
           </div>
-          <div className="border-t border-[var(--color-wh-stone)]/30 pt-2 mt-2">
+          <div className="border-t border-[var(--color-wh-winter-grey)]/30 pt-2 mt-2">
             <Row label="Bisher bezahlt" value={booking.paidCents} muted />
           </div>
         </dl>
       </section>
 
       {/* Zahlungen */}
-      <section className="rounded-2xl bg-white border border-[var(--color-wh-stone)]/40 p-6 mb-6">
-        <h2 className="font-heading text-xl text-[var(--color-wh-forest)] mb-4">Zahlungen</h2>
+      <section className="rounded-2xl bg-white border border-[var(--color-wh-winter-grey)]/40 p-6 mb-6">
+        <h2 className="font-heading text-xl text-[var(--color-wh-deep-green)] mb-4">Zahlungen</h2>
         {bookingPayments.length === 0 ? (
-          <p className="text-sm text-[var(--color-wh-charcoal)]/60">
+          <p className="text-sm text-[var(--color-wh-black)]/60">
             Noch keine Zahlungen erfasst.
           </p>
         ) : (
@@ -121,11 +121,11 @@ export default async function BuchungDetailPage({ params }: Props) {
             {bookingPayments.map((p) => (
               <li
                 key={p.id}
-                className="flex items-center justify-between border-b border-[var(--color-wh-stone)]/20 pb-2 last:border-0"
+                className="flex items-center justify-between border-b border-[var(--color-wh-winter-grey)]/20 pb-2 last:border-0"
               >
                 <span>
                   <span className="font-medium capitalize">{p.kind}</span>
-                  <span className="ml-2 text-xs text-[var(--color-wh-charcoal)]/60">
+                  <span className="ml-2 text-xs text-[var(--color-wh-black)]/60">
                     {p.method ?? "—"}
                     {p.receivedAt && ` · ${new Date(p.receivedAt).toLocaleDateString("de-DE")}`}
                   </span>
@@ -142,8 +142,8 @@ export default async function BuchungDetailPage({ params }: Props) {
 
       {/* Kautions-Countdown */}
       {isPostStay && booking.depositCents > 0 && booking.status !== "storniert" && (
-        <section className="rounded-2xl bg-[var(--color-wh-cream)] border-l-4 border-[var(--color-wh-forest)] p-6 mb-6">
-          <h2 className="font-heading text-lg text-[var(--color-wh-forest)] mb-2">
+        <section className="rounded-2xl bg-[var(--color-wh-beige)] border-l-4 border-[var(--color-wh-deep-green)] p-6 mb-6">
+          <h2 className="font-heading text-lg text-[var(--color-wh-deep-green)] mb-2">
             Kautions-Erstattung
           </h2>
           {booking.depositHold ? (
@@ -168,19 +168,19 @@ export default async function BuchungDetailPage({ params }: Props) {
       )}
 
       {/* Aktionen */}
-      <section className="rounded-2xl bg-white border border-[var(--color-wh-stone)]/40 p-6 mb-6">
-        <h2 className="font-heading text-xl text-[var(--color-wh-forest)] mb-4">Aktionen</h2>
+      <section className="rounded-2xl bg-white border border-[var(--color-wh-winter-grey)]/40 p-6 mb-6">
+        <h2 className="font-heading text-xl text-[var(--color-wh-deep-green)] mb-4">Aktionen</h2>
         <div className="flex flex-wrap gap-3">
           <Link
             href={`/konto/buchungen/${booking.id}/rechnung`}
-            className="rounded-full bg-[var(--color-wh-forest)] text-white px-5 py-2.5 text-sm font-semibold no-underline hover:opacity-90"
+            className="rounded-full bg-[var(--color-wh-deep-green)] text-white px-5 py-2.5 text-sm font-semibold no-underline hover:opacity-90"
           >
             Quittung anzeigen
           </Link>
           {booking.status === "abgereist" && (
             <Link
               href={`/buchen?repeat=${booking.id}`}
-              className="rounded-full border border-[var(--color-wh-forest)] text-[var(--color-wh-forest)] px-5 py-2.5 text-sm font-semibold no-underline hover:bg-[var(--color-wh-forest)] hover:text-white transition"
+              className="rounded-full border border-[var(--color-wh-deep-green)] text-[var(--color-wh-deep-green)] px-5 py-2.5 text-sm font-semibold no-underline hover:bg-[var(--color-wh-deep-green)] hover:text-white transition"
             >
               Erneut buchen
             </Link>
@@ -196,7 +196,7 @@ export default async function BuchungDetailPage({ params }: Props) {
           )}
         </div>
         {canCancel && (
-          <p className="text-xs text-[var(--color-wh-charcoal)]/60 mt-3">
+          <p className="text-xs text-[var(--color-wh-black)]/60 mt-3">
             Bei Stornierung jetzt: <strong>{fee.percent}%</strong> Storno-Gebühr ={" "}
             <strong>{formatEuro(fee.feeCents)}</strong>. Erstattung:{" "}
             <strong>{formatEuro(booking.subtotalCents - fee.feeCents)}</strong> + volle Kaution.
@@ -218,7 +218,7 @@ function Row({
   bold?: boolean;
   muted?: boolean;
 }) {
-  const cls = bold ? "font-bold" : muted ? "text-[var(--color-wh-charcoal)]/60" : "";
+  const cls = bold ? "font-bold" : muted ? "text-[var(--color-wh-black)]/60" : "";
   return (
     <div className={`flex justify-between ${cls}`}>
       <dt>{label}</dt>
@@ -254,5 +254,5 @@ function paymentStatusClass(s: string): string {
   if (s === "erhalten") return "text-emerald-700 text-xs font-medium";
   if (s === "fehlgeschlagen") return "text-red-600 text-xs font-medium";
   if (s === "erstattet") return "text-blue-600 text-xs font-medium";
-  return "text-[var(--color-wh-charcoal)]/60 text-xs";
+  return "text-[var(--color-wh-black)]/60 text-xs";
 }

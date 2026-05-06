@@ -58,10 +58,10 @@ export default async function QuittungPage({ params }: Props) {
         }
       `}</style>
 
-      <div className="no-print bg-[var(--color-wh-cream)] py-3 px-6 flex items-center justify-between sticky top-0 z-10 border-b border-[var(--color-wh-stone)]/40">
+      <div className="no-print bg-[var(--color-wh-beige)] py-3 px-6 flex items-center justify-between sticky top-0 z-10 border-b border-[var(--color-wh-winter-grey)]/40">
         <a
           href={`/konto/buchungen/${booking.id}`}
-          className="text-sm text-[var(--color-wh-forest)] hover:underline"
+          className="text-sm text-[var(--color-wh-deep-green)] hover:underline"
         >
           ← Zurück
         </a>
@@ -70,9 +70,9 @@ export default async function QuittungPage({ params }: Props) {
 
       <div className="max-w-[760px] mx-auto px-12 py-12 text-[14px] text-[#111] leading-relaxed font-serif">
         {/* Kopf */}
-        <header className="flex items-start justify-between mb-12 pb-6 border-b-2 border-[var(--color-wh-forest)]">
+        <header className="flex items-start justify-between mb-12 pb-6 border-b-2 border-[var(--color-wh-deep-green)]">
           <div>
-            <h1 className="text-2xl font-bold text-[var(--color-wh-forest)] mb-1">
+            <h1 className="text-2xl font-bold text-[var(--color-wh-deep-green)] mb-1">
               Wiesenhütte
             </h1>
             <p className="text-xs text-[#555]">Skifreunde Gütersloh e.V.</p>
@@ -105,7 +105,7 @@ export default async function QuittungPage({ params }: Props) {
         </section>
 
         {/* Aufenthalts-Daten */}
-        <section className="mb-8 grid grid-cols-3 gap-4 bg-[var(--color-wh-cream)] p-5 rounded">
+        <section className="mb-8 grid grid-cols-3 gap-4 bg-[var(--color-wh-beige)] p-5 rounded">
           <div>
             <p className="text-xs uppercase tracking-wider text-[#555]">Anreise</p>
             <p className="font-bold">{formatDateLong(booking.arrival)}</p>

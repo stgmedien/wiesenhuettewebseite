@@ -51,10 +51,10 @@ export function CancelBookingButton({
             className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="font-heading text-xl text-[var(--color-wh-forest)] mb-2">
+            <h3 className="font-heading text-xl text-[var(--color-wh-deep-green)] mb-2">
               Buchung stornieren?
             </h3>
-            <p className="text-sm text-[var(--color-wh-charcoal)] mb-4">
+            <p className="text-sm text-[var(--color-wh-black)] mb-4">
               Buchung <strong>{bookingNumber}</strong> wird storniert. Bei Stornierung jetzt fällt
               eine Gebühr von{" "}
               <strong>
@@ -70,7 +70,7 @@ export function CancelBookingButton({
                 name="reason"
                 rows={3}
                 placeholder="Grund (optional, hilft uns)"
-                className="w-full rounded-lg border border-[var(--color-wh-stone)] px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-[var(--color-wh-winter-grey)] px-3 py-2 text-sm"
               />
               {error && (
                 <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-800">
@@ -82,7 +82,7 @@ export function CancelBookingButton({
                   type="button"
                   onClick={() => setOpen(false)}
                   disabled={pending}
-                  className="px-4 py-2 rounded-full text-sm border border-[var(--color-wh-stone)]"
+                  className="px-4 py-2 rounded-full text-sm border border-[var(--color-wh-winter-grey)]"
                 >
                   Doch nicht
                 </button>

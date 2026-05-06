@@ -24,7 +24,7 @@ type User = {
 };
 
 const inputBase =
-  "w-full rounded-lg border border-[var(--color-wh-stone)] px-3 py-2 focus:border-[var(--color-wh-forest)] focus:outline-none";
+  "w-full rounded-lg border border-[var(--color-wh-winter-grey)] px-3 py-2 focus:border-[var(--color-wh-deep-green)] focus:outline-none";
 
 export function ProfileClient({ user, customer }: { user: User; customer: Customer | null }) {
   return (
@@ -47,10 +47,10 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-2xl bg-white border border-[var(--color-wh-stone)]/40 p-6">
-      <h2 className="font-heading text-xl text-[var(--color-wh-forest)] mb-1">{title}</h2>
+    <section className="rounded-2xl bg-white border border-[var(--color-wh-winter-grey)]/40 p-6">
+      <h2 className="font-heading text-xl text-[var(--color-wh-deep-green)] mb-1">{title}</h2>
       {description && (
-        <p className="text-sm text-[var(--color-wh-charcoal)]/70 mb-4">{description}</p>
+        <p className="text-sm text-[var(--color-wh-black)]/70 mb-4">{description}</p>
       )}
       {children}
     </section>
@@ -120,7 +120,7 @@ function ProfileSection({ user, customer }: { user: User; customer: Customer | n
           <button
             type="submit"
             disabled={pending}
-            className="rounded-full bg-[var(--color-wh-forest)] text-white px-5 py-2.5 text-sm font-semibold disabled:opacity-50"
+            className="rounded-full bg-[var(--color-wh-deep-green)] text-white px-5 py-2.5 text-sm font-semibold disabled:opacity-50"
           >
             Speichern
           </button>
@@ -142,7 +142,7 @@ function PasswordSection({ hasPassword }: { hasPassword: boolean }) {
         title="Passwort"
         description="Du hast aktuell kein Passwort gesetzt — Du loggst Dich nur per Magic-Link ein."
       >
-        <p className="text-sm text-[var(--color-wh-charcoal)]/70">
+        <p className="text-sm text-[var(--color-wh-black)]/70">
           Wenn Du ein Passwort setzen willst, klick beim nächsten Login auf "Passwort vergessen" —
           dann bekommst Du einen Link zum Setzen eines neuen Passworts.
         </p>
@@ -200,7 +200,7 @@ function PasswordSection({ hasPassword }: { hasPassword: boolean }) {
           <button
             type="submit"
             disabled={pending}
-            className="rounded-full bg-[var(--color-wh-forest)] text-white px-5 py-2.5 text-sm font-semibold disabled:opacity-50"
+            className="rounded-full bg-[var(--color-wh-deep-green)] text-white px-5 py-2.5 text-sm font-semibold disabled:opacity-50"
           >
             Ändern
           </button>
@@ -254,7 +254,7 @@ function EmailSection({
           <button
             type="submit"
             disabled={pending || !hasPassword}
-            className="rounded-full bg-[var(--color-wh-forest)] text-white px-5 py-2.5 text-sm font-semibold disabled:opacity-50"
+            className="rounded-full bg-[var(--color-wh-deep-green)] text-white px-5 py-2.5 text-sm font-semibold disabled:opacity-50"
             title={!hasPassword ? "Erst Passwort setzen" : ""}
           >
             Bestätigung anfordern
@@ -311,7 +311,7 @@ function DeleteSection() {
               type="button"
               onClick={() => setOpen(false)}
               disabled={pending}
-              className="rounded-full border border-[var(--color-wh-stone)] px-4 py-2 text-sm"
+              className="rounded-full border border-[var(--color-wh-winter-grey)] px-4 py-2 text-sm"
             >
               Doch nicht
             </button>

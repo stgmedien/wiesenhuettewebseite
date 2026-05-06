@@ -16,7 +16,7 @@ export function AutoSubmitMagic({ token }: { token: string }) {
       <noscript>
         <button
           type="submit"
-          className="rounded-full bg-[var(--color-wh-forest)] text-white px-6 py-3 font-semibold"
+          className="rounded-full bg-[var(--color-wh-deep-green)] text-white px-6 py-3 font-semibold"
         >
           Anmeldung abschließen
         </button>

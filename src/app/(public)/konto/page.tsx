@@ -60,9 +60,9 @@ export default async function KontoPage({ searchParams }: Props) {
   return (
     <div className="container max-w-5xl mx-auto px-6 py-12">
       {welcome && (
-        <div className="mb-6 rounded-2xl bg-[var(--color-wh-cream)] border-l-4 border-[var(--color-wh-forest)] p-5">
-          <p className="font-semibold text-[var(--color-wh-forest)]">Willkommen!</p>
-          <p className="text-sm text-[var(--color-wh-charcoal)] mt-1">
+        <div className="mb-6 rounded-2xl bg-[var(--color-wh-beige)] border-l-4 border-[var(--color-wh-deep-green)] p-5">
+          <p className="font-semibold text-[var(--color-wh-deep-green)]">Willkommen!</p>
+          <p className="text-sm text-[var(--color-wh-black)] mt-1">
             Du bist eingeloggt. Hier siehst Du alle Deine Buchungen, Anfragen und das aktuelle
             Wetter im Hochsauerland.
           </p>
@@ -73,13 +73,13 @@ export default async function KontoPage({ searchParams }: Props) {
         <div>
           <div className="flex items-start justify-between gap-4 mb-8">
             <div>
-              <p className="eyebrow text-[var(--color-wh-forest)] uppercase tracking-wider text-xs font-semibold">
+              <p className="eyebrow text-[var(--color-wh-deep-green)] uppercase tracking-wider text-xs font-semibold">
                 Mein Konto
               </p>
-              <h1 className="font-heading text-4xl text-[var(--color-wh-forest)]">
+              <h1 className="font-heading text-4xl text-[var(--color-wh-deep-green)]">
                 {customer ? `Hallo ${customer.firstName}.` : "Hallo."}
               </h1>
-              <p className="text-sm text-[var(--color-wh-charcoal)]/70 mt-1">{email}</p>
+              <p className="text-sm text-[var(--color-wh-black)]/70 mt-1">{email}</p>
               <div className="flex flex-wrap gap-2 mt-2">
                 {membershipBadge}
                 {customer && customer.completedStays > 0 && (
@@ -90,19 +90,19 @@ export default async function KontoPage({ searchParams }: Props) {
             <div className="flex items-center gap-3 text-sm">
               <Link
                 href="/konto/profil"
-                className="text-[var(--color-wh-forest)] underline hover:opacity-70"
+                className="text-[var(--color-wh-deep-green)] underline hover:opacity-70"
               >
                 Profil
               </Link>
               <Link
                 href="/konto/anfragen"
-                className="text-[var(--color-wh-forest)] underline hover:opacity-70"
+                className="text-[var(--color-wh-deep-green)] underline hover:opacity-70"
               >
                 Anfragen
               </Link>
               <a
                 href="/api/account/export"
-                className="text-[var(--color-wh-forest)] underline hover:opacity-70"
+                className="text-[var(--color-wh-deep-green)] underline hover:opacity-70"
                 title="Alle Deine Daten als ZIP exportieren (DSGVO)"
               >
                 Daten-Export
@@ -115,7 +115,7 @@ export default async function KontoPage({ searchParams }: Props) {
               >
                 <button
                   type="submit"
-                  className="text-[var(--color-wh-forest)] underline hover:opacity-70"
+                  className="text-[var(--color-wh-deep-green)] underline hover:opacity-70"
                 >
                   Abmelden
                 </button>
@@ -149,15 +149,15 @@ export default async function KontoPage({ searchParams }: Props) {
           )}
 
           <section className="space-y-4">
-            <h2 className="font-heading text-2xl text-[var(--color-wh-forest)]">
+            <h2 className="font-heading text-2xl text-[var(--color-wh-deep-green)]">
               Deine Buchungen
             </h2>
             {myBookings.length === 0 ? (
-              <div className="rounded-2xl bg-white border border-[var(--color-wh-stone)]/50 p-6 text-sm text-[var(--color-wh-charcoal)]/70">
+              <div className="rounded-2xl bg-white border border-[var(--color-wh-winter-grey)]/50 p-6 text-sm text-[var(--color-wh-black)]/70">
                 Noch keine Buchungen.{" "}
                 <Link
                   href="/buchen"
-                  className="text-[var(--color-wh-forest)] underline font-medium"
+                  className="text-[var(--color-wh-deep-green)] underline font-medium"
                 >
                   Jetzt buchen →
                 </Link>
@@ -168,23 +168,23 @@ export default async function KontoPage({ searchParams }: Props) {
                   <li key={b.id}>
                     <Link
                       href={`/konto/buchungen/${b.id}`}
-                      className="block rounded-2xl bg-white border border-[var(--color-wh-stone)]/50 p-5 no-underline hover:border-[var(--color-wh-forest)] transition"
+                      className="block rounded-2xl bg-white border border-[var(--color-wh-winter-grey)]/50 p-5 no-underline hover:border-[var(--color-wh-deep-green)] transition"
                     >
                       <div className="flex items-start justify-between gap-4">
                         <div>
-                          <p className="text-xs text-[var(--color-wh-charcoal)]/60 font-mono">
+                          <p className="text-xs text-[var(--color-wh-black)]/60 font-mono">
                             {b.bookingNumber}
                           </p>
-                          <p className="font-heading text-lg text-[var(--color-wh-forest)]">
+                          <p className="font-heading text-lg text-[var(--color-wh-deep-green)]">
                             {formatDateLong(b.arrival)} – {formatDateLong(b.departure)}
                           </p>
-                          <p className="text-sm text-[var(--color-wh-charcoal)]/80">
+                          <p className="text-sm text-[var(--color-wh-black)]/80">
                             {b.persons} Personen · {b.nights} Nächte
                           </p>
                         </div>
                         <div className="text-right">
                           <span className={statusPill(b.status)}>{statusLabel(b.status)}</span>
-                          <p className="text-sm font-mono text-[var(--color-wh-forest)] mt-2">
+                          <p className="text-sm font-mono text-[var(--color-wh-deep-green)] mt-2">
                             {formatEuro(b.totalCents)}
                           </p>
                         </div>
@@ -199,28 +199,28 @@ export default async function KontoPage({ searchParams }: Props) {
 
         <aside className="space-y-4">
           <WeatherWidget />
-          <div className="rounded-2xl bg-white border border-[var(--color-wh-stone)]/50 p-5">
-            <p className="font-heading text-lg text-[var(--color-wh-forest)] mb-2">
+          <div className="rounded-2xl bg-white border border-[var(--color-wh-winter-grey)]/50 p-5">
+            <p className="font-heading text-lg text-[var(--color-wh-deep-green)] mb-2">
               Schnell-Aktionen
             </p>
             <ul className="space-y-1 text-sm">
               <li>
-                <Link href="/buchen" className="text-[var(--color-wh-forest)] underline">
+                <Link href="/buchen" className="text-[var(--color-wh-deep-green)] underline">
                   Neue Buchung anlegen
                 </Link>
               </li>
               <li>
-                <Link href="/konto/anfragen" className="text-[var(--color-wh-forest)] underline">
+                <Link href="/konto/anfragen" className="text-[var(--color-wh-deep-green)] underline">
                   Meine Anfragen
                 </Link>
               </li>
               <li>
-                <Link href="/konto/profil" className="text-[var(--color-wh-forest)] underline">
+                <Link href="/konto/profil" className="text-[var(--color-wh-deep-green)] underline">
                   Profil bearbeiten
                 </Link>
               </li>
               <li>
-                <Link href="/kontakt" className="text-[var(--color-wh-forest)] underline">
+                <Link href="/kontakt" className="text-[var(--color-wh-deep-green)] underline">
                   Wirt kontaktieren
                 </Link>
               </li>
@@ -244,7 +244,7 @@ function LoyaltyBadge({ stays, tier }: { stays: number; tier: number }) {
       ? "bg-amber-50 border-amber-300 text-amber-900"
       : tier >= 1
         ? "bg-emerald-50 border-emerald-300 text-emerald-900"
-        : "bg-[var(--color-wh-cream)] border-[var(--color-wh-stone)]/40 text-[var(--color-wh-charcoal)]";
+        : "bg-[var(--color-wh-beige)] border-[var(--color-wh-winter-grey)]/40 text-[var(--color-wh-black)]";
   return (
     <span className={`px-3 py-1 rounded-full border text-xs font-medium ${cls}`}>{label}</span>
   );

@@ -3,8 +3,11 @@
 import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { bookings, customers, payments, activityLog } from "@/lib/db/schema";
+import { bookings, customers, payments, activityLog, users } from "@/lib/db/schema";
 import { auth } from "@/lib/auth";
+import { createMagicLinkToken } from "@/lib/magic-link";
+import { sendMail } from "@/lib/mail/send";
+import WelcomeEmail from "@/lib/mail/templates/welcome";
 import {
   calculatePrice,
   validateBookingInput,
@@ -61,7 +64,43 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
     };
   }
   const data = parsed.data;
-  const persons: Persons = data.persons;
+  const persons: Persons = { ...data.persons };
+
+  // ---------------------------------------------------------------
+  // Member-Discount-Gate: nur verifizierte Vereinsmitglieder duerfen
+  // den Mitglieds-Tarif (7,50 €/Nacht) buchen.
+  // ---------------------------------------------------------------
+  const session = await auth();
+  const sessionUserId = (session?.user as { id?: string } | undefined)?.id;
+  const sessionEmail = session?.user?.email?.toLowerCase();
+  let isVerifiedMember = false;
+  if (sessionUserId) {
+    const linked = await db
+      .select({ status: customers.membershipStatus })
+      .from(customers)
+      .where(eq(customers.userId, sessionUserId))
+      .limit(1);
+    isVerifiedMember = linked[0]?.status === "verified";
+  }
+
+  if (persons.members > 0 && !isVerifiedMember) {
+    return {
+      ok: false,
+      error:
+        "Der Mitglieds-Tarif ist nur für verifizierte Vereinsmitglieder buchbar. Bitte logge Dich ein und beantrage die Mitgliedschaft im Konto-Profil.",
+      issues: [
+        {
+          field: "persons.members",
+          message: "Mitglieds-Tarif gesperrt",
+        },
+      ],
+    };
+  }
+
+  // Customer-Type analog absichern: "mitglied" nur fuer verifizierte Mitglieder.
+  if (data.customerType === "mitglied" && !isVerifiedMember) {
+    data.customerType = "privat";
+  }
 
   const issues = validateBookingInput({
     arrival: data.arrival,
@@ -96,14 +135,16 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
 
   const bookingNumber = generateBookingNumber();
 
-  // Customer-Resolution:
-  //  - Eingeloggter Kunde -> sein Customer-Record (linked via userId), Email aus Session.
-  //    Mitgliedschafts-Status NICHT durch Formular ueberschreiben (manueller Workflow).
-  //  - Nicht eingeloggt -> per Email finden oder neu anlegen.
+  // Customer-Resolution + Auto-Account-Creation:
+  //  - Eingeloggt → benutze den verknuepften Customer-Record (oder lege einen an,
+  //    falls der User noch keinen hat).
+  //  - Nicht eingeloggt → suche User per Email; wenn keiner existiert, lege
+  //    automatisch einen User-Account (rolle=customer, ohne Passwort) + Customer-
+  //    Record an. Nach der Buchung schicken wir einen Magic-Link, ueber den der
+  //    Kunde sein Konto "uebernehmen" kann.
   let customerId: string;
-  const session = await auth();
-  const sessionUserId = (session?.user as { id?: string } | undefined)?.id;
-  const sessionEmail = session?.user?.email?.toLowerCase();
+  let resolvedUserId = sessionUserId;
+  let isNewAccount = false;
   const effectiveEmail = sessionEmail ?? data.email.toLowerCase();
 
   if (sessionUserId) {
@@ -114,7 +155,7 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
       .limit(1);
     if (linked[0]) {
       customerId = linked[0].id;
-      // Optional: Profil-Felder mit Form-Daten anreichern, falls leer
+      // Profil-Felder mit Form-Daten anreichern, falls leer
       const updates: Partial<typeof customers.$inferInsert> = {};
       if (!linked[0].phone && data.phone) updates.phone = data.phone;
       if (!linked[0].street && data.street) updates.street = data.street;
@@ -125,12 +166,11 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
         await db.update(customers).set(updates).where(eq(customers.id, customerId));
       }
     } else {
-      // User existiert, aber noch kein Customer-Record (z.B. Magic-Link-Login ohne Sign-up)
       const inserted = await db
         .insert(customers)
         .values({
           userId: sessionUserId,
-          type: data.customerType === "mitglied" ? "privat" : data.customerType,
+          type: data.customerType,
           firstName: data.firstName,
           lastName: data.lastName,
           email: effectiveEmail,
@@ -144,29 +184,100 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
       customerId = inserted[0].id;
     }
   } else {
-    const found = await db
+    // Auto-Account-Creation
+    const existingUser = await db
       .select()
-      .from(customers)
-      .where(eq(customers.email, effectiveEmail))
+      .from(users)
+      .where(eq(users.email, effectiveEmail))
       .limit(1);
-    if (found[0]) {
-      customerId = found[0].id;
+
+    if (existingUser[0]) {
+      // User mit dieser Email existiert schon — Buchung an seinen Customer haengen.
+      resolvedUserId = existingUser[0].id;
+      const linked = await db
+        .select()
+        .from(customers)
+        .where(eq(customers.userId, existingUser[0].id))
+        .limit(1);
+      if (linked[0]) {
+        customerId = linked[0].id;
+      } else {
+        // User hat noch keinen Customer — ggf. Customer per Email finden und linken
+        const customerByEmail = await db
+          .select()
+          .from(customers)
+          .where(eq(customers.email, effectiveEmail))
+          .limit(1);
+        if (customerByEmail[0]) {
+          await db
+            .update(customers)
+            .set({ userId: existingUser[0].id })
+            .where(eq(customers.id, customerByEmail[0].id));
+          customerId = customerByEmail[0].id;
+        } else {
+          const ins = await db
+            .insert(customers)
+            .values({
+              userId: existingUser[0].id,
+              type: data.customerType,
+              firstName: data.firstName,
+              lastName: data.lastName,
+              email: effectiveEmail,
+              phone: data.phone ?? null,
+              company: data.company ?? null,
+              street: data.street ?? null,
+              zip: data.zip ?? null,
+              city: data.city ?? null,
+            })
+            .returning({ id: customers.id });
+          customerId = ins[0].id;
+        }
+      }
     } else {
-      const inserted = await db
-        .insert(customers)
+      // Brandneuer Account: User + Customer atomar anlegen, kein Passwort.
+      const fullName = `${data.firstName} ${data.lastName}`.trim();
+      const insertedUser = await db
+        .insert(users)
         .values({
-          type: data.customerType,
-          firstName: data.firstName,
-          lastName: data.lastName,
           email: effectiveEmail,
-          phone: data.phone ?? null,
-          company: data.company ?? null,
-          street: data.street ?? null,
-          zip: data.zip ?? null,
-          city: data.city ?? null,
+          name: fullName,
+          role: "customer",
         })
-        .returning({ id: customers.id });
-      customerId = inserted[0].id;
+        .returning({ id: users.id });
+      resolvedUserId = insertedUser[0].id;
+
+      // Falls schon ein anonymer Customer-Record existiert (alte Buchung gleicher Email),
+      // mit dem neuen User verknuepfen statt zu duplizieren.
+      const customerByEmail = await db
+        .select()
+        .from(customers)
+        .where(eq(customers.email, effectiveEmail))
+        .limit(1);
+      if (customerByEmail[0]) {
+        await db
+          .update(customers)
+          .set({ userId: resolvedUserId })
+          .where(eq(customers.id, customerByEmail[0].id));
+        customerId = customerByEmail[0].id;
+      } else {
+        const ins = await db
+          .insert(customers)
+          .values({
+            userId: resolvedUserId,
+            type: data.customerType,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            email: effectiveEmail,
+            phone: data.phone ?? null,
+            company: data.company ?? null,
+            street: data.street ?? null,
+            zip: data.zip ?? null,
+            city: data.city ?? null,
+          })
+          .returning({ id: customers.id });
+        customerId = ins[0].id;
+      }
+      isNewAccount = true;
     }
   }
 
@@ -277,9 +388,38 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
 
   await db.insert(activityLog).values({
     who: "Portal",
-    what: `Neue Buchung ${bookingNumber} angelegt — Anzahlung ${formatEuro(breakdown.prepaymentCents)} + Kaution ${formatEuro(breakdown.depositCents)} via Stripe; Restzahlung ${formatEuro(breakdown.remainderCents)} offen`,
+    what: `Neue Buchung ${bookingNumber} angelegt — Anzahlung ${formatEuro(breakdown.prepaymentCents)} + Kaution ${formatEuro(breakdown.depositCents)} via Stripe; Restzahlung ${formatEuro(breakdown.remainderCents)} offen${
+      isNewAccount ? " (Konto automatisch angelegt)" : ""
+    }`,
     bookingId,
   });
+
+  // Wenn wir gerade ein neues Kunden-Konto angelegt haben: Welcome-Mail mit
+  // Magic-Link-Login schicken, damit der Kunde sofort sein Konto uebernehmen kann.
+  if (isNewAccount && resolvedUserId) {
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.xn--wiesenhtte-geb.com";
+      const tokenRes = await createMagicLinkToken(effectiveEmail);
+      const loginUrl =
+        "rateLimited" in tokenRes
+          ? `${baseUrl}/konto`
+          : `${baseUrl}/auth/magic?token=${encodeURIComponent(tokenRes.token)}`;
+      await sendMail({
+        to: effectiveEmail,
+        subject: "Dein Wiesenhütten-Konto + Buchung",
+        template: "welcome_with_booking",
+        bookingId,
+        react: WelcomeEmail({
+          firstName: data.firstName,
+          email: effectiveEmail,
+          membershipPending: false,
+          loginUrl,
+        }),
+      });
+    } catch (err) {
+      console.error("[booking-welcome-mail] failed (non-blocking):", err);
+    }
+  }
 
   if (!checkoutSession.url) {
     return { ok: false, error: "Stripe-Checkout konnte nicht erstellt werden." };

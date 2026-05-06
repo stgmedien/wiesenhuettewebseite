@@ -32,22 +32,22 @@ export default async function AnfragenPage() {
     <div className="container max-w-3xl mx-auto px-6 py-12">
       <Link
         href="/konto"
-        className="text-sm text-[var(--color-wh-forest)] hover:underline mb-4 inline-block"
+        className="text-sm text-[var(--color-wh-deep-green)] hover:underline mb-4 inline-block"
       >
         ← Zurück zum Konto
       </Link>
-      <h1 className="font-heading text-3xl text-[var(--color-wh-forest)] mb-2">
+      <h1 className="font-heading text-3xl text-[var(--color-wh-deep-green)] mb-2">
         Meine Anfragen
       </h1>
-      <p className="text-sm text-[var(--color-wh-charcoal)]/70 mb-8">
+      <p className="text-sm text-[var(--color-wh-black)]/70 mb-8">
         Hier siehst Du alle Anfragen, die Du an die Wiesenhütte gestellt hast — auch wenn sie noch
         nicht zu einer Buchung geworden sind.
       </p>
 
       {myInquiries.length === 0 ? (
-        <div className="rounded-2xl bg-white border border-[var(--color-wh-stone)]/40 p-8 text-center text-sm text-[var(--color-wh-charcoal)]/70">
+        <div className="rounded-2xl bg-white border border-[var(--color-wh-winter-grey)]/40 p-8 text-center text-sm text-[var(--color-wh-black)]/70">
           Du hast noch keine Anfragen gestellt. Direkte Buchungen findest Du im{" "}
-          <Link href="/konto" className="text-[var(--color-wh-forest)] underline">
+          <Link href="/konto" className="text-[var(--color-wh-deep-green)] underline">
             Konto
           </Link>
           .
@@ -57,31 +57,31 @@ export default async function AnfragenPage() {
           {myInquiries.map((i) => (
             <li
               key={i.id}
-              className="rounded-2xl bg-white border border-[var(--color-wh-stone)]/40 p-5"
+              className="rounded-2xl bg-white border border-[var(--color-wh-winter-grey)]/40 p-5"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
-                  <p className="text-xs font-mono text-[var(--color-wh-charcoal)]/60">
+                  <p className="text-xs font-mono text-[var(--color-wh-black)]/60">
                     {i.inquiryNumber}
                   </p>
-                  <p className="font-heading text-lg text-[var(--color-wh-forest)] mt-1">
+                  <p className="font-heading text-lg text-[var(--color-wh-deep-green)] mt-1">
                     {i.arrival && i.departure
                       ? `${formatDateLong(i.arrival)} – ${formatDateLong(i.departure)}`
                       : "Datum noch offen"}
                   </p>
                   {i.persons && (
-                    <p className="text-sm text-[var(--color-wh-charcoal)]/80">
+                    <p className="text-sm text-[var(--color-wh-black)]/80">
                       ca. {i.persons} Personen
                       {i.purpose && ` · ${i.purpose}`}
                     </p>
                   )}
                   {i.message && (
-                    <p className="text-sm text-[var(--color-wh-charcoal)]/70 mt-2 italic">
+                    <p className="text-sm text-[var(--color-wh-black)]/70 mt-2 italic">
                       &ldquo;{i.message.slice(0, 180)}
                       {i.message.length > 180 ? "…" : ""}&rdquo;
                     </p>
                   )}
-                  <p className="text-xs text-[var(--color-wh-charcoal)]/50 mt-3">
+                  <p className="text-xs text-[var(--color-wh-black)]/50 mt-3">
                     Eingereicht am {formatDateLong(i.createdAt)}
                     {i.repliedAt && ` · beantwortet am ${formatDateLong(i.repliedAt)}`}
                   </p>
@@ -93,7 +93,7 @@ export default async function AnfragenPage() {
               {i.convertedToBookingId && (
                 <Link
                   href={`/konto/buchungen/${i.convertedToBookingId}`}
-                  className="inline-block mt-3 text-sm text-[var(--color-wh-forest)] underline"
+                  className="inline-block mt-3 text-sm text-[var(--color-wh-deep-green)] underline"
                 >
                   → Zur Buchung
                 </Link>

@@ -236,7 +236,11 @@ export const BookingFlow = ({
             )}
 
             <h3 className="text-[22px] sm:text-[24px] mt-12 mb-0">Wer kommt?</h3>
-            <PersonsEditor persons={persons} onChange={setPersons} />
+            <PersonsEditor
+              persons={persons}
+              onChange={setPersons}
+              memberAllowed={!!prefill?.membershipVerified}
+            />
             <div
               className={`text-sm ${
                 personsValid ? "text-[var(--color-wh-fg-muted)]" : "text-[var(--color-wh-sunset)]"
@@ -313,12 +317,23 @@ export const BookingFlow = ({
                 value={customerType}
                 options={[
                   { value: "privat", label: "Privat" },
-                  { value: "mitglied", label: "Vereinsmitglied" },
+                  ...(prefill?.membershipVerified
+                    ? [{ value: "mitglied", label: "Vereinsmitglied" }]
+                    : []),
                   { value: "verein", label: "Verein / Schule" },
                   { value: "firma", label: "Firma" },
                 ]}
                 onChange={(v) => setCustomerType(v as typeof customerType)}
               />
+              {!prefill?.loggedIn && (
+                <p className="text-xs text-[var(--color-wh-fg-muted)] mt-2">
+                  💡 Hast Du schon ein Konto?{" "}
+                  <a href="/login?callbackUrl=/buchen" className="underline">
+                    Hier einloggen
+                  </a>
+                  {" "}— oder weiter buchen, wir legen automatisch ein Konto für Dich an.
+                </p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -523,9 +538,11 @@ const PersonRow = ({
 const PersonsEditor = ({
   persons,
   onChange,
+  memberAllowed,
 }: {
   persons: Persons;
   onChange: (p: Persons) => void;
+  memberAllowed: boolean;
 }) => (
   <div className="bg-[var(--color-wh-snow)] border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-4">
     <PersonRow
@@ -534,12 +551,34 @@ const PersonsEditor = ({
       value={persons.adults}
       onChange={(v) => onChange({ ...persons, adults: v })}
     />
-    <PersonRow
-      label="Erwachsene Vereinsmitglieder"
-      hint="7,50 € / Nacht"
-      value={persons.members}
-      onChange={(v) => onChange({ ...persons, members: v })}
-    />
+    {memberAllowed ? (
+      <PersonRow
+        label="Erwachsene Vereinsmitglieder"
+        hint="7,50 € / Nacht"
+        value={persons.members}
+        onChange={(v) => onChange({ ...persons, members: v })}
+      />
+    ) : (
+      <div className="border-b border-[var(--color-wh-winter-grey)]/50 py-3 flex items-center justify-between gap-4 text-sm">
+        <div>
+          <div className="font-medium text-[var(--color-wh-fg-muted)]">
+            Erwachsene Vereinsmitglieder
+          </div>
+          <div className="text-xs text-[var(--color-wh-fg-muted)]/80">
+            Nur für verifizierte Skifreunde-Mitglieder.{" "}
+            <a href="/login?callbackUrl=/buchen" className="underline">
+              Login
+            </a>{" "}
+            oder im{" "}
+            <a href="/registrieren" className="underline">
+              Konto-Profil
+            </a>{" "}
+            Mitgliedschaft beantragen.
+          </div>
+        </div>
+        <div className="text-[var(--color-wh-fg-muted)]/60 text-sm shrink-0">gesperrt</div>
+      </div>
+    )}
     <PersonRow
       label="Kinder (4–15 Jahre)"
       hint="10,00 € / Nacht"

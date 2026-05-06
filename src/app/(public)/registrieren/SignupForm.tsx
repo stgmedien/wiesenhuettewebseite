@@ -22,7 +22,7 @@ export function SignupForm() {
   };
 
   const inputBase =
-    "w-full rounded-lg border border-[var(--color-wh-stone)] px-3 py-2 focus:border-[var(--color-wh-forest)] focus:outline-none";
+    "w-full rounded-lg border border-[var(--color-wh-winter-grey)] px-3 py-2 focus:border-[var(--color-wh-deep-green)] focus:outline-none";
   const errorRing = (field: string) => (errorField === field ? " border-red-500" : "");
 
   return (
@@ -103,7 +103,7 @@ export function SignupForm() {
         </div>
       </div>
 
-      <div className="rounded-lg bg-[var(--color-wh-cream)] p-4 space-y-3">
+      <div className="rounded-lg bg-[var(--color-wh-beige)] p-4 space-y-3">
         <label className="flex items-start gap-3 cursor-pointer">
           <input
             type="checkbox"
@@ -115,7 +115,7 @@ export function SignupForm() {
           <div className="text-sm">
             <span className="font-medium">Ich bin Vereinsmitglied der Skifreunde Gütersloh.</span>
             <br />
-            <span className="text-[var(--color-wh-charcoal)]/70">
+            <span className="text-[var(--color-wh-black)]/70">
               Wir prüfen Deinen Status manuell. Bis zur Bestätigung gelten die Nichtmitglieds-Tarife.
             </span>
           </div>
@@ -134,11 +134,11 @@ export function SignupForm() {
         <input type="checkbox" name="acceptTerms" required className="mt-1" />
         <span>
           Ich habe die{" "}
-          <a href="/agb" className="text-[var(--color-wh-forest)] underline">
+          <a href="/agb" className="text-[var(--color-wh-deep-green)] underline">
             AGB
           </a>{" "}
           und die{" "}
-          <a href="/datenschutz" className="text-[var(--color-wh-forest)] underline">
+          <a href="/datenschutz" className="text-[var(--color-wh-deep-green)] underline">
             Datenschutzerklärung
           </a>{" "}
           gelesen und akzeptiere sie.
@@ -148,7 +148,7 @@ export function SignupForm() {
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-full bg-[var(--color-wh-forest)] text-white py-3 font-semibold disabled:opacity-50"
+        className="w-full rounded-full bg-[var(--color-wh-deep-green)] text-white py-3 font-semibold disabled:opacity-50"
       >
         {pending ? "Wird angelegt …" : "Konto anlegen"}
       </button>
@@ -159,9 +159,9 @@ export function SignupForm() {
         </div>
       )}
 
-      <p className="text-sm text-[var(--color-wh-charcoal)]/80">
+      <p className="text-sm text-[var(--color-wh-black)]/80">
         Schon registriert?{" "}
-        <a href="/login" className="text-[var(--color-wh-forest)] underline font-medium">
+        <a href="/login" className="text-[var(--color-wh-deep-green)] underline font-medium">
           Login
         </a>
       </p>

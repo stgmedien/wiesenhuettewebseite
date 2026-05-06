@@ -29,11 +29,11 @@ export default async function ProfilPage() {
     <div className="container max-w-3xl mx-auto px-6 py-12">
       <Link
         href="/konto"
-        className="text-sm text-[var(--color-wh-forest)] hover:underline mb-4 inline-block"
+        className="text-sm text-[var(--color-wh-deep-green)] hover:underline mb-4 inline-block"
       >
         ← Zurück zum Konto
       </Link>
-      <h1 className="font-heading text-3xl text-[var(--color-wh-forest)] mb-6">
+      <h1 className="font-heading text-3xl text-[var(--color-wh-deep-green)] mb-6">
         Mein Profil
       </h1>
       <ProfileClient

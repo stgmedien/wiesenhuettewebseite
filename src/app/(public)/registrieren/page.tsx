@@ -11,13 +11,13 @@ export default async function RegisterPage() {
 
   return (
     <div className="container max-w-md mx-auto px-6 py-16">
-      <p className="eyebrow text-[var(--color-wh-forest)] uppercase tracking-wider text-xs font-semibold mb-2">
+      <p className="eyebrow text-[var(--color-wh-deep-green)] uppercase tracking-wider text-xs font-semibold mb-2">
         Wiesenhütte · Registrierung
       </p>
-      <h1 className="font-heading text-4xl text-[var(--color-wh-forest)] mb-3">
+      <h1 className="font-heading text-4xl text-[var(--color-wh-deep-green)] mb-3">
         Konto anlegen.
       </h1>
-      <p className="text-sm text-[var(--color-wh-charcoal)]/80 mb-8">
+      <p className="text-sm text-[var(--color-wh-black)]/80 mb-8">
         Mit einem Konto siehst Du Deine Buchungen, Anfragen und kannst Folgebuchungen schneller
         abschließen.
       </p>

@@ -30,11 +30,11 @@ export function LoginForm() {
 
   if (success) {
     return (
-      <div className="rounded-2xl bg-[var(--color-wh-cream)] border-l-4 border-[var(--color-wh-forest)] p-6">
-        <h2 className="font-heading text-2xl text-[var(--color-wh-forest)] mb-2">
+      <div className="rounded-2xl bg-[var(--color-wh-beige)] border-l-4 border-[var(--color-wh-deep-green)] p-6">
+        <h2 className="font-heading text-2xl text-[var(--color-wh-deep-green)] mb-2">
           Mail ist unterwegs
         </h2>
-        <p className="text-sm text-[var(--color-wh-charcoal)]">
+        <p className="text-sm text-[var(--color-wh-black)]">
           Falls ein Konto mit dieser Adresse existiert, haben wir Dir gerade einen Login-Link
           geschickt. Schau in Dein Postfach (auch Spam).
         </p>
@@ -50,8 +50,8 @@ export function LoginForm() {
           onClick={() => setMode("magic")}
           className={`px-4 py-2 rounded-full transition ${
             mode === "magic"
-              ? "bg-[var(--color-wh-forest)] text-white"
-              : "border border-[var(--color-wh-forest)] text-[var(--color-wh-forest)]"
+              ? "bg-[var(--color-wh-deep-green)] text-white"
+              : "border border-[var(--color-wh-deep-green)] text-[var(--color-wh-deep-green)]"
           }`}
         >
           Per E-Mail-Link
@@ -61,8 +61,8 @@ export function LoginForm() {
           onClick={() => setMode("password")}
           className={`px-4 py-2 rounded-full transition ${
             mode === "password"
-              ? "bg-[var(--color-wh-forest)] text-white"
-              : "border border-[var(--color-wh-forest)] text-[var(--color-wh-forest)]"
+              ? "bg-[var(--color-wh-deep-green)] text-white"
+              : "border border-[var(--color-wh-deep-green)] text-[var(--color-wh-deep-green)]"
           }`}
         >
           Mit Passwort
@@ -81,16 +81,16 @@ export function LoginForm() {
               type="email"
               required
               autoComplete="email"
-              className="w-full rounded-lg border border-[var(--color-wh-stone)] px-3 py-2 focus:border-[var(--color-wh-forest)] focus:outline-none"
+              className="w-full rounded-lg border border-[var(--color-wh-winter-grey)] px-3 py-2 focus:border-[var(--color-wh-deep-green)] focus:outline-none"
             />
           </div>
-          <p className="text-xs text-[var(--color-wh-charcoal)]/70">
+          <p className="text-xs text-[var(--color-wh-black)]/70">
             Wir schicken Dir einen Link, der 15 Minuten gültig ist. Kein Passwort nötig.
           </p>
           <button
             type="submit"
             disabled={pending}
-            className="w-full rounded-full bg-[var(--color-wh-forest)] text-white py-3 font-semibold disabled:opacity-50"
+            className="w-full rounded-full bg-[var(--color-wh-deep-green)] text-white py-3 font-semibold disabled:opacity-50"
           >
             {pending ? "Wird gesendet …" : "Login-Link schicken"}
           </button>
@@ -107,7 +107,7 @@ export function LoginForm() {
               type="email"
               required
               autoComplete="email"
-              className="w-full rounded-lg border border-[var(--color-wh-stone)] px-3 py-2 focus:border-[var(--color-wh-forest)] focus:outline-none"
+              className="w-full rounded-lg border border-[var(--color-wh-winter-grey)] px-3 py-2 focus:border-[var(--color-wh-deep-green)] focus:outline-none"
             />
           </div>
           <div>
@@ -120,13 +120,13 @@ export function LoginForm() {
               type="password"
               required
               autoComplete="current-password"
-              className="w-full rounded-lg border border-[var(--color-wh-stone)] px-3 py-2 focus:border-[var(--color-wh-forest)] focus:outline-none"
+              className="w-full rounded-lg border border-[var(--color-wh-winter-grey)] px-3 py-2 focus:border-[var(--color-wh-deep-green)] focus:outline-none"
             />
           </div>
           <button
             type="submit"
             disabled={pending}
-            className="w-full rounded-full bg-[var(--color-wh-forest)] text-white py-3 font-semibold disabled:opacity-50"
+            className="w-full rounded-full bg-[var(--color-wh-deep-green)] text-white py-3 font-semibold disabled:opacity-50"
           >
             {pending ? "Anmelden …" : "Anmelden"}
           </button>
@@ -134,11 +134,11 @@ export function LoginForm() {
             <button
               type="button"
               onClick={() => setMode("magic")}
-              className="text-[var(--color-wh-forest)] underline hover:opacity-70"
+              className="text-[var(--color-wh-deep-green)] underline hover:opacity-70"
             >
               Passwort vergessen?
             </button>{" "}
-            <span className="text-[var(--color-wh-charcoal)]/60">
+            <span className="text-[var(--color-wh-black)]/60">
               Wir schicken Dir einen Login-Link, von dem aus Du das Passwort neu setzen kannst.
             </span>
           </p>
@@ -151,9 +151,9 @@ export function LoginForm() {
         </div>
       )}
 
-      <p className="text-sm text-[var(--color-wh-charcoal)]/80">
+      <p className="text-sm text-[var(--color-wh-black)]/80">
         Noch kein Konto?{" "}
-        <a href="/registrieren" className="text-[var(--color-wh-forest)] underline font-medium">
+        <a href="/registrieren" className="text-[var(--color-wh-deep-green)] underline font-medium">
           Jetzt registrieren
         </a>
       </p>
