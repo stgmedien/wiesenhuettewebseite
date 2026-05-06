@@ -13,6 +13,7 @@ import {
   MountainSnow,
   FileText,
   Settings,
+  Users2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +24,7 @@ const NAV = [
   { href: "/m/manuell", label: "Manuelle Buchung", Icon: PlusCircle },
   { href: "/m/sperrzeiten", label: "Sperrzeiten", Icon: Lock },
   { href: "/m/blog", label: "Blog", Icon: FileText },
+  { href: "/m/benutzer", label: "Benutzer", Icon: Users2 },
   { href: "/m/einstellungen", label: "Einstellungen", Icon: Settings },
 ];
 
