@@ -48,6 +48,13 @@ export default async function ProfilPage() {
                 zip: c.zip,
                 city: c.city,
                 country: c.country,
+                membershipStatus: c.membershipStatus as
+                  | "none"
+                  | "pending"
+                  | "verified"
+                  | "rejected",
+                membershipRejectedReason: c.membershipRejectedReason,
+                memberId: c.memberId,
               }
             : null
         }

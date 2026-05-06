@@ -211,6 +211,99 @@ export async function requestEmailChange(formData: FormData) {
 }
 
 // =============================================================
+// Mitgliedschaft beantragen / zurueckziehen
+// =============================================================
+
+const membershipSchema = z.object({
+  memberId: z.string().max(60).optional().nullable(),
+  note: z.string().max(2000).optional().nullable(),
+});
+
+export async function requestMembership(formData: FormData) {
+  const { user, customer } = await requireCustomer();
+  if (!customer) {
+    return {
+      ok: false,
+      error: "Bitte fülle erst Dein Profil (Adresse & Kontakt) aus.",
+    };
+  }
+
+  const parsed = membershipSchema.safeParse({
+    memberId: (formData.get("memberId") || "").toString().trim() || null,
+    note: (formData.get("note") || "").toString().trim() || null,
+  });
+  if (!parsed.success) return { ok: false, error: "Ungültige Eingabe." };
+
+  if (customer.membershipStatus === "verified") {
+    return { ok: false, error: "Deine Mitgliedschaft ist bereits bestätigt." };
+  }
+  if (customer.membershipStatus === "pending") {
+    return { ok: false, error: "Dein Antrag liegt bereits zur Prüfung vor." };
+  }
+
+  const noteSuffix = parsed.data.note
+    ? `\n\nAntrags-Notiz vom Kunden: ${parsed.data.note}`
+    : "";
+
+  await db
+    .update(customers)
+    .set({
+      membershipStatus: "pending",
+      type: "mitglied",
+      memberId: parsed.data.memberId ?? customer.memberId,
+      // Reject-Felder zuruecksetzen, falls Re-Apply nach Ablehnung
+      membershipRejectedReason: null,
+      membershipVerifiedAt: null,
+      membershipVerifiedBy: null,
+      // Notiz an existing notes anhaengen
+      notes: customer.notes ? customer.notes + noteSuffix : noteSuffix.trim() || null,
+    })
+    .where(eq(customers.id, customer.id));
+
+  await db.insert(activityLog).values({
+    who: user.email,
+    what: `Mitgliedschaft beantragt vom Kunden${
+      parsed.data.memberId ? ` (Mitgliedsnr. ${parsed.data.memberId})` : ""
+    }`,
+  });
+
+  revalidatePath("/konto");
+  revalidatePath("/konto/profil");
+  revalidatePath("/m/mitgliedschaften");
+
+  return { ok: true as const };
+}
+
+export async function withdrawMembershipRequest() {
+  const { user, customer } = await requireCustomer();
+  if (!customer) return { ok: false, error: "Kein Customer-Record." };
+
+  if (customer.membershipStatus !== "pending") {
+    return { ok: false, error: "Nur offene Anträge können zurückgezogen werden." };
+  }
+
+  await db
+    .update(customers)
+    .set({
+      membershipStatus: "none",
+      type: "privat",
+      memberId: null,
+    })
+    .where(eq(customers.id, customer.id));
+
+  await db.insert(activityLog).values({
+    who: user.email,
+    what: "Mitgliedschafts-Antrag vom Kunden zurückgezogen",
+  });
+
+  revalidatePath("/konto");
+  revalidatePath("/konto/profil");
+  revalidatePath("/m/mitgliedschaften");
+
+  return { ok: true as const };
+}
+
+// =============================================================
 // Konto loeschen — DSGVO Soft-Delete (30 Tage Frist)
 // =============================================================
 
