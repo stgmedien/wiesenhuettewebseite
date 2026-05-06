@@ -364,6 +364,33 @@ export default function EsgPage() {
               </p>
             </div>
           </div>
+
+          {/* Kontakt — bewusst dezent, im Footer der Stimmen-Section */}
+          <div className="mt-16 pt-10 border-t border-[var(--color-wh-winter-grey)]">
+            <div className="eyebrow mb-2">Kontakt zur Hüttenarbeit</div>
+            <p className="text-[15px] text-[var(--color-wh-fg-muted)] max-w-2xl mb-6">
+              Die Brücke zwischen Schule und Verein wird im Vorstand der Skifreunde Gütersloh von
+              zwei ESG-Lehrkräften mitgehalten — gerne als Ansprechpartner für Klassen-Pitches
+              und organisatorische Fragen.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <ContactRow
+                imgSrc="/media/photos/tanja-milse-portrait-gruen.png"
+                imgAlt="Tanja Milse"
+                name="Tanja Milse"
+                role="Vorstand Skifreunde · Lehrkraft ESG"
+                email="mil@esg-guetersloh.de"
+              />
+              <ContactRow
+                imgSrc="/media/photos/johannes-leiskau-portrait-gruen.png"
+                imgAlt="Johannes Leiskau"
+                name="Johannes Leiskau"
+                role="Vorstand Skifreunde · Lehrkraft ESG"
+                email="lei@esg-guetersloh.de"
+              />
+            </div>
+          </div>
         </div>
       </section>
 
@@ -971,6 +998,48 @@ function ContactCard({
       <p className="text-[15px] sm:text-[16px] leading-relaxed italic m-0 text-[var(--color-wh-black)] border-l-2 border-[var(--color-wh-deep-green)] pl-4">
         „{quote}"
       </p>
+    </div>
+  );
+}
+
+function ContactRow({
+  imgSrc,
+  imgAlt,
+  name,
+  role,
+  email,
+}: {
+  imgSrc: string;
+  imgAlt: string;
+  name: string;
+  role: string;
+  email: string;
+}) {
+  return (
+    <div className="flex items-center gap-3 bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-md)] px-4 py-3">
+      <div className="relative w-12 h-12 rounded-full overflow-hidden bg-white shrink-0">
+        <Image
+          src={imgSrc}
+          alt={imgAlt}
+          fill
+          className="object-cover"
+          sizes="48px"
+        />
+      </div>
+      <div className="min-w-0">
+        <p className="font-semibold text-[15px] text-[var(--color-wh-deep-green)] m-0 leading-tight">
+          {name}
+        </p>
+        <p className="text-[12px] text-[var(--color-wh-fg-muted)] m-0 leading-tight">
+          {role}
+        </p>
+        <a
+          href={`mailto:${email}`}
+          className="text-[13px] text-[var(--color-wh-deep-green)] hover:underline break-all"
+        >
+          {email}
+        </a>
+      </div>
     </div>
   );
 }
