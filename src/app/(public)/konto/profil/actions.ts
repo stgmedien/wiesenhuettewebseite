@@ -9,6 +9,8 @@ import { auth, signOut } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { sendMail } from "@/lib/mail/send";
 import EmailVerificationEmail from "@/lib/mail/templates/email-verification";
+import MembershipRequestedEmail from "@/lib/mail/templates/membership-requested";
+import MembershipRequestedInternalEmail from "@/lib/mail/templates/membership-requested-internal";
 import { generateEmailChangeToken, hashToken } from "@/lib/email-change";
 
 type SessionLike = {
@@ -266,6 +268,44 @@ export async function requestMembership(formData: FormData) {
       parsed.data.memberId ? ` (Mitgliedsnr. ${parsed.data.memberId})` : ""
     }`,
   });
+
+  // Mails versenden — Best-effort: Failures blockieren den Antrag nicht.
+  const customerName = `${customer.firstName} ${customer.lastName}`.trim();
+  try {
+    await sendMail({
+      to: user.email,
+      subject: "Dein Antrag auf Vereinsmitgliedschaft ist eingegangen",
+      template: "membership_requested",
+      react: MembershipRequestedEmail({
+        firstName: customer.firstName,
+        memberId: parsed.data.memberId ?? null,
+      }),
+    });
+  } catch (err) {
+    console.error("[membership-requested-mail customer] failed:", err);
+  }
+
+  const internalRecipient = process.env.MAIL_INTERNAL_TO;
+  if (internalRecipient) {
+    try {
+      await sendMail({
+        to: internalRecipient,
+        subject: `Neuer Mitgliedschafts-Antrag: ${customerName}`,
+        template: "membership_requested_internal",
+        replyTo: user.email,
+        react: MembershipRequestedInternalEmail({
+          customerName,
+          customerEmail: user.email,
+          customerPhone: customer.phone ?? null,
+          memberId: parsed.data.memberId ?? null,
+          note: parsed.data.note ?? null,
+          reviewUrl: `${baseUrl()}/m/mitgliedschaften`,
+        }),
+      });
+    } catch (err) {
+      console.error("[membership-requested-mail internal] failed:", err);
+    }
+  }
 
   revalidatePath("/konto");
   revalidatePath("/konto/profil");
