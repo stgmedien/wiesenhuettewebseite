@@ -9,8 +9,8 @@ export const metadata = {
 const TOC = [
   { id: "einstieg", label: "Eine Schule, eine Hütte" },
   { id: "tagebuch", label: "Projekttagebuch" },
-  { id: "jahrgaenge", label: "Was die Mittelstufe tut" },
-  { id: "ansprechpartner", label: "Ansprechpartner & Stimmen" },
+  { id: "jahrgaenge", label: "Was Mittelstufe an der Hütte tut" },
+  { id: "stimmen", label: "Stimmen aus der Hütte" },
   { id: "paedagogik", label: "Pädagogische Idee" },
   { id: "lernort", label: "Wie aus einer Hütte ein Lernort wird" },
   { id: "sicherheit", label: "Begleitung & Sicherheit" },
@@ -67,9 +67,9 @@ export default function EsgPage() {
           </p>
           <p className="text-base sm:text-[18px] leading-relaxed text-[var(--color-wh-black)] max-w-2xl mt-4">
             Hier gilt eine einfache Beobachtung: <strong>Manches lernt man nur dort, wo das
-            Klassenzimmer aufhört.</strong> Wenn Schüler:innen für eine Woche selbst kochen,
-            Holz schichten, miteinander durch Konflikte gehen und am Ende des Tages am Feuer
-            stehen, geschieht etwas, das zu Persönlichkeitsbildung wird — und nicht nur zu
+            Klassenzimmer aufhört.</strong> Wenn Lerngruppen für ein paar Tage selbst kochen,
+            Holz schichten, am Lagerfeuer Stockbrot drehen und miteinander durch Konflikte
+            gehen, geschieht etwas, das zu Persönlichkeitsbildung wird — und nicht nur zu
             Stoff. Genau dafür gibt es die Hütte.
           </p>
         </div>
@@ -277,107 +277,91 @@ export default function EsgPage() {
       {/* ---------------------------------------------------------------- */}
       <section id="jahrgaenge" className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-16 sm:py-24">
         <div className="max-w-[1080px] mx-auto">
-          <div className="eyebrow">Jahrgänge</div>
+          <div className="eyebrow">Mittelstufe</div>
           <h2 className="text-[32px] sm:text-[44px] mt-3 mb-6 leading-tight">
-            Was die Mittelstufe an der Hütte tut.
+            Was Mittelstufe an der Hütte tut.
           </h2>
-          <p className="prose-block">
-            Am ESG fährt <strong>die Mittelstufe</strong> (Klasse 7–9) zur Wiesenhütte. Eine
-            Hüttenfahrt in Klasse 7 hat einen anderen Sinn als in Klasse 9 — wir erläutern die
-            jahrgangsspezifischen Schwerpunkte unten. Klasse 5/6 und Oberstufe nutzen andere
-            Lernformate; die Hütte ist bewusst der Mittelstufen-Lernort.
-          </p>
+          <div className="prose-block max-w-3xl">
+            <p>
+              Am ESG fährt <strong>die Mittelstufe</strong> zur Wiesenhütte. Wir fahren immer
+              <strong> unter der Woche, meist drei Tage</strong> — kompakt genug, dass es in den
+              Schulalltag passt, lang genug, dass etwas hängenbleibt.
+            </p>
+            <p>
+              An der Hütte gestalten die Schüler:innen ihren Alltag selbst. Sie kochen für die
+              Gruppe, schichten Holz, machen Feuer, drehen am Abend Stockbrot über der
+              Glut, grillen, räumen auf. Selbstversorgung ist nicht nebenbei — sie ist Teil des
+              Programms. Wer für zwölf Hungrige Mittagessen kocht, lernt Verantwortung anders
+              als im Hauswirtschafts-Stundenplan.
+            </p>
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10">
-            <YearCard
-              year="Klasse 7"
-              title="Verantwortung übernehmen"
-              body="Die erste Hüttenfahrt: Aus 28 Einzelkindern wird eine Klasse. Schwerpunkt sind Gemeinschaft, Tagesstruktur, Selbstständigkeit (Kofferpacken bis Bett machen), erste Wanderung mit Karte. Reflexion am Ende: Welche Rolle übernehme ich in der Klasse — und welche möchte ich?"
-            />
-            <YearCard
-              year="Klasse 8"
-              title="Konflikte aushalten"
-              body="In der Pubertät spitzen sich Klassendynamiken zu. Die Hütte gibt Raum, in dem Konflikte nicht ausgesessen werden können. Schwerpunkt ist soziale Kompetenz, Selbstorganisation, ein erstes größeres Projekt (z. B. Renovierung eines Raums, Naturkartierung)."
-            />
-            <YearCard
-              year="Klasse 9"
-              title="Ein eigenes Projekt verantworten"
-              body="Die Hütte ist Bühne für ein eigenständig verantwortetes Projekt. Beispiel: Klasse 9e hat 2025 die Feuerstelle vor der Hütte geplant, gebaut und übergeben (siehe Projekttagebuch oben). Schwerpunkt: Projektkompetenz, handwerkliches Arbeiten, Übergabe an die Schulgemeinschaft."
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-10">
+            <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 sm:p-7">
+              <div className="text-xs uppercase tracking-wider text-[var(--color-wh-deep-green)] font-semibold mb-2">
+                Alltag gestalten
+              </div>
+              <h3 className="font-display font-bold text-[22px] text-[var(--color-wh-deep-green)] mt-0 mb-3">
+                Selbst kochen, selbst heizen.
+              </h3>
+              <p className="text-[15px] leading-relaxed text-[var(--color-wh-black)] m-0">
+                Die Gruppe übernimmt die Hütte für drei Tage. Frühstück, Mittagessen, Abendbrot
+                — alles wird gemeinsam gekocht. Wer einkauft, wer kocht, wer abspült: das
+                organisiert die Klasse. Holz machen, Feuer in Kachelofen und Lagerfeuerstelle,
+                aufräumen — auch das gehört dazu. Am Abend: Stockbrot, Lagerfeuer, Reflexion.
+              </p>
+            </div>
+
+            <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 sm:p-7">
+              <div className="text-xs uppercase tracking-wider text-[var(--color-wh-deep-green)] font-semibold mb-2">
+                Eigene Projekte
+              </div>
+              <h3 className="font-display font-bold text-[22px] text-[var(--color-wh-deep-green)] mt-0 mb-3">
+                Schüler:innen pitchen ihre Ideen.
+              </h3>
+              <p className="text-[15px] leading-relaxed text-[var(--color-wh-black)] m-0">
+                Wenn eine Klasse ein Projekt an der Hütte anstoßen will — Feuerstelle bauen, Raum
+                renovieren, Naturweg anlegen — pitcht sie ihre Idee dem Vorstand der Skifreunde
+                Gütersloh. Der Vorstand steht mit Rat, Tat und (wo nötig) Finanzierung zur Seite.
+                Das ist die Erlaubnisstruktur der Hüttenarbeit: Schüler:innen denken, Verein
+                trägt mit. Die Feuerstelle der Klasse 9e ist genau so entstanden (siehe
+                Projekttagebuch oben).
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
       {/* ---------------------------------------------------------------- */}
-      {/* 4. Ansprechpartner & Stimmen */}
+      {/* 4. Stimmen aus der Hütte */}
       {/* ---------------------------------------------------------------- */}
-      <section id="ansprechpartner" className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24">
+      <section id="stimmen" className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24">
         <div className="max-w-[1080px] mx-auto">
-          <div className="eyebrow">Ansprechpartner</div>
-          <h2 className="text-[32px] sm:text-[44px] mt-3 mb-4 leading-tight">
-            Wer trägt diese Brücke zwischen Schule und Verein.
+          <div className="eyebrow">Stimmen aus der Hütte</div>
+          <h2 className="text-[32px] sm:text-[44px] mt-3 mb-10 leading-tight">
+            Schüler:innen und Eltern.
           </h2>
-          <p className="prose-block max-w-2xl mb-10">
-            Die Kooperation zwischen ESG und den Skifreunden Gütersloh wird von Menschen
-            getragen, die in beiden Welten zu Hause sind: <strong>Tanja Milse</strong> und{" "}
-            <strong>Johannes Leiskau</strong> sind <strong>Vorstände der Skifreunde
-            Gütersloh e.V.</strong> und gleichzeitig <strong>Lehrkräfte am ESG</strong>. Sie sind
-            erste Ansprechpartner für alles, was die Hüttenarbeit am ESG betrifft — für Klassen,
-            Eltern und Kolleg:innen.
-          </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-16">
-            <ContactCard
-              imgSrc="/media/photos/tanja-milse-portrait-gruen.png"
-              imgAlt="Tanja Milse, Lehrkraft am ESG und Vorständin der Skifreunde Gütersloh"
-              name="Tanja Milse"
-              roles={[
-                "Vorstand · Skifreunde Gütersloh e.V.",
-                "Lehrkraft · ESG Gütersloh",
-              ]}
-              email="mil@esg-guetersloh.de"
-              quote="Ich kenne die Klasse seit Klasse 5. Aber drei Tage Hütte zeigen mir mehr über meine Klasse als ein halbes Schuljahr Unterricht. Nicht weil der Unterricht schlecht wäre — weil die Hütte etwas anderes ist."
-            />
-            <ContactCard
-              imgSrc="/media/photos/johannes-leiskau-portrait-gruen.png"
-              imgAlt="Johannes Leiskau, Lehrkraft am ESG und Vorstand der Skifreunde Gütersloh"
-              name="Johannes Leiskau"
-              roles={[
-                "Vorstand · Skifreunde Gütersloh e.V.",
-                "Lehrkraft · ESG Gütersloh",
-              ]}
-              email="lei@esg-guetersloh.de"
-              quote="Wir sehen Schüler:innen an der Hütte in Rollen, die im Klassenzimmer kaum sichtbar sind. Wer in Mathe eher still ist, organisiert plötzlich die ganze Küche. Das verschiebt etwas — nicht nur in der Klasse, sondern auch in unserem Bild von ihr."
-            />
-          </div>
-
-          <div className="border-t border-[var(--color-wh-winter-grey)] pt-12">
-            <div className="eyebrow mb-3">Stimmen aus der Hütte</div>
-            <h3 className="text-[24px] sm:text-[28px] mt-0 mb-8 leading-tight">
-              Schüler:innen und Eltern.
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 sm:p-7">
-                <p className="text-[17px] sm:text-[19px] leading-relaxed italic m-0 text-[var(--color-wh-deep-green)]">
-                  „Am Anfang dachte ich, das ist nur Schaufeln. Aber als wir dann am letzten Abend
-                  dasaßen, mit dem Feuer, das wir selber gebaut haben — das war anders als alles,
-                  was wir vorher in der Schule gemacht haben."
-                </p>
-                <p className="m-0 mt-4 text-[13px] text-[var(--color-wh-fg-muted)]">
-                  — Eine Schülerin der Klasse 9
-                </p>
-              </div>
-              <div className="bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 sm:p-7">
-                <p className="text-[17px] sm:text-[19px] leading-relaxed italic m-0 text-[var(--color-wh-deep-green)]">
-                  „Sie kam zurück und konnte erklären, warum sie weniger Streit mit ihrer
-                  Schwester hatte. Sie hat etwas mitgebracht, das man auch zuhause merkt. Und das
-                  war keine Klassenfahrtsstimmung — das war ein Stück Reife."
-                </p>
-                <p className="m-0 mt-4 text-[13px] text-[var(--color-wh-fg-muted)]">
-                  — Eine Mutter, nach der ersten Hüttenfahrt ihrer Tochter (Klasse 7)
-                </p>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 sm:p-7">
+              <p className="text-[17px] sm:text-[19px] leading-relaxed italic m-0 text-[var(--color-wh-deep-green)]">
+                „Am Anfang dachte ich, das ist nur Schaufeln. Aber als wir dann am letzten Abend
+                dasaßen, mit dem Feuer, das wir selber gebaut haben — das war anders als alles,
+                was wir vorher in der Schule gemacht haben."
+              </p>
+              <p className="m-0 mt-4 text-[13px] text-[var(--color-wh-fg-muted)]">
+                — Eine Schülerin der Klasse 9
+              </p>
+            </div>
+            <div className="bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 sm:p-7">
+              <p className="text-[17px] sm:text-[19px] leading-relaxed italic m-0 text-[var(--color-wh-deep-green)]">
+                „Sie kam zurück und konnte erklären, warum sie weniger Streit mit ihrer
+                Schwester hatte. Sie hat etwas mitgebracht, das man auch zuhause merkt. Und das
+                war keine Klassenfahrtsstimmung — das war ein Stück Reife."
+              </p>
+              <p className="m-0 mt-4 text-[13px] text-[var(--color-wh-fg-muted)]">
+                — Eine Mutter, nach der ersten Hüttenfahrt ihrer Tochter
+              </p>
             </div>
           </div>
         </div>
@@ -553,13 +537,13 @@ export default function EsgPage() {
             <PhaseCard
               num="02"
               title="An der Hütte"
-              subtitle="Ein typischer Tag"
+              subtitle="Drei Tage gemeinsam"
               points={[
-                "Frühdienst & Frühstück gemeinsam",
-                "Morgenkreis: Was steht heute an?",
-                "Vormittag: Wandern, Werken, Renovieren",
-                "Nachmittag: Bewegung & Projektarbeit",
-                "Abend: Reflexionsrunde am Lagerfeuer",
+                "Selbstversorgung: kochen, abspülen, Holz machen",
+                "Tagesblock: Wandern, Werken, Projekt",
+                "Bewegung im Sauerland-Wald",
+                "Stockbrot, Lagerfeuer, Gespräche",
+                "Reflexion am Abend, kein Minutenplan",
               ]}
             />
             <PhaseCard
@@ -575,27 +559,11 @@ export default function EsgPage() {
             />
           </div>
 
-          <h3 className="text-[22px] sm:text-[26px] mt-16 mb-4">An der Hütte — ein Tag</h3>
-          <div className="bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] overflow-hidden">
-            {DAY_SCHEDULE.map((d, i) => (
-              <div
-                key={d.time}
-                className={`flex flex-col sm:flex-row gap-2 sm:gap-6 px-5 sm:px-6 py-4 ${
-                  i !== DAY_SCHEDULE.length - 1
-                    ? "border-b border-[var(--color-wh-winter-grey)]"
-                    : ""
-                }`}
-              >
-                <div className="font-mono text-[13px] text-[var(--color-wh-deep-green)] font-bold w-full sm:w-32 shrink-0 pt-0.5">
-                  {d.time}
-                </div>
-                <div className="text-[15px] leading-relaxed">{d.text}</div>
-              </div>
-            ))}
-          </div>
-          <p className="text-[14px] text-[var(--color-wh-fg-muted)] mt-4 italic">
-            Dieser Rhythmus erlaubt Konzentration und Erholung im Wechsel. Er ist kein Plan zum
-            Abhaken, sondern ein Gerüst, das die Klasse füllt.
+          <p className="prose-block max-w-3xl mt-12 text-[15px] text-[var(--color-wh-fg-muted)] italic">
+            Wir geben bewusst keinen Minutenplan vor. Jede Klasse füllt die drei Tage anders —
+            mit ihrer Lehrkraft, mit ihrem Projekt, mit ihrem eigenen Rhythmus. Was bleibt, ist:
+            morgens gemeinsam frühstücken, abends ans Lagerfeuer, dazwischen das, was die
+            Gruppe sich vorgenommen hat.
           </p>
         </div>
       </section>
@@ -848,12 +816,16 @@ const DAY_SCHEDULE = [
 
 const FAQS = [
   {
-    q: "Wie sicher ist die Hütte?",
-    a: "Sehr sicher, mit Routine: zwei Lehrkräfte mit Erste-Hilfe-Schein, Notfallplan, Hüttenwart vor Ort, Erreichbarkeit der Klassenleitung 24/7 für Eltern. Wir senden vor jeder Fahrt einen Elternbrief mit allen Notfallnummern.",
+    q: "Wann finden die Hüttenfahrten statt?",
+    a: "Wir fahren <strong>immer unter der Woche</strong>, meist drei Tage. Das hält die Fahrt schulalltagstauglich und schont das Wochenende der Familien.",
   },
   {
-    q: "Was kostet eine Klassenfahrt zur Wiesenhütte?",
-    a: "Die Übernachtung in der Hütte ist günstig (Stand 2025: 18 € pro Person und Nacht für Nichtmitglieder). Hinzu kommen Verpflegung und Anreise. Die Gesamtkosten liegen je nach Dauer in einem Rahmen, der bewusst niedrig gehalten ist — damit alle mitfahren können. <strong>Familien, für die es eng ist, wenden sich vertraulich an die Klassenleitung — der Förderverein des ESG hilft.</strong>",
+    q: "Was kostet eine Hüttenfahrt für ESG-Lerngruppen?",
+    a: "Für ESG-Lerngruppen fallen <strong>keine Übernachtungskosten</strong> an — die Skifreunde Gütersloh stellen die Hütte kostenfrei zur Verfügung. Familien zahlen lediglich <strong>Anreise und Verpflegung</strong>. Die Verpflegung wird gemeinsam eingekauft und gekocht, was die Kosten zusätzlich niedrig hält. <strong>Familien, für die selbst das eng ist, wenden sich vertraulich an die Klassenleitung — der Förderverein des ESG hilft.</strong>",
+  },
+  {
+    q: "Wie sicher ist die Hütte?",
+    a: "Sehr sicher, mit Routine: zwei Lehrkräfte mit Erste-Hilfe-Schein, Notfallplan, Hüttenwart vor Ort, Erreichbarkeit der Klassenleitung 24/7 für Eltern. Wir senden vor jeder Fahrt einen Elternbrief mit allen Notfallnummern.",
   },
   {
     q: "Mein Kind hat eine Allergie / besondere Ernährung — geht das?",
@@ -878,6 +850,10 @@ const FAQS = [
   {
     q: "Können Eltern die Hütte selbst sehen?",
     a: "Ja. Bei Tagen der offenen Tür, Eltern-Wanderungen oder bei Familienwochenenden des Vereins ist das möglich. Termine sehen Sie auf dieser Seite und im Schul-Newsletter.",
+  },
+  {
+    q: "An wen kann ich mich mit Fragen wenden?",
+    a: "Erste Anlaufstelle ist immer die <strong>Klassenleitung</strong>. Für vereinsseitige Fragen rund um die Wiesenhütte stehen <a href=\"mailto:mil@esg-guetersloh.de\">Tanja Milse</a> und <a href=\"mailto:lei@esg-guetersloh.de\">Johannes Leiskau</a> zur Verfügung — beide sind Lehrkräfte am ESG und gleichzeitig im Vorstand der Skifreunde Gütersloh e.V.",
   },
 ];
 
