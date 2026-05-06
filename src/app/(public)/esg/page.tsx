@@ -8,12 +8,12 @@ export const metadata = {
 
 const TOC = [
   { id: "einstieg", label: "Eine Schule, eine Hütte" },
+  { id: "tagebuch", label: "Projekttagebuch" },
+  { id: "jahrgaenge", label: "Was die Mittelstufe tut" },
+  { id: "ansprechpartner", label: "Ansprechpartner & Stimmen" },
   { id: "paedagogik", label: "Pädagogische Idee" },
   { id: "lernort", label: "Wie aus einer Hütte ein Lernort wird" },
   { id: "sicherheit", label: "Begleitung & Sicherheit" },
-  { id: "jahrgaenge", label: "Was die Mittelstufe tut" },
-  { id: "tagebuch", label: "Projekttagebuch" },
-  { id: "stimmen", label: "Stimmen aus der Hütte" },
   { id: "fragen", label: "Häufige Elternfragen" },
   { id: "traeger", label: "Wer trägt die Hüttenarbeit" },
 ];
@@ -27,16 +27,37 @@ export default function EsgPage() {
   return (
     <div>
       {/* ---------------------------------------------------------------- */}
-      {/* 1. Einstieg */}
+      {/* HERO BILD — Kollaboration ESG × Wiesenhütte */}
       {/* ---------------------------------------------------------------- */}
-      <section id="einstieg" className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-20 sm:py-24">
-        <div className="max-w-[1080px] mx-auto grid grid-cols-1 md:grid-cols-[1fr_auto] gap-8 md:gap-12 items-center">
-          <div>
-            <div className="eyebrow">ESG · Evangelisch Stiftisches Gymnasium</div>
-            <h1 className="text-[44px] sm:text-[64px] mt-4 leading-[1.05]">
-              Eine Schule, eine Hütte, ein gemeinsames Lernen.
+      <div className="relative w-full bg-[var(--color-wh-deep-green)]" style={{ aspectRatio: "21 / 9", maxHeight: "560px" }}>
+        <Image
+          src="/media/photos/kollaboration_zwischen_esg_und_wiesenhuette.png"
+          alt="Kollaboration zwischen Evangelisch Stiftischem Gymnasium und Wiesenhütte"
+          fill
+          priority
+          className="object-cover object-center"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[rgba(47,74,53,0.65)] via-transparent to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 px-6 sm:px-8 pb-8 sm:pb-12">
+          <div className="max-w-[1080px] mx-auto">
+            <div className="text-xs uppercase tracking-wider font-semibold text-white/85">
+              ESG · Evangelisch Stiftisches Gymnasium
+            </div>
+            <h1 className="text-[40px] sm:text-[60px] mt-2 leading-[1.05] text-white drop-shadow-md">
+              Eine Schule, eine Hütte,<br className="hidden sm:block" /> ein gemeinsames Lernen.
             </h1>
-            <p className="text-base sm:text-[18px] leading-relaxed text-[var(--color-wh-black)] max-w-2xl mt-5">
+          </div>
+        </div>
+      </div>
+
+      {/* ---------------------------------------------------------------- */}
+      {/* 1. Einstieg — Lead-Text */}
+      {/* ---------------------------------------------------------------- */}
+      <section id="einstieg" className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-16 sm:py-20">
+        <div className="max-w-[1080px] mx-auto grid grid-cols-1 md:grid-cols-[1fr_auto] gap-8 md:gap-12 items-start">
+          <div>
+            <p className="text-base sm:text-[18px] leading-relaxed text-[var(--color-wh-black)] max-w-2xl">
               Die Wiesenhütte in Langewiese ist keine Klassenfahrt-Adresse. Sie ist ein
               außerschulischer Lernort des Evangelisch Stiftischen Gymnasiums Gütersloh —
               getragen seit Generationen vom Verein Skifreunde Gütersloh, geöffnet seit einigen
@@ -50,20 +71,20 @@ export default function EsgPage() {
               Stoff. Genau dafür gibt es die Hütte.
             </p>
           </div>
-          <div className="relative w-48 sm:w-64 md:w-72 aspect-[3/2] shrink-0">
+          <div className="relative w-40 sm:w-56 md:w-64 aspect-[3/2] shrink-0">
             <Image
               src="/media/logos/esg-175.jpg"
               alt="175 Jahre Evangelisch Stiftisches Gymnasium"
               fill
               className="object-contain"
-              sizes="(min-width: 768px) 288px, 240px"
+              sizes="(min-width: 768px) 256px, 224px"
             />
           </div>
         </div>
       </section>
 
       {/* In Kürze */}
-      <section className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-16">
+      <section className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-12 sm:py-14">
         <div className="max-w-[1080px] mx-auto">
           <div className="eyebrow">In Kürze</div>
           <ul className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 list-none p-0">
@@ -86,7 +107,7 @@ export default function EsgPage() {
       </section>
 
       {/* TOC */}
-      <section className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-12 border-y border-[var(--color-wh-winter-grey)]">
+      <section className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-10 border-y border-[var(--color-wh-winter-grey)]">
         <div className="max-w-[1080px] mx-auto">
           <div className="eyebrow mb-3">Auf dieser Seite</div>
           <nav className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2">
@@ -107,328 +128,18 @@ export default function EsgPage() {
       </section>
 
       {/* ---------------------------------------------------------------- */}
-      {/* 2. Pädagogische Idee */}
-      {/* ---------------------------------------------------------------- */}
-      <section id="paedagogik" className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24">
-        <div className="max-w-[1080px] mx-auto">
-          <div className="eyebrow">Pädagogische Idee</div>
-          <h2 className="text-[32px] sm:text-[44px] mt-3 mb-6 leading-tight">
-            Kopf · Herz · Hand · Fuß.
-          </h2>
-
-          <h3 className="text-[22px] sm:text-[26px] mt-12 mb-3">
-            Warum überhaupt ein außerschulischer Lernort?
-          </h3>
-          <div className="prose-block">
-            <p>
-              Schule lebt von einem Versprechen: dass Bildung mehr ist als Stoffvermittlung. Mehr
-              als Noten. Mehr als die Optimierung von G8-Wochenstunden. Dass Schule auch dazu da
-              ist, Menschen zu bilden — mit Verstand, Werten und der Fähigkeit, in der Welt etwas
-              zu tun.
-            </p>
-            <p>
-              Dieses Versprechen lässt sich im Klassenraum nur teilweise einlösen. Manches braucht{" "}
-              <strong>andere Räume, andere Zeiten, andere Aufgaben</strong>: ein Wochenende ohne
-              Schulglocke, eine Küche, in der zwölf Hungrige bedient werden wollen, einen Wald, in
-              dem das Smartphone keinen Empfang hat, ein Lagerfeuer, an dem Gespräche entstehen,
-              die unter Zeitdruck nicht entstanden wären.
-            </p>
-            <p>Die Wiesenhütte ist ein solcher anderer Raum.</p>
-          </div>
-
-          <h3 className="text-[22px] sm:text-[26px] mt-12 mb-3">Pestalozzis Trias — und der Fuß</h3>
-          <div className="prose-block">
-            <p>
-              Wir lehnen uns an eine pädagogische Tradition an, die im deutschsprachigen Raum eine
-              lange Linie hat. <strong>Johann Heinrich Pestalozzi</strong> (1746–1827) hat sie auf
-              eine einfache Formel gebracht: Bildung gelingt, wenn drei Dimensionen zusammenwirken.
-            </p>
-            <ul>
-              <li>
-                <strong>Kopf</strong> — das Denken, das Verstehen, das Reflektieren.
-              </li>
-              <li>
-                <strong>Herz</strong> — das Fühlen, die Werte, die Verantwortung füreinander.
-              </li>
-              <li>
-                <strong>Hand</strong> — das Tun, die praktische Geschicklichkeit, das Hervorbringen.
-              </li>
-            </ul>
-            <p>
-              In der Hüttenarbeit ergänzen wir diese Trias um eine vierte Dimension: den{" "}
-              <strong>Fuß</strong>. Damit meinen wir alles, was mit Bewegung, mit Ortwechsel, mit
-              dem Hinausgehen aus der Schul- und Stadtroutine zu tun hat. Der Fuß ist die
-              Lerndimension, die in einer sitzenden, zunehmend bildschirmgebundenen Schule am
-              leichtesten verloren geht.
-            </p>
-          </div>
-
-          <h4 className="text-[18px] sm:text-[20px] mt-10 mb-4 font-semibold text-[var(--color-wh-deep-green)]">
-            Was das konkret an der Hütte heißt
-          </h4>
-
-          {/* Responsive 4-Spalten-Tabelle: auf mobil als Karten */}
-          <div className="hidden md:block overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-wh-winter-grey)]">
-            <table className="w-full border-collapse text-[14px]">
-              <thead>
-                <tr className="bg-[var(--color-wh-beige)] text-left">
-                  <th className="p-4 font-semibold w-[120px]">Dimension</th>
-                  <th className="p-4 font-semibold">Was Schüler:innen tun</th>
-                  <th className="p-4 font-semibold">Was sie dabei lernen</th>
-                </tr>
-              </thead>
-              <tbody>
-                {DIMENSIONS.map((d) => (
-                  <tr
-                    key={d.dim}
-                    className="border-t border-[var(--color-wh-winter-grey)] align-top"
-                  >
-                    <td className="p-4 font-bold text-[var(--color-wh-deep-green)]">{d.dim}</td>
-                    <td className="p-4 leading-relaxed">{d.tun}</td>
-                    <td className="p-4 leading-relaxed text-[var(--color-wh-fg-muted)]">
-                      {d.lernen}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="md:hidden grid gap-3">
-            {DIMENSIONS.map((d) => (
-              <div
-                key={d.dim}
-                className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-5"
-              >
-                <div className="font-bold text-[var(--color-wh-deep-green)] text-[18px] mb-2">
-                  {d.dim}
-                </div>
-                <p className="m-0 text-[14px] mb-2">
-                  <strong>Was sie tun:</strong> {d.tun}
-                </p>
-                <p className="m-0 text-[14px] text-[var(--color-wh-fg-muted)]">
-                  <strong>Was sie lernen:</strong> {d.lernen}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          <p className="prose-block mt-8 text-[15px]">
-            Diese vier Dimensionen sind keine Programmpunkte, die wir abhaken. Sie sind ein
-            Kompass: Eine Hüttenfahrt, an der nur eine der vier Dimensionen vorkommt, wäre keine
-            gute Hüttenfahrt. Sie sind außerdem ein Korrektiv — wenn eine Klasse zum Beispiel im
-            Kopf-Modus festhängt, lenken wir bewusst auf Hand oder Fuß um.
-          </p>
-
-          <h3 className="text-[22px] sm:text-[26px] mt-12 mb-3">
-            Mit wem wir pädagogisch im Gespräch sind
-          </h3>
-          <div className="prose-block">
-            <p>
-              Wir stehen mit unserer Praxis nicht alleine. Mehrere pädagogische Traditionen tragen
-              das, was an der Hütte geschieht.
-            </p>
-            <ul>
-              {PADAGOGEN.map((p) => (
-                <li key={p.name} className="mb-3">
-                  <strong>{p.name}</strong> {p.intro && `— ${p.intro}`}
-                  <br />
-                  <span className="text-[var(--color-wh-fg-muted)]">{p.text}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="text-[14px] text-[var(--color-wh-fg-muted)] italic">
-              Diese Verankerungen erwähnen wir nicht, um zu imponieren. Sie sind
-              Selbstverpflichtung: Was wir an der Hütte machen, soll diesem Niveau standhalten.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ---------------------------------------------------------------- */}
-      {/* 3. Wie aus einer Hütte ein Lernort wird */}
-      {/* ---------------------------------------------------------------- */}
-      <section id="lernort" className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-16 sm:py-24">
-        <div className="max-w-[1080px] mx-auto">
-          <div className="eyebrow">Prozess</div>
-          <h2 className="text-[32px] sm:text-[44px] mt-3 mb-6 leading-tight">
-            Wie aus einer Hütte ein Lernort wird.
-          </h2>
-          <p className="prose-block">
-            Eine Hüttenfahrt am ESG hat drei Phasen: <strong>Vorbereitung, Aufenthalt,
-            Nachbereitung</strong>. Erst alle drei zusammen machen sie zu einem Lernort.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10">
-            <PhaseCard
-              num="01"
-              title="Vor der Fahrt"
-              subtitle="Hineinwachsen in den Lernort"
-              points={[
-                "Inhaltliche Verzahnung mit dem Unterricht",
-                "Vorbereitungsrunden in der Klasse",
-                "Elternkontakt mit Notfallplan",
-                "Sicherheits-Briefing der Lehrkräfte",
-              ]}
-            />
-            <PhaseCard
-              num="02"
-              title="An der Hütte"
-              subtitle="Ein typischer Tag"
-              points={[
-                "Frühdienst & Frühstück gemeinsam",
-                "Morgenkreis: Was steht heute an?",
-                "Vormittag: Wandern, Werken, Renovieren",
-                "Nachmittag: Bewegung & Projektarbeit",
-                "Abend: Reflexionsrunde am Lagerfeuer",
-              ]}
-            />
-            <PhaseCard
-              num="03"
-              title="Nach der Fahrt"
-              subtitle="Reflexion und Anschluss"
-              points={[
-                "Reflexionsstunde in der Klasse",
-                "Anschluss an den Unterricht",
-                "Bericht an Förderverein & Schulgemeinschaft",
-                "Bei Bedarf: individuelle Nachgespräche",
-              ]}
-            />
-          </div>
-
-          <h3 className="text-[22px] sm:text-[26px] mt-16 mb-4">An der Hütte — ein Tag</h3>
-          <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] overflow-hidden">
-            {DAY_SCHEDULE.map((d, i) => (
-              <div
-                key={d.time}
-                className={`flex flex-col sm:flex-row gap-2 sm:gap-6 px-5 sm:px-6 py-4 ${
-                  i !== DAY_SCHEDULE.length - 1
-                    ? "border-b border-[var(--color-wh-winter-grey)]"
-                    : ""
-                }`}
-              >
-                <div className="font-mono text-[13px] text-[var(--color-wh-deep-green)] font-bold w-full sm:w-32 shrink-0 pt-0.5">
-                  {d.time}
-                </div>
-                <div className="text-[15px] leading-relaxed">{d.text}</div>
-              </div>
-            ))}
-          </div>
-          <p className="text-[14px] text-[var(--color-wh-fg-muted)] mt-4 italic">
-            Dieser Rhythmus erlaubt Konzentration und Erholung im Wechsel. Er ist kein Plan zum
-            Abhaken, sondern ein Gerüst, das die Klasse füllt.
-          </p>
-        </div>
-      </section>
-
-      {/* ---------------------------------------------------------------- */}
-      {/* 4. Begleitung, Sicherheit, Inklusion */}
-      {/* ---------------------------------------------------------------- */}
-      <section id="sicherheit" className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24">
-        <div className="max-w-[1080px] mx-auto">
-          <div className="eyebrow">Eltern-Block</div>
-          <h2 className="text-[32px] sm:text-[44px] mt-3 mb-6 leading-tight">
-            Begleitung, Sicherheit & Inklusion.
-          </h2>
-          <p className="prose-block text-[var(--color-wh-fg-muted)] italic">
-            Diese Seite ist für die Eltern, die — zu Recht — fragen: „Wie konkret läuft das
-            eigentlich?"
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10">
-            <SafetyBlock
-              title="Begleitung"
-              body={
-                <>
-                  Pro Klasse mindestens <strong>zwei Lehrkräfte</strong>, in der Regel
-                  Klassenleitung plus eine zusätzliche Lehrkraft, geschlechtergemischt. In der
-                  Mittelstufe können — wo sinnvoll — Schul-Sozialarbeiter:innen ergänzend
-                  mitfahren. Lehrkräfte sind <strong>Lernbegleiter:innen</strong>: sie
-                  strukturieren, halten Räume offen, intervenieren in Konflikten und ermöglichen
-                  Verantwortungsübernahme.
-                </>
-              }
-            />
-            <SafetyBlock
-              title="Sicherheit"
-              body={
-                <>
-                  Mindestens zwei Begleitpersonen mit aktuellem Erste-Hilfe-Schein. Notfallplan
-                  mit Hüttenwart Werner Klauke (mobil 01516 7448273), Polizei, Notarzt 112,
-                  ärztlicher Bereitschaftsdienst 116117, St. Franziskus Hospital Winterberg
-                  (02981/8020). Klassenleitung ist während der Fahrt 24/7 für Eltern erreichbar.
-                </>
-              }
-            />
-            <SafetyBlock
-              title="Inklusion"
-              body={
-                <>
-                  <strong>Soziale Fairness:</strong> Förderverein des ESG unterstützt Familien
-                  vertraulich. <strong>Gesundheit:</strong> Allergien, Diabetes, Asthma,
-                  vegetarisch/vegan/glutenfrei werden vorher abgefragt.{" "}
-                  <strong>Mobilität:</strong> Barrierefreiheit ist nicht überall gegeben — wir
-                  sprechen offen und suchen Lösungen.
-                </>
-              }
-            />
-          </div>
-
-          <div className="mt-12 bg-[var(--color-wh-beige)] border-l-4 border-[var(--color-wh-deep-green)] rounded-r-[var(--radius-card)] p-6">
-            <p className="m-0 text-[15px]">
-              <strong>Mobbing & Heimweh.</strong> Eine 24/7-Wohngemeinschaft kann auch belasten.
-              Lehrkräfte sind sensibilisiert, kennen die Klasse, beobachten Dynamiken und greifen
-              früh ein. Kein Kind wird allein gelassen — Heimweh wird ernst genommen, aber nicht
-              zur Krise hochgespielt.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ---------------------------------------------------------------- */}
-      {/* 5. Was die Mittelstufe tut */}
-      {/* ---------------------------------------------------------------- */}
-      <section id="jahrgaenge" className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-16 sm:py-24">
-        <div className="max-w-[1080px] mx-auto">
-          <div className="eyebrow">Jahrgänge</div>
-          <h2 className="text-[32px] sm:text-[44px] mt-3 mb-6 leading-tight">
-            Was die Mittelstufe an der Hütte tut.
-          </h2>
-          <p className="prose-block">
-            Am ESG fährt <strong>die Mittelstufe</strong> (Klasse 7–9) zur Wiesenhütte. Eine
-            Hüttenfahrt in Klasse 7 hat einen anderen Sinn als in Klasse 9 — wir erläutern die
-            jahrgangsspezifischen Schwerpunkte unten. Klasse 5/6 und Oberstufe nutzen andere
-            Lernformate; die Hütte ist bewusst der Mittelstufen-Lernort.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10">
-            <YearCard
-              year="Klasse 7"
-              title="Verantwortung übernehmen"
-              body="Die erste Hüttenfahrt: Aus 28 Einzelkindern wird eine Klasse. Schwerpunkt sind Gemeinschaft, Tagesstruktur, Selbstständigkeit (Kofferpacken bis Bett machen), erste Wanderung mit Karte. Reflexion am Ende: Welche Rolle übernehme ich in der Klasse — und welche möchte ich?"
-            />
-            <YearCard
-              year="Klasse 8"
-              title="Konflikte aushalten"
-              body="In der Pubertät spitzen sich Klassendynamiken zu. Die Hütte gibt Raum, in dem Konflikte nicht ausgesessen werden können. Schwerpunkt ist soziale Kompetenz, Selbstorganisation, ein erstes größeres Projekt (z. B. Renovierung eines Raums, Naturkartierung)."
-            />
-            <YearCard
-              year="Klasse 9"
-              title="Ein eigenes Projekt verantworten"
-              body="Die Hütte ist Bühne für ein eigenständig verantwortetes Projekt. Beispiel: Klasse 9e hat 2025 die Feuerstelle vor der Hütte geplant, gebaut und übergeben (siehe Projekttagebuch unten). Schwerpunkt: Projektkompetenz, handwerkliches Arbeiten, Übergabe an die Schulgemeinschaft."
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* ---------------------------------------------------------------- */}
-      {/* 6. Projekttagebuch */}
+      {/* 2. PROJEKTTAGEBUCH — jetzt früh, damit man konkrete Projekte sieht */}
       {/* ---------------------------------------------------------------- */}
       <section id="tagebuch" className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24">
         <div className="max-w-[1080px] mx-auto">
           <div className="eyebrow">Projekttagebuch · „Aus der Hütte"</div>
-          <h2 className="text-[32px] sm:text-[44px] mt-3 mb-12 leading-tight">
+          <h2 className="text-[32px] sm:text-[44px] mt-3 mb-4 leading-tight">
             Reportagen aus der Wiesenhütte.
           </h2>
+          <p className="text-[var(--color-wh-fg-muted)] text-[16px] max-w-2xl mb-12">
+            Diese Reportagen zeigen, was an der Hütte konkret entsteht. Wer den pädagogischen
+            Hintergrund vertiefen möchte, findet weiter unten die Konzept-Abschnitte.
+          </p>
 
           {/* Eintrag 1: Feuerstelle der Klasse 9e */}
           <article className="mb-20">
@@ -593,91 +304,399 @@ export default function EsgPage() {
       </section>
 
       {/* ---------------------------------------------------------------- */}
-      {/* 7. Stimmen aus der Hütte */}
+      {/* 3. Was die Mittelstufe tut */}
       {/* ---------------------------------------------------------------- */}
-      <section id="stimmen" className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-16 sm:py-24">
+      <section id="jahrgaenge" className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-16 sm:py-24">
         <div className="max-w-[1080px] mx-auto">
-          <div className="eyebrow">Stimmen aus der Hütte</div>
-          <h2 className="text-[32px] sm:text-[44px] mt-3 mb-12 leading-tight">
-            Schüler:innen, Lehrkräfte, Eltern.
+          <div className="eyebrow">Jahrgänge</div>
+          <h2 className="text-[32px] sm:text-[44px] mt-3 mb-6 leading-tight">
+            Was die Mittelstufe an der Hütte tut.
           </h2>
+          <p className="prose-block">
+            Am ESG fährt <strong>die Mittelstufe</strong> (Klasse 7–9) zur Wiesenhütte. Eine
+            Hüttenfahrt in Klasse 7 hat einen anderen Sinn als in Klasse 9 — wir erläutern die
+            jahrgangsspezifischen Schwerpunkte unten. Klasse 5/6 und Oberstufe nutzen andere
+            Lernformate; die Hütte ist bewusst der Mittelstufen-Lernort.
+          </p>
 
-          {/* Schüler-Zitat */}
-          <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 sm:p-8 mb-6">
-            <p className="text-[18px] sm:text-[22px] leading-relaxed italic m-0 text-[var(--color-wh-deep-green)]">
-              „Am Anfang dachte ich, das ist nur Schaufeln. Aber als wir dann am letzten Abend
-              dasaßen, mit dem Feuer, das wir selber gebaut haben — das war anders als alles, was
-              wir vorher in der Schule gemacht haben."
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10">
+            <YearCard
+              year="Klasse 7"
+              title="Verantwortung übernehmen"
+              body="Die erste Hüttenfahrt: Aus 28 Einzelkindern wird eine Klasse. Schwerpunkt sind Gemeinschaft, Tagesstruktur, Selbstständigkeit (Kofferpacken bis Bett machen), erste Wanderung mit Karte. Reflexion am Ende: Welche Rolle übernehme ich in der Klasse — und welche möchte ich?"
+            />
+            <YearCard
+              year="Klasse 8"
+              title="Konflikte aushalten"
+              body="In der Pubertät spitzen sich Klassendynamiken zu. Die Hütte gibt Raum, in dem Konflikte nicht ausgesessen werden können. Schwerpunkt ist soziale Kompetenz, Selbstorganisation, ein erstes größeres Projekt (z. B. Renovierung eines Raums, Naturkartierung)."
+            />
+            <YearCard
+              year="Klasse 9"
+              title="Ein eigenes Projekt verantworten"
+              body="Die Hütte ist Bühne für ein eigenständig verantwortetes Projekt. Beispiel: Klasse 9e hat 2025 die Feuerstelle vor der Hütte geplant, gebaut und übergeben (siehe Projekttagebuch oben). Schwerpunkt: Projektkompetenz, handwerkliches Arbeiten, Übergabe an die Schulgemeinschaft."
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ---------------------------------------------------------------- */}
+      {/* 4. Ansprechpartner & Stimmen */}
+      {/* ---------------------------------------------------------------- */}
+      <section id="ansprechpartner" className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24">
+        <div className="max-w-[1080px] mx-auto">
+          <div className="eyebrow">Ansprechpartner</div>
+          <h2 className="text-[32px] sm:text-[44px] mt-3 mb-4 leading-tight">
+            Wer trägt diese Brücke zwischen Schule und Verein.
+          </h2>
+          <p className="prose-block max-w-2xl mb-10">
+            Die Kooperation zwischen ESG und den Skifreunden Gütersloh wird von Menschen
+            getragen, die in beiden Welten zu Hause sind: <strong>Tanja Milse</strong> und{" "}
+            <strong>Johannes Leiskau</strong> sind <strong>Vorstände der Skifreunde
+            Gütersloh e.V.</strong> und gleichzeitig <strong>Lehrkräfte am ESG</strong>. Sie sind
+            erste Ansprechpartner für alles, was die Hüttenarbeit am ESG betrifft — für Klassen,
+            Eltern und Kolleg:innen.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-16">
+            <ContactCard
+              imgSrc="/media/photos/tanja-milse-portrait-gruen.png"
+              imgAlt="Tanja Milse, Lehrkraft am ESG und Vorständin der Skifreunde Gütersloh"
+              name="Tanja Milse"
+              roles={[
+                "Vorstand · Skifreunde Gütersloh e.V.",
+                "Lehrkraft · ESG Gütersloh",
+              ]}
+              email="mil@esg-guetersloh.de"
+              quote="Ich kenne die Klasse seit Klasse 5. Aber drei Tage Hütte zeigen mir mehr über meine Klasse als ein halbes Schuljahr Unterricht. Nicht weil der Unterricht schlecht wäre — weil die Hütte etwas anderes ist."
+            />
+            <ContactCard
+              imgSrc="/media/photos/johannes-leiskau-portrait-gruen.png"
+              imgAlt="Johannes Leiskau, Lehrkraft am ESG und Vorstand der Skifreunde Gütersloh"
+              name="Johannes Leiskau"
+              roles={[
+                "Vorstand · Skifreunde Gütersloh e.V.",
+                "Lehrkraft · ESG Gütersloh",
+              ]}
+              email="lei@esg-guetersloh.de"
+              quote="Wir sehen Schüler:innen an der Hütte in Rollen, die im Klassenzimmer kaum sichtbar sind. Wer in Mathe eher still ist, organisiert plötzlich die ganze Küche. Das verschiebt etwas — nicht nur in der Klasse, sondern auch in unserem Bild von ihr."
+            />
+          </div>
+
+          <div className="border-t border-[var(--color-wh-winter-grey)] pt-12">
+            <div className="eyebrow mb-3">Stimmen aus der Hütte</div>
+            <h3 className="text-[24px] sm:text-[28px] mt-0 mb-8 leading-tight">
+              Schüler:innen und Eltern.
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 sm:p-7">
+                <p className="text-[17px] sm:text-[19px] leading-relaxed italic m-0 text-[var(--color-wh-deep-green)]">
+                  „Am Anfang dachte ich, das ist nur Schaufeln. Aber als wir dann am letzten Abend
+                  dasaßen, mit dem Feuer, das wir selber gebaut haben — das war anders als alles,
+                  was wir vorher in der Schule gemacht haben."
+                </p>
+                <p className="m-0 mt-4 text-[13px] text-[var(--color-wh-fg-muted)]">
+                  — Eine Schülerin der Klasse 9
+                </p>
+              </div>
+              <div className="bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 sm:p-7">
+                <p className="text-[17px] sm:text-[19px] leading-relaxed italic m-0 text-[var(--color-wh-deep-green)]">
+                  „Sie kam zurück und konnte erklären, warum sie weniger Streit mit ihrer
+                  Schwester hatte. Sie hat etwas mitgebracht, das man auch zuhause merkt. Und das
+                  war keine Klassenfahrtsstimmung — das war ein Stück Reife."
+                </p>
+                <p className="m-0 mt-4 text-[13px] text-[var(--color-wh-fg-muted)]">
+                  — Eine Mutter, nach der ersten Hüttenfahrt ihrer Tochter (Klasse 7)
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ---------------------------------------------------------------- */}
+      {/* 5. Pädagogische Idee — Konzept-Block */}
+      {/* ---------------------------------------------------------------- */}
+      <section id="paedagogik" className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-16 sm:py-24">
+        <div className="max-w-[1080px] mx-auto">
+          <div className="eyebrow">Pädagogische Idee</div>
+          <h2 className="text-[32px] sm:text-[44px] mt-3 mb-6 leading-tight">
+            Kopf · Herz · Hand · Fuß.
+          </h2>
+          <p className="prose-block max-w-2xl text-[var(--color-wh-fg-muted)]">
+            Die folgenden Abschnitte erläutern den pädagogischen Hintergrund, vor dem die oben
+            beschriebenen Projekte entstehen. Wer das Gesamtbild sucht, ist hier richtig.
+          </p>
+
+          <h3 className="text-[22px] sm:text-[26px] mt-12 mb-3">
+            Warum überhaupt ein außerschulischer Lernort?
+          </h3>
+          <div className="prose-block">
+            <p>
+              Schule lebt von einem Versprechen: dass Bildung mehr ist als Stoffvermittlung. Mehr
+              als Noten. Mehr als die Optimierung von G8-Wochenstunden. Dass Schule auch dazu da
+              ist, Menschen zu bilden — mit Verstand, Werten und der Fähigkeit, in der Welt etwas
+              zu tun.
             </p>
-            <p className="m-0 mt-4 text-[14px] text-[var(--color-wh-fg-muted)]">
-              — Eine Schülerin der Klasse 9
+            <p>
+              Dieses Versprechen lässt sich im Klassenraum nur teilweise einlösen. Manches braucht{" "}
+              <strong>andere Räume, andere Zeiten, andere Aufgaben</strong>: ein Wochenende ohne
+              Schulglocke, eine Küche, in der zwölf Hungrige bedient werden wollen, einen Wald, in
+              dem das Smartphone keinen Empfang hat, ein Lagerfeuer, an dem Gespräche entstehen,
+              die unter Zeitdruck nicht entstanden wären.
+            </p>
+            <p>Die Wiesenhütte ist ein solcher anderer Raum.</p>
+          </div>
+
+          <h3 className="text-[22px] sm:text-[26px] mt-12 mb-3">Pestalozzis Trias — und der Fuß</h3>
+          <div className="prose-block">
+            <p>
+              Wir lehnen uns an eine pädagogische Tradition an, die im deutschsprachigen Raum eine
+              lange Linie hat. <strong>Johann Heinrich Pestalozzi</strong> (1746–1827) hat sie auf
+              eine einfache Formel gebracht: Bildung gelingt, wenn drei Dimensionen zusammenwirken.
+            </p>
+            <ul>
+              <li>
+                <strong>Kopf</strong> — das Denken, das Verstehen, das Reflektieren.
+              </li>
+              <li>
+                <strong>Herz</strong> — das Fühlen, die Werte, die Verantwortung füreinander.
+              </li>
+              <li>
+                <strong>Hand</strong> — das Tun, die praktische Geschicklichkeit, das Hervorbringen.
+              </li>
+            </ul>
+            <p>
+              In der Hüttenarbeit ergänzen wir diese Trias um eine vierte Dimension: den{" "}
+              <strong>Fuß</strong>. Damit meinen wir alles, was mit Bewegung, mit Ortwechsel, mit
+              dem Hinausgehen aus der Schul- und Stadtroutine zu tun hat. Der Fuß ist die
+              Lerndimension, die in einer sitzenden, zunehmend bildschirmgebundenen Schule am
+              leichtesten verloren geht.
             </p>
           </div>
 
-          {/* Lehrer 1 — Tanja Milse */}
-          <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 sm:p-8 mb-6 grid grid-cols-1 sm:grid-cols-[120px_1fr] gap-4 sm:gap-6 items-start">
-            <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden bg-[var(--color-wh-beige)] mx-auto sm:mx-0">
-              <Image
-                src="/media/photos/tanja-milse-portrait-gruen.png"
-                alt="Tanja Milse, Lehrkraft am ESG"
-                fill
-                className="object-cover"
-                sizes="120px"
-              />
-            </div>
-            <div>
-              <p className="text-[18px] sm:text-[20px] leading-relaxed italic m-0 text-[var(--color-wh-deep-green)]">
-                „Ich kenne die Klasse seit Klasse 5. Aber drei Tage Hütte zeigen mir mehr über
-                meine Klasse als ein halbes Schuljahr Unterricht. Nicht weil der Unterricht
-                schlecht wäre — weil die Hütte etwas anderes ist."
-              </p>
-              <p className="m-0 mt-3 text-[14px] text-[var(--color-wh-fg-muted)]">
-                <strong className="text-[var(--color-wh-black)]">Tanja Milse</strong> · Lehrkraft
-                am ESG, begleitet Hüttenfahrten der Mittelstufe
-              </p>
-            </div>
+          <h4 className="text-[18px] sm:text-[20px] mt-10 mb-4 font-semibold text-[var(--color-wh-deep-green)]">
+            Was das konkret an der Hütte heißt
+          </h4>
+
+          <div className="hidden md:block overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-wh-winter-grey)] bg-white">
+            <table className="w-full border-collapse text-[14px]">
+              <thead>
+                <tr className="bg-[var(--color-wh-snow)] text-left">
+                  <th className="p-4 font-semibold w-[120px]">Dimension</th>
+                  <th className="p-4 font-semibold">Was Schüler:innen tun</th>
+                  <th className="p-4 font-semibold">Was sie dabei lernen</th>
+                </tr>
+              </thead>
+              <tbody>
+                {DIMENSIONS.map((d) => (
+                  <tr
+                    key={d.dim}
+                    className="border-t border-[var(--color-wh-winter-grey)] align-top"
+                  >
+                    <td className="p-4 font-bold text-[var(--color-wh-deep-green)]">{d.dim}</td>
+                    <td className="p-4 leading-relaxed">{d.tun}</td>
+                    <td className="p-4 leading-relaxed text-[var(--color-wh-fg-muted)]">
+                      {d.lernen}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="md:hidden grid gap-3">
+            {DIMENSIONS.map((d) => (
+              <div
+                key={d.dim}
+                className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-5"
+              >
+                <div className="font-bold text-[var(--color-wh-deep-green)] text-[18px] mb-2">
+                  {d.dim}
+                </div>
+                <p className="m-0 text-[14px] mb-2">
+                  <strong>Was sie tun:</strong> {d.tun}
+                </p>
+                <p className="m-0 text-[14px] text-[var(--color-wh-fg-muted)]">
+                  <strong>Was sie lernen:</strong> {d.lernen}
+                </p>
+              </div>
+            ))}
           </div>
 
-          {/* Lehrer 2 — Johannes Leiskau */}
-          <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 sm:p-8 mb-6 grid grid-cols-1 sm:grid-cols-[120px_1fr] gap-4 sm:gap-6 items-start">
-            <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden bg-[var(--color-wh-beige)] mx-auto sm:mx-0">
-              <Image
-                src="/media/photos/johannes-leiskau-portrait-gruen.png"
-                alt="Johannes Leiskau, Lehrkraft am ESG"
-                fill
-                className="object-cover"
-                sizes="120px"
-              />
-            </div>
-            <div>
-              <p className="text-[18px] sm:text-[20px] leading-relaxed italic m-0 text-[var(--color-wh-deep-green)]">
-                „Wir sehen Schüler:innen an der Hütte in Rollen, die im Klassenzimmer kaum sichtbar
-                sind. Wer in Mathe eher still ist, organisiert plötzlich die ganze Küche. Das
-                verschiebt etwas — nicht nur in der Klasse, sondern auch in unserem Bild von ihr."
-              </p>
-              <p className="m-0 mt-3 text-[14px] text-[var(--color-wh-fg-muted)]">
-                <strong className="text-[var(--color-wh-black)]">Johannes Leiskau</strong> ·
-                Lehrkraft am ESG, mitverantwortlich für die Hüttenarbeit
-              </p>
-            </div>
-          </div>
+          <p className="prose-block mt-8 text-[15px]">
+            Diese vier Dimensionen sind keine Programmpunkte, die wir abhaken. Sie sind ein
+            Kompass: Eine Hüttenfahrt, an der nur eine der vier Dimensionen vorkommt, wäre keine
+            gute Hüttenfahrt. Sie sind außerdem ein Korrektiv — wenn eine Klasse zum Beispiel im
+            Kopf-Modus festhängt, lenken wir bewusst auf Hand oder Fuß um.
+          </p>
 
-          {/* Eltern-Zitat */}
-          <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 sm:p-8">
-            <p className="text-[18px] sm:text-[22px] leading-relaxed italic m-0 text-[var(--color-wh-deep-green)]">
-              „Sie kam zurück und konnte erklären, warum sie weniger Streit mit ihrer Schwester
-              hatte. Sie hat etwas mitgebracht, das man auch zuhause merkt. Und das war keine
-              Klassenfahrtsstimmung — das war ein Stück Reife."
+          <h3 className="text-[22px] sm:text-[26px] mt-12 mb-3">
+            Mit wem wir pädagogisch im Gespräch sind
+          </h3>
+          <div className="prose-block">
+            <p>
+              Wir stehen mit unserer Praxis nicht alleine. Mehrere pädagogische Traditionen tragen
+              das, was an der Hütte geschieht.
             </p>
-            <p className="m-0 mt-4 text-[14px] text-[var(--color-wh-fg-muted)]">
-              — Eine Mutter, nach der ersten Hüttenfahrt ihrer Tochter (Klasse 7)
+            <ul>
+              {PADAGOGEN.map((p) => (
+                <li key={p.name} className="mb-3">
+                  <strong>{p.name}</strong> {p.intro && `— ${p.intro}`}
+                  <br />
+                  <span className="text-[var(--color-wh-fg-muted)]">{p.text}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="text-[14px] text-[var(--color-wh-fg-muted)] italic">
+              Diese Verankerungen erwähnen wir nicht, um zu imponieren. Sie sind
+              Selbstverpflichtung: Was wir an der Hütte machen, soll diesem Niveau standhalten.
             </p>
           </div>
         </div>
       </section>
 
       {/* ---------------------------------------------------------------- */}
-      {/* 8. Häufige Elternfragen */}
+      {/* 6. Wie aus einer Hütte ein Lernort wird */}
+      {/* ---------------------------------------------------------------- */}
+      <section id="lernort" className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24">
+        <div className="max-w-[1080px] mx-auto">
+          <div className="eyebrow">Prozess</div>
+          <h2 className="text-[32px] sm:text-[44px] mt-3 mb-6 leading-tight">
+            Wie aus einer Hütte ein Lernort wird.
+          </h2>
+          <p className="prose-block">
+            Eine Hüttenfahrt am ESG hat drei Phasen: <strong>Vorbereitung, Aufenthalt,
+            Nachbereitung</strong>. Erst alle drei zusammen machen sie zu einem Lernort.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10">
+            <PhaseCard
+              num="01"
+              title="Vor der Fahrt"
+              subtitle="Hineinwachsen in den Lernort"
+              points={[
+                "Inhaltliche Verzahnung mit dem Unterricht",
+                "Vorbereitungsrunden in der Klasse",
+                "Elternkontakt mit Notfallplan",
+                "Sicherheits-Briefing der Lehrkräfte",
+              ]}
+            />
+            <PhaseCard
+              num="02"
+              title="An der Hütte"
+              subtitle="Ein typischer Tag"
+              points={[
+                "Frühdienst & Frühstück gemeinsam",
+                "Morgenkreis: Was steht heute an?",
+                "Vormittag: Wandern, Werken, Renovieren",
+                "Nachmittag: Bewegung & Projektarbeit",
+                "Abend: Reflexionsrunde am Lagerfeuer",
+              ]}
+            />
+            <PhaseCard
+              num="03"
+              title="Nach der Fahrt"
+              subtitle="Reflexion und Anschluss"
+              points={[
+                "Reflexionsstunde in der Klasse",
+                "Anschluss an den Unterricht",
+                "Bericht an Förderverein & Schulgemeinschaft",
+                "Bei Bedarf: individuelle Nachgespräche",
+              ]}
+            />
+          </div>
+
+          <h3 className="text-[22px] sm:text-[26px] mt-16 mb-4">An der Hütte — ein Tag</h3>
+          <div className="bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] overflow-hidden">
+            {DAY_SCHEDULE.map((d, i) => (
+              <div
+                key={d.time}
+                className={`flex flex-col sm:flex-row gap-2 sm:gap-6 px-5 sm:px-6 py-4 ${
+                  i !== DAY_SCHEDULE.length - 1
+                    ? "border-b border-[var(--color-wh-winter-grey)]"
+                    : ""
+                }`}
+              >
+                <div className="font-mono text-[13px] text-[var(--color-wh-deep-green)] font-bold w-full sm:w-32 shrink-0 pt-0.5">
+                  {d.time}
+                </div>
+                <div className="text-[15px] leading-relaxed">{d.text}</div>
+              </div>
+            ))}
+          </div>
+          <p className="text-[14px] text-[var(--color-wh-fg-muted)] mt-4 italic">
+            Dieser Rhythmus erlaubt Konzentration und Erholung im Wechsel. Er ist kein Plan zum
+            Abhaken, sondern ein Gerüst, das die Klasse füllt.
+          </p>
+        </div>
+      </section>
+
+      {/* ---------------------------------------------------------------- */}
+      {/* 7. Begleitung, Sicherheit, Inklusion */}
+      {/* ---------------------------------------------------------------- */}
+      <section id="sicherheit" className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-16 sm:py-24">
+        <div className="max-w-[1080px] mx-auto">
+          <div className="eyebrow">Eltern-Block</div>
+          <h2 className="text-[32px] sm:text-[44px] mt-3 mb-6 leading-tight">
+            Begleitung, Sicherheit & Inklusion.
+          </h2>
+          <p className="prose-block text-[var(--color-wh-fg-muted)] italic">
+            Diese Seite ist für die Eltern, die — zu Recht — fragen: „Wie konkret läuft das
+            eigentlich?"
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10">
+            <SafetyBlock
+              title="Begleitung"
+              body={
+                <>
+                  Pro Klasse mindestens <strong>zwei Lehrkräfte</strong>, in der Regel
+                  Klassenleitung plus eine zusätzliche Lehrkraft, geschlechtergemischt. In der
+                  Mittelstufe können — wo sinnvoll — Schul-Sozialarbeiter:innen ergänzend
+                  mitfahren. Lehrkräfte sind <strong>Lernbegleiter:innen</strong>: sie
+                  strukturieren, halten Räume offen, intervenieren in Konflikten und ermöglichen
+                  Verantwortungsübernahme.
+                </>
+              }
+            />
+            <SafetyBlock
+              title="Sicherheit"
+              body={
+                <>
+                  Mindestens zwei Begleitpersonen mit aktuellem Erste-Hilfe-Schein. Notfallplan
+                  mit Hüttenwart Werner Klauke (mobil 01516 7448273), Polizei, Notarzt 112,
+                  ärztlicher Bereitschaftsdienst 116117, St. Franziskus Hospital Winterberg
+                  (02981/8020). Klassenleitung ist während der Fahrt 24/7 für Eltern erreichbar.
+                </>
+              }
+            />
+            <SafetyBlock
+              title="Inklusion"
+              body={
+                <>
+                  <strong>Soziale Fairness:</strong> Förderverein des ESG unterstützt Familien
+                  vertraulich. <strong>Gesundheit:</strong> Allergien, Diabetes, Asthma,
+                  vegetarisch/vegan/glutenfrei werden vorher abgefragt.{" "}
+                  <strong>Mobilität:</strong> Barrierefreiheit ist nicht überall gegeben — wir
+                  sprechen offen und suchen Lösungen.
+                </>
+              }
+            />
+          </div>
+
+          <div className="mt-12 bg-white border-l-4 border-[var(--color-wh-deep-green)] rounded-r-[var(--radius-card)] p-6">
+            <p className="m-0 text-[15px]">
+              <strong>Mobbing & Heimweh.</strong> Eine 24/7-Wohngemeinschaft kann auch belasten.
+              Lehrkräfte sind sensibilisiert, kennen die Klasse, beobachten Dynamiken und greifen
+              früh ein. Kein Kind wird allein gelassen — Heimweh wird ernst genommen, aber nicht
+              zur Krise hochgespielt.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ---------------------------------------------------------------- */}
+      {/* 8. FAQ */}
       {/* ---------------------------------------------------------------- */}
       <section id="fragen" className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24">
         <div className="max-w-[800px] mx-auto">
@@ -709,58 +728,44 @@ export default function EsgPage() {
       </section>
 
       {/* ---------------------------------------------------------------- */}
-      {/* 9. Träger */}
+      {/* 9. Träger — dunkler Schluss-Block */}
       {/* ---------------------------------------------------------------- */}
-      <section id="traeger" className="bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24">
+      <section
+        id="traeger"
+        className="bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24"
+      >
         <div className="max-w-[1080px] mx-auto">
-          <div className="text-xs uppercase tracking-wider opacity-80 font-semibold">
+          <div className="text-xs uppercase tracking-wider text-[var(--color-wh-snow)]/85 font-semibold">
             Wer trägt die Hüttenarbeit
           </div>
-          <h2 className="text-[32px] sm:text-[44px] mt-3 mb-6 leading-tight">
+          <h2 className="text-[32px] sm:text-[44px] mt-3 mb-6 leading-tight text-[var(--color-wh-snow)]">
             Ein Dreiergespann.
           </h2>
-          <p className="text-[17px] leading-relaxed max-w-3xl opacity-90">
+          <p className="text-[17px] leading-relaxed max-w-3xl text-[var(--color-wh-snow)]/90">
             Die Hüttenarbeit am ESG ist getragen von drei Säulen — Verein, Schule und Eltern. Das
             ist keine Selbstverständlichkeit. Sie funktioniert, weil über Jahre ein Vertrauen
             zwischen Verein, Schule und Familien gewachsen ist.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10">
-            <div className="bg-white/8 backdrop-blur border border-white/15 rounded-[var(--radius-card)] p-6">
-              <div className="text-xs uppercase tracking-wider opacity-70 font-semibold mb-2">
-                Säule 1
-              </div>
-              <h3 className="font-display font-bold text-[20px] mb-3">
-                Skifreunde Gütersloh e.V.
-              </h3>
-              <p className="text-[15px] leading-relaxed opacity-90 m-0">
-                Stellen die Hütte bereit, halten sie instand, garantieren den Hüttenwart, und
-                sind seit 70+ Jahren ihr Rückgrat.
-              </p>
-            </div>
-            <div className="bg-white/8 backdrop-blur border border-white/15 rounded-[var(--radius-card)] p-6">
-              <div className="text-xs uppercase tracking-wider opacity-70 font-semibold mb-2">
-                Säule 2
-              </div>
-              <h3 className="font-display font-bold text-[20px] mb-3">Lehrkräfte des ESG</h3>
-              <p className="text-[15px] leading-relaxed opacity-90 m-0">
-                Tragen die pädagogische Konzeption, planen, begleiten und reflektieren die
-                Fahrten.
-              </p>
-            </div>
-            <div className="bg-white/8 backdrop-blur border border-white/15 rounded-[var(--radius-card)] p-6">
-              <div className="text-xs uppercase tracking-wider opacity-70 font-semibold mb-2">
-                Säule 3
-              </div>
-              <h3 className="font-display font-bold text-[20px] mb-3">Förderverein des ESG</h3>
-              <p className="text-[15px] leading-relaxed opacity-90 m-0">
-                Unterstützt — finanziell, ideell und mit dem Auge der Eltern. Zentraler Topf für
-                soziale Härtefälle.
-              </p>
-            </div>
+            <PillarCard
+              num="1"
+              title="Skifreunde Gütersloh e.V."
+              body="Stellen die Hütte bereit, halten sie instand, garantieren den Hüttenwart, und sind seit 70+ Jahren ihr Rückgrat."
+            />
+            <PillarCard
+              num="2"
+              title="Lehrkräfte des ESG"
+              body="Tragen die pädagogische Konzeption, planen, begleiten und reflektieren die Fahrten."
+            />
+            <PillarCard
+              num="3"
+              title="Förderverein des ESG"
+              body="Unterstützt — finanziell, ideell und mit dem Auge der Eltern. Zentraler Topf für soziale Härtefälle."
+            />
           </div>
 
-          <p className="text-[15px] mt-10 opacity-75 italic">
+          <p className="text-[15px] mt-10 text-[var(--color-wh-snow)]/75 italic">
             Wir sind dankbar, dass das so ist.
           </p>
         </div>
@@ -943,7 +948,7 @@ function PhaseCard({
 
 function SafetyBlock({ title, body }: { title: string; body: React.ReactNode }) {
   return (
-    <div className="bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6">
+    <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6">
       <h4 className="font-display font-bold text-[20px] text-[var(--color-wh-deep-green)] mt-0 mb-3">
         {title}
       </h4>
@@ -970,6 +975,79 @@ function YearCard({
         {title}
       </h4>
       <p className="text-[14px] leading-relaxed text-[var(--color-wh-black)] m-0">{body}</p>
+    </div>
+  );
+}
+
+function ContactCard({
+  imgSrc,
+  imgAlt,
+  name,
+  roles,
+  email,
+  quote,
+}: {
+  imgSrc: string;
+  imgAlt: string;
+  name: string;
+  roles: string[];
+  email: string;
+  quote: string;
+}) {
+  return (
+    <div className="bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 sm:p-7">
+      <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[96px_1fr] gap-4 sm:gap-5 items-start mb-5">
+        <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-white shrink-0">
+          <Image
+            src={imgSrc}
+            alt={imgAlt}
+            fill
+            className="object-cover"
+            sizes="96px"
+          />
+        </div>
+        <div>
+          <p className="font-display font-bold text-[20px] sm:text-[22px] text-[var(--color-wh-deep-green)] m-0">
+            {name}
+          </p>
+          {roles.map((r) => (
+            <p key={r} className="text-[13px] text-[var(--color-wh-fg-muted)] m-0">
+              {r}
+            </p>
+          ))}
+          <a
+            href={`mailto:${email}`}
+            className="inline-block mt-2 text-[14px] text-[var(--color-wh-deep-green)] underline hover:opacity-70"
+          >
+            {email}
+          </a>
+        </div>
+      </div>
+      <p className="text-[15px] sm:text-[16px] leading-relaxed italic m-0 text-[var(--color-wh-black)] border-l-2 border-[var(--color-wh-deep-green)] pl-4">
+        „{quote}"
+      </p>
+    </div>
+  );
+}
+
+function PillarCard({
+  num,
+  title,
+  body,
+}: {
+  num: string;
+  title: string;
+  body: string;
+}) {
+  return (
+    <div className="bg-white/10 backdrop-blur border border-white/20 rounded-[var(--radius-card)] p-6">
+      <div className="text-xs uppercase tracking-wider text-[var(--color-wh-snow)]/75 font-semibold mb-2">
+        Säule {num}
+      </div>
+      <h3 className="font-display font-bold text-[20px] mb-3 text-[var(--color-wh-snow)]">
+        {title}
+      </h3>
+      <p className="text-[15px] leading-relaxed text-[var(--color-wh-snow)]/90 m-0">{body}</p>
     </div>
   );
 }
