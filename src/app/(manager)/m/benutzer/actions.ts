@@ -72,6 +72,7 @@ export async function createUser(raw: z.infer<typeof createSchema>): Promise<Cre
       name: data.name.trim(),
       passwordHash,
       role: data.role as Role,
+      mustChangePassword: true,  // neue User müssen beim ersten Login eigenes Passwort setzen
     })
     .returning({ id: users.id });
 
@@ -182,7 +183,14 @@ export async function resetUserPassword(
   if (!target[0]) return { ok: false, error: "Nutzer nicht gefunden." };
 
   const hash = await bcrypt.hash(newPassword, 12);
-  await db.update(users).set({ passwordHash: hash, updatedAt: new Date() }).where(eq(users.id, userId));
+  await db
+    .update(users)
+    .set({
+      passwordHash: hash,
+      mustChangePassword: true,  // erzwingt Wechsel beim nächsten Login
+      updatedAt: new Date(),
+    })
+    .where(eq(users.id, userId));
 
   await db.insert(activityLog).values({
     who: session.user?.name ?? session.user?.email ?? "Admin",

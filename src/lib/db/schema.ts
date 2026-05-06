@@ -64,9 +64,45 @@ export const users = pgTable("users", {
   passwordHash: text("password_hash"),
   role: userRoleEnum("role").notNull().default("customer"),
   emailVerified: timestamp("email_verified"),
+
+  // Erzwingt Passwort-Wechsel beim nächsten Login (z. B. nach Admin-Reset)
+  mustChangePassword: boolean("must_change_password").notNull().default(false),
+
+  // 2FA (TOTP) — Pflicht für Admin-Rollen, optional für Manager
+  twoFactorEnabled: boolean("two_factor_enabled").notNull().default(false),
+  twoFactorSecret: text("two_factor_secret"),                                          // Base32
+  twoFactorBackupCodes: jsonb("two_factor_backup_codes").$type<string[]>(),            // gehashte Einmal-Codes
+
+  // Login-Audit
+  lastLoginAt: timestamp("last_login_at"),
+  lastLoginIp: varchar("last_login_ip", { length: 45 }),
+
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
+
+// =============================================================
+// EMAIL CHANGE REQUESTS — Mailwechsel mit Token-Verifizierung
+// =============================================================
+
+export const emailChangeRequests = pgTable(
+  "email_change_requests",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    newEmail: varchar("new_email", { length: 255 }).notNull(),
+    tokenHash: text("token_hash").notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
+    consumedAt: timestamp("consumed_at"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    userIdx: index("email_change_user_idx").on(t.userId),
+    expiresIdx: index("email_change_expires_idx").on(t.expiresAt),
+  })
+);
 
 // =============================================================
 // CUSTOMERS — guest details (decoupled from auth user)
