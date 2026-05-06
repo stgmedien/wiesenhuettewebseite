@@ -215,6 +215,17 @@ export const activityLog = pgTable("activity_log", {
 });
 
 // =============================================================
+// SITE SETTINGS — Singleton-Row mit Manager-konfigurierbaren Werten
+// =============================================================
+
+export const siteSettings = pgTable("site_settings", {
+  id: integer("id").primaryKey().default(1),
+  cleaningDaysAfterDeparture: integer("cleaning_days_after_departure").notNull().default(1),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  updatedBy: varchar("updated_by", { length: 255 }),
+});
+
+// =============================================================
 // BLOG / CMS
 // =============================================================
 

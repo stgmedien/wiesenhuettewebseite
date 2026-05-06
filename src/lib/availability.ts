@@ -1,7 +1,7 @@
 import { db } from "./db";
 import { bookings } from "./db/schema";
 import { and, gte, lte, ne, or, eq } from "drizzle-orm";
-import { RULES } from "./pricing";
+import { getSiteSettings } from "./settings";
 
 export type DateRange = { arrival: Date | string; departure: Date | string };
 
@@ -38,7 +38,8 @@ export const isRangeAvailable = async (
 ): Promise<boolean> => {
   const arrival = toIso(range.arrival);
   const departure = toIso(range.departure);
-  const cleaningDays = RULES.cleaningDaysAfterDeparture;
+  const settings = await getSiteSettings();
+  const cleaningDays = settings.cleaningDaysAfterDeparture;
 
   // Effective new range = [arrival, departure + cleaningDays). Two intervals overlap iff
   //   existing.arrival < new.effectiveEnd  AND  existing.effectiveEnd > new.arrival
@@ -101,7 +102,8 @@ export const getBookingBlocks = async (
 ): Promise<BookingBlocks> => {
   const fromIso = toIso(from);
   const toIsoStr = toIso(to);
-  const cleaningDays = RULES.cleaningDaysAfterDeparture;
+  const settings = await getSiteSettings();
+  const cleaningDays = settings.cleaningDaysAfterDeparture;
 
   const rows = await db
     .select({

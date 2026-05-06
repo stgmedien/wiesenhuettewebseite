@@ -12,6 +12,7 @@ import {
   LogOut,
   MountainSnow,
   FileText,
+  Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +23,7 @@ const NAV = [
   { href: "/m/manuell", label: "Manuelle Buchung", Icon: PlusCircle },
   { href: "/m/sperrzeiten", label: "Sperrzeiten", Icon: Lock },
   { href: "/m/blog", label: "Blog", Icon: FileText },
+  { href: "/m/einstellungen", label: "Einstellungen", Icon: Settings },
 ];
 
 export const Sidebar = ({

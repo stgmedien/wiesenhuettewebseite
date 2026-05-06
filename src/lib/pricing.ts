@@ -28,12 +28,8 @@ export const RULES = {
   minPersons: 10,
   maxPersons: 33,
   prepaymentPercent: 50,        // Anzahlung-Anteil bei Buchung in %
-  /**
-   * Anzahl Tage NACH der Abreise, an denen die Hütte nicht buchbar ist
-   * (Reinigung, Übergabe, Wartung). Default 1 = der Abreisetag selbst ist
-   * gesperrt; nächste Anreise ist somit am Folgetag möglich.
-   */
-  cleaningDaysAfterDeparture: 1,
+  // Hinweis: cleaningDaysAfterDeparture ist jetzt eine Manager-Einstellung
+  // (site_settings-Tabelle, abrufbar über getSiteSettings()). Default = 1.
 } as const;
 
 // Cancellation tiers (vom subtotal exkl. Kaution)

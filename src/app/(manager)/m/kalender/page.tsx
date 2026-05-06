@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { bookings, customers } from "@/lib/db/schema";
 import { eq, gte, lte, and } from "drizzle-orm";
 import { CalendarGrid } from "./CalendarGrid";
-import { RULES } from "@/lib/pricing";
+import { getSiteSettings } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Kalender · Wiesenhütte Manager" };
@@ -48,12 +48,13 @@ export default async function CalendarPage({ searchParams }: Props) {
         : b.bookingNumber,
   }));
 
+  const { cleaningDaysAfterDeparture } = await getSiteSettings();
   // Cleaning days = day of departure (and following days when cleaningDays > 1) for non-Wartung
   const cleaningDates = new Set<string>();
   for (const e of list) {
     if (e.status === "wartung") continue;
     const dep = new Date(e.departure);
-    for (let i = 0; i < RULES.cleaningDaysAfterDeparture; i++) {
+    for (let i = 0; i < cleaningDaysAfterDeparture; i++) {
       const d = new Date(dep);
       d.setDate(d.getDate() + i);
       cleaningDates.add(d.toISOString().slice(0, 10));
