@@ -50,6 +50,13 @@
       "when": 1778090619840,
       "tag": "0006_stiff_dreadnoughts",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1778107145640,
+      "tag": "0007_thick_tana_nile",
+      "breakpoints": true
     }
   ]
 }

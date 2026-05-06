@@ -230,6 +230,8 @@ export const bookings = pgTable(
     cleaningCents: integer("cleaning_cents").notNull().default(0),
     soloSurchargeCents: integer("solo_surcharge_cents").notNull().default(0),
     extrasCents: integer("extras_cents").notNull().default(0),
+    discountCents: integer("discount_cents").notNull().default(0), // eingeloester Rabatt
+    discountCode: varchar("discount_code", { length: 30 }),
     subtotalCents: integer("subtotal_cents").notNull().default(0),
     depositCents: integer("deposit_cents").notNull().default(0),  // Kaution (separat)
     totalCents: integer("total_cents").notNull().default(0),      // ohne Kaution

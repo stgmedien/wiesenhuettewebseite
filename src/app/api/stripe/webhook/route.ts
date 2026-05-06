@@ -9,6 +9,7 @@ import BookingInternalEmail from "@/lib/mail/templates/booking-internal";
 import KurtaxeInfoEmail from "@/lib/mail/templates/kurtaxe-info";
 import MietvertragEmail from "@/lib/mail/templates/mietvertrag";
 import { formatDateLong } from "@/lib/utils";
+import { createInvoiceForBooking } from "@/lib/invoice";
 import type Stripe from "stripe";
 
 export const runtime = "nodejs"; // raw body needed
@@ -44,6 +45,18 @@ export async function POST(req: NextRequest) {
       case "checkout.session.async_payment_failed": {
         const session = event.data.object as Stripe.Checkout.Session;
         await handleCheckoutFailed(session);
+        break;
+      }
+      case "charge.refunded": {
+        const charge = event.data.object as Stripe.Charge;
+        await handleChargeRefunded(charge);
+        break;
+      }
+      case "payment_intent.succeeded": {
+        // Wird bereits ueber checkout.session.completed abgedeckt; hier nur Logging
+        // damit auch Off-Session-Payments (Restzahlung-Auto-Charge) registriert werden.
+        const pi = event.data.object as Stripe.PaymentIntent;
+        await handlePaymentIntentSucceeded(pi);
         break;
       }
       default:
@@ -131,6 +144,20 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     what: `Anzahlung erhalten — Buchung ${booking.bookingNumber} bestätigt (${(amountCents / 100).toFixed(2)} €)`,
     bookingId,
   });
+
+  // GoBD-Rechnung anlegen (atomare Nummer via Postgres-Sequence)
+  try {
+    const inv = await createInvoiceForBooking(bookingId);
+    if (inv.isNew) {
+      await db.insert(activityLog).values({
+        who: "System",
+        what: `Rechnung ${inv.invoiceNumber} ausgestellt`,
+        bookingId,
+      });
+    }
+  } catch (err) {
+    console.error("[webhook] invoice creation failed (non-blocking):", err);
+  }
 
   // Send mails
   const customer = booking.customerId
@@ -282,6 +309,160 @@ async function handleCheckoutFailed(session: Stripe.Checkout.Session) {
   await db.insert(activityLog).values({
     who: "Stripe",
     what: `Zahlung fehlgeschlagen — Buchung bleibt im Status „angefragt"`,
+    bookingId,
+  });
+}
+
+// =============================================================
+// charge.refunded — markiert die zugehoerige Zahlung als erstattet,
+// fuegt eine 'rueckerstattung'-Payment-Row mit negativem Betrag hinzu,
+// und passt booking.paidCents an.
+// =============================================================
+async function handleChargeRefunded(charge: Stripe.Charge) {
+  const piId = (charge.payment_intent as string | null) ?? null;
+  if (!piId) {
+    console.warn("[webhook] charge.refunded ohne payment_intent");
+    return;
+  }
+  // Buchung anhand der payment_intent_id finden
+  const found = await db
+    .select()
+    .from(bookings)
+    .where(eq(bookings.stripePaymentIntentId, piId))
+    .limit(1);
+  const booking = found[0];
+  if (!booking) {
+    // Versuch ueber payments-Tabelle
+    const pmtRows = await db
+      .select()
+      .from(payments)
+      .where(eq(payments.stripePaymentIntentId, piId))
+      .limit(1);
+    if (!pmtRows[0]) {
+      console.warn(`[webhook] charge.refunded: keine Buchung fuer PI ${piId}`);
+      return;
+    }
+    await markRefund(pmtRows[0].bookingId, charge.amount_refunded, piId);
+    return;
+  }
+  await markRefund(booking.id, charge.amount_refunded, piId);
+}
+
+async function markRefund(
+  bookingId: string,
+  amountRefundedCents: number,
+  piId: string
+) {
+  // Existing rueckerstattung-Payment? (Idempotenz: wenn unsere Cron schon
+  // einen Refund eingetragen hat, nicht doppelt buchen)
+  const existing = await db
+    .select()
+    .from(payments)
+    .where(eq(payments.bookingId, bookingId));
+  const alreadyRefunded = existing.find(
+    (p) => p.kind === "rueckerstattung" && p.stripePaymentIntentId === piId
+  );
+  if (alreadyRefunded) {
+    console.log(`[webhook] refund fuer PI ${piId} bereits eingetragen, skip`);
+    return;
+  }
+
+  // Markiere die zugehoerige Original-Zahlung als 'erstattet'
+  const original = existing.find(
+    (p) => p.stripePaymentIntentId === piId && p.kind !== "rueckerstattung"
+  );
+  if (original) {
+    await db
+      .update(payments)
+      .set({ status: "erstattet" })
+      .where(eq(payments.id, original.id));
+  }
+
+  // Neue Rueckerstattungs-Row
+  await db.insert(payments).values({
+    bookingId,
+    kind: "rueckerstattung",
+    status: "erstattet",
+    amountCents: -Math.abs(amountRefundedCents),
+    method: "Stripe",
+    stripePaymentIntentId: piId,
+    receivedAt: new Date(),
+  });
+
+  // paidCents aktualisieren
+  const bookingRow = (
+    await db.select().from(bookings).where(eq(bookings.id, bookingId)).limit(1)
+  )[0];
+  if (bookingRow) {
+    const newPaid = Math.max(0, bookingRow.paidCents - Math.abs(amountRefundedCents));
+    await db
+      .update(bookings)
+      .set({ paidCents: newPaid, updatedAt: new Date() })
+      .where(eq(bookings.id, bookingId));
+  }
+
+  await db.insert(activityLog).values({
+    who: "Stripe",
+    what: `Rückerstattung erfasst — ${(amountRefundedCents / 100).toFixed(2)} € (PI ${piId})`,
+    bookingId,
+  });
+}
+
+// =============================================================
+// payment_intent.succeeded — primaer fuer Off-Session-Charges
+// (Restzahlungs-Automatik). Bei normalen Checkout-Sessions kommt der
+// Erfolg ohnehin ueber checkout.session.completed; wir ignorieren hier
+// Doppel-Buchungen via Idempotenz-Check auf payments.stripePaymentIntentId.
+// =============================================================
+async function handlePaymentIntentSucceeded(pi: Stripe.PaymentIntent) {
+  const bookingId = pi.metadata?.bookingId;
+  const kind = pi.metadata?.kind;
+  if (!bookingId) return; // wir verwalten nur PIs mit unserer bookingId-Metadata
+
+  // Idempotenz: schon erfasst?
+  const existing = await db
+    .select({ id: payments.id, status: payments.status })
+    .from(payments)
+    .where(eq(payments.stripePaymentIntentId, pi.id))
+    .limit(1);
+  if (existing[0] && existing[0].status === "erhalten") return;
+
+  const amountCents = pi.amount_received ?? pi.amount;
+
+  if (existing[0]) {
+    await db
+      .update(payments)
+      .set({ status: "erhalten", receivedAt: new Date() })
+      .where(eq(payments.id, existing[0].id));
+  } else {
+    await db.insert(payments).values({
+      bookingId,
+      kind: kind === "kaution-capture" ? "kaution" : "restzahlung",
+      status: "erhalten",
+      amountCents,
+      method: "Stripe (Off-Session)",
+      stripePaymentIntentId: pi.id,
+      receivedAt: new Date(),
+    });
+  }
+
+  // Booking paidCents anpassen
+  const bookingRow = (
+    await db.select().from(bookings).where(eq(bookings.id, bookingId)).limit(1)
+  )[0];
+  if (bookingRow) {
+    await db
+      .update(bookings)
+      .set({
+        paidCents: bookingRow.paidCents + amountCents,
+        updatedAt: new Date(),
+      })
+      .where(eq(bookings.id, bookingId));
+  }
+
+  await db.insert(activityLog).values({
+    who: "Stripe",
+    what: `Off-Session-Zahlung erfasst — ${(amountCents / 100).toFixed(2)} € (${kind ?? "unknown"}, PI ${pi.id})`,
     bookingId,
   });
 }

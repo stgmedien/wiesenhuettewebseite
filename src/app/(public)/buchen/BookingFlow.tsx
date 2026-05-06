@@ -5,7 +5,7 @@ import { ArrowRight, ArrowLeft, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
 import { calculatePrice, formatEuro, RULES, type Persons } from "@/lib/pricing";
-import { createBookingAndCheckout } from "./actions";
+import { createBookingAndCheckout, previewDiscountAction } from "./actions";
 import { AvailabilityCalendar } from "./AvailabilityCalendar";
 
 type Step = 0 | 1 | 2 | 3;
@@ -102,6 +102,15 @@ export const BookingFlow = ({
   const [customerMessage, setCustomerMessage] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
+  // Discount-Code (Loyalty / Manager / Promo)
+  const [discountCode, setDiscountCode] = useState("");
+  const [discountState, setDiscountState] = useState<
+    | { status: "idle" }
+    | { status: "checking" }
+    | { status: "valid"; code: string; discountCents: number }
+    | { status: "invalid"; error: string }
+  >({ status: "idle" });
+
   const [submitting, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -174,6 +183,8 @@ export const BookingFlow = ({
         city: city.trim() || null,
         purpose: purpose.trim() || null,
         customerMessage: customerMessage.trim() || null,
+        discountCode:
+          discountState.status === "valid" ? discountState.code : discountCode.trim() || null,
         acceptedTerms: true,
       });
       if (!res.ok) {
@@ -408,22 +419,101 @@ export const BookingFlow = ({
               lastName={lastName}
               email={email}
             />
-            <div className="bg-[var(--color-wh-beige)] rounded-[var(--radius-card)] p-5 text-sm text-[var(--color-wh-black)]">
-              <p className="m-0 font-semibold mb-2">Heute fällig:</p>
-              <p className="m-0">
-                <strong>{formatEuro(breakdown.prepaymentCents)}</strong> Anzahlung (50 % der Buchungssumme) +{" "}
-                <strong>{formatEuro(breakdown.depositCents)}</strong> Kaution.
+
+            {/* Discount-Code */}
+            <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-4">
+              <p className="text-sm font-semibold text-[var(--color-wh-deep-green)] m-0 mb-2">
+                Rabatt-Code (optional)
               </p>
-              <p className="m-0 mt-3">
-                Restzahlung von <strong>{formatEuro(breakdown.remainderCents)}</strong> wird vor Anreise per
-                separater Zahlungsaufforderung eingezogen. Die Kaution wird innerhalb von 14 Tagen
-                nach mangelfreier Abreise zurückerstattet.
-              </p>
-              <p className="m-0 mt-3 text-[var(--color-wh-fg-muted)]">
-                Hinweis: Die Kurtaxe Hochsauerland wird seit Mai 2026 separat über das offizielle
-                Kurtaxen-Portal abgerechnet — Du erhältst nach der Buchung eine eigene E-Mail mit dem Link.
-              </p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={discountCode}
+                  onChange={(e) => {
+                    setDiscountCode(e.target.value.toUpperCase());
+                    setDiscountState({ status: "idle" });
+                  }}
+                  placeholder="z.B. WH-A1B2-C3D4"
+                  disabled={discountState.status === "valid"}
+                  className="flex-1 rounded-lg border border-[var(--color-wh-winter-grey)] px-3 py-2 text-sm font-mono uppercase tracking-wider disabled:bg-[var(--color-wh-beige)] disabled:opacity-70"
+                />
+                {discountState.status !== "valid" ? (
+                  <button
+                    type="button"
+                    disabled={!discountCode.trim() || discountState.status === "checking"}
+                    onClick={async () => {
+                      setDiscountState({ status: "checking" });
+                      const res = await previewDiscountAction(
+                        discountCode.trim(),
+                        breakdown.subtotalCents
+                      );
+                      if (res.ok) {
+                        setDiscountState({
+                          status: "valid",
+                          code: res.code,
+                          discountCents: res.discountCents,
+                        });
+                      } else {
+                        setDiscountState({ status: "invalid", error: res.error });
+                      }
+                    }}
+                    className="rounded-full bg-[var(--color-wh-deep-green)] text-white px-4 py-2 text-sm font-semibold disabled:opacity-50"
+                  >
+                    {discountState.status === "checking" ? "Prüfe …" : "Anwenden"}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDiscountCode("");
+                      setDiscountState({ status: "idle" });
+                    }}
+                    className="rounded-full border border-[var(--color-wh-winter-grey)] px-4 py-2 text-sm"
+                  >
+                    Entfernen
+                  </button>
+                )}
+              </div>
+              {discountState.status === "valid" && (
+                <p className="text-sm text-emerald-700 mt-2 m-0">
+                  ✓ Code <span className="font-mono">{discountState.code}</span> angewendet —{" "}
+                  <strong>−{formatEuro(discountState.discountCents)}</strong>
+                </p>
+              )}
+              {discountState.status === "invalid" && (
+                <p className="text-sm text-red-700 mt-2 m-0">{discountState.error}</p>
+              )}
             </div>
+
+            {(() => {
+              const off =
+                discountState.status === "valid" ? discountState.discountCents : 0;
+              const subAfter = breakdown.subtotalCents - off;
+              const prepayAfter = Math.round((subAfter * 50) / 100);
+              const remainAfter = subAfter - prepayAfter;
+              const totalDueAfter = prepayAfter + breakdown.depositCents;
+              return (
+                <div className="bg-[var(--color-wh-beige)] rounded-[var(--radius-card)] p-5 text-sm text-[var(--color-wh-black)]">
+                  <p className="m-0 font-semibold mb-2">Heute fällig:</p>
+                  <p className="m-0">
+                    <strong>{formatEuro(prepayAfter)}</strong> Anzahlung (50 % der Buchungssumme
+                    {off > 0 ? " nach Rabatt" : ""}) +{" "}
+                    <strong>{formatEuro(breakdown.depositCents)}</strong> Kaution ={" "}
+                    <strong>{formatEuro(totalDueAfter)}</strong>
+                  </p>
+                  <p className="m-0 mt-3">
+                    Restzahlung von <strong>{formatEuro(remainAfter)}</strong> wird vor Anreise per
+                    separater Zahlungsaufforderung eingezogen. Die Kaution wird innerhalb von 14
+                    Tagen nach mangelfreier Abreise zurückerstattet.
+                  </p>
+                  <p className="m-0 mt-3 text-[var(--color-wh-fg-muted)]">
+                    Hinweis: Die Kurtaxe Hochsauerland wird seit Mai 2026 separat über das
+                    offizielle Kurtaxen-Portal abgerechnet — Du erhältst nach der Buchung eine
+                    eigene E-Mail mit dem Link.
+                  </p>
+                </div>
+              );
+            })()}
             {error && (
               <div className="bg-[var(--color-wh-sunset)]/10 text-[var(--color-wh-sunset)] rounded-[var(--radius-md)] p-4 text-sm font-medium">
                 {error}
@@ -445,9 +535,16 @@ export const BookingFlow = ({
                   submitting ? <Loader2 className="animate-spin" size={18} /> : <ArrowRight size={18} />
                 }
               >
-                {submitting
-                  ? "Leite weiter ..."
-                  : `Jetzt zahlen — ${formatEuro(breakdown.totalDueCents)}`}
+                {(() => {
+                  const off =
+                    discountState.status === "valid" ? discountState.discountCents : 0;
+                  const subAfter = breakdown.subtotalCents - off;
+                  const totalDueAfter =
+                    Math.round((subAfter * 50) / 100) + breakdown.depositCents;
+                  return submitting
+                    ? "Leite weiter ..."
+                    : `Jetzt zahlen — ${formatEuro(totalDueAfter)}`;
+                })()}
               </Button>
             </div>
           </div>

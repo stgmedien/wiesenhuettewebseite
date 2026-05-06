@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect, notFound } from "next/navigation";
 import { db } from "@/lib/db";
-import { bookings, customers, payments } from "@/lib/db/schema";
+import { bookings, customers, payments, invoices } from "@/lib/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { formatEuro, cancellationFee } from "@/lib/pricing";
 import { formatDateLong } from "@/lib/utils";
@@ -44,6 +44,13 @@ export default async function BuchungDetailPage({ params }: Props) {
     .from(payments)
     .where(eq(payments.bookingId, booking.id))
     .orderBy(desc(payments.createdAt));
+
+  const invRow = await db
+    .select({ id: invoices.id, invoiceNumber: invoices.invoiceNumber })
+    .from(invoices)
+    .where(eq(invoices.bookingId, booking.id))
+    .limit(1);
+  const invoice = invRow[0];
 
   const fee = cancellationFee(booking.subtotalCents, booking.arrival);
   const canCancel =
@@ -171,11 +178,19 @@ export default async function BuchungDetailPage({ params }: Props) {
       <section className="rounded-2xl bg-white border border-[var(--color-wh-winter-grey)]/40 p-6 mb-6">
         <h2 className="font-heading text-xl text-[var(--color-wh-deep-green)] mb-4">Aktionen</h2>
         <div className="flex flex-wrap gap-3">
+          {invoice && (
+            <a
+              href={`/api/invoices/${invoice.id}/pdf`}
+              className="rounded-full bg-[var(--color-wh-deep-green)] text-white px-5 py-2.5 text-sm font-semibold no-underline hover:opacity-90"
+            >
+              Rechnung als PDF · {invoice.invoiceNumber}
+            </a>
+          )}
           <Link
             href={`/konto/buchungen/${booking.id}/rechnung`}
-            className="rounded-full bg-[var(--color-wh-deep-green)] text-white px-5 py-2.5 text-sm font-semibold no-underline hover:opacity-90"
+            className="rounded-full border border-[var(--color-wh-deep-green)] text-[var(--color-wh-deep-green)] px-5 py-2.5 text-sm font-semibold no-underline hover:bg-[var(--color-wh-beige)]"
           >
-            Quittung anzeigen
+            Quittung im Browser
           </Link>
           {booking.status === "abgereist" && (
             <Link

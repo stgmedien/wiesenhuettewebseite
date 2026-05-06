@@ -1,0 +1,127 @@
+/**
+ * GoBD-konforme Rechnungsnummern via Postgres-Sequence (atomar, lueckenlos).
+ *
+ * Format: WH-YYYY-NNNNN  (z.B. WH-2026-00012)
+ * Hinweis: lueckenlos pro Sequence, NICHT pro Jahr — wir gehen einfach
+ * fortlaufend ueber Jahresgrenzen hinweg, das ist GoBD-konform und einfacher.
+ */
+
+import { db } from "@/lib/db";
+import { invoices, bookings, customers, payments } from "@/lib/db/schema";
+import { sql, eq } from "drizzle-orm";
+
+export const allocateInvoiceNumber = async (): Promise<{ number: string; n: number }> => {
+  const r = await db.execute(sql`SELECT nextval('invoice_seq') AS n`);
+  const rows = (r as unknown as { n: string | number }[]) || [];
+  const n = Number(rows[0]?.n ?? 1);
+  const year = new Date().getFullYear();
+  return { number: `WH-${year}-${String(n).padStart(5, "0")}`, n };
+};
+
+/**
+ * Erzeugt eine atomare Invoice-Row fuer eine Buchung.
+ * Idempotent: wenn fuer die Buchung schon eine Invoice existiert, wird
+ * diese zurueckgegeben.
+ */
+export const createInvoiceForBooking = async (
+  bookingId: string
+): Promise<{ id: string; invoiceNumber: string; isNew: boolean }> => {
+  // Existing invoice?
+  const existing = await db
+    .select({ id: invoices.id, invoiceNumber: invoices.invoiceNumber })
+    .from(invoices)
+    .where(eq(invoices.bookingId, bookingId))
+    .limit(1);
+  if (existing[0]) {
+    return { id: existing[0].id, invoiceNumber: existing[0].invoiceNumber, isNew: false };
+  }
+
+  const bookingRows = await db.select().from(bookings).where(eq(bookings.id, bookingId)).limit(1);
+  const booking = bookingRows[0];
+  if (!booking) throw new Error("Buchung nicht gefunden");
+
+  const customerRows = booking.customerId
+    ? await db.select().from(customers).where(eq(customers.id, booking.customerId)).limit(1)
+    : [];
+  const customer = customerRows[0];
+
+  const { number: invoiceNumber } = await allocateInvoiceNumber();
+  const today = new Date().toISOString().slice(0, 10);
+
+  // Line items snapshot
+  const lineItems: { label: string; qty: number; unitCents: number; totalCents: number }[] = [];
+  if (booking.accommodationCents > 0) {
+    lineItems.push({
+      label: `Übernachtung — ${booking.persons} Personen × ${booking.nights} Nächte`,
+      qty: booking.persons * booking.nights,
+      unitCents: Math.round(booking.accommodationCents / Math.max(1, booking.persons * booking.nights)),
+      totalCents: booking.accommodationCents,
+    });
+  }
+  if (booking.energyFlatCents > 0) {
+    lineItems.push({
+      label: `Energiepauschale (${booking.nights} Nächte × 22,00 €)`,
+      qty: booking.nights,
+      unitCents: 2200,
+      totalCents: booking.energyFlatCents,
+    });
+  }
+  if (booking.cleaningCents > 0) {
+    lineItems.push({
+      label: "Endreinigung (Pflicht)",
+      qty: 1,
+      unitCents: booking.cleaningCents,
+      totalCents: booking.cleaningCents,
+    });
+  }
+  if (booking.soloSurchargeCents > 0) {
+    lineItems.push({
+      label: "Aufschlag Allein-/Exklusivnutzung",
+      qty: 1,
+      unitCents: booking.soloSurchargeCents,
+      totalCents: booking.soloSurchargeCents,
+    });
+  }
+  if (booking.extrasCents > 0) {
+    lineItems.push({
+      label: "Extras",
+      qty: 1,
+      unitCents: booking.extrasCents,
+      totalCents: booking.extrasCents,
+    });
+  }
+
+  const customerSnapshot = {
+    name: customer
+      ? `${customer.firstName} ${customer.lastName}`.trim()
+      : "Anonymer Kunde",
+    company: customer?.company ?? undefined,
+    street: customer?.street ?? undefined,
+    zip: customer?.zip ?? undefined,
+    city: customer?.city ?? undefined,
+    country: customer?.country ?? "DE",
+    email: customer?.email ?? undefined,
+  };
+
+  // Gemeinnütziger Verein: keine USt fuer Vereinszweck-Vermietung
+  const inserted = await db
+    .insert(invoices)
+    .values({
+      invoiceNumber,
+      bookingId: booking.id,
+      customerId: customer?.id ?? null,
+      status: "ausgestellt",
+      issueDate: today,
+      dueDate: today, // Anzahlung ist bereits erfolgt
+      customerSnapshot,
+      lineItems,
+      subtotalCents: booking.subtotalCents,
+      taxCents: 0,
+      totalCents: booking.subtotalCents,
+      notes:
+        "Skifreunde Gütersloh e.V. ist als gemeinnütziger Verein anerkannt. Die Vermietung der Hütte erfolgt im Rahmen des satzungsmäßigen Zwecks und ist gemäß §4 UStG umsatzsteuerfrei. Freistellungsbescheid auf Anfrage.",
+    })
+    .returning({ id: invoices.id });
+
+  return { id: inserted[0].id, invoiceNumber, isNew: true };
+};

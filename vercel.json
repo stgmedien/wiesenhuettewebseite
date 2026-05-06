@@ -8,6 +8,10 @@
     {
       "path": "/api/cron/daily-cleanup",
       "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/daily-mail-jobs",
+      "schedule": "0 8 * * *"
     }
   ]
 }
