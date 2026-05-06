@@ -27,6 +27,21 @@ export const Header = ({ session }: { session: HeaderSession }) => {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  // Viewport-Detection: nur ab >=768px morphen wir den Header in den Pill-State.
+  // Auf Mobile bleibt er full-width, sonst entsteht der "Blob"-Effekt im Burger-Menu.
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const update = () => setIsDesktop(mq.matches);
+    update();
+    if (mq.addEventListener) mq.addEventListener("change", update);
+    else mq.addListener(update);
+    return () => {
+      if (mq.removeEventListener) mq.removeEventListener("change", update);
+      else mq.removeListener(update);
+    };
+  }, []);
 
   useEffect(() => {
     let ticking = false;
@@ -45,6 +60,9 @@ export const Header = ({ session }: { session: HeaderSession }) => {
 
   useEffect(() => setOpen(false), [pathname]);
 
+  // Pill/Blob-State nur auf Desktop UND wenn das Burger-Menu nicht offen ist.
+  const morph = isDesktop && scrolled && !open;
+
   // Single transition declaration, identical in both states — smooth morph.
   const morphTransition = `max-width ${DURATION_MS}ms ${EASE}, border-radius ${DURATION_MS}ms ${EASE}, box-shadow ${DURATION_MS}ms ${EASE}, margin ${DURATION_MS}ms ${EASE}`;
   const wrapperTransition = `padding ${DURATION_MS}ms ${EASE}`;
@@ -54,18 +72,18 @@ export const Header = ({ session }: { session: HeaderSession }) => {
       className="sticky top-0 z-40"
       style={{
         transition: wrapperTransition,
-        paddingTop: scrolled ? 12 : 0,
-        paddingLeft: scrolled ? 12 : 0,
-        paddingRight: scrolled ? 12 : 0,
+        paddingTop: morph ? 12 : 0,
+        paddingLeft: morph ? 12 : 0,
+        paddingRight: morph ? 12 : 0,
       }}
     >
       <div
         className="bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] mx-auto"
         style={{
           transition: morphTransition,
-          maxWidth: scrolled ? "980px" : "100vw",
-          borderRadius: scrolled ? 9999 : 0,
-          boxShadow: scrolled
+          maxWidth: morph ? "980px" : "100vw",
+          borderRadius: morph ? 9999 : 0,
+          boxShadow: morph
             ? "0 12px 32px rgba(17,17,17,0.18), 0 4px 10px rgba(17,17,17,0.08)"
             : "0 0 0 rgba(17,17,17,0)",
           willChange: "max-width, border-radius, box-shadow, margin",
@@ -74,7 +92,7 @@ export const Header = ({ session }: { session: HeaderSession }) => {
         <div
           className={cn(
             "flex items-center justify-between gap-3 sm:gap-4 h-14",
-            scrolled ? "px-4 sm:px-5" : "px-5 sm:px-6 lg:px-8 max-w-[1280px] mx-auto"
+            morph ? "px-4 sm:px-5" : "px-5 sm:px-6 lg:px-8 max-w-[1280px] mx-auto"
           )}
         >
           <Link
@@ -154,11 +172,7 @@ export const Header = ({ session }: { session: HeaderSession }) => {
 
         {open && (
           <nav
-            className={cn(
-              "md:hidden bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] border-t border-[var(--color-wh-deep-green-hover)]",
-              scrolled && "rounded-b-3xl"
-            )}
-            style={{ transition: `border-radius ${DURATION_MS}ms ${EASE}` }}
+            className="md:hidden bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] border-t border-white/15"
           >
             <div className="px-5 py-3 flex flex-col gap-1">
               {NAV.map((n) => {

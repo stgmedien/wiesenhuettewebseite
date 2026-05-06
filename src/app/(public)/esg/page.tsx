@@ -29,7 +29,10 @@ export default function EsgPage() {
       {/* ---------------------------------------------------------------- */}
       {/* HERO BILD — Kollaboration ESG × Wiesenhütte */}
       {/* ---------------------------------------------------------------- */}
-      <div className="relative w-full bg-[var(--color-wh-deep-green)]" style={{ aspectRatio: "21 / 9", maxHeight: "560px" }}>
+      <div
+        className="relative w-full bg-[var(--color-wh-deep-green)] min-h-[380px] sm:min-h-0 sm:aspect-[16/9] md:aspect-[21/9]"
+        style={{ maxHeight: "560px" }}
+      >
         <Image
           src="/media/photos/kollaboration_esg_skifreunde.png"
           alt="Kollaboration zwischen Evangelisch Stiftischem Gymnasium und Skifreunden Gütersloh"
@@ -38,13 +41,13 @@ export default function EsgPage() {
           className="object-cover object-center"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[rgba(47,74,53,0.65)] via-transparent to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 px-6 sm:px-8 pb-8 sm:pb-12">
+        <div className="absolute inset-0 bg-gradient-to-t from-[rgba(47,74,53,0.78)] via-[rgba(47,74,53,0.25)] to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 px-6 sm:px-8 pb-6 sm:pb-10 md:pb-12">
           <div className="max-w-[1080px] mx-auto">
-            <div className="text-xs uppercase tracking-wider font-semibold text-white/85">
+            <div className="text-[10px] sm:text-xs uppercase tracking-wider font-semibold text-white/90">
               ESG · Evangelisch Stiftisches Gymnasium
             </div>
-            <h1 className="text-[40px] sm:text-[60px] mt-2 leading-[1.05] text-white drop-shadow-md">
+            <h1 className="text-[26px] sm:text-[40px] md:text-[56px] lg:text-[60px] mt-1.5 sm:mt-2 leading-[1.1] sm:leading-[1.05] text-white drop-shadow-md font-display font-bold">
               Eine Schule, eine Hütte,<br className="hidden sm:block" /> ein gemeinsames Lernen.
             </h1>
           </div>
