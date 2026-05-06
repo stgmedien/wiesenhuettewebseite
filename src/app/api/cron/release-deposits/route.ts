@@ -57,6 +57,8 @@ export async function GET(req: NextRequest) {
         eq(bookings.status, "abgereist"),
         lte(bookings.departure, cutoffIso),
         gt(bookings.depositCents, 0),
+        // Manager can pause auto-refund explicitly — skip those
+        eq(bookings.depositHold, false),
         // Only Portal bookings — manual ones have no Stripe PI to refund against
         sql`${bookings.stripePaymentIntentId} IS NOT NULL`
       )

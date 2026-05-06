@@ -135,6 +135,12 @@ export const bookings = pgTable(
     totalCents: integer("total_cents").notNull().default(0),      // ohne Kaution
     paidCents: integer("paid_cents").notNull().default(0),
 
+    // Manager kann Kaution-Auto-Refund pausieren (z. B. bei Schaden)
+    depositHold: boolean("deposit_hold").notNull().default(false),
+    depositHoldReason: text("deposit_hold_reason"),
+    depositHoldAt: timestamp("deposit_hold_at"),
+    depositHoldBy: varchar("deposit_hold_by", { length: 255 }),
+
     // Extras snapshot (line items as JSON for transparency)
     extrasSnapshot: jsonb("extras_snapshot")
       .$type<Array<{ id: string; label: string; qty: number; unitCents: number; totalCents: number }>>()

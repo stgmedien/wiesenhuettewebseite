@@ -8,6 +8,7 @@ import { formatDateLong } from "@/lib/utils";
 import { StatusPill } from "@/components/manager/StatusPill";
 import { StatusActions } from "./StatusActions";
 import { ManagerMessage } from "./ManagerMessage";
+import { DepositHoldControl } from "./DepositHoldControl";
 
 export const dynamic = "force-dynamic";
 
@@ -215,6 +216,25 @@ export default async function BookingDetail({ params }: Props) {
                 {formatEuro(b.paidCents)}
               </span>
             </div>
+
+            {b.depositCents > 0 && (
+              <div className="border-t border-[var(--color-wh-winter-grey)] mt-4 pt-4">
+                <div className="text-xs uppercase tracking-wider text-[var(--color-wh-fg-muted)] mb-1">
+                  Kaution-Auto-Refund
+                </div>
+                <p className="text-xs text-[var(--color-wh-fg-muted)] m-0 leading-relaxed">
+                  Cron erstattet die {formatEuro(b.depositCents)} automatisch 14 Tage nach Abreise,
+                  sofern Status &bdquo;abgereist&ldquo; und kein Hold gesetzt ist.
+                </p>
+                <DepositHoldControl
+                  bookingId={b.id}
+                  currentHold={b.depositHold}
+                  reason={b.depositHoldReason}
+                  heldBy={b.depositHoldBy}
+                  heldAt={b.depositHoldAt}
+                />
+              </div>
+            )}
           </Section>
         </aside>
       </div>
