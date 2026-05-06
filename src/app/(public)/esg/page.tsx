@@ -31,8 +31,8 @@ export default function EsgPage() {
       {/* ---------------------------------------------------------------- */}
       <div className="relative w-full bg-[var(--color-wh-deep-green)]" style={{ aspectRatio: "21 / 9", maxHeight: "560px" }}>
         <Image
-          src="/media/photos/kollaboration_zwischen_esg_und_wiesenhuette.png"
-          alt="Kollaboration zwischen Evangelisch Stiftischem Gymnasium und Wiesenhütte"
+          src="/media/photos/kollaboration_esg_skifreunde.png"
+          alt="Kollaboration zwischen Evangelisch Stiftischem Gymnasium und Skifreunden Gütersloh"
           fill
           priority
           className="object-cover object-center"
