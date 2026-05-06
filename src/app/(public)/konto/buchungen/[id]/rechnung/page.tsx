@@ -38,15 +38,29 @@ export default async function QuittungPage({ params }: Props) {
   const booking = found[0];
   if (!booking) notFound();
 
-  const bookingPayments = await db
+  // Quittung: nur tatsaechlich vereinnahmte / erstattete Zahlungen anzeigen.
+  // Offene Restzahlung oder fehlgeschlagene Charges duerfen NIEMALS auf einer
+  // Quittung als "bezahlt" erscheinen — das waere irrefuehrend.
+  const allPayments = await db
     .select()
     .from(payments)
     .where(eq(payments.bookingId, booking.id))
     .orderBy(asc(payments.createdAt));
 
+  const bookingPayments = allPayments.filter(
+    (p) => p.status === "erhalten" || p.status === "erstattet"
+  );
+  const openPayments = allPayments.filter(
+    (p) => p.status === "offen" || p.status === "fehlgeschlagen"
+  );
+
   const totalReceived = bookingPayments
     .filter((p) => p.status === "erhalten")
     .reduce((sum, p) => sum + p.amountCents, 0);
+  const totalRefunded = bookingPayments
+    .filter((p) => p.status === "erstattet")
+    .reduce((sum, p) => sum + p.amountCents, 0); // negativ
+  const netReceived = totalReceived + totalRefunded;
 
   return (
     <div className="bg-white print:bg-white">
@@ -151,10 +165,12 @@ export default async function QuittungPage({ params }: Props) {
           </tbody>
         </table>
 
-        {/* Zahlungen */}
+        {/* Zahlungseingaenge — nur tatsaechlich vereinnahmt/erstattet */}
         {bookingPayments.length > 0 && (
           <section className="mb-8">
-            <p className="text-xs uppercase tracking-wider text-[#555] mb-2">Zahlungen</p>
+            <p className="text-xs uppercase tracking-wider text-[#555] mb-2">
+              Zahlungseingänge
+            </p>
             <table className="w-full text-xs border-collapse">
               <tbody>
                 {bookingPayments.map((p) => (
@@ -162,20 +178,51 @@ export default async function QuittungPage({ params }: Props) {
                     <td className="py-1 capitalize">{p.kind}</td>
                     <td className="py-1 text-[#555]">{p.method ?? "—"}</td>
                     <td className="py-1 text-[#555]">
-                      {p.receivedAt ? new Date(p.receivedAt).toLocaleDateString("de-DE") : "offen"}
+                      {p.receivedAt
+                        ? new Date(p.receivedAt).toLocaleDateString("de-DE")
+                        : "—"}
                     </td>
                     <td className="py-1 text-right font-mono">
-                      {p.status === "erhalten" ? "+" : ""}
+                      {p.amountCents >= 0 ? "+" : ""}
                       {formatEuro(p.amountCents)}
                     </td>
                   </tr>
                 ))}
                 <tr className="border-t-2 border-[#111] font-bold">
                   <td colSpan={3} className="py-2">
-                    Erhalten
+                    Saldo erhalten
                   </td>
-                  <td className="py-2 text-right font-mono">{formatEuro(totalReceived)}</td>
+                  <td className="py-2 text-right font-mono">{formatEuro(netReceived)}</td>
                 </tr>
+              </tbody>
+            </table>
+          </section>
+        )}
+
+        {/* Offene Posten — DEUTLICH abgegrenzt, NICHT als bezahlt */}
+        {openPayments.length > 0 && (
+          <section className="mb-8 border-2 border-dashed border-[#999] p-4 bg-[#fafaf5]">
+            <p className="text-xs uppercase tracking-wider text-[#555] mb-1 font-bold">
+              Noch offen
+            </p>
+            <p className="text-[10px] text-[#777] mb-2 italic">
+              Diese Beträge sind noch nicht bezahlt. Sie sind hier nur zur Information
+              aufgeführt und gelten <strong>nicht</strong> als vereinnahmt.
+            </p>
+            <table className="w-full text-xs border-collapse">
+              <tbody>
+                {openPayments.map((p) => (
+                  <tr key={p.id} className="border-b border-[#ddd] last:border-0">
+                    <td className="py-1 capitalize">{p.kind}</td>
+                    <td className="py-1 text-[#555]">{p.method ?? "—"}</td>
+                    <td className="py-1 text-[#555]">
+                      {p.status === "fehlgeschlagen" ? "fehlgeschlagen" : "offen"}
+                    </td>
+                    <td className="py-1 text-right font-mono text-[#555]">
+                      {formatEuro(p.amountCents)}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </section>
