@@ -30,7 +30,19 @@ const addDaysIso = (iso: string, days: number) => {
   return d.toISOString().slice(0, 10);
 };
 
-export const BookingFlow = ({ blockedDates }: { blockedDates: string[] }) => {
+type BookingFlowProps = {
+  bookedDates: string[];
+  cleaningDates: string[];
+  wartungDates: string[];
+};
+
+export const BookingFlow = ({
+  bookedDates,
+  cleaningDates,
+  wartungDates,
+}: BookingFlowProps) => {
+  // Internal: union of all unavailable days for the rangeBlocked guard.
+  const blockedDates = [...bookedDates, ...cleaningDates, ...wartungDates];
   const [step, setStep] = useState<Step>(0);
   const [arrival, setArrival] = useState("");
   const [departure, setDeparture] = useState("");
@@ -144,7 +156,9 @@ export const BookingFlow = ({ blockedDates }: { blockedDates: string[] }) => {
             <h3 className="text-[22px] sm:text-[24px] m-0">Wann?</h3>
 
             <AvailabilityCalendar
-              blockedDates={blockedDates}
+              bookedDates={bookedDates}
+              cleaningDates={cleaningDates}
+              wartungDates={wartungDates}
               arrival={arrival}
               departure={departure}
               onSelect={(a, d) => {

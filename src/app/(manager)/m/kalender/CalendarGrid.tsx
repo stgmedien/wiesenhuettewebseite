@@ -43,11 +43,14 @@ export const CalendarGrid = ({
   year,
   monthIdx,
   events,
+  cleaningDates = [],
 }: {
   year: number;
   monthIdx: number;
   events: Event[];
+  cleaningDates?: string[];
 }) => {
+  const cleaningSet = new Set(cleaningDates);
   const firstOfMonth = new Date(year, monthIdx, 1);
   // 0=Sun 1=Mon ... — convert to Mo-first
   const dayOfWeek = (firstOfMonth.getDay() + 6) % 7;
@@ -114,15 +117,34 @@ export const CalendarGrid = ({
           const iso = d.toISOString().slice(0, 10);
           const dayEvents = eventsForDay(d);
           const isToday = iso === todayIso;
+          const isCleaning = cleaningSet.has(iso);
           return (
             <div
               key={idx}
-              className={`bg-white border rounded-[var(--radius-md)] min-h-[110px] p-2 flex flex-col gap-1 ${
-                isToday ? "border-[var(--color-wh-deep-green)] border-2" : "border-[var(--color-wh-winter-grey)]"
+              className={`bg-white border rounded-[var(--radius-md)] min-h-[110px] p-2 flex flex-col gap-1 relative overflow-hidden ${
+                isToday
+                  ? "border-[var(--color-wh-deep-green)] border-2"
+                  : "border-[var(--color-wh-winter-grey)]"
               }`}
+              style={
+                isCleaning
+                  ? {
+                      backgroundImage:
+                        "repeating-linear-gradient(45deg, rgba(138,90,56,0.10) 0 6px, transparent 6px 12px)",
+                    }
+                  : undefined
+              }
+              title={isCleaning ? "Reinigungstag — nicht buchbar" : undefined}
             >
-              <div className="text-xs font-semibold text-[var(--color-wh-deep-green)]">
-                {d.getDate()}
+              <div className="flex items-center justify-between">
+                <div className="text-xs font-semibold text-[var(--color-wh-deep-green)]">
+                  {d.getDate()}
+                </div>
+                {isCleaning && (
+                  <span className="text-[9px] uppercase tracking-wider font-semibold text-[var(--color-wh-wood)] bg-[var(--color-wh-wood)]/15 px-1.5 py-0.5 rounded">
+                    Reinigung
+                  </span>
+                )}
               </div>
               <div className="flex flex-col gap-1 overflow-hidden">
                 {dayEvents.slice(0, 3).map((e) => (

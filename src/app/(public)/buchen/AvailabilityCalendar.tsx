@@ -15,24 +15,47 @@ const todayIso = () => {
   return d.toISOString().slice(0, 10);
 };
 
-type State = "past" | "blocked" | "free" | "selected" | "in-range";
+type State =
+  | "past"
+  | "booked"
+  | "cleaning"
+  | "wartung"
+  | "free"
+  | "selected"
+  | "in-range";
 
-export const AvailabilityCalendar = ({
-  blockedDates,
-  arrival,
-  departure,
-  onSelect,
-}: {
-  blockedDates: string[];
+type Props = {
+  bookedDates: string[];
+  cleaningDates: string[];
+  wartungDates: string[];
   arrival: string;
   departure: string;
   onSelect: (arrival: string, departure: string) => void;
-}) => {
+};
+
+export const AvailabilityCalendar = ({
+  bookedDates,
+  cleaningDates,
+  wartungDates,
+  arrival,
+  departure,
+  onSelect,
+}: Props) => {
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [monthIdx, setMonthIdx] = useState(now.getMonth());
 
-  const blockedSet = useMemo(() => new Set(blockedDates), [blockedDates]);
+  const bookedSet = useMemo(() => new Set(bookedDates), [bookedDates]);
+  const cleaningSet = useMemo(() => new Set(cleaningDates), [cleaningDates]);
+  const wartungSet = useMemo(() => new Set(wartungDates), [wartungDates]);
+  const blockedSet = useMemo(() => {
+    const all = new Set<string>();
+    bookedSet.forEach((d) => all.add(d));
+    cleaningSet.forEach((d) => all.add(d));
+    wartungSet.forEach((d) => all.add(d));
+    return all;
+  }, [bookedSet, cleaningSet, wartungSet]);
+
   const today = todayIso();
 
   const goPrev = () => {
@@ -61,17 +84,33 @@ export const AvailabilityCalendar = ({
     const stateOf = (d: Date): State => {
       const iso = d.toISOString().slice(0, 10);
       if (iso < today) return "past";
-      if (blockedSet.has(iso)) return "blocked";
       if (arrival && iso === arrival) return "selected";
       if (departure && iso === departure) return "selected";
       if (arrival && departure && iso > arrival && iso < departure) return "in-range";
+      if (wartungSet.has(iso)) return "wartung";
+      if (cleaningSet.has(iso)) return "cleaning";
+      if (bookedSet.has(iso)) return "booked";
       return "free";
+    };
+
+    const titleOf = (d: Date): string | undefined => {
+      const iso = d.toISOString().slice(0, 10);
+      if (cleaningSet.has(iso)) return "Reinigungstag — nicht buchbar";
+      if (wartungSet.has(iso)) return "Wartung";
+      if (bookedSet.has(iso)) return "Belegt";
+      return undefined;
     };
 
     const handleClick = (d: Date) => {
       const iso = d.toISOString().slice(0, 10);
       const state = stateOf(d);
-      if (state === "past" || state === "blocked") return;
+      if (
+        state === "past" ||
+        state === "booked" ||
+        state === "cleaning" ||
+        state === "wartung"
+      )
+        return;
       // first click sets arrival, second sets departure (must be after arrival)
       if (!arrival || (arrival && departure)) {
         onSelect(iso, "");
@@ -79,7 +118,7 @@ export const AvailabilityCalendar = ({
         if (iso <= arrival) {
           onSelect(iso, "");
         } else {
-          // check no blocked day in between
+          // check no blocked day in between [arrival, iso)
           const cur = new Date(arrival);
           const end = new Date(iso);
           let hasBlocked = false;
@@ -99,25 +138,48 @@ export const AvailabilityCalendar = ({
       }
     };
 
+    const cls: Record<State, string> = {
+      past: "text-[var(--color-wh-winter-grey)] cursor-not-allowed line-through",
+      booked:
+        "bg-[var(--color-wh-winter-grey)]/60 text-[var(--color-wh-fg-muted)] cursor-not-allowed line-through",
+      cleaning:
+        "bg-[var(--color-wh-wood)]/15 text-[var(--color-wh-wood)] cursor-not-allowed",
+      wartung:
+        "bg-[var(--color-wh-black)]/80 text-[var(--color-wh-snow)] cursor-not-allowed line-through",
+      free: "text-[var(--color-wh-deep-green)] hover:bg-[var(--color-wh-green-soft)] cursor-pointer",
+      selected:
+        "bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] font-bold cursor-pointer",
+      "in-range":
+        "bg-[var(--color-wh-green-soft)] text-[var(--color-wh-deep-green)] cursor-pointer",
+    };
+
     return cells.map((d, idx) => {
       if (!d) return <div key={idx} className="aspect-square" />;
       const state = stateOf(d);
+      const isCleaning = state === "cleaning";
       const base =
-        "aspect-square flex items-center justify-center text-sm font-medium rounded-md transition-colors";
-      const cls = {
-        past: "text-[var(--color-wh-winter-grey)] cursor-not-allowed line-through",
-        blocked: "bg-[var(--color-wh-winter-grey)]/40 text-[var(--color-wh-fg-muted)] cursor-not-allowed line-through",
-        free: "text-[var(--color-wh-deep-green)] hover:bg-[var(--color-wh-green-soft)] cursor-pointer",
-        selected: "bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] font-bold cursor-pointer",
-        "in-range": "bg-[var(--color-wh-green-soft)] text-[var(--color-wh-deep-green)] cursor-pointer",
-      }[state];
+        "aspect-square flex items-center justify-center text-sm font-medium rounded-md transition-colors relative";
       return (
         <button
           key={idx}
           type="button"
-          disabled={state === "past" || state === "blocked"}
+          disabled={
+            state === "past" ||
+            state === "booked" ||
+            state === "cleaning" ||
+            state === "wartung"
+          }
           onClick={() => handleClick(d)}
-          className={`${base} ${cls}`}
+          title={titleOf(d)}
+          className={`${base} ${cls[state]}`}
+          style={
+            isCleaning
+              ? {
+                  backgroundImage:
+                    "repeating-linear-gradient(45deg, rgba(138,90,56,0.18) 0 4px, transparent 4px 8px)",
+                }
+              : undefined
+          }
         >
           {d.getDate()}
         </button>
@@ -167,7 +229,16 @@ export const AvailabilityCalendar = ({
 
       <div className="mt-5 pt-4 border-t border-[var(--color-wh-winter-grey)] flex flex-wrap gap-x-5 gap-y-2 text-xs text-[var(--color-wh-fg-muted)]">
         <Legend swatch="bg-white border border-[var(--color-wh-winter-grey)]" label="frei" />
-        <Legend swatch="bg-[var(--color-wh-winter-grey)]/40" label="belegt" />
+        <Legend swatch="bg-[var(--color-wh-winter-grey)]/60" label="belegt" />
+        <Legend
+          swatchStyle={{
+            backgroundImage:
+              "repeating-linear-gradient(45deg, rgba(138,90,56,0.18) 0 4px, transparent 4px 8px)",
+            border: "1px solid rgba(138,90,56,0.3)",
+          }}
+          label="Reinigungstag"
+        />
+        <Legend swatch="bg-[var(--color-wh-black)]/80" label="Wartung" />
         <Legend swatch="bg-[var(--color-wh-green-soft)]" label="ausgewählt" />
         <Legend swatch="bg-[var(--color-wh-deep-green)]" label="An-/Abreise" />
       </div>
@@ -197,9 +268,20 @@ const MonthBlock = ({
   </div>
 );
 
-const Legend = ({ swatch, label }: { swatch: string; label: string }) => (
+const Legend = ({
+  swatch,
+  swatchStyle,
+  label,
+}: {
+  swatch?: string;
+  swatchStyle?: React.CSSProperties;
+  label: string;
+}) => (
   <span className="inline-flex items-center gap-2">
-    <span className={`inline-block w-3 h-3 rounded-sm ${swatch}`} />
+    <span
+      className={`inline-block w-3 h-3 rounded-sm ${swatch ?? ""}`}
+      style={swatchStyle}
+    />
     {label}
   </span>
 );
