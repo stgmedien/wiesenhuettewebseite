@@ -16,6 +16,7 @@ import {
   Users2,
   UserCircle,
   ScrollText,
+  BadgeCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +28,7 @@ const NAV_ALL = [
   { href: "/m/sperrzeiten", label: "Sperrzeiten", Icon: Lock, adminOnly: false },
   { href: "/m/blog", label: "Blog", Icon: FileText, adminOnly: false },
   { href: "/m/benutzer", label: "Benutzer", Icon: Users2, adminOnly: false },
+  { href: "/m/mitgliedschaften", label: "Mitgliedschaften", Icon: BadgeCheck, adminOnly: false },
   { href: "/m/audit", label: "Audit-Log", Icon: ScrollText, adminOnly: true },
   { href: "/m/einstellungen", label: "Einstellungen", Icon: Settings, adminOnly: false },
 ];

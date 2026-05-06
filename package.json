@@ -10,7 +10,8 @@
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:migrate": "drizzle-kit migrate",
-    "db:seed": "tsx src/lib/db/seed.ts"
+    "db:seed": "tsx src/lib/db/seed.ts",
+    "db:seed:config": "tsx src/lib/db/seed-config.ts"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.2",

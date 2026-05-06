@@ -53,6 +53,50 @@ export const paymentStatusEnum = pgEnum("payment_status", [
 
 export const userRoleEnum = pgEnum("user_role", ["customer", "manager", "admin"]);
 
+export const membershipStatusEnum = pgEnum("membership_status", [
+  "none",
+  "pending",   // Customer hat behauptet Mitglied zu sein, Verifizierung steht aus
+  "verified",  // Manager hat Mitgliedschaft bestätigt
+  "rejected",  // Manager hat Mitgliedschaft abgelehnt
+]);
+
+export const inquiryStatusEnum = pgEnum("inquiry_status", [
+  "new",
+  "in_progress",
+  "replied",
+  "converted",
+  "rejected",
+]);
+
+export const handoverKindEnum = pgEnum("handover_kind", ["checkin", "checkout"]);
+
+export const damageStatusEnum = pgEnum("damage_status", [
+  "offen",
+  "in_bearbeitung",
+  "behoben",
+  "abgerechnet",
+]);
+
+export const damageSeverityEnum = pgEnum("damage_severity", [
+  "klein",       // Bagatell, keine Verrechnung
+  "mittel",      // Reparatur < 100 €
+  "gross",       // Reparatur > 100 €
+  "abrechnung",  // mit Kaution verrechnen
+]);
+
+export const invoiceStatusEnum = pgEnum("invoice_status", [
+  "entwurf",
+  "ausgestellt",
+  "bezahlt",
+  "storniert",
+]);
+
+export const noteScopeEnum = pgEnum("note_scope", [
+  "booking",
+  "customer",
+  "inquiry",
+]);
+
 // =============================================================
 // USERS — for both managers (login) and (later) customer accounts
 // =============================================================
@@ -126,10 +170,18 @@ export const customers = pgTable(
     country: varchar("country", { length: 60 }).notNull().default("DE"),
     notes: text("notes"),
     tags: jsonb("tags").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+
+    // Mitgliedschafts-Verifizierung — manueller Workflow
+    membershipStatus: membershipStatusEnum("membership_status").notNull().default("none"),
+    membershipVerifiedAt: timestamp("membership_verified_at"),
+    membershipVerifiedBy: varchar("membership_verified_by", { length: 255 }),
+    membershipRejectedReason: text("membership_rejected_reason"),
+
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (t) => ({
     emailIdx: index("customers_email_idx").on(t.email),
+    membershipStatusIdx: index("customers_membership_status_idx").on(t.membershipStatus),
   })
 );
 
@@ -299,6 +351,342 @@ export const blogPostsRelations = relations(blogPosts, ({ one }) => ({
 }));
 
 // =============================================================
+// SEASONS — zeitliche Tarif-Perioden (Hauptsaison, Nebensaison, Ferien)
+// =============================================================
+
+export const seasons = pgTable(
+  "seasons",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: varchar("name", { length: 120 }).notNull(),
+    code: varchar("code", { length: 30 }).notNull().unique(),     // z.B. "winter", "sommer"
+    startMonthDay: varchar("start_month_day", { length: 5 }).notNull(),  // "MM-DD" yearly recurrence (e.g. "12-15")
+    endMonthDay: varchar("end_month_day", { length: 5 }).notNull(),      // "MM-DD"
+    priority: integer("priority").notNull().default(0),           // Höhere Zahl gewinnt bei Überschneidungen
+    active: boolean("active").notNull().default(true),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    activeIdx: index("seasons_active_idx").on(t.active),
+  })
+);
+
+// =============================================================
+// TARIFFS — Personenkategorie × Saison → Preis pro Nacht
+// =============================================================
+
+export const tariffCategoryEnum = pgEnum("tariff_category", [
+  "mitglied",
+  "nichtmitglied",
+  "kind",     // 4–15 J.
+  "schueler",
+  "lehrer",
+]);
+
+export const tariffs = pgTable(
+  "tariffs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: varchar("name", { length: 120 }).notNull(),
+    category: tariffCategoryEnum("category").notNull(),
+    seasonId: uuid("season_id").references(() => seasons.id, { onDelete: "set null" }),
+    priceCentsPerNight: integer("price_cents_per_night").notNull(),
+    minNights: integer("min_nights").notNull().default(1),
+    validFrom: date("valid_from"),
+    validUntil: date("valid_until"),
+    active: boolean("active").notNull().default(true),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    categoryIdx: index("tariffs_category_idx").on(t.category),
+    activeIdx: index("tariffs_active_idx").on(t.active),
+  })
+);
+
+// =============================================================
+// EXTRAS — buchbare Zusatzleistungen (Holz, Handtuchset, …)
+// =============================================================
+
+export const extras = pgTable(
+  "extras",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    code: varchar("code", { length: 60 }).notNull().unique(),
+    label: varchar("label", { length: 200 }).notNull(),
+    description: text("description"),
+    unitCents: integer("unit_cents").notNull(),
+    unitLabel: varchar("unit_label", { length: 60 }),  // z.B. "pro Bündel", "pro Person"
+    perNight: boolean("per_night").notNull().default(false),  // soll pro Nacht abgerechnet werden?
+    perPerson: boolean("per_person").notNull().default(false),
+    sortOrder: integer("sort_order").notNull().default(0),
+    active: boolean("active").notNull().default(true),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    activeIdx: index("extras_active_idx").on(t.active),
+  })
+);
+
+// =============================================================
+// BOOKING_EXTRAS — eigene Tabelle für Buchungs-Extras (statt nur JSON)
+// =============================================================
+
+export const bookingExtras = pgTable(
+  "booking_extras",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    bookingId: uuid("booking_id")
+      .notNull()
+      .references(() => bookings.id, { onDelete: "cascade" }),
+    extraId: uuid("extra_id").references(() => extras.id, { onDelete: "set null" }),
+    label: varchar("label", { length: 200 }).notNull(),  // Snapshot des Labels zur Buchungszeit
+    qty: integer("qty").notNull().default(1),
+    unitCents: integer("unit_cents").notNull(),
+    totalCents: integer("total_cents").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    bookingIdx: index("booking_extras_booking_idx").on(t.bookingId),
+  })
+);
+
+// =============================================================
+// BLOCKED_DATES — eigene Tabelle für Sperrzeiten (saubere Trennung von Bookings)
+// =============================================================
+
+export const blockedDateKindEnum = pgEnum("blocked_date_kind", [
+  "wartung",
+  "reinigung",
+  "veranstaltung",
+  "sonstiges",
+]);
+
+export const blockedDates = pgTable(
+  "blocked_dates",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    fromDate: date("from_date").notNull(),
+    toDate: date("to_date").notNull(),
+    kind: blockedDateKindEnum("kind").notNull().default("wartung"),
+    reason: varchar("reason", { length: 255 }),
+    notes: text("notes"),
+    createdBy: varchar("created_by", { length: 255 }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    fromIdx: index("blocked_dates_from_idx").on(t.fromDate),
+    toIdx: index("blocked_dates_to_idx").on(t.toDate),
+  })
+);
+
+// =============================================================
+// HANDOVERS — Schlüssel-/Zustands-Übergabe an An- und Abreise
+// =============================================================
+
+export const handovers = pgTable(
+  "handovers",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    bookingId: uuid("booking_id")
+      .notNull()
+      .references(() => bookings.id, { onDelete: "cascade" }),
+    kind: handoverKindEnum("kind").notNull(),
+    at: timestamp("at").notNull().defaultNow(),
+    by: varchar("by", { length: 255 }),
+    notes: text("notes"),
+    checklist: jsonb("checklist")
+      .$type<Array<{ key: string; label: string; ok: boolean; comment?: string }>>()
+      .notNull()
+      .default(sql`'[]'::jsonb`),
+    photoUrls: jsonb("photo_urls").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    bookingIdx: index("handovers_booking_idx").on(t.bookingId),
+  })
+);
+
+// =============================================================
+// DAMAGE_REPORTS — Schadensmeldungen (verknüpft mit Buchung + Kaution)
+// =============================================================
+
+export const damageReports = pgTable(
+  "damage_reports",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    bookingId: uuid("booking_id").references(() => bookings.id, { onDelete: "set null" }),
+    reportedAt: timestamp("reported_at").notNull().defaultNow(),
+    reportedBy: varchar("reported_by", { length: 255 }),
+    severity: damageSeverityEnum("severity").notNull().default("klein"),
+    status: damageStatusEnum("status").notNull().default("offen"),
+    title: varchar("title", { length: 200 }).notNull(),
+    description: text("description"),
+    estimatedCostCents: integer("estimated_cost_cents").notNull().default(0),
+    actualCostCents: integer("actual_cost_cents").notNull().default(0),
+    photoUrls: jsonb("photo_urls").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+    deductFromDeposit: boolean("deduct_from_deposit").notNull().default(false),
+    resolvedAt: timestamp("resolved_at"),
+    resolvedBy: varchar("resolved_by", { length: 255 }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    bookingIdx: index("damage_reports_booking_idx").on(t.bookingId),
+    statusIdx: index("damage_reports_status_idx").on(t.status),
+  })
+);
+
+// =============================================================
+// INVOICES — Rechnungen mit eigener Nummer + Snapshot
+// =============================================================
+
+export const invoices = pgTable(
+  "invoices",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    invoiceNumber: varchar("invoice_number", { length: 30 }).notNull().unique(),
+    bookingId: uuid("booking_id").references(() => bookings.id, { onDelete: "set null" }),
+    customerId: uuid("customer_id").references(() => customers.id, { onDelete: "set null" }),
+    status: invoiceStatusEnum("status").notNull().default("entwurf"),
+
+    issueDate: date("issue_date"),
+    dueDate: date("due_date"),
+    paidAt: timestamp("paid_at"),
+    sentAt: timestamp("sent_at"),
+
+    // Customer snapshot — Rechnungs-Adresse zum Zeitpunkt der Ausstellung
+    customerSnapshot: jsonb("customer_snapshot")
+      .$type<{
+        name: string;
+        company?: string;
+        street?: string;
+        zip?: string;
+        city?: string;
+        country?: string;
+        email?: string;
+      }>()
+      .notNull(),
+
+    lineItems: jsonb("line_items")
+      .$type<Array<{ label: string; qty: number; unitCents: number; totalCents: number }>>()
+      .notNull()
+      .default(sql`'[]'::jsonb`),
+
+    subtotalCents: integer("subtotal_cents").notNull().default(0),
+    taxCents: integer("tax_cents").notNull().default(0),
+    totalCents: integer("total_cents").notNull().default(0),
+
+    pdfUrl: text("pdf_url"),
+    notes: text("notes"),
+
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    bookingIdx: index("invoices_booking_idx").on(t.bookingId),
+    customerIdx: index("invoices_customer_idx").on(t.customerId),
+    statusIdx: index("invoices_status_idx").on(t.status),
+  })
+);
+
+// =============================================================
+// INQUIRIES — Anfragen, die noch nicht zu einer Buchung wurden
+// =============================================================
+
+export const inquiries = pgTable(
+  "inquiries",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    inquiryNumber: varchar("inquiry_number", { length: 20 }).notNull().unique(),
+    name: varchar("name", { length: 255 }).notNull(),
+    email: varchar("email", { length: 255 }).notNull(),
+    phone: varchar("phone", { length: 60 }),
+    organization: varchar("organization", { length: 255 }),
+    arrival: date("arrival"),
+    departure: date("departure"),
+    persons: integer("persons"),
+    purpose: varchar("purpose", { length: 255 }),
+    message: text("message"),
+    status: inquiryStatusEnum("status").notNull().default("new"),
+    convertedToBookingId: uuid("converted_to_booking_id").references(() => bookings.id, {
+      onDelete: "set null",
+    }),
+    repliedAt: timestamp("replied_at"),
+    repliedBy: varchar("replied_by", { length: 255 }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    statusIdx: index("inquiries_status_idx").on(t.status),
+    emailIdx: index("inquiries_email_idx").on(t.email),
+  })
+);
+
+// =============================================================
+// NOTES — generische Notizen, an Buchung/Customer/Anfrage hängbar
+// =============================================================
+
+export const notes = pgTable(
+  "notes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    scope: noteScopeEnum("scope").notNull(),
+    refId: uuid("ref_id").notNull(),       // bookingId / customerId / inquiryId
+    body: text("body").notNull(),
+    pinned: boolean("pinned").notNull().default(false),
+    internal: boolean("internal").notNull().default(true),  // false = sichtbar für Kunde
+    by: varchar("by", { length: 255 }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    scopeRefIdx: index("notes_scope_ref_idx").on(t.scope, t.refId),
+  })
+);
+
+// =============================================================
+// MAGIC LINK TOKENS — passwordless Login per Email
+// =============================================================
+
+export const magicLinkTokens = pgTable(
+  "magic_link_tokens",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    email: varchar("email", { length: 255 }).notNull(),
+    tokenHash: text("token_hash").notNull().unique(),
+    expiresAt: timestamp("expires_at").notNull(),
+    consumedAt: timestamp("consumed_at"),
+    requestIp: varchar("request_ip", { length: 45 }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    emailIdx: index("magic_link_email_idx").on(t.email),
+    expiresIdx: index("magic_link_expires_idx").on(t.expiresAt),
+  })
+);
+
+// =============================================================
+// PERMISSIONS — granulare Rollen-Capabilities
+// =============================================================
+
+export const permissions = pgTable(
+  "permissions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    role: userRoleEnum("role").notNull(),
+    capability: varchar("capability", { length: 80 }).notNull(),  // z.B. "bookings.refund", "users.create"
+    description: varchar("description", { length: 255 }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    uniq: uniqueIndex("permissions_role_cap_uniq").on(t.role, t.capability),
+  })
+);
+
+// =============================================================
 // RELATIONS
 // =============================================================
 
@@ -310,10 +698,47 @@ export const customersRelations = relations(customers, ({ many, one }) => ({
 export const bookingsRelations = relations(bookings, ({ one, many }) => ({
   customer: one(customers, { fields: [bookings.customerId], references: [customers.id] }),
   payments: many(payments),
+  bookingExtras: many(bookingExtras),
+  handovers: many(handovers),
+  damageReports: many(damageReports),
+  invoices: many(invoices),
 }));
 
 export const paymentsRelations = relations(payments, ({ one }) => ({
   booking: one(bookings, { fields: [payments.bookingId], references: [bookings.id] }),
+}));
+
+export const seasonsRelations = relations(seasons, ({ many }) => ({
+  tariffs: many(tariffs),
+}));
+
+export const tariffsRelations = relations(tariffs, ({ one }) => ({
+  season: one(seasons, { fields: [tariffs.seasonId], references: [seasons.id] }),
+}));
+
+export const bookingExtrasRelations = relations(bookingExtras, ({ one }) => ({
+  booking: one(bookings, { fields: [bookingExtras.bookingId], references: [bookings.id] }),
+  extra: one(extras, { fields: [bookingExtras.extraId], references: [extras.id] }),
+}));
+
+export const handoversRelations = relations(handovers, ({ one }) => ({
+  booking: one(bookings, { fields: [handovers.bookingId], references: [bookings.id] }),
+}));
+
+export const damageReportsRelations = relations(damageReports, ({ one }) => ({
+  booking: one(bookings, { fields: [damageReports.bookingId], references: [bookings.id] }),
+}));
+
+export const invoicesRelations = relations(invoices, ({ one }) => ({
+  booking: one(bookings, { fields: [invoices.bookingId], references: [bookings.id] }),
+  customer: one(customers, { fields: [invoices.customerId], references: [customers.id] }),
+}));
+
+export const inquiriesRelations = relations(inquiries, ({ one }) => ({
+  convertedBooking: one(bookings, {
+    fields: [inquiries.convertedToBookingId],
+    references: [bookings.id],
+  }),
 }));
 
 // =============================================================
@@ -330,3 +755,27 @@ export type Payment = typeof payments.$inferSelect;
 export type NewPayment = typeof payments.$inferInsert;
 export type BlogPost = typeof blogPosts.$inferSelect;
 export type NewBlogPost = typeof blogPosts.$inferInsert;
+export type Season = typeof seasons.$inferSelect;
+export type NewSeason = typeof seasons.$inferInsert;
+export type Tariff = typeof tariffs.$inferSelect;
+export type NewTariff = typeof tariffs.$inferInsert;
+export type Extra = typeof extras.$inferSelect;
+export type NewExtra = typeof extras.$inferInsert;
+export type BookingExtra = typeof bookingExtras.$inferSelect;
+export type NewBookingExtra = typeof bookingExtras.$inferInsert;
+export type BlockedDate = typeof blockedDates.$inferSelect;
+export type NewBlockedDate = typeof blockedDates.$inferInsert;
+export type Handover = typeof handovers.$inferSelect;
+export type NewHandover = typeof handovers.$inferInsert;
+export type DamageReport = typeof damageReports.$inferSelect;
+export type NewDamageReport = typeof damageReports.$inferInsert;
+export type Invoice = typeof invoices.$inferSelect;
+export type NewInvoice = typeof invoices.$inferInsert;
+export type Inquiry = typeof inquiries.$inferSelect;
+export type NewInquiry = typeof inquiries.$inferInsert;
+export type Note = typeof notes.$inferSelect;
+export type NewNote = typeof notes.$inferInsert;
+export type MagicLinkToken = typeof magicLinkTokens.$inferSelect;
+export type NewMagicLinkToken = typeof magicLinkTokens.$inferInsert;
+export type Permission = typeof permissions.$inferSelect;
+export type NewPermission = typeof permissions.$inferInsert;

@@ -6,6 +6,7 @@ import { users, activityLog } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { verifyTotp, consumeBackupCode } from "@/lib/totp";
+import { consumeMagicLinkToken } from "@/lib/magic-link";
 
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -27,6 +28,53 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: "/m/login",
   },
   providers: [
+    // ---------------------------------------------------------------
+    // CUSTOMER MAGIC LINK — passwordless Login per Email
+    // ---------------------------------------------------------------
+    Credentials({
+      id: "magic",
+      name: "Magic Link",
+      credentials: { token: { label: "Token", type: "text" } },
+      authorize: async (raw) => {
+        const token = (raw?.token ?? "").toString().trim();
+        if (!token) return null;
+        const result = await consumeMagicLinkToken(token);
+        if (!result.ok) return null;
+
+        const userRow = await db
+          .select()
+          .from(users)
+          .where(eq(users.id, result.userId))
+          .limit(1);
+        const u = userRow[0];
+        if (!u) return null;
+
+        await db
+          .update(users)
+          .set({ lastLoginAt: new Date(), updatedAt: new Date() })
+          .where(eq(users.id, u.id));
+
+        await db.insert(activityLog).values({
+          who: u.email,
+          what: result.isNewUser
+            ? "Kunden-Konto via Magic Link angelegt"
+            : "Login via Magic Link",
+        });
+
+        return {
+          id: u.id,
+          email: u.email,
+          name: u.name ?? u.email,
+          role: u.role,
+          mustChangePassword: false,
+          twoFactorEnabled: false,
+        };
+      },
+    }),
+
+    // ---------------------------------------------------------------
+    // PASSWORD LOGIN — Manager/Admin (mit optionalem TOTP)
+    // ---------------------------------------------------------------
     Credentials({
       credentials: {
         email: { label: "E-Mail", type: "email" },
@@ -49,9 +97,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const ok = await bcrypt.compare(password, user.passwordHash);
         if (!ok) return null;
-        if (user.role !== "manager" && user.role !== "admin") return null;
 
-        // 2FA gate
+        // 2FA gate (nur Manager/Admin können 2FA aktiviert haben)
         if (user.twoFactorEnabled) {
           if (!totp || totp.trim().length === 0) {
             throw new TotpRequiredError();
