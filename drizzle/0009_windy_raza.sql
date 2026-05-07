@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "must_enable_2fa" boolean DEFAULT false NOT NULL;

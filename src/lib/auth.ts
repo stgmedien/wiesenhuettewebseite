@@ -142,6 +142,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           role: user.role,
           mustChangePassword: user.mustChangePassword,
           twoFactorEnabled: user.twoFactorEnabled,
+          mustEnable2FA: user.mustEnable2FA,
         };
       },
     }),
@@ -154,11 +155,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           role?: string;
           mustChangePassword?: boolean;
           twoFactorEnabled?: boolean;
+          mustEnable2FA?: boolean;
         };
         token.id = u.id;
         token.role = u.role;
         token.mustChangePassword = u.mustChangePassword ?? false;
         token.twoFactorEnabled = u.twoFactorEnabled ?? false;
+        token.mustEnable2FA = u.mustEnable2FA ?? false;
       }
 
       // When a session is updated (e.g. after Passwort-Wechsel), rerefresh from DB
@@ -167,6 +170,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           .select({
             mustChangePassword: users.mustChangePassword,
             twoFactorEnabled: users.twoFactorEnabled,
+            mustEnable2FA: users.mustEnable2FA,
             role: users.role,
             email: users.email,
             name: users.name,
@@ -177,6 +181,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (fresh[0]) {
           token.mustChangePassword = fresh[0].mustChangePassword;
           token.twoFactorEnabled = fresh[0].twoFactorEnabled;
+          token.mustEnable2FA = fresh[0].mustEnable2FA;
           token.role = fresh[0].role;
           token.email = fresh[0].email;
           token.name = fresh[0].name ?? undefined;
@@ -191,11 +196,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           role?: string;
           mustChangePassword?: boolean;
           twoFactorEnabled?: boolean;
+          mustEnable2FA?: boolean;
         };
         u.id = token.id as string | undefined;
         u.role = token.role as string | undefined;
         u.mustChangePassword = (token.mustChangePassword as boolean | undefined) ?? false;
         u.twoFactorEnabled = (token.twoFactorEnabled as boolean | undefined) ?? false;
+        u.mustEnable2FA = (token.mustEnable2FA as boolean | undefined) ?? false;
       }
       return session;
     },

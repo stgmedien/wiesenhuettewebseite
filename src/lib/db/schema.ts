@@ -117,6 +117,9 @@ export const users = pgTable("users", {
   twoFactorSecret: text("two_factor_secret"),                                          // Base32
   twoFactorBackupCodes: jsonb("two_factor_backup_codes").$type<string[]>(),            // gehashte Einmal-Codes
 
+  // Erzwingt 2FA-Setup beim nächsten Login (Admin-Pflicht für echte Manager)
+  mustEnable2FA: boolean("must_enable_2fa").notNull().default(false),
+
   // Login-Audit
   lastLoginAt: timestamp("last_login_at"),
   lastLoginIp: varchar("last_login_ip", { length: 45 }),

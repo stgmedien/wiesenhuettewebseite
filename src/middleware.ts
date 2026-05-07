@@ -49,12 +49,14 @@ export default auth((req) => {
     return NextResponse.redirect(url);
   }
 
-  // 4) 2FA-Pflicht fuer Admins — Admin ohne aktiviertes 2FA wird auf /m/profil
-  //    gezwungen, bis er 2FA aktiviert. Andere Pfade gesperrt.
+  // 4) 2FA-Pflicht — gilt fuer Admins UND fuer User mit explizitem
+  //    mustEnable2FA-Flag (gesetzt bei Account-Anlage durch Admin).
+  //    Ohne aktiviertes 2FA wird auf /m/profil gezwungen.
   const twoFactorEnabled = (session.user as { twoFactorEnabled?: boolean }).twoFactorEnabled;
+  const mustEnable2FA = (session.user as { mustEnable2FA?: boolean }).mustEnable2FA;
+  const needs2FA = !twoFactorEnabled && (userRole === "admin" || mustEnable2FA);
   if (
-    userRole === "admin" &&
-    !twoFactorEnabled &&
+    needs2FA &&
     !ALLOWED_PATHS_DURING_FORCED_PW_CHANGE.some((p) => path === p || path.startsWith(`${p}/`))
   ) {
     const url = req.nextUrl.clone();

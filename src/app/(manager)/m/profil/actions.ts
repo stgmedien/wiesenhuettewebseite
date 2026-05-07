@@ -202,6 +202,7 @@ export async function confirmTwoFactorSetup(
     .set({
       twoFactorEnabled: true,
       twoFactorBackupCodes: hashed,
+      mustEnable2FA: false,
       updatedAt: new Date(),
     })
     .where(eq(users.id, me.id));
