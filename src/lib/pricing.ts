@@ -87,6 +87,18 @@ export type PriceInput = {
   departure: Date | string;
   soloUse: boolean;
   extras?: ExtraLine[];
+  /**
+   * Optional: aufgeloeste Tarife (z.B. aus DB via resolveTariffs()).
+   * Wenn nicht gesetzt, wird die hardcoded PRICES-Konstante verwendet.
+   */
+  tariffs?: {
+    mitglied: number;
+    nichtmitglied: number;
+    kind: number;
+    schueler: number;
+    lehrer: number;
+    seasonName?: string | null;
+  };
 };
 
 const toDate = (d: Date | string) => (typeof d === "string" ? new Date(d) : d);
@@ -138,11 +150,20 @@ export const calculatePrice = (input: PriceInput): PriceBreakdown => {
   const p = input.persons;
   const adultsNonMember = p.adults + p.teachers; // Lehrkräfte zählen als Nichtmitglieder
 
+  // Tarif-Resolution: pro Kategorie aktiver DB-Tarif oder Fallback
+  const T = input.tariffs;
+  const adultNonMemberCents = T?.nichtmitglied ?? PRICES.adultNonMemberCents;
+  const adultMemberCents = T?.mitglied ?? PRICES.adultMemberCents;
+  const childCents = T?.kind ?? PRICES.childCents;
+  const pupilCents = T?.schueler ?? PRICES.pupilCents;
+  const teacherCents = T?.lehrer ?? PRICES.adultNonMemberCents;
+
   const accommodationCents =
-    adultsNonMember * PRICES.adultNonMemberCents * nights +
-    p.members * PRICES.adultMemberCents * nights +
-    p.children * PRICES.childCents * nights +
-    p.pupils * PRICES.pupilCents * nights;
+    p.adults * adultNonMemberCents * nights +
+    p.teachers * teacherCents * nights +
+    p.members * adultMemberCents * nights +
+    p.children * childCents * nights +
+    p.pupils * pupilCents * nights;
 
   const energyFlatCents = PRICES.energyFlatPerNightCents * nights;
   const cleaningCents = PRICES.cleaningCents; // Pflicht
@@ -164,39 +185,45 @@ export const calculatePrice = (input: PriceInput): PriceBreakdown => {
 
   const lines: PriceLine[] = [];
   if (adultsNonMember > 0) {
+    const blendedUnit =
+      p.adults > 0
+        ? adultNonMemberCents
+        : teacherCents; // wenn nur Lehrer, nutze Lehrer-Tarif
+    const totalC =
+      p.adults * adultNonMemberCents * nights + p.teachers * teacherCents * nights;
     lines.push({
       label: "Erwachsene (Nichtmitglieder)",
-      detail: `${adultsNonMember} × ${nights} Nächte × 18,00 €`,
+      detail: `${adultsNonMember} × ${nights} Nächte`,
       qty: adultsNonMember * nights,
-      unitCents: PRICES.adultNonMemberCents,
-      totalCents: adultsNonMember * PRICES.adultNonMemberCents * nights,
+      unitCents: blendedUnit,
+      totalCents: totalC,
     });
   }
   if (p.members > 0) {
     lines.push({
       label: "Erwachsene Vereinsmitglieder",
-      detail: `${p.members} × ${nights} Nächte × 7,50 €`,
+      detail: `${p.members} × ${nights} Nächte`,
       qty: p.members * nights,
-      unitCents: PRICES.adultMemberCents,
-      totalCents: p.members * PRICES.adultMemberCents * nights,
+      unitCents: adultMemberCents,
+      totalCents: p.members * adultMemberCents * nights,
     });
   }
   if (p.children > 0) {
     lines.push({
       label: "Kinder (4–15 Jahre)",
-      detail: `${p.children} × ${nights} Nächte × 10,00 €`,
+      detail: `${p.children} × ${nights} Nächte`,
       qty: p.children * nights,
-      unitCents: PRICES.childCents,
-      totalCents: p.children * PRICES.childCents * nights,
+      unitCents: childCents,
+      totalCents: p.children * childCents * nights,
     });
   }
   if (p.pupils > 0) {
     lines.push({
       label: "Schüler (Schulgruppe)",
-      detail: `${p.pupils} × ${nights} Nächte × 7,50 €`,
+      detail: `${p.pupils} × ${nights} Nächte`,
       qty: p.pupils * nights,
-      unitCents: PRICES.pupilCents,
-      totalCents: p.pupils * PRICES.pupilCents * nights,
+      unitCents: pupilCents,
+      totalCents: p.pupils * pupilCents * nights,
     });
   }
   lines.push({

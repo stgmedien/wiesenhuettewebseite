@@ -14,6 +14,7 @@ import {
   markDiscountRedeemed,
   previewDiscount,
 } from "@/lib/discount";
+import { resolveTariffs } from "@/lib/pricing-tariffs";
 import {
   calculatePrice,
   validateBookingInput,
@@ -131,11 +132,15 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
     };
   }
 
+  // Tarife auflösen (DB-Tarife mit Saison-Resolution, Fallback auf hardcoded)
+  const resolvedTariffs = await resolveTariffs(data.arrival);
+
   const breakdown = calculatePrice({
     arrival: data.arrival,
     departure: data.departure,
     persons,
     soloUse: data.soloUse,
+    tariffs: resolvedTariffs,
   });
 
   const totalPersons = breakdown.totalPersons;

@@ -72,6 +72,22 @@ export default async function BookingDetail({ params }: Props) {
         />
       )}
 
+      {/* Übergabeprotokoll-Buttons */}
+      <div className="flex flex-wrap gap-3 mt-6">
+        <Link
+          href={`/m/buchungen/${b.id}/uebergabe/checkin`}
+          className="rounded-full border-2 border-[var(--color-wh-deep-green)] text-[var(--color-wh-deep-green)] px-5 py-2 text-sm font-semibold no-underline hover:bg-[var(--color-wh-deep-green)] hover:text-white transition"
+        >
+          📋 Anreise-Übergabe
+        </Link>
+        <Link
+          href={`/m/buchungen/${b.id}/uebergabe/checkout`}
+          className="rounded-full border-2 border-[var(--color-wh-deep-green)] text-[var(--color-wh-deep-green)] px-5 py-2 text-sm font-semibold no-underline hover:bg-[var(--color-wh-deep-green)] hover:text-white transition"
+        >
+          📋 Abreise-Übernahme
+        </Link>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 mt-8">
         <div className="space-y-6">
           <Section title="Gast">

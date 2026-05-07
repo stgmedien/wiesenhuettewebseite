@@ -517,10 +517,57 @@ export const handovers = pgTable(
       .notNull()
       .default(sql`'[]'::jsonb`),
     photoUrls: jsonb("photo_urls").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+    signatureGuestUrl: text("signature_guest_url"),
+    signatureManagerUrl: text("signature_manager_url"),
+    guestName: varchar("guest_name", { length: 255 }),
+    completedAt: timestamp("completed_at"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (t) => ({
     bookingIdx: index("handovers_booking_idx").on(t.bookingId),
+  })
+);
+
+// =============================================================
+// MAIL TEMPLATES — Versionierte Templates (Editor + Diff)
+// =============================================================
+
+export const mailTemplates = pgTable(
+  "mail_templates",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    key: varchar("key", { length: 80 }).notNull().unique(),  // z.B. "booking-confirmed"
+    name: varchar("name", { length: 200 }).notNull(),
+    description: text("description"),
+    variables: jsonb("variables")
+      .$type<Array<{ name: string; description: string; example?: string }>>()
+      .notNull()
+      .default(sql`'[]'::jsonb`),
+    activeVersionId: uuid("active_version_id"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    keyIdx: index("mail_templates_key_idx").on(t.key),
+  })
+);
+
+export const mailTemplateVersions = pgTable(
+  "mail_template_versions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    templateId: uuid("template_id")
+      .notNull()
+      .references(() => mailTemplates.id, { onDelete: "cascade" }),
+    version: integer("version").notNull(),         // 1, 2, 3, ...
+    subject: text("subject").notNull(),
+    bodyMd: text("body_md").notNull(),             // Markdown mit {{variable}} placeholders
+    changeNote: text("change_note"),
+    createdBy: varchar("created_by", { length: 255 }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    templateVersionIdx: uniqueIndex("mail_template_version_uniq").on(t.templateId, t.version),
   })
 );
 
@@ -830,3 +877,7 @@ export type Permission = typeof permissions.$inferSelect;
 export type NewPermission = typeof permissions.$inferInsert;
 export type DiscountCode = typeof discountCodes.$inferSelect;
 export type NewDiscountCode = typeof discountCodes.$inferInsert;
+export type MailTemplate = typeof mailTemplates.$inferSelect;
+export type NewMailTemplate = typeof mailTemplates.$inferInsert;
+export type MailTemplateVersion = typeof mailTemplateVersions.$inferSelect;
+export type NewMailTemplateVersion = typeof mailTemplateVersions.$inferInsert;

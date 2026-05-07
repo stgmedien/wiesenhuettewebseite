@@ -19,6 +19,7 @@ import {
   BadgeCheck,
   BarChart3,
   Database,
+  MailIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -33,6 +34,7 @@ const NAV_ALL = [
   { href: "/m/mitgliedschaften", label: "Mitgliedschaften", Icon: BadgeCheck, adminOnly: false },
   { href: "/m/reporting", label: "Reporting", Icon: BarChart3, adminOnly: false },
   { href: "/m/stammdaten", label: "Stammdaten", Icon: Database, adminOnly: false },
+  { href: "/m/mail-templates", label: "Mail-Templates", Icon: MailIcon, adminOnly: false },
   { href: "/m/audit", label: "Audit-Log", Icon: ScrollText, adminOnly: true },
   { href: "/m/einstellungen", label: "Einstellungen", Icon: Settings, adminOnly: false },
 ];
