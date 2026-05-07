@@ -12,7 +12,6 @@ const TOC = [
   { id: "jahrgaenge", label: "Was Mittelstufe an der Hütte tut" },
   { id: "stimmen", label: "Stimmen aus der Hütte" },
   { id: "lernort", label: "Wie aus einer Hütte ein Lernort wird" },
-  { id: "sicherheit", label: "Begleitung & Sicherheit" },
   { id: "fragen", label: "Häufige Elternfragen" },
   { id: "traeger", label: "Wer trägt die Hüttenarbeit" },
 ];
@@ -453,70 +452,6 @@ export default function EsgPage() {
       </section>
 
       {/* ---------------------------------------------------------------- */}
-      {/* 7. Begleitung, Sicherheit, Inklusion */}
-      {/* ---------------------------------------------------------------- */}
-      <section id="sicherheit" className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-16 sm:py-24">
-        <div className="max-w-[1080px] mx-auto">
-          <div className="eyebrow">Eltern-Block</div>
-          <h2 className="text-[32px] sm:text-[44px] mt-3 mb-6 leading-tight">
-            Begleitung, Sicherheit & Inklusion.
-          </h2>
-          <p className="prose-block text-[var(--color-wh-fg-muted)] italic">
-            Diese Seite ist für die Eltern, die — zu Recht — fragen: „Wie konkret läuft das
-            eigentlich?"
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10">
-            <SafetyBlock
-              title="Begleitung"
-              body={
-                <>
-                  Pro Klasse mindestens <strong>zwei Lehrkräfte</strong>, in der Regel
-                  Klassenleitung plus eine zusätzliche Lehrkraft, geschlechtergemischt. In der
-                  Mittelstufe können — wo sinnvoll — Schul-Sozialarbeiter:innen ergänzend
-                  mitfahren. Lehrkräfte sind <strong>Lernbegleiter:innen</strong>: sie
-                  strukturieren, halten Räume offen, intervenieren in Konflikten und ermöglichen
-                  Verantwortungsübernahme.
-                </>
-              }
-            />
-            <SafetyBlock
-              title="Sicherheit"
-              body={
-                <>
-                  Mindestens zwei Begleitpersonen mit aktuellem Erste-Hilfe-Schein. Notfallplan
-                  mit Hüttenwart Werner Klauke (mobil 01516 7448273), Polizei, Notarzt 112,
-                  ärztlicher Bereitschaftsdienst 116117, St. Franziskus Hospital Winterberg
-                  (02981/8020). Klassenleitung ist während der Fahrt 24/7 für Eltern erreichbar.
-                </>
-              }
-            />
-            <SafetyBlock
-              title="Inklusion"
-              body={
-                <>
-                  <strong>Soziale Fairness:</strong> Förderverein des ESG unterstützt Familien
-                  vertraulich. <strong>Gesundheit:</strong> Allergien, Diabetes, Asthma,
-                  vegetarisch/vegan/glutenfrei werden vorher abgefragt.{" "}
-                  <strong>Mobilität:</strong> Barrierefreiheit ist nicht überall gegeben — wir
-                  sprechen offen und suchen Lösungen.
-                </>
-              }
-            />
-          </div>
-
-          <div className="mt-12 bg-white border-l-4 border-[var(--color-wh-deep-green)] rounded-r-[var(--radius-card)] p-6">
-            <p className="m-0 text-[15px]">
-              <strong>Mobbing & Heimweh.</strong> Eine 24/7-Wohngemeinschaft kann auch belasten.
-              Lehrkräfte sind sensibilisiert, kennen die Klasse, beobachten Dynamiken und greifen
-              früh ein. Kein Kind wird allein gelassen — Heimweh wird ernst genommen, aber nicht
-              zur Krise hochgespielt.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ---------------------------------------------------------------- */}
       {/* 8. FAQ */}
       {/* ---------------------------------------------------------------- */}
       <section id="fragen" className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24">
@@ -672,17 +607,6 @@ function PhaseCard({
           </li>
         ))}
       </ul>
-    </div>
-  );
-}
-
-function SafetyBlock({ title, body }: { title: string; body: React.ReactNode }) {
-  return (
-    <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6">
-      <h4 className="font-display font-bold text-[20px] text-[var(--color-wh-deep-green)] mt-0 mb-3">
-        {title}
-      </h4>
-      <p className="text-[14px] leading-relaxed text-[var(--color-wh-black)] m-0">{body}</p>
     </div>
   );
 }
