@@ -333,9 +333,10 @@ export default async function StammdatenPage() {
           </table>
         </div>
         <p className="text-[11px] text-[var(--color-wh-fg-muted)] mt-3">
-          Hinweis: Die Pricing-Engine verwendet aktuell hartkodierte Preise; diese Tabelle wird in
-          einer kommenden Version als Single-Source-of-Truth angebunden. Änderungen sind
-          historisiert und werden im Audit-Log geloggt.
+          Diese Tabelle ist die Single-Source-of-Truth für die Pricing-Engine: bei jeder neuen
+          Buchung wird je nach Anreisedatum + Saison der jeweils aktive Tarif geladen. Der
+          hartkodierte Fallback greift nur, wenn ein Tarif fehlt oder deaktiviert ist. Änderungen
+          werden im Audit-Log geloggt.
         </p>
       </section>
 
