@@ -1,7 +1,14 @@
 import { db } from "@/lib/db";
-import { tariffs, extras } from "@/lib/db/schema";
-import { asc } from "drizzle-orm";
-import { updateTariff, updateExtra, createExtra } from "./actions";
+import { tariffs, extras, seasons } from "@/lib/db/schema";
+import { asc, desc } from "drizzle-orm";
+import {
+  updateTariff,
+  updateExtra,
+  createExtra,
+  updateSeason,
+  createSeason,
+  deleteSeason,
+} from "./actions";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
@@ -18,6 +25,7 @@ export default async function StammdatenPage() {
 
   const allTariffs = await db.select().from(tariffs).orderBy(asc(tariffs.category));
   const allExtras = await db.select().from(extras).orderBy(asc(extras.sortOrder));
+  const allSeasons = await db.select().from(seasons).orderBy(desc(seasons.priority));
 
   return (
     <div className="px-8 py-10 max-w-[1200px]">
@@ -27,6 +35,208 @@ export default async function StammdatenPage() {
         Preise pro Personenkategorie und buchbare Zusatzleistungen. Änderungen wirken auf neue
         Buchungen — bestehende Buchungen behalten ihren historischen Snapshot.
       </p>
+
+      {/* Saisons */}
+      <section className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 mb-8">
+        <h2 className="text-[22px] m-0 mb-1">Saisons</h2>
+        <p className="text-xs text-[var(--color-wh-fg-muted)] mb-4">
+          Zeitliche Tarif-Perioden im Format <code>MM-DD</code> (z.B. 12-15 → 03-15 für
+          Wintersaison über den Jahreswechsel). Höhere Priorität gewinnt bei Überschneidungen.
+        </p>
+        {allSeasons.length === 0 ? (
+          <p className="text-sm text-[var(--color-wh-fg-muted)] mb-4 italic">
+            Noch keine Saisons angelegt.
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="border-b border-[var(--color-wh-winter-grey)]">
+                  <th className="text-left py-2 font-semibold text-xs uppercase tracking-wider">
+                    Code
+                  </th>
+                  <th className="text-left py-2 font-semibold text-xs uppercase tracking-wider">
+                    Name
+                  </th>
+                  <th className="text-center py-2 font-semibold text-xs uppercase tracking-wider">
+                    Start (MM-DD)
+                  </th>
+                  <th className="text-center py-2 font-semibold text-xs uppercase tracking-wider">
+                    Ende (MM-DD)
+                  </th>
+                  <th className="text-right py-2 font-semibold text-xs uppercase tracking-wider">
+                    Prio
+                  </th>
+                  <th className="text-center py-2 font-semibold text-xs uppercase tracking-wider">
+                    Aktiv
+                  </th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {allSeasons.map((s) => (
+                  <tr key={s.id} className="border-b border-[var(--color-wh-winter-grey)]/30">
+                    <td className="py-3 font-mono text-xs">{s.code}</td>
+                    <td className="py-3">
+                      <form
+                        action={async (fd) => {
+                          "use server";
+                          await updateSeason(fd);
+                        }}
+                        className="contents"
+                        id={`season-${s.id}`}
+                      >
+                        <input type="hidden" name="id" value={s.id} />
+                        <input
+                          type="text"
+                          name="name"
+                          defaultValue={s.name}
+                          className={`${inputBase} w-full max-w-[220px]`}
+                        />
+                      </form>
+                    </td>
+                    <td className="py-3 text-center">
+                      <input
+                        type="text"
+                        name="startMonthDay"
+                        defaultValue={s.startMonthDay}
+                        pattern="\d{2}-\d{2}"
+                        form={`season-${s.id}`}
+                        className={`${inputBase} text-center w-20 font-mono`}
+                      />
+                    </td>
+                    <td className="py-3 text-center">
+                      <input
+                        type="text"
+                        name="endMonthDay"
+                        defaultValue={s.endMonthDay}
+                        pattern="\d{2}-\d{2}"
+                        form={`season-${s.id}`}
+                        className={`${inputBase} text-center w-20 font-mono`}
+                      />
+                    </td>
+                    <td className="py-3 text-right">
+                      <input
+                        type="number"
+                        name="priority"
+                        min="0"
+                        max="100"
+                        defaultValue={s.priority}
+                        form={`season-${s.id}`}
+                        className={`${inputBase} text-right w-16`}
+                      />
+                    </td>
+                    <td className="py-3 text-center">
+                      <input
+                        type="checkbox"
+                        name="active"
+                        defaultChecked={s.active}
+                        form={`season-${s.id}`}
+                      />
+                    </td>
+                    <td className="py-3 text-right">
+                      <div className="flex gap-1 justify-end">
+                        <button
+                          type="submit"
+                          form={`season-${s.id}`}
+                          className="rounded-full bg-[var(--color-wh-deep-green)] text-white px-3 py-1 text-xs font-semibold"
+                        >
+                          Speichern
+                        </button>
+                        <form
+                          action={async (fd) => {
+                            "use server";
+                            await deleteSeason(fd);
+                          }}
+                        >
+                          <input type="hidden" name="id" value={s.id} />
+                          <button
+                            type="submit"
+                            className="rounded-full border border-red-300 text-red-700 px-3 py-1 text-xs hover:bg-red-50"
+                            title="Saison löschen"
+                          >
+                            ✕
+                          </button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Neue Saison */}
+        <div className="mt-6 pt-6 border-t border-[var(--color-wh-winter-grey)]/40">
+          <h3 className="text-[16px] m-0 mb-3">Neue Saison anlegen</h3>
+          <form
+            action={async (fd) => {
+              "use server";
+              await createSeason(fd);
+            }}
+            className="flex flex-wrap items-end gap-3"
+          >
+            <div>
+              <label className="block text-[11px] uppercase text-[var(--color-wh-fg-muted)] mb-1">
+                Code
+              </label>
+              <input
+                type="text"
+                name="code"
+                required
+                pattern="[a-z0-9_-]+"
+                placeholder="z.B. winter"
+                className={`${inputBase} w-32 font-mono`}
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] uppercase text-[var(--color-wh-fg-muted)] mb-1">
+                Name
+              </label>
+              <input
+                type="text"
+                name="name"
+                required
+                placeholder="z.B. Wintersaison"
+                className={`${inputBase} w-56`}
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] uppercase text-[var(--color-wh-fg-muted)] mb-1">
+                Start (MM-DD)
+              </label>
+              <input
+                type="text"
+                name="startMonthDay"
+                required
+                pattern="\d{2}-\d{2}"
+                placeholder="12-15"
+                className={`${inputBase} w-24 font-mono`}
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] uppercase text-[var(--color-wh-fg-muted)] mb-1">
+                Ende (MM-DD)
+              </label>
+              <input
+                type="text"
+                name="endMonthDay"
+                required
+                pattern="\d{2}-\d{2}"
+                placeholder="03-15"
+                className={`${inputBase} w-24 font-mono`}
+              />
+            </div>
+            <button
+              type="submit"
+              className="rounded-full bg-[var(--color-wh-deep-green)] text-white px-4 py-2 text-sm font-semibold"
+            >
+              Anlegen
+            </button>
+          </form>
+        </div>
+      </section>
 
       {/* Tarife */}
       <section className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 mb-8">

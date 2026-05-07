@@ -57,30 +57,14 @@ export default async function TemplateEditorPage({ params }: Props) {
         </div>
       </div>
 
-      {tpl.variables && (tpl.variables as { name: string }[]).length > 0 && (
-        <div className="mb-6 bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)]/40 rounded-lg p-4">
-          <p className="text-xs uppercase tracking-wider text-[var(--color-wh-fg-muted)] mb-2">
-            Verfügbare Variablen
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {(tpl.variables as { name: string }[]).map((v) => (
-              <code
-                key={v.name}
-                className="px-2 py-1 rounded bg-white border border-[var(--color-wh-winter-grey)] text-xs font-mono"
-              >
-                {`{{${v.name}}}`}
-              </code>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Editor */}
       <TemplateEditor
         templateId={tpl.id}
+        templateName={tpl.name}
         initialSubject={activeVersion?.subject ?? ""}
         initialBody={activeVersion?.bodyMd ?? ""}
         previousBody={previousVersion?.bodyMd ?? null}
+        variables={(tpl.variables as { name: string; description?: string; example?: string }[]) ?? []}
       />
 
       {/* Versions-Verlauf */}
