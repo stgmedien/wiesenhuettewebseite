@@ -49,6 +49,20 @@ export default auth((req) => {
     return NextResponse.redirect(url);
   }
 
+  // 4) 2FA-Pflicht fuer Admins — Admin ohne aktiviertes 2FA wird auf /m/profil
+  //    gezwungen, bis er 2FA aktiviert. Andere Pfade gesperrt.
+  const twoFactorEnabled = (session.user as { twoFactorEnabled?: boolean }).twoFactorEnabled;
+  if (
+    userRole === "admin" &&
+    !twoFactorEnabled &&
+    !ALLOWED_PATHS_DURING_FORCED_PW_CHANGE.some((p) => path === p || path.startsWith(`${p}/`))
+  ) {
+    const url = req.nextUrl.clone();
+    url.pathname = "/m/profil";
+    url.searchParams.set("force_2fa", "1");
+    return NextResponse.redirect(url);
+  }
+
   return undefined;
 });
 

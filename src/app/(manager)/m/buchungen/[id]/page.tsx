@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
-import { bookings, customers, payments } from "@/lib/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { bookings, customers, payments, notes } from "@/lib/db/schema";
+import { eq, desc, and } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { formatEuro } from "@/lib/pricing";
@@ -9,6 +9,7 @@ import { StatusPill } from "@/components/manager/StatusPill";
 import { StatusActions } from "./StatusActions";
 import { ManagerMessage } from "./ManagerMessage";
 import { DepositHoldControl } from "./DepositHoldControl";
+import { Kundenakte } from "./Kundenakte";
 
 export const dynamic = "force-dynamic";
 
@@ -33,6 +34,12 @@ export default async function BookingDetail({ params }: Props) {
     .from(payments)
     .where(eq(payments.bookingId, id))
     .orderBy(desc(payments.createdAt));
+
+  const bookingNotes = await db
+    .select()
+    .from(notes)
+    .where(and(eq(notes.scope, "booking"), eq(notes.refId, id)))
+    .orderBy(desc(notes.createdAt));
 
   return (
     <div className="px-8 py-10 max-w-[1200px]">
@@ -238,6 +245,21 @@ export default async function BookingDetail({ params }: Props) {
           </Section>
         </aside>
       </div>
+
+      <Kundenakte
+        bookingId={b.id}
+        customerId={customer?.id ?? null}
+        customerTags={customer?.tags ?? []}
+        notes={bookingNotes.map((n) => ({
+          id: n.id,
+          body: n.body,
+          pinned: n.pinned,
+          internal: n.internal,
+          by: n.by,
+          createdAt: n.createdAt,
+          scope: n.scope,
+        }))}
+      />
     </div>
   );
 }

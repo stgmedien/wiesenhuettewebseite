@@ -1,10 +1,17 @@
 import { db } from "@/lib/db";
-import { bookings, customers, payments, activityLog } from "@/lib/db/schema";
-import { eq, gte, lte, and, desc } from "drizzle-orm";
+import { bookings, customers, payments, activityLog, inquiries } from "@/lib/db/schema";
+import { eq, gte, lte, and, desc, ne, sql } from "drizzle-orm";
 import Link from "next/link";
 import { formatEuro } from "@/lib/pricing";
 import { formatDateLong } from "@/lib/utils";
-import { CalendarArrowDown, CalendarArrowUp, Mail, BadgeEuro } from "lucide-react";
+import {
+  CalendarArrowDown,
+  CalendarArrowUp,
+  Mail,
+  BadgeEuro,
+  AlertCircle,
+  CalendarClock,
+} from "lucide-react";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Dashboard · Wiesenhütte Manager" };
@@ -75,6 +82,70 @@ export default async function Dashboard() {
 
   const openRequests = allRecent.filter((b) => b.status === "angefragt").length;
 
+  // Heute-Block: Anreisen + Abreisen am heutigen Datum
+  const arrivalsToday = arrivalsSoon.filter((b) => b.arrival === todayIso);
+  const departuresToday = departuresSoon.filter((b) => b.departure === todayIso);
+
+  // Offene Zahlungen (Restzahlung & angefragt-Bookings) — kommende 30 Tage
+  const in30d = new Date(today);
+  in30d.setDate(in30d.getDate() + 30);
+  const in30dIso = in30d.toISOString().slice(0, 10);
+
+  const openPaymentRows = await db
+    .select({
+      id: payments.id,
+      bookingId: payments.bookingId,
+      kind: payments.kind,
+      amountCents: payments.amountCents,
+      status: payments.status,
+    })
+    .from(payments)
+    .where(
+      and(
+        eq(payments.status, "offen"),
+        ne(payments.kind, "kaution"),
+        ne(payments.kind, "rueckerstattung")
+      )
+    );
+  const openPaymentTotalCents = openPaymentRows.reduce(
+    (a, p) => a + Math.max(0, p.amountCents),
+    0
+  );
+  const openPaymentBookingIds = Array.from(
+    new Set(openPaymentRows.map((p) => p.bookingId))
+  );
+  const openPaymentBookings = openPaymentBookingIds.length
+    ? await db
+        .select({
+          id: bookings.id,
+          bookingNumber: bookings.bookingNumber,
+          arrival: bookings.arrival,
+          customerId: bookings.customerId,
+          subtotalCents: bookings.subtotalCents,
+          paidCents: bookings.paidCents,
+        })
+        .from(bookings)
+        .where(
+          and(
+            sql`${bookings.id} IN (${sql.join(
+              openPaymentBookingIds.map((id) => sql`${id}`),
+              sql`, `
+            )})`,
+            lte(bookings.arrival, in30dIso)
+          )
+        )
+        .orderBy(bookings.arrival)
+        .limit(10)
+    : [];
+
+  // Offene Anfragen (Inquiries-Tabelle, separater Workflow von angefragt-Bookings)
+  const openInquiries = await db
+    .select()
+    .from(inquiries)
+    .where(eq(inquiries.status, "new"))
+    .orderBy(desc(inquiries.createdAt))
+    .limit(10);
+
   const recentActivity = await db
     .select()
     .from(activityLog)
@@ -103,28 +174,111 @@ export default async function Dashboard() {
         {formatDateLong(today)}
       </p>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-10">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-10">
+        <Kpi
+          icon={<CalendarClock />}
+          label="Heute An/Ab"
+          value={`${arrivalsToday.length}/${departuresToday.length}`}
+          tone={arrivalsToday.length + departuresToday.length > 0 ? "warm" : "default"}
+        />
         <Kpi
           icon={<CalendarArrowDown />}
           label="Anreisen (7 T.)"
           value={String(arrivalsSoon.length)}
         />
         <Kpi
-          icon={<CalendarArrowUp />}
-          label="Abreisen (7 T.)"
-          value={String(departuresSoon.length)}
-        />
-        <Kpi
           icon={<Mail />}
           label="Offene Anfragen"
-          value={String(openRequests)}
-          tone={openRequests > 0 ? "warm" : "default"}
+          value={String(openInquiries.length + openRequests)}
+          tone={openInquiries.length + openRequests > 0 ? "warm" : "default"}
         />
         <Kpi
           icon={<BadgeEuro />}
-          label="Umsatz (gesamt)"
-          value={formatEuro(totalRevenueCents)}
+          label="Offene Zahlungen"
+          value={formatEuro(openPaymentTotalCents)}
+          tone={openPaymentTotalCents > 0 ? "warm" : "default"}
         />
+      </div>
+
+      {/* Heute-Block — kompakt oben */}
+      {(arrivalsToday.length > 0 || departuresToday.length > 0) && (
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+          {arrivalsToday.length > 0 && (
+            <Section title={`Heute Anreise (${arrivalsToday.length})`}>
+              {arrivalsToday.map((b) => {
+                const c = b.customerId ? custMap.get(b.customerId) : null;
+                return (
+                  <Row
+                    key={b.id}
+                    href={`/m/buchungen/${b.id}`}
+                    date={b.arrival}
+                    title={c ? `${c.firstName} ${c.lastName}` : "—"}
+                    subtitle={`${b.bookingNumber} · ${b.persons} Personen`}
+                  />
+                );
+              })}
+            </Section>
+          )}
+          {departuresToday.length > 0 && (
+            <Section title={`Heute Abreise (${departuresToday.length})`}>
+              {departuresToday.map((b) => {
+                const c = b.customerId ? custMap.get(b.customerId) : null;
+                return (
+                  <Row
+                    key={b.id}
+                    href={`/m/buchungen/${b.id}`}
+                    date={b.departure}
+                    title={c ? `${c.firstName} ${c.lastName}` : "—"}
+                    subtitle={`${b.bookingNumber} · ${b.persons} Personen`}
+                  />
+                );
+              })}
+            </Section>
+          )}
+        </div>
+      )}
+
+      {/* Offene Zahlungen + Anfragen */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-10">
+        <Section title={`Offene Zahlungen (${openPaymentBookings.length})`}>
+          {openPaymentBookings.length === 0 ? (
+            <p className="text-[var(--color-wh-fg-muted)] text-sm">
+              Keine offenen Zahlungen in den nächsten 30 Tagen.
+            </p>
+          ) : (
+            openPaymentBookings.map((b) => {
+              const c = b.customerId ? custMap.get(b.customerId) : null;
+              const open = b.subtotalCents - b.paidCents;
+              return (
+                <Row
+                  key={b.id}
+                  href={`/m/buchungen/${b.id}`}
+                  date={b.arrival}
+                  title={c ? `${c.firstName} ${c.lastName}` : "—"}
+                  subtitle={`${b.bookingNumber} · offen ${formatEuro(open)}`}
+                />
+              );
+            })
+          )}
+        </Section>
+        <Section
+          title={`Offene Anfragen (${openInquiries.length + openRequests})`}
+        >
+          {openInquiries.length === 0 && openRequests === 0 && (
+            <p className="text-[var(--color-wh-fg-muted)] text-sm">
+              Keine offenen Anfragen.
+            </p>
+          )}
+          {openInquiries.map((i) => (
+            <Row
+              key={i.id}
+              href={`/m/buchungen?inquiry=${i.id}`}
+              date={i.arrival ?? i.createdAt.toISOString().slice(0, 10)}
+              title={i.name}
+              subtitle={`Anfrage · ${i.email}${i.persons ? ` · ${i.persons} Personen` : ""}`}
+            />
+          ))}
+        </Section>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-10">
