@@ -1,10 +1,18 @@
 import Image from "next/image";
+import { ImageCarousel } from "@/components/public/ImageCarousel";
 
 export const metadata = {
   title: "Verein · Skifreunde Gütersloh e.V.",
   description:
     "1949 gegründet, seit 1956 Träger der Wiesenhütte in Langewiese. Skigymnastik, Adventskaffeetrinken, Grünkohlwanderung — und Generationen, die die Hütte erhalten.",
 };
+
+const VEREINSAKTIVITAETEN_BILDER = [
+  { src: "/media/photos/vereinsaktivitaeten/signal-2026-04-21-084348.jpeg", alt: "Vereinsaktivität — Skifreunde Gütersloh" },
+  { src: "/media/photos/vereinsaktivitaeten/signal-2026-04-21-084428.jpeg", alt: "Vereinsaktivität — Skifreunde Gütersloh" },
+  { src: "/media/photos/vereinsaktivitaeten/signal-2026-04-21-084456.jpeg", alt: "Vereinsaktivität — Skifreunde Gütersloh" },
+  { src: "/media/photos/vereinsaktivitaeten/signal-2026-04-21-084531.jpeg", alt: "Vereinsaktivität — Skifreunde Gütersloh" },
+];
 
 const TIMELINE = [
   {
@@ -155,15 +163,10 @@ export default function VereinPage() {
             </p>
           </div>
 
-          <div className="relative aspect-[4/3] rounded-[var(--radius-card)] overflow-hidden">
-            <Image
-              src="/media/historical/founders.jpg"
-              alt="Vorstand der Skifreunde Gütersloh"
-              fill
-              className="object-cover"
-              sizes="(min-width: 768px) 460px, 100vw"
-            />
-          </div>
+          <ImageCarousel
+            images={VEREINSAKTIVITAETEN_BILDER}
+            aspectClass="aspect-[4/3]"
+          />
         </div>
       </section>
 

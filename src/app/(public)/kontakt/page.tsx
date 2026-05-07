@@ -1,4 +1,5 @@
 import { Mail, Phone, Home } from "lucide-react";
+import Image from "next/image";
 
 export const metadata = {
   title: "Kontakt · Wiesenhütte Skifreunde Gütersloh",
@@ -16,6 +17,25 @@ export default function KontaktPage() {
           Für Buchungen nutzt am besten direkt unser Buchungstool. Für Fragen, Sonderwünsche oder
           Großgruppenanfragen erreicht Ihr uns hier.
         </p>
+
+        <div className="mt-10 relative aspect-[16/9] sm:aspect-[2/1] rounded-[var(--radius-card)] overflow-hidden">
+          <Image
+            src="/media/historical/founders.jpg"
+            alt="Vorstand der Skifreunde Gütersloh"
+            fill
+            className="object-cover"
+            sizes="(min-width: 920px) 920px, 100vw"
+            priority
+          />
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[rgba(47,74,53,0.85)] to-transparent p-5 sm:p-6">
+            <p className="text-[10px] uppercase tracking-wider font-semibold text-white/85 m-0">
+              Vorstand
+            </p>
+            <p className="text-[15px] sm:text-[17px] text-white m-0">
+              Skifreunde Gütersloh e.V. — die Menschen hinter dem Verein.
+            </p>
+          </div>
+        </div>
 
         <div className="mt-12 grid gap-4 md:grid-cols-2">
           <Card
