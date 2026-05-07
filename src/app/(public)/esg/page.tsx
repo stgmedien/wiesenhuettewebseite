@@ -21,6 +21,21 @@ const FEUERSTELLE_BILDER = [1, 2, 3, 4, 5, 6, 7, 8].map((i) => ({
   alt: `Feuerstelle vor der Wiesenhütte — Bauphase ${i}`,
 }));
 
+const PROJEKTFAHRT_BILDER = [
+  { src: "/media/photos/projektfahrten/zusammen_essen_kochen.jpeg", alt: "Schüler:innen kochen zusammen in der Hütten-Küche" },
+  { src: "/media/photos/projektfahrten/fruestueck_gemeinsam.jpeg", alt: "Gemeinsames Frühstück am großen Tisch" },
+  { src: "/media/photos/projektfahrten/gemeinschaftliches_grillen.jpeg", alt: "Gemeinschaftliches Grillen vor der Hütte" },
+  { src: "/media/photos/projektfahrten/grillen_2.jpeg", alt: "Lagerfeuer und Grillen am Abend" },
+  { src: "/media/photos/projektfahrten/karten_spielen.jpeg", alt: "Karten spielen am Hütten-Tisch" },
+  { src: "/media/photos/projektfahrten/eine_bank_wird_gebaut.jpeg", alt: "Eine Holzbank wird gebaut" },
+  { src: "/media/photos/projektfahrten/bank_wird_gebaut_2.jpeg", alt: "Schüler beim Bau der Bank" },
+  { src: "/media/photos/projektfahrten/fertige_bank.jpeg", alt: "Die fertige selbstgebaute Bank" },
+  { src: "/media/photos/projektfahrten/jacken_haenger_bauen.jpeg", alt: "Bau einer Garderoben-Leiste" },
+  { src: "/media/photos/projektfahrten/maedchen_boehrt.jpeg", alt: "Schülerin bohrt mit der Akkuschraubmaschine" },
+  { src: "/media/photos/projektfahrten/maedchen_schrauben_in_ein_brett.jpeg", alt: "Schülerinnen schrauben in ein Brett" },
+  { src: "/media/photos/projektfahrten/voegelhaeurser_bemalen.jpeg", alt: "Vogelhäuser werden bemalt" },
+];
+
 export default function EsgPage() {
   return (
     <div>
@@ -216,10 +231,172 @@ export default function EsgPage() {
             </div>
           </article>
 
-          {/* Eintrag 2 */}
-          <article className="mb-16 border-t border-[var(--color-wh-winter-grey)] pt-12">
+          {/* Eintrag 2: Projektfahrt der 9b */}
+          <article className="mb-20 border-t border-[var(--color-wh-winter-grey)] pt-12">
             <div className="text-xs uppercase tracking-wider text-[var(--color-wh-deep-green)] font-semibold mb-2">
               Eintrag 2
+            </div>
+            <h3 className="text-[28px] sm:text-[32px] mt-0 mb-3 leading-tight">
+              Projektfahrt der 9b — Mehr als eine Klassenfahrt.
+            </h3>
+            <p className="text-[15px] text-[var(--color-wh-fg-muted)] m-0 mb-8 italic">
+              Eine Erfahrung des ESG Gütersloh in der Hütte der Skifreunde Gütersloh e.V. ·
+              Erfahrungsumfrage Mai 2026 mit 20 Gästen (15–16 Jahre, 100 % Rücklauf).
+            </p>
+
+            {/* Foto-Galerie 12 Bilder */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 mb-10">
+              {PROJEKTFAHRT_BILDER.map((img) => (
+                <div
+                  key={img.src}
+                  className="relative aspect-square rounded-[var(--radius-md)] overflow-hidden bg-[var(--color-wh-beige)]"
+                >
+                  <Image
+                    src={img.src}
+                    alt={img.alt}
+                    fill
+                    className="object-cover hover:scale-105 transition-transform duration-500"
+                    sizes="(min-width: 1024px) 250px, (min-width: 640px) 33vw, 50vw"
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Lead */}
+            <div className="prose-block max-w-3xl">
+              <p>
+                Die Wiesenhütte in Langewiese ist für das Evangelisch Stiftische Gymnasium
+                Gütersloh kein gewöhnlicher Ausflugsort. Sie ist ein Lernraum eigener Art: Eine
+                Klasse zieht für mehrere Tage in eine Hütte mitten im Wald, kocht selbst,
+                organisiert sich selbst, gestaltet ihre Abende selbst — und nimmt am Ende mehr mit
+                als jede Schulstunde vermitteln könnte. Was das ESG hier mit seinen Schülerinnen
+                und Schülern erlebt, ist <strong>Selbstversorgung als Schule fürs Leben</strong>.
+              </p>
+            </div>
+
+            {/* Selbstversorgung */}
+            <h4 className="font-display font-bold text-[20px] text-[var(--color-wh-deep-green)] mt-10 mb-3">
+              Selbstversorgung als pädagogisches Format
+            </h4>
+            <div className="prose-block max-w-3xl">
+              <p>
+                In der Wiesenhütte gibt es keinen Hotelservice, keine Animation, kein Programm aus
+                der Konserve. Stattdessen: ein Küchenteam aus den eigenen Reihen, gemeinsame
+                Abende, gemeinsame Verantwortung. Genau dieses Selber-Machen wird von den
+                Schülerinnen und Schülern als das prägende Element erlebt.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 my-6 max-w-3xl">
+              <Quote text="Das Küchen Team." source="16 J., Antwort #4" />
+              <Quote text="Die 10er Betten und das Koch Team." source="16 J., Antwort #11" />
+            </div>
+            <div className="prose-block max-w-3xl">
+              <p>
+                Das Küchenteam wird namentlich gelobt — nicht ein anonymer Caterer, sondern
+                Mitschülerinnen und Mitschüler, die füreinander kochen. Genau das ist der Punkt:
+                Wer für zwanzig andere kocht, lernt etwas über Mengen, Planung, Verlässlichkeit —
+                und über sich selbst.
+              </p>
+            </div>
+
+            {/* Bewertungs-Stats */}
+            <h4 className="font-display font-bold text-[20px] text-[var(--color-wh-deep-green)] mt-10 mb-4">
+              Was die Schülerinnen und Schüler erleben
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              <RatingBox
+                label="Gemeinschaft"
+                rating="4,1"
+                text={`11 von 20 Gästen bewerten das Gemeinschaftsgefühl mit „Sehr gut". Mit deutlichem Abstand das meistgenannte Lob der gesamten Umfrage — und es entsteht genau dort, wo Selbstorganisation gefragt ist: am Abend, in der Küche, im Schlafsaal.`}
+              />
+              <RatingBox
+                label="Lage"
+                rating="3,8"
+                text="Die Hütte liegt mitten im Sauerland, umgeben von Wald und Wiese. 12 von 20 Gästen nennen die Umgebung explizit als Highlight — und keine einzige Antwort kritisiert sie."
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 my-6">
+              <Quote
+                text="Man kann da gut Gemeinschaftsspiele spielen Abends und die Nacht ausklingen lassen. Das Miteinander hat sehr spaß gemacht."
+                source="16 J., Antwort #18"
+              />
+              <Quote text="Die Gemeinschaft." source="15 J., Antwort #2" />
+              <Quote
+                text="Den Wald der nebenan liegt, dass jeder Spaß hatte, das Programm."
+                source="16 J., Antwort #17"
+              />
+              <Quote
+                text="Die lange Wiese hinter dem Haus und dass man keine Nachbarn hatte, die sich beschwert haben, wenn man zu laut war."
+                source="15 J., Antwort #15"
+              />
+              <Quote text="Der ruhige Ort." source="16 J., Antwort #8" />
+              <Quote
+                text="Die 10er Betten, waren ein Erlebnis."
+                source="15 J., Antwort #14"
+              />
+            </div>
+
+            {/* 10er-Betten */}
+            <h4 className="font-display font-bold text-[20px] text-[var(--color-wh-deep-green)] mt-10 mb-3">
+              Die 10er-Betten — Gemeinschaft im Schlafsaal
+            </h4>
+            <div className="prose-block max-w-3xl">
+              <p>
+                Die großen Schlafsäle sind ein Format, das es kaum noch irgendwo gibt — und genau
+                deshalb funktioniert es. Vier Gäste heben sie ausdrücklich hervor. Wer in einem
+                Zehnerzimmer schläft, lernt Rücksicht, Geduld und das Aushalten von Nähe. Das sind
+                Kompetenzen, die in keinem Lehrplan stehen — und die im echten Leben jeden Tag
+                gebraucht werden.
+              </p>
+            </div>
+
+            {/* ESG */}
+            <h4 className="font-display font-bold text-[20px] text-[var(--color-wh-deep-green)] mt-10 mb-3">
+              Was das ESG hier möglich macht
+            </h4>
+            <div className="prose-block max-w-3xl">
+              <p>
+                Das ESG Gütersloh nutzt die Wiesenhütte als das, was sie sein kann: einen Ort, an
+                dem Schülerinnen und Schüler für ein paar Tage erwachsen werden dürfen. Sie
+                übernehmen Verantwortung für die Versorgung der Gruppe, sie gestalten ihren
+                Tagesablauf, sie lösen kleine Probleme, ohne dass Eltern oder Lehrkräfte sie ihnen
+                abnehmen. Die Hütte stellt den Rahmen — die Klasse füllt ihn selbst.
+              </p>
+              <p>
+                Die Umfrageergebnisse zeigen: Diese Form von Klassenfahrt hinterlässt Eindruck.
+                Nicht wegen eines Programms, sondern wegen der Erfahrung, sich selbst und die
+                Gruppe zu organisieren. „Jeder hatte Spaß, das Programm" — und das Programm, das
+                ist hier eben nicht von außen vorgegeben, sondern entsteht aus der Klasse heraus.
+              </p>
+            </div>
+
+            {/* Fazit */}
+            <div className="bg-[var(--color-wh-beige)] border-l-4 border-[var(--color-wh-deep-green)] rounded-r-[var(--radius-md)] p-6 mt-10 max-w-3xl">
+              <p className="text-xs uppercase tracking-wider font-bold text-[var(--color-wh-deep-green)] mb-2">
+                Fazit
+              </p>
+              <p className="text-[15px] leading-relaxed m-0">
+                Die Wiesenhütte ist für das ESG Gütersloh ein Lernort, der das leistet, was Schule
+                allein nicht kann: <strong>Selbstversorgung, Gemeinschaft und Eigenverantwortung
+                in einem realen Setting erfahrbar machen.</strong> Wald, Wiese, Schlafsaal, eigene
+                Küche — das ist die Bühne, auf der eine Klasse für ein paar Tage so etwas wie ein
+                eigener kleiner Haushalt wird. Und genau das nehmen die Schülerinnen und Schüler
+                mit nach Hause.
+              </p>
+              <p className="font-display text-[20px] italic text-[var(--color-wh-deep-green)] m-0 mt-4">
+                „Das Miteinander hat sehr spaß gemacht."
+              </p>
+              <p className="text-[13px] text-[var(--color-wh-fg-muted)] m-0 mt-1">
+                Mehr braucht es nicht.
+              </p>
+            </div>
+          </article>
+
+          {/* Eintrag 3: Renovierung */}
+          <article className="mb-16 border-t border-[var(--color-wh-winter-grey)] pt-12">
+            <div className="text-xs uppercase tracking-wider text-[var(--color-wh-deep-green)] font-semibold mb-2">
+              Eintrag 3
             </div>
             <h3 className="text-[24px] sm:text-[28px] mt-0 mb-4 leading-tight">
               Renovierung eines Schlafraums.
@@ -239,10 +416,10 @@ export default function EsgPage() {
             </div>
           </article>
 
-          {/* Eintrag 3 */}
+          {/* Eintrag 4: Naturerkundung */}
           <article className="mb-12 border-t border-[var(--color-wh-winter-grey)] pt-12">
             <div className="text-xs uppercase tracking-wider text-[var(--color-wh-deep-green)] font-semibold mb-2">
-              Eintrag 3
+              Eintrag 4
             </div>
             <h3 className="text-[24px] sm:text-[28px] mt-0 mb-4 leading-tight">
               Naturerkundung rund um Langewiese.
@@ -744,6 +921,42 @@ function PillarCard({
         {title}
       </h3>
       <p className="text-[15px] leading-relaxed text-[var(--color-wh-snow)]/90 m-0">{body}</p>
+    </div>
+  );
+}
+
+function Quote({ text, source }: { text: string; source: string }) {
+  return (
+    <div className="bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)]/40 rounded-[var(--radius-md)] p-4">
+      <p className="text-[15px] leading-relaxed italic m-0 text-[var(--color-wh-deep-green)]">
+        „{text}"
+      </p>
+      <p className="text-[11px] text-[var(--color-wh-fg-muted)] m-0 mt-2">— {source}</p>
+    </div>
+  );
+}
+
+function RatingBox({
+  label,
+  rating,
+  text,
+}: {
+  label: string;
+  rating: string;
+  text: string;
+}) {
+  return (
+    <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-5">
+      <div className="flex items-baseline gap-3 mb-2">
+        <span className="text-[10px] uppercase tracking-wider text-[var(--color-wh-fg-muted)] font-semibold">
+          {label}
+        </span>
+        <span className="font-display font-bold text-[28px] text-[var(--color-wh-deep-green)] leading-none">
+          Ø {rating}
+        </span>
+        <span className="text-[12px] text-[var(--color-wh-fg-muted)]">/ 5</span>
+      </div>
+      <p className="text-[14px] leading-relaxed text-[var(--color-wh-black)] m-0">{text}</p>
     </div>
   );
 }
