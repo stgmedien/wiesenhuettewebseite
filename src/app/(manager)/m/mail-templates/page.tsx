@@ -5,6 +5,7 @@ import { mailTemplates } from "@/lib/db/schema";
 import { asc } from "drizzle-orm";
 import Link from "next/link";
 import { createTemplate } from "./actions";
+import { DeleteTemplateButton } from "./DeleteTemplateButton";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Mail-Templates · Wiesenhütte Manager" };
@@ -66,12 +67,15 @@ export default async function MailTemplatesPage() {
                     )}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <Link
-                      href={`/m/mail-templates/${t.id}`}
-                      className="text-[var(--color-wh-deep-green)] underline text-sm"
-                    >
-                      Bearbeiten →
-                    </Link>
+                    <div className="flex gap-3 justify-end items-center">
+                      <Link
+                        href={`/m/mail-templates/${t.id}`}
+                        className="text-[var(--color-wh-deep-green)] underline text-sm"
+                      >
+                        Bearbeiten
+                      </Link>
+                      <DeleteTemplateButton id={t.id} name={t.name} />
+                    </div>
                   </td>
                 </tr>
               ))

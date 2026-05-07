@@ -7,6 +7,7 @@ import Link from "next/link";
 import { saveTemplateVersion, activateVersion } from "../actions";
 import { mdToHtml } from "@/lib/mail-templates";
 import { TemplateEditor } from "./TemplateEditor";
+import { GLOBAL_MAIL_VARIABLES } from "@/lib/mail-render";
 
 export const dynamic = "force-dynamic";
 
@@ -64,7 +65,7 @@ export default async function TemplateEditorPage({ params }: Props) {
         initialSubject={activeVersion?.subject ?? ""}
         initialBody={activeVersion?.bodyMd ?? ""}
         previousBody={previousVersion?.bodyMd ?? null}
-        variables={(tpl.variables as { name: string; description?: string; example?: string }[]) ?? []}
+        variables={GLOBAL_MAIL_VARIABLES}
       />
 
       {/* Versions-Verlauf */}

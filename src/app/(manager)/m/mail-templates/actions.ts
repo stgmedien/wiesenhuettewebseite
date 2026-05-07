@@ -126,3 +126,24 @@ export async function activateVersion(formData: FormData) {
   revalidatePath(`/m/mail-templates/${templateId}`);
   return { ok: true as const };
 }
+
+export async function deleteTemplate(formData: FormData) {
+  const me = await requireManager();
+  const id = z.string().uuid().parse(formData.get("id"));
+  // Versions werden ueber FK ON DELETE CASCADE mitgeloescht. ABER: activeVersionId
+  // referenziert auf eine Version, die ggf. zuerst weg muss. Da unser Schema
+  // keine FK von mailTemplates.activeVersionId auf mailTemplateVersions hat
+  // (nur logical), reicht eine simple Cascade.
+  // Wir setzen erst activeVersionId=null um eventuelle DB-Constraints zu vermeiden.
+  await db
+    .update(mailTemplates)
+    .set({ activeVersionId: null })
+    .where(eq(mailTemplates.id, id));
+  await db.delete(mailTemplates).where(eq(mailTemplates.id, id));
+  await db.insert(activityLog).values({
+    who: me,
+    what: `Mail-Template gelöscht (${id})`,
+  });
+  revalidatePath("/m/mail-templates");
+  return { ok: true as const };
+}

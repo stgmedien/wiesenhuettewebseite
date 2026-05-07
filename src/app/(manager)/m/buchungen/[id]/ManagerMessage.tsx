@@ -2,21 +2,25 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Mail, BadgeEuro, X, Copy, Check } from "lucide-react";
+import { Mail, BadgeEuro, X, Copy, Check, FileText } from "lucide-react";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { sendBookingMessage } from "./actions";
+import { sendBookingMessage, applyTemplateForBooking } from "./actions";
+
+type TemplateOption = { id: string; key: string; name: string };
 
 export function ManagerMessage({
   bookingId,
   guestEmail,
   guestName,
   bookingNumber,
+  templates,
 }: {
   bookingId: string;
   guestEmail: string;
   guestName: string;
   bookingNumber: string;
+  templates: TemplateOption[];
 }) {
   const [open, setOpen] = useState(false);
   const [paymentEnabled, setPaymentEnabled] = useState(false);
@@ -52,6 +56,24 @@ export function ManagerMessage({
       setSuccess({ paymentUrl: res.paymentUrl });
       router.refresh();
     });
+  };
+
+  const [applyingTemplate, setApplyingTemplate] = useState(false);
+  const applyTemplate = async (templateId: string) => {
+    if (!templateId) return;
+    setApplyingTemplate(true);
+    setError(null);
+    try {
+      const r = await applyTemplateForBooking(templateId, bookingId);
+      if (r.ok) {
+        setSubject(r.subject);
+        setBody(r.body);
+      } else {
+        setError(r.error);
+      }
+    } finally {
+      setApplyingTemplate(false);
+    }
   };
 
   const copyLink = async () => {
@@ -90,6 +112,40 @@ export function ManagerMessage({
       </div>
 
       <form onSubmit={submit} className="space-y-4">
+        {templates.length > 0 && (
+          <div className="bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)]/40 rounded-lg p-3 flex items-center gap-3">
+            <FileText
+              size={16}
+              className="text-[var(--color-wh-deep-green)] shrink-0"
+            />
+            <span className="text-xs text-[var(--color-wh-fg-muted)] uppercase tracking-wider font-semibold whitespace-nowrap">
+              Vorlage einsetzen
+            </span>
+            <select
+              onChange={(e) => {
+                if (e.target.value) {
+                  applyTemplate(e.target.value);
+                  e.target.value = "";
+                }
+              }}
+              disabled={applyingTemplate}
+              className="flex-1 rounded-md border border-[var(--color-wh-winter-grey)] px-2 py-1.5 text-sm bg-white disabled:opacity-50"
+            >
+              <option value="">
+                {applyingTemplate ? "Lade …" : "— Vorlage auswählen —"}
+              </option>
+              {templates.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
+            </select>
+            <span className="text-[10px] text-[var(--color-wh-fg-muted)] hidden sm:block">
+              Variablen werden aus Buchung gefüllt
+            </span>
+          </div>
+        )}
+
         <Input
           id="subject"
           label="Betreff"

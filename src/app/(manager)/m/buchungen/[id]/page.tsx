@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
-import { bookings, customers, payments, notes } from "@/lib/db/schema";
-import { eq, desc, and } from "drizzle-orm";
+import { bookings, customers, payments, notes, mailTemplates } from "@/lib/db/schema";
+import { eq, desc, and, isNotNull, asc } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { formatEuro } from "@/lib/pricing";
@@ -41,6 +41,17 @@ export default async function BookingDetail({ params }: Props) {
     .where(and(eq(notes.scope, "booking"), eq(notes.refId, id)))
     .orderBy(desc(notes.createdAt));
 
+  // Verfuegbare Mail-Templates fuer den ManagerMessage-Picker (nur die mit aktiver Version)
+  const availableTemplates = await db
+    .select({
+      id: mailTemplates.id,
+      key: mailTemplates.key,
+      name: mailTemplates.name,
+    })
+    .from(mailTemplates)
+    .where(isNotNull(mailTemplates.activeVersionId))
+    .orderBy(asc(mailTemplates.name));
+
   return (
     <div className="px-8 py-10 max-w-[1200px]">
       <Link
@@ -69,6 +80,7 @@ export default async function BookingDetail({ params }: Props) {
           guestEmail={customer.email}
           guestName={`${customer.firstName} ${customer.lastName}`.trim()}
           bookingNumber={b.bookingNumber}
+          templates={availableTemplates}
         />
       )}
 

@@ -10,6 +10,9 @@ import { stripe } from "@/lib/stripe";
 import { sendMail } from "@/lib/mail/send";
 import ManagerMessageEmail from "@/lib/mail/templates/manager-message";
 import { formatEuro } from "@/lib/pricing";
+import { mailTemplates, mailTemplateVersions } from "@/lib/db/schema";
+import { substituteVars } from "@/lib/mail-render";
+import { buildBookingVars } from "@/lib/mail-template-vars";
 
 const ALLOWED_STATUSES = new Set([
   "angefragt",
@@ -187,4 +190,42 @@ export async function sendBookingMessage(
   revalidatePath(`/m/buchungen/${data.bookingId}`);
   revalidatePath("/m/dashboard");
   return { ok: true, paymentUrl };
+}
+
+// =============================================================
+// Vorlage in Manager-Message einsetzen — laedt aktive Version eines
+// Templates und substituiert die Buchungs-Variablen.
+// =============================================================
+
+export async function applyTemplateForBooking(
+  templateId: string,
+  bookingId: string
+): Promise<{ ok: true; subject: string; body: string } | { ok: false; error: string }> {
+  const session = await auth();
+  const role = (session?.user as { role?: string } | undefined)?.role;
+  if (role !== "manager" && role !== "admin") {
+    return { ok: false, error: "Nicht autorisiert" };
+  }
+
+  const tpl = (
+    await db.select().from(mailTemplates).where(eq(mailTemplates.id, templateId)).limit(1)
+  )[0];
+  if (!tpl) return { ok: false, error: "Vorlage nicht gefunden" };
+  if (!tpl.activeVersionId) return { ok: false, error: "Vorlage hat keine aktive Version" };
+
+  const ver = (
+    await db
+      .select()
+      .from(mailTemplateVersions)
+      .where(eq(mailTemplateVersions.id, tpl.activeVersionId))
+      .limit(1)
+  )[0];
+  if (!ver) return { ok: false, error: "Aktive Version nicht gefunden" };
+
+  const vars = await buildBookingVars(bookingId);
+  return {
+    ok: true,
+    subject: substituteVars(ver.subject, vars),
+    body: substituteVars(ver.bodyMd, vars),
+  };
 }

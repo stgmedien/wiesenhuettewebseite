@@ -2,6 +2,57 @@
  * Pure render helpers — kein DB-Zugriff, kann in Client-Components importiert werden.
  */
 
+/**
+ * Globale Variable-Definitionen. Single Source of Truth — wird im Editor angezeigt
+ * und beim Versand aus dem jeweiligen Buchungs-Kontext befuellt.
+ *
+ * Wenn Du eine neue Variable hinzufuegst:
+ *   1. Hier eintragen (Name, Beschreibung, Beispielwert)
+ *   2. In buildBookingVars() in /lib/mail-template-vars.ts den Wert aufloesen
+ */
+export type MailVariable = {
+  name: string;
+  description: string;
+  example: string;
+  group: "Kunde" | "Buchung" | "Zahlung" | "Sonstiges";
+};
+
+export const GLOBAL_MAIL_VARIABLES: MailVariable[] = [
+  // Kunde
+  { name: "firstName", description: "Vorname", example: "Maren", group: "Kunde" },
+  { name: "lastName", description: "Nachname", example: "Holtkamp", group: "Kunde" },
+  { name: "guestName", description: "Vor- + Nachname", example: "Maren Holtkamp", group: "Kunde" },
+  { name: "email", description: "E-Mail-Adresse", example: "maren@example.com", group: "Kunde" },
+  { name: "phone", description: "Telefon", example: "0521 12345", group: "Kunde" },
+  { name: "salutation", description: "Anrede (Hallo Vorname,)", example: "Hallo Maren,", group: "Kunde" },
+
+  // Buchung
+  { name: "bookingNumber", description: "Buchungsnummer", example: "WH-2026-1042", group: "Buchung" },
+  { name: "arrival", description: "Anreise (lang)", example: "Fr, 6. Februar 2026", group: "Buchung" },
+  { name: "departure", description: "Abreise (lang)", example: "Mo, 9. Februar 2026", group: "Buchung" },
+  { name: "arrivalShort", description: "Anreise (kurz)", example: "06.02.2026", group: "Buchung" },
+  { name: "departureShort", description: "Abreise (kurz)", example: "09.02.2026", group: "Buchung" },
+  { name: "nights", description: "Nächte", example: "3", group: "Buchung" },
+  { name: "persons", description: "Personen-Anzahl", example: "12", group: "Buchung" },
+  { name: "purpose", description: "Anlass", example: "Klassenfahrt", group: "Buchung" },
+  { name: "bookingUrl", description: "Link zur Buchung im Konto", example: "https://www.wiesenhütte.com/konto/buchungen/abc", group: "Buchung" },
+
+  // Zahlung
+  { name: "totalAmount", description: "Gesamtbetrag (formatiert)", example: "1.420,00 €", group: "Zahlung" },
+  { name: "paidAmount", description: "Bereits bezahlt", example: "710,00 €", group: "Zahlung" },
+  { name: "remainderAmount", description: "Restbetrag", example: "710,00 €", group: "Zahlung" },
+  { name: "depositAmount", description: "Kaution", example: "300,00 €", group: "Zahlung" },
+  { name: "invoiceNumber", description: "Rechnungs-Nr (falls vorhanden)", example: "WH-2026-00042", group: "Zahlung" },
+
+  // Sonstiges
+  { name: "today", description: "Heutiges Datum", example: new Date().toLocaleDateString("de-DE"), group: "Sonstiges" },
+  { name: "baseUrl", description: "Web-Adresse", example: "https://www.wiesenhütte.com", group: "Sonstiges" },
+];
+
+export const SAMPLE_VARIABLE_VALUES: Record<string, string> = Object.fromEntries(
+  GLOBAL_MAIL_VARIABLES.map((v) => [v.name, v.example])
+);
+
 export const substituteVars = (
   template: string,
   vars: Record<string, string | number | undefined | null>

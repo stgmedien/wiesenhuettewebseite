@@ -3,9 +3,13 @@
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { diffLines } from "diff";
 import { saveTemplateVersion } from "../actions";
-import { mdToHtml, substituteVars, wrapEmailHtml } from "@/lib/mail-render";
-
-type Variable = { name: string; description?: string; example?: string };
+import {
+  mdToHtml,
+  substituteVars,
+  wrapEmailHtml,
+  SAMPLE_VARIABLE_VALUES,
+  type MailVariable,
+} from "@/lib/mail-render";
 
 type Props = {
   templateId: string;
@@ -13,26 +17,10 @@ type Props = {
   initialSubject: string;
   initialBody: string;
   previousBody: string | null;
-  variables: Variable[];
+  variables: MailVariable[];
 };
 
-const SAMPLE_VALUES: Record<string, string> = {
-  firstName: "Maren",
-  lastName: "Holtkamp",
-  guestName: "Maren Holtkamp",
-  bookingNumber: "WH-2026-1042",
-  arrival: "Fr, 6. Februar 2026",
-  departure: "Mo, 9. Februar 2026",
-  nights: "3",
-  persons: "12",
-  email: "maren@example.com",
-  totalCents: "1.420,00 €",
-  paidCents: "710,00 €",
-  remainderCents: "710,00 €",
-  depositCents: "300,00 €",
-  baseUrl: "https://www.wiesenhütte.com",
-  date: new Date().toLocaleDateString("de-DE"),
-};
+const SAMPLE_VALUES = SAMPLE_VARIABLE_VALUES;
 
 export function TemplateEditor({
   templateId,
@@ -263,40 +251,44 @@ export function TemplateEditor({
       {view === "editor" ? (
         <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr_minmax(0,1fr)] gap-4">
           {/* === LEFT: Variables-Palette + Toolbar === */}
-          <aside className="bg-white border border-[var(--color-wh-winter-grey)] rounded-2xl p-4 space-y-5 lg:sticky lg:top-4 self-start">
+          <aside className="bg-white border border-[var(--color-wh-winter-grey)] rounded-2xl p-4 space-y-5 lg:sticky lg:top-4 self-start max-h-[calc(100vh-2rem)] overflow-y-auto">
             <div>
               <p className="text-[10px] uppercase tracking-wider text-[var(--color-wh-fg-muted)] font-semibold mb-2">
                 Variablen
               </p>
-              {variables.length === 0 ? (
-                <p className="text-xs text-[var(--color-wh-fg-muted)] italic">
-                  Keine Variablen definiert.{" "}
-                  <a href="/m/mail-templates" className="underline">
-                    Bearbeiten
-                  </a>
-                </p>
-              ) : (
-                <div className="flex flex-wrap gap-1.5">
-                  {variables.map((v) => (
-                    <button
-                      key={v.name}
-                      type="button"
-                      draggable
-                      onDragStart={onVarDragStart(v.name)}
-                      onDragEnd={onVarDragEnd}
-                      onClick={() => insertAtCursor(`{{${v.name}}}`)}
-                      title={`Klicken zum Einfügen oder ins Feld ziehen${v.description ? `\n${v.description}` : ""}`}
-                      className={`text-[11px] font-mono px-2 py-1 rounded-md border transition cursor-grab active:cursor-grabbing select-none ${
-                        draggedVar === v.name
-                          ? "bg-[var(--color-wh-deep-green)] text-white border-[var(--color-wh-deep-green)] scale-95"
-                          : "bg-[var(--color-wh-beige)] border-[var(--color-wh-winter-grey)]/60 hover:bg-[var(--color-wh-beige-hover)] hover:border-[var(--color-wh-deep-green)]"
-                      }`}
-                    >
-                      {`{{${v.name}}}`}
-                    </button>
-                  ))}
-                </div>
-              )}
+              <div className="space-y-3">
+                {(["Kunde", "Buchung", "Zahlung", "Sonstiges"] as const).map((group) => {
+                  const inGroup = variables.filter((v) => v.group === group);
+                  if (inGroup.length === 0) return null;
+                  return (
+                    <div key={group}>
+                      <p className="text-[10px] text-[var(--color-wh-fg-muted)] mb-1 font-semibold">
+                        {group}
+                      </p>
+                      <div className="flex flex-wrap gap-1">
+                        {inGroup.map((v) => (
+                          <button
+                            key={v.name}
+                            type="button"
+                            draggable
+                            onDragStart={onVarDragStart(v.name)}
+                            onDragEnd={onVarDragEnd}
+                            onClick={() => insertAtCursor(`{{${v.name}}}`)}
+                            title={`${v.description}\nBeispiel: ${v.example}\n\nKlicken zum Einfügen oder ins Feld ziehen`}
+                            className={`text-[11px] font-mono px-1.5 py-0.5 rounded-md border transition cursor-grab active:cursor-grabbing select-none ${
+                              draggedVar === v.name
+                                ? "bg-[var(--color-wh-deep-green)] text-white border-[var(--color-wh-deep-green)] scale-95"
+                                : "bg-[var(--color-wh-beige)] border-[var(--color-wh-winter-grey)]/60 hover:bg-[var(--color-wh-beige-hover)] hover:border-[var(--color-wh-deep-green)]"
+                            }`}
+                          >
+                            {`{{${v.name}}}`}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
             <div>
