@@ -21,6 +21,13 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "*.blob.vercel-storage.com" },
     ],
   },
+  // Permanent-Redirects fuer umbenannte Routen (SEO + alte Bookmarks)
+  async redirects() {
+    return [
+      { source: "/esg", destination: "/schulprojekt", permanent: true },
+      { source: "/esg/:path*", destination: "/schulprojekt/:path*", permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;

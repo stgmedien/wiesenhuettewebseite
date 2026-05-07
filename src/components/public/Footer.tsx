@@ -43,8 +43,8 @@ export const Footer = () => (
         <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/verein">
           Skifreunde Gütersloh
         </Link>
-        <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/esg">
-          Tradition mit dem ESG
+        <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/schulprojekt">
+          Schulprojekt mit dem ESG
         </Link>
         <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/blog">
           Blog
