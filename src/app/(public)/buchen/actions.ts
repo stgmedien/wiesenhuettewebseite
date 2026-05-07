@@ -364,53 +364,85 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
   const bookingId = inserted[0].id;
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
-  const checkoutSession = await stripe.checkout.sessions.create({
-    mode: "payment",
-    payment_method_types: ["card"],
-    locale: "de",
-    customer_email: effectiveEmail,
-    billing_address_collection: "auto",
-    line_items: [
-      {
-        quantity: 1,
-        price_data: {
-          currency: "eur",
-          unit_amount: effectivePrepayment,
-          product_data: {
-            name: `Anzahlung 50 % — Wiesenhütte ${data.arrival} bis ${data.departure}`,
-            description: `${totalPersons} Personen · ${breakdown.nights} Nächte · Buchung ${bookingNumber}${
-              discountCents > 0 ? ` · Rabatt ${formatEuro(discountCents)} (${appliedDiscountCode})` : ""
-            } · Restzahlung ${formatEuro(effectiveRemainder)} folgt vor Anreise.`,
+  let checkoutSession;
+  try {
+    checkoutSession = await stripe.checkout.sessions.create({
+      mode: "payment",
+      payment_method_types: ["card"],
+      locale: "de",
+      customer_email: effectiveEmail,
+      billing_address_collection: "auto",
+      line_items: [
+        {
+          quantity: 1,
+          price_data: {
+            currency: "eur",
+            unit_amount: effectivePrepayment,
+            product_data: {
+              name: `Anzahlung 50 % — Wiesenhütte ${data.arrival} bis ${data.departure}`,
+              description: `${totalPersons} Personen · ${breakdown.nights} Nächte · Buchung ${bookingNumber}${
+                discountCents > 0 ? ` · Rabatt ${formatEuro(discountCents)} (${appliedDiscountCode})` : ""
+              } · Restzahlung ${formatEuro(effectiveRemainder)} folgt vor Anreise.`,
+            },
           },
         },
-      },
-      {
-        quantity: 1,
-        price_data: {
-          currency: "eur",
-          unit_amount: breakdown.depositCents,
-          product_data: {
-            name: "Kaution",
-            description: "Erstattung innerhalb 14 Tagen nach mangelfreier Abreise.",
+        {
+          quantity: 1,
+          price_data: {
+            currency: "eur",
+            unit_amount: breakdown.depositCents,
+            product_data: {
+              name: "Kaution",
+              description: "Erstattung innerhalb 14 Tagen nach mangelfreier Abreise.",
+            },
           },
         },
+      ],
+      // Stripe-Customer und Payment-Method speichern fuer spaetere
+      // Off-Session-Restzahlung (Cron T-7 vor Anreise).
+      customer_creation: "always",
+      payment_intent_data: {
+        setup_future_usage: "off_session",
+        metadata: { bookingId, bookingNumber },
       },
-    ],
-    // Stripe-Customer und Payment-Method speichern fuer spaetere
-    // Off-Session-Restzahlung (Cron T-7 vor Anreise).
-    customer_creation: "always",
-    payment_intent_data: {
-      setup_future_usage: "off_session",
-      metadata: { bookingId, bookingNumber },
-    },
-    metadata: {
-      bookingId,
-      bookingNumber,
-      kind: "anzahlung",
-    },
-    success_url: `${baseUrl}/buchen/erfolg?bn=${bookingNumber}`,
-    cancel_url: `${baseUrl}/buchen/abbruch?bn=${bookingNumber}`,
-  });
+      metadata: {
+        bookingId,
+        bookingNumber,
+        kind: "anzahlung",
+      },
+      success_url: `${baseUrl}/buchen/erfolg?bn=${bookingNumber}`,
+      cancel_url: `${baseUrl}/buchen/abbruch?bn=${bookingNumber}`,
+    });
+  } catch (err) {
+    // Diagnose-Logging: schreibe den exakten Stripe-Error in activity_log
+    // damit wir bei Live-Mode-Problemen sehen was schiefgeht.
+    const e = err as {
+      message?: string;
+      code?: string;
+      type?: string;
+      raw?: { code?: string; message?: string; type?: string };
+      statusCode?: number;
+    };
+    const detail = JSON.stringify({
+      message: e.message,
+      code: e.code ?? e.raw?.code,
+      type: e.type ?? e.raw?.type,
+      statusCode: e.statusCode,
+      keyPrefix: (process.env.STRIPE_SECRET_KEY ?? "").slice(0, 12),
+    });
+    try {
+      await db.insert(activityLog).values({
+        who: "Stripe-Error",
+        what: `Session-Create FEHLGESCHLAGEN für ${bookingNumber}: ${detail.slice(0, 480)}`,
+        bookingId,
+      });
+    } catch {}
+    console.error("[stripe sessions.create] failed:", err);
+    return {
+      ok: false,
+      error: `Zahlung konnte nicht initialisiert werden: ${e.message ?? "unbekannter Stripe-Fehler"}`,
+    };
+  }
 
   await db
     .update(bookings)
