@@ -20,6 +20,7 @@ import {
   BarChart3,
   Database,
   MailIcon,
+  BookOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -78,6 +79,14 @@ export const Sidebar = ({
       </nav>
 
       <div className="border-t border-[var(--color-wh-snow)]/15 p-4">
+        <a
+          href="/api/m/handbook/pdf"
+          className="flex items-center gap-2 px-3 py-2 mb-3 text-xs uppercase tracking-wider font-semibold text-[var(--color-wh-snow)]/85 hover:text-[var(--color-wh-snow)] hover:bg-[var(--color-wh-snow)]/10 rounded-md no-underline transition-colors"
+          title="Manager-Handbuch als PDF herunterladen"
+        >
+          <BookOpen size={14} strokeWidth={1.6} />
+          Handbuch (PDF)
+        </a>
         <Link
           href="/m/profil"
           className={cn(
