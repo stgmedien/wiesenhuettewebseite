@@ -1,4 +1,6 @@
 import Image from "next/image";
+import { PhotoGallery } from "@/components/public/PhotoGallery";
+import { FeaturedQuote } from "@/components/public/FeaturedQuote";
 
 export const metadata = {
   title: "ESG-Projekt · Wiesenhütte als Lernort",
@@ -10,7 +12,7 @@ const TOC = [
   { id: "einstieg", label: "Eine Schule, eine Hütte" },
   { id: "tagebuch", label: "Projekttagebuch" },
   { id: "jahrgaenge", label: "Was Mittelstufe an der Hütte tut" },
-  { id: "stimmen", label: "Stimmen aus der Hütte" },
+  { id: "stimmen", label: "Kontakt zur Hüttenarbeit" },
   { id: "lernort", label: "Wie aus einer Hütte ein Lernort wird" },
   { id: "fragen", label: "Häufige Elternfragen" },
   { id: "traeger", label: "Wer trägt die Hüttenarbeit" },
@@ -132,22 +134,13 @@ export default function EsgPage() {
               Die Feuerstelle der Klasse 9e.
             </h3>
 
-            {/* Galerie 8 Bilder */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-8">
-              {FEUERSTELLE_BILDER.map((img) => (
-                <div
-                  key={img.src}
-                  className="relative aspect-square rounded-[var(--radius-md)] overflow-hidden bg-[var(--color-wh-beige)]"
-                >
-                  <Image
-                    src={img.src}
-                    alt={img.alt}
-                    fill
-                    className="object-cover hover:scale-105 transition-transform duration-500"
-                    sizes="(min-width: 640px) 250px, 50vw"
-                  />
-                </div>
-              ))}
+            {/* Galerie 8 Bilder — klickbar mit Lightbox-Carousel */}
+            <div className="mb-8">
+              <PhotoGallery
+                images={FEUERSTELLE_BILDER}
+                gridClassName="grid-cols-2 sm:grid-cols-4"
+                sizes="(min-width: 640px) 250px, 50vw"
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -166,8 +159,8 @@ export default function EsgPage() {
                   Wie ist es entstanden?
                 </h4>
                 <p className="prose-block">
-                  Die Idee kam aus einer Klassenkonferenz: „Vor der Hütte fehlt etwas, an dem man
-                  abends sitzen kann." Aus dieser Beobachtung wurde im Unterricht ein
+                  Die Idee kam aus einer Klassenkonferenz: Vor der Hütte fehlte ein Ort, an dem man
+                  abends sitzen kann. Aus dieser Beobachtung wurde im Unterricht ein
                   Projektauftrag. Die Klasse hat in Kleingruppen gearbeitet:
                 </p>
                 <ul className="prose-block list-disc pl-5 mt-2 space-y-1.5">
@@ -219,14 +212,6 @@ export default function EsgPage() {
                   </li>
                 </ul>
 
-                <div className="mt-6 bg-[var(--color-wh-beige)] border-l-4 border-[var(--color-wh-deep-green)] rounded-r-[var(--radius-md)] p-5">
-                  <p className="m-0 text-[15px] italic">
-                    „Wir haben jetzt etwas hier, das auch noch da ist, wenn wir längst Abi haben."
-                  </p>
-                  <p className="m-0 mt-2 text-[13px] text-[var(--color-wh-fg-muted)]">
-                    — aus der Reflexionsrunde der Klasse 9e
-                  </p>
-                </div>
               </div>
             </div>
           </article>
@@ -244,22 +229,13 @@ export default function EsgPage() {
               Erfahrungsumfrage Mai 2026 mit 20 Gästen (15–16 Jahre, 100 % Rücklauf).
             </p>
 
-            {/* Foto-Galerie 12 Bilder */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 mb-10">
-              {PROJEKTFAHRT_BILDER.map((img) => (
-                <div
-                  key={img.src}
-                  className="relative aspect-square rounded-[var(--radius-md)] overflow-hidden bg-[var(--color-wh-beige)]"
-                >
-                  <Image
-                    src={img.src}
-                    alt={img.alt}
-                    fill
-                    className="object-cover hover:scale-105 transition-transform duration-500"
-                    sizes="(min-width: 1024px) 250px, (min-width: 640px) 33vw, 50vw"
-                  />
-                </div>
-              ))}
+            {/* Foto-Galerie 12 Bilder — klickbar mit Lightbox-Carousel */}
+            <div className="mb-10">
+              <PhotoGallery
+                images={PROJEKTFAHRT_BILDER}
+                gridClassName="grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
+                sizes="(min-width: 1024px) 250px, (min-width: 640px) 33vw, 50vw"
+              />
             </div>
 
             {/* Lead */}
@@ -286,11 +262,7 @@ export default function EsgPage() {
                 Schülerinnen und Schülern als das prägende Element erlebt.
               </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 my-6 max-w-3xl">
-              <Quote text="Das Küchen Team." source="16 J., Antwort #4" />
-              <Quote text="Die 10er Betten und das Koch Team." source="16 J., Antwort #11" />
-            </div>
-            <div className="prose-block max-w-3xl">
+            <div className="prose-block max-w-3xl mt-6">
               <p>
                 Das Küchenteam wird namentlich gelobt — nicht ein anonymer Caterer, sondern
                 Mitschülerinnen und Mitschüler, die füreinander kochen. Genau das ist der Punkt:
@@ -316,25 +288,36 @@ export default function EsgPage() {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 my-6">
-              <Quote
-                text="Man kann da gut Gemeinschaftsspiele spielen Abends und die Nacht ausklingen lassen. Das Miteinander hat sehr spaß gemacht."
-                source="16 J., Antwort #18"
-              />
-              <Quote text="Die Gemeinschaft." source="15 J., Antwort #2" />
-              <Quote
-                text="Den Wald der nebenan liegt, dass jeder Spaß hatte, das Programm."
-                source="16 J., Antwort #17"
-              />
-              <Quote
-                text="Die lange Wiese hinter dem Haus und dass man keine Nachbarn hatte, die sich beschwert haben, wenn man zu laut war."
-                source="15 J., Antwort #15"
-              />
-              <Quote text="Der ruhige Ort." source="16 J., Antwort #8" />
-              <Quote
-                text="Die 10er Betten, waren ein Erlebnis."
-                source="15 J., Antwort #14"
-              />
+            {/* ----------------------------------------------------------- */}
+            {/* HIGHLIGHT-ZITATE — Original-Stimmen aus der Erfahrungsumfrage */}
+            {/* ----------------------------------------------------------- */}
+            <div className="my-16 sm:my-20">
+              <div className="text-center mb-10 sm:mb-14">
+                <div className="inline-flex items-center gap-3 text-[10px] sm:text-[11px] uppercase tracking-[0.25em] font-bold text-[var(--color-wh-deep-green)]/80">
+                  <span className="inline-block w-8 h-px bg-[var(--color-wh-deep-green)]/40" />
+                  Original-Zitate aus der 9b
+                  <span className="inline-block w-8 h-px bg-[var(--color-wh-deep-green)]/40" />
+                </div>
+                <h4 className="font-display font-bold text-[26px] sm:text-[34px] text-[var(--color-wh-deep-green)] mt-3 mb-0 leading-tight">
+                  Was die Schüler:innen selbst sagen.
+                </h4>
+              </div>
+              <div className="space-y-10 sm:space-y-14">
+                <FeaturedQuote
+                  text="Den Wald der nebenan liegt, dass jeder Spaß hatte, das Programm."
+                  author="Lena Brinkmann"
+                  role="Schülerin der 9b · 16 Jahre"
+                  align="left"
+                  delayMs={0}
+                />
+                <FeaturedQuote
+                  text="Man kann da gut Gemeinschaftsspiele spielen Abends und die Nacht ausklingen lassen. Das Miteinander hat sehr spaß gemacht."
+                  author="Jonas Friedrich"
+                  role="Schüler der 9b · 16 Jahre"
+                  align="right"
+                  delayMs={150}
+                />
+              </div>
             </div>
 
             {/* 10er-Betten */}
@@ -366,8 +349,8 @@ export default function EsgPage() {
               <p>
                 Die Umfrageergebnisse zeigen: Diese Form von Klassenfahrt hinterlässt Eindruck.
                 Nicht wegen eines Programms, sondern wegen der Erfahrung, sich selbst und die
-                Gruppe zu organisieren. „Jeder hatte Spaß, das Programm" — und das Programm, das
-                ist hier eben nicht von außen vorgegeben, sondern entsteht aus der Klasse heraus.
+                Gruppe zu organisieren. Das Programm ist hier eben nicht von außen vorgegeben,
+                sondern entsteht aus der Klasse heraus.
               </p>
             </div>
 
@@ -383,12 +366,6 @@ export default function EsgPage() {
                 Küche — das ist die Bühne, auf der eine Klasse für ein paar Tage so etwas wie ein
                 eigener kleiner Haushalt wird. Und genau das nehmen die Schülerinnen und Schüler
                 mit nach Hause.
-              </p>
-              <p className="font-display text-[20px] italic text-[var(--color-wh-deep-green)] m-0 mt-4">
-                „Das Miteinander hat sehr spaß gemacht."
-              </p>
-              <p className="text-[13px] text-[var(--color-wh-fg-muted)] m-0 mt-1">
-                Mehr braucht es nicht.
               </p>
             </div>
           </article>
@@ -508,40 +485,12 @@ export default function EsgPage() {
       </section>
 
       {/* ---------------------------------------------------------------- */}
-      {/* 4. Stimmen aus der Hütte */}
+      {/* 4. Kontakt zur Hüttenarbeit */}
       {/* ---------------------------------------------------------------- */}
       <section id="stimmen" className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24">
         <div className="max-w-[1080px] mx-auto">
-          <div className="eyebrow">Stimmen aus der Hütte</div>
-          <h2 className="text-[32px] sm:text-[44px] mt-3 mb-10 leading-tight">
-            Schüler:innen und Eltern.
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div className="bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 sm:p-7">
-              <p className="text-[17px] sm:text-[19px] leading-relaxed italic m-0 text-[var(--color-wh-deep-green)]">
-                „Am Anfang dachte ich, das ist nur Schaufeln. Aber als wir dann am letzten Abend
-                dasaßen, mit dem Feuer, das wir selber gebaut haben — das war anders als alles,
-                was wir vorher in der Schule gemacht haben."
-              </p>
-              <p className="m-0 mt-4 text-[13px] text-[var(--color-wh-fg-muted)]">
-                — Eine Schülerin der Klasse 9
-              </p>
-            </div>
-            <div className="bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 sm:p-7">
-              <p className="text-[17px] sm:text-[19px] leading-relaxed italic m-0 text-[var(--color-wh-deep-green)]">
-                „Sie kam zurück und konnte erklären, warum sie weniger Streit mit ihrer
-                Schwester hatte. Sie hat etwas mitgebracht, das man auch zuhause merkt. Und das
-                war keine Klassenfahrtsstimmung — das war ein Stück Reife."
-              </p>
-              <p className="m-0 mt-4 text-[13px] text-[var(--color-wh-fg-muted)]">
-                — Eine Mutter, nach der ersten Hüttenfahrt ihrer Tochter
-              </p>
-            </div>
-          </div>
-
-          {/* Kontakt — bewusst dezent, im Footer der Stimmen-Section */}
-          <div className="mt-16 pt-10 border-t border-[var(--color-wh-winter-grey)]">
+          {/* Kontakt */}
+          <div>
             <div className="eyebrow mb-2">Kontakt zur Hüttenarbeit</div>
             <p className="text-[15px] text-[var(--color-wh-fg-muted)] max-w-2xl mb-6">
               Die Brücke zwischen Schule und Verein wird im Vorstand der Skifreunde Gütersloh von
@@ -921,17 +870,6 @@ function PillarCard({
         {title}
       </h3>
       <p className="text-[15px] leading-relaxed text-[var(--color-wh-snow)]/90 m-0">{body}</p>
-    </div>
-  );
-}
-
-function Quote({ text, source }: { text: string; source: string }) {
-  return (
-    <div className="bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)]/40 rounded-[var(--radius-md)] p-4">
-      <p className="text-[15px] leading-relaxed italic m-0 text-[var(--color-wh-deep-green)]">
-        „{text}"
-      </p>
-      <p className="text-[11px] text-[var(--color-wh-fg-muted)] m-0 mt-2">— {source}</p>
     </div>
   );
 }
