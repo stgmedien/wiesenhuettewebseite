@@ -183,6 +183,13 @@ export const customers = pgTable(
     membershipVerifiedBy: varchar("membership_verified_by", { length: 255 }),
     membershipRejectedReason: text("membership_rejected_reason"),
 
+    // Mitgliedsbeitrag-Abo via Stripe (optional — perspektivisch fuer Automatik)
+    membershipTierCode: varchar("membership_tier_code", { length: 60 }),
+    stripeSubscriptionId: text("stripe_subscription_id"),
+    stripeSubscriptionCustomerId: text("stripe_subscription_customer_id"),
+    subscriptionStatus: varchar("subscription_status", { length: 30 }), // active / past_due / canceled / unpaid / incomplete
+    subscriptionCurrentPeriodEnd: timestamp("subscription_current_period_end"),
+
     // Loyalty — gecachter Counter, wird beim Setzen auf "abgereist" inkrementiert
     completedStays: integer("completed_stays").notNull().default(0),
     loyaltyTier: integer("loyalty_tier").notNull().default(0), // Stufe: 0=keine, 1=>=3 Aufenthalte, 2=>=10
@@ -528,6 +535,30 @@ export const handovers = pgTable(
   },
   (t) => ({
     bookingIdx: index("handovers_booking_idx").on(t.bookingId),
+  })
+);
+
+// =============================================================
+// MEMBERSHIP TIERS — Beitragskategorien für Mitglieder
+// =============================================================
+
+export const membershipTiers = pgTable(
+  "membership_tiers",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    code: varchar("code", { length: 60 }).notNull().unique(),
+    name: varchar("name", { length: 200 }).notNull(),
+    description: text("description"),
+    annualFeeCents: integer("annual_fee_cents").notNull(),
+    stripePriceId: text("stripe_price_id"),    // Stripe Price (recurring yearly)
+    stripeProductId: text("stripe_product_id"),
+    sortOrder: integer("sort_order").notNull().default(0),
+    active: boolean("active").notNull().default(true),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    codeIdx: index("membership_tiers_code_idx").on(t.code),
   })
 );
 
@@ -882,5 +913,7 @@ export type DiscountCode = typeof discountCodes.$inferSelect;
 export type NewDiscountCode = typeof discountCodes.$inferInsert;
 export type MailTemplate = typeof mailTemplates.$inferSelect;
 export type NewMailTemplate = typeof mailTemplates.$inferInsert;
+export type MembershipTier = typeof membershipTiers.$inferSelect;
+export type NewMembershipTier = typeof membershipTiers.$inferInsert;
 export type MailTemplateVersion = typeof mailTemplateVersions.$inferSelect;
 export type NewMailTemplateVersion = typeof mailTemplateVersions.$inferInsert;

@@ -80,6 +80,30 @@ export async function POST(req: NextRequest) {
         await handlePaymentIntentSucceeded(pi);
         break;
       }
+      // -----------------------------------------------------------
+      // Mitgliedsbeitrag-Subscription Events
+      // -----------------------------------------------------------
+      case "customer.subscription.created":
+      case "customer.subscription.updated": {
+        const sub = event.data.object as Stripe.Subscription;
+        await handleSubscriptionUpsert(sub);
+        break;
+      }
+      case "customer.subscription.deleted": {
+        const sub = event.data.object as Stripe.Subscription;
+        await handleSubscriptionDeleted(sub);
+        break;
+      }
+      case "invoice.paid": {
+        const invoice = event.data.object as Stripe.Invoice;
+        await handleInvoicePaid(invoice);
+        break;
+      }
+      case "invoice.payment_failed": {
+        const invoice = event.data.object as Stripe.Invoice;
+        await handleInvoicePaymentFailed(invoice);
+        break;
+      }
       default:
         // ignore other event types
         break;
@@ -489,5 +513,194 @@ async function handlePaymentIntentSucceeded(pi: Stripe.PaymentIntent) {
     who: "Stripe",
     what: `Off-Session-Zahlung erfasst — ${(amountCents / 100).toFixed(2)} € (${kind ?? "unknown"}, PI ${pi.id})`,
     bookingId,
+  });
+}
+
+// =============================================================
+// MEMBERSHIP SUBSCRIPTION EVENTS
+// =============================================================
+//
+// Stripe sendet hier die Lifecycle-Events der jährlichen
+// Mitgliedsbeitrags-Abos. Wir spiegeln Stripe-State auf customers-Felder:
+//   stripeSubscriptionId, subscriptionStatus, subscriptionCurrentPeriodEnd,
+//   stripeSubscriptionCustomerId, membershipTierCode
+//
+// Idempotenz: alle Handler sind upserts auf customers.id.
+// =============================================================
+
+// Resolves the local customer-row für eine Stripe-Subscription über die metadata.customerId
+// (zuverlässig — wir setzen sie beim Checkout). Falls nicht gesetzt, fallback über
+// stripe_subscription_customer_id.
+async function findCustomerForSubscription(sub: Stripe.Subscription) {
+  const localCustomerId = sub.metadata?.customerId;
+  if (localCustomerId) {
+    const r = await db
+      .select()
+      .from(customers)
+      .where(eq(customers.id, localCustomerId))
+      .limit(1);
+    if (r[0]) return r[0];
+  }
+  const stripeCustomerId =
+    typeof sub.customer === "string" ? sub.customer : sub.customer?.id;
+  if (stripeCustomerId) {
+    const r = await db
+      .select()
+      .from(customers)
+      .where(eq(customers.stripeSubscriptionCustomerId, stripeCustomerId))
+      .limit(1);
+    if (r[0]) return r[0];
+  }
+  return null;
+}
+
+async function handleSubscriptionUpsert(sub: Stripe.Subscription) {
+  const customer = await findCustomerForSubscription(sub);
+  if (!customer) {
+    console.warn(
+      `[webhook] subscription ${sub.id} ohne zugeordneten Kunden (metadata.customerId fehlt?)`
+    );
+    return;
+  }
+
+  const stripeCustomerId =
+    typeof sub.customer === "string" ? sub.customer : sub.customer?.id ?? null;
+
+  // current_period_end: Stripe-Subscription speichert es als Unix-Sekunden.
+  const periodEndSec = (sub as unknown as { current_period_end?: number })
+    .current_period_end;
+  const periodEnd =
+    typeof periodEndSec === "number" ? new Date(periodEndSec * 1000) : null;
+
+  const tierCode = sub.metadata?.tierCode ?? customer.membershipTierCode ?? null;
+
+  await db
+    .update(customers)
+    .set({
+      stripeSubscriptionId: sub.id,
+      stripeSubscriptionCustomerId: stripeCustomerId,
+      subscriptionStatus: sub.status,
+      subscriptionCurrentPeriodEnd: periodEnd,
+      ...(tierCode ? { membershipTierCode: tierCode } : {}),
+    })
+    .where(eq(customers.id, customer.id));
+
+  await db.insert(activityLog).values({
+    who: "Stripe",
+    what: `Mitgliedsbeitrag-Abo ${sub.id} → status=${sub.status}${
+      tierCode ? `, tier=${tierCode}` : ""
+    } (${customer.firstName} ${customer.lastName})`,
+  });
+}
+
+async function handleSubscriptionDeleted(sub: Stripe.Subscription) {
+  const customer = await findCustomerForSubscription(sub);
+  if (!customer) return;
+
+  await db
+    .update(customers)
+    .set({
+      stripeSubscriptionId: null,
+      subscriptionStatus: "canceled",
+      subscriptionCurrentPeriodEnd: null,
+      // Keep stripeSubscriptionCustomerId for künftige Re-Subscriptions
+      // damit Stripe-Customer-Portal weiter funktioniert.
+    })
+    .where(eq(customers.id, customer.id));
+
+  await db.insert(activityLog).values({
+    who: "Stripe",
+    what: `Mitgliedsbeitrag-Abo gekündigt (${sub.id}) — ${customer.firstName} ${customer.lastName}`,
+  });
+}
+
+async function handleInvoicePaid(invoice: Stripe.Invoice) {
+  // Wir verarbeiten hier nur Subscription-Invoices.
+  const subRef = (invoice as unknown as { subscription?: string | Stripe.Subscription })
+    .subscription;
+  const subscriptionId =
+    typeof subRef === "string" ? subRef : subRef?.id ?? null;
+  if (!subscriptionId) return;
+
+  const stripeCustomerId =
+    typeof invoice.customer === "string" ? invoice.customer : invoice.customer?.id;
+  if (!stripeCustomerId) return;
+
+  // Find local customer
+  const r = await db
+    .select()
+    .from(customers)
+    .where(eq(customers.stripeSubscriptionCustomerId, stripeCustomerId))
+    .limit(1);
+  const customer = r[0];
+  if (!customer) {
+    // Vielleicht noch nicht über subscription.created verlinkt — wir fallen auf
+    // metadata.customerId aus den Sub-Lines zurück:
+    const lineMeta = invoice.lines?.data?.[0]?.metadata?.customerId;
+    if (lineMeta) {
+      const fallback = await db
+        .select()
+        .from(customers)
+        .where(eq(customers.id, lineMeta))
+        .limit(1);
+      if (fallback[0]) {
+        await db
+          .update(customers)
+          .set({
+            stripeSubscriptionCustomerId: stripeCustomerId,
+            stripeSubscriptionId: subscriptionId,
+            subscriptionStatus: "active",
+          })
+          .where(eq(customers.id, fallback[0].id));
+      }
+    }
+    return;
+  }
+
+  // Subscription-Status auf 'active' setzen, falls noch incomplete.
+  await db
+    .update(customers)
+    .set({
+      stripeSubscriptionId: subscriptionId,
+      subscriptionStatus: "active",
+    })
+    .where(eq(customers.id, customer.id));
+
+  const amountCents = invoice.amount_paid ?? 0;
+  await db.insert(activityLog).values({
+    who: "Stripe",
+    what: `Mitgliedsbeitrag eingezogen — ${(amountCents / 100).toFixed(2)} € (${customer.firstName} ${customer.lastName}, Sub ${subscriptionId})`,
+  });
+}
+
+async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
+  const subRef = (invoice as unknown as { subscription?: string | Stripe.Subscription })
+    .subscription;
+  const subscriptionId =
+    typeof subRef === "string" ? subRef : subRef?.id ?? null;
+  if (!subscriptionId) return;
+
+  const stripeCustomerId =
+    typeof invoice.customer === "string" ? invoice.customer : invoice.customer?.id;
+  if (!stripeCustomerId) return;
+
+  const r = await db
+    .select()
+    .from(customers)
+    .where(eq(customers.stripeSubscriptionCustomerId, stripeCustomerId))
+    .limit(1);
+  const customer = r[0];
+  if (!customer) return;
+
+  await db
+    .update(customers)
+    .set({
+      subscriptionStatus: "past_due",
+    })
+    .where(eq(customers.id, customer.id));
+
+  await db.insert(activityLog).values({
+    who: "Stripe",
+    what: `Mitgliedsbeitrag-Lastschrift fehlgeschlagen — ${customer.firstName} ${customer.lastName} (Sub ${subscriptionId})`,
   });
 }

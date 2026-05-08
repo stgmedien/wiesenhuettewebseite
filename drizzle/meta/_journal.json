@@ -71,6 +71,13 @@
       "when": 1778171947185,
       "tag": "0009_windy_raza",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1778184453095,
+      "tag": "0010_cool_albert_cleary",
+      "breakpoints": true
     }
   ]
 }

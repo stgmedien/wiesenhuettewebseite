@@ -1,5 +1,12 @@
 import Image from "next/image";
+import Link from "next/link";
 import { ImageCarousel } from "@/components/public/ImageCarousel";
+import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { customers } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Verein · Skifreunde Gütersloh e.V.",
@@ -63,7 +70,64 @@ const TIMELINE = [
   },
 ];
 
-export default function VereinPage() {
+type MemberCtaState = {
+  loggedIn: boolean;
+  status: "none" | "pending" | "verified" | "rejected" | null;
+};
+
+async function getMemberCtaState(): Promise<MemberCtaState> {
+  const session = await auth();
+  const userId = (session?.user as { id?: string } | undefined)?.id;
+  if (!userId) return { loggedIn: false, status: null };
+  const c = await db
+    .select({ status: customers.membershipStatus })
+    .from(customers)
+    .where(eq(customers.userId, userId))
+    .limit(1);
+  return { loggedIn: true, status: c[0]?.status ?? "none" };
+}
+
+function MemberCta({
+  loggedIn,
+  status,
+}: {
+  loggedIn: boolean;
+  status: MemberCtaState["status"];
+}) {
+  const base =
+    "inline-flex items-center px-5 py-2.5 rounded-full text-sm font-semibold no-underline";
+  const primary = "bg-[var(--color-wh-snow)] text-[var(--color-wh-deep-green)] hover:bg-white";
+  if (!loggedIn) {
+    return (
+      <Link href="/registrieren" className={`${base} ${primary}`}>
+        Konto anlegen & Mitgliedschaft beantragen →
+      </Link>
+    );
+  }
+  if (status === "verified") {
+    return (
+      <Link href="/konto" className={`${base} ${primary}`}>
+        ✓ Du bist Mitglied — zum Konto
+      </Link>
+    );
+  }
+  if (status === "pending") {
+    return (
+      <Link href="/konto/profil" className={`${base} ${primary}`}>
+        Dein Antrag wird geprüft — Status ansehen
+      </Link>
+    );
+  }
+  return (
+    <Link href="/konto/profil" className={`${base} ${primary}`}>
+      Mitgliedschaft beantragen →
+    </Link>
+  );
+}
+
+export default async function VereinPage() {
+  const memberCta = await getMemberCtaState();
+
   return (
     <div>
       <section className="bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] px-6 sm:px-8 py-20 sm:py-24">
@@ -200,13 +264,25 @@ export default function VereinPage() {
             ))}
           </ul>
 
-          <p className="text-[var(--color-wh-snow)]/75 mt-8 text-sm">
-            Aufnahmeantrag und Datenschutzerklärung als PDF: bitte direkt anfragen unter
-            <a className="text-[var(--color-wh-snow)] ml-1" href="mailto:info@skifreunde-gt.de">
-              info@skifreunde-gt.de
-            </a>
-            .
-          </p>
+          <div className="mt-10 bg-[var(--color-wh-snow)]/10 border border-[var(--color-wh-snow)]/20 rounded-[var(--radius-card)] p-6 sm:p-7">
+            <p className="text-[var(--color-wh-snow)] m-0 mb-2 font-semibold text-[18px]">
+              Mitglied werden — direkt online.
+            </p>
+            <p className="text-[var(--color-wh-snow)]/85 m-0 mb-5 text-sm leading-relaxed">
+              Konto anlegen, Mitgliedschaft beantragen, der Vorstand prüft den Antrag. Sobald
+              bestätigt, kannst Du den Mitgliedsbeitrag perspektivisch bequem per
+              SEPA-Lastschrift oder Karte automatisch jährlich einziehen lassen.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <MemberCta loggedIn={memberCta.loggedIn} status={memberCta.status} />
+              <a
+                href="mailto:info@skifreunde-gt.de"
+                className="inline-flex items-center px-5 py-2.5 rounded-full text-sm font-semibold no-underline border border-[var(--color-wh-snow)]/40 text-[var(--color-wh-snow)]/85 hover:bg-[var(--color-wh-snow)]/10"
+              >
+                Lieber per Mail
+              </a>
+            </div>
+          </div>
         </div>
       </section>
     </div>

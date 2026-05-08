@@ -1,8 +1,8 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { users, customers } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { users, customers, membershipTiers } from "@/lib/db/schema";
+import { and, asc, eq, isNotNull } from "drizzle-orm";
 import Link from "next/link";
 import { ProfileClient } from "./ProfileClient";
 
@@ -24,6 +24,19 @@ export default async function ProfilPage() {
   const u = userRow[0];
   if (!u) redirect("/login");
   const c = customerRow[0] ?? null;
+
+  // Aktive Beitrags-Tarife mit hinterlegter Stripe Price-ID — diese können
+  // automatisch via Stripe-Abo abgerechnet werden. Tiers ohne Price-ID
+  // erscheinen nicht in der Auswahl.
+  const subscribableTiersRaw = await db
+    .select({
+      code: membershipTiers.code,
+      name: membershipTiers.name,
+      annualFeeCents: membershipTiers.annualFeeCents,
+    })
+    .from(membershipTiers)
+    .where(and(eq(membershipTiers.active, true), isNotNull(membershipTiers.stripePriceId)))
+    .orderBy(asc(membershipTiers.sortOrder));
 
   return (
     <div className="container max-w-3xl mx-auto px-6 py-12">
@@ -55,9 +68,17 @@ export default async function ProfilPage() {
                   | "rejected",
                 membershipRejectedReason: c.membershipRejectedReason,
                 memberId: c.memberId,
+                membershipTierCode: c.membershipTierCode,
+                stripeSubscriptionId: c.stripeSubscriptionId,
+                stripeSubscriptionCustomerId: c.stripeSubscriptionCustomerId,
+                subscriptionStatus: c.subscriptionStatus,
+                subscriptionCurrentPeriodEnd: c.subscriptionCurrentPeriodEnd
+                  ? c.subscriptionCurrentPeriodEnd.toISOString()
+                  : null,
               }
             : null
         }
+        subscribableTiers={subscribableTiersRaw}
       />
     </div>
   );

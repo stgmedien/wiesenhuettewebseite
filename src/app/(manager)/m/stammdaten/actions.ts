@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { tariffs, extras, seasons, activityLog } from "@/lib/db/schema";
+import { tariffs, extras, seasons, activityLog, membershipTiers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
@@ -212,6 +212,45 @@ export async function createExtra(formData: FormData) {
   await db.insert(activityLog).values({
     who: me,
     what: `Extra angelegt: ${parsed.data.label} (${parsed.data.code})`,
+  });
+  revalidatePath("/m/stammdaten");
+  return { ok: true as const };
+}
+
+
+// ---------- Membership Tiers ----------
+
+const tierUpdateSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1).max(200),
+  annualFeeEuros: z.coerce.number().nonnegative(),
+  stripePriceId: z.string().max(120).optional().nullable(),
+  active: z.preprocess((v) => v === "on" || v === true, z.boolean()).default(false),
+});
+
+export async function updateMembershipTier(formData: FormData) {
+  const me = await requireManager();
+  const parsed = tierUpdateSchema.safeParse({
+    id: formData.get("id"),
+    name: formData.get("name"),
+    annualFeeEuros: formData.get("annualFeeEuros"),
+    stripePriceId: (formData.get("stripePriceId") || "").toString().trim() || null,
+    active: formData.get("active"),
+  });
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message };
+  await db
+    .update(membershipTiers)
+    .set({
+      name: parsed.data.name,
+      annualFeeCents: Math.round(parsed.data.annualFeeEuros * 100),
+      stripePriceId: parsed.data.stripePriceId,
+      active: parsed.data.active,
+      updatedAt: new Date(),
+    })
+    .where(eq(membershipTiers.id, parsed.data.id));
+  await db.insert(activityLog).values({
+    who: me,
+    what: `Mitgliedsbeitrag-Tier geändert: ${parsed.data.name} (${parsed.data.annualFeeEuros.toFixed(2)} €${parsed.data.stripePriceId ? `, Stripe-Price: ${parsed.data.stripePriceId}` : ""})`,
   });
   revalidatePath("/m/stammdaten");
   return { ok: true as const };

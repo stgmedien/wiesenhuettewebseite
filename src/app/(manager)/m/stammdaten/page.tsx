@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { tariffs, extras, seasons } from "@/lib/db/schema";
+import { tariffs, extras, seasons, membershipTiers } from "@/lib/db/schema";
 import { asc, desc } from "drizzle-orm";
 import {
   updateTariff,
@@ -8,6 +8,7 @@ import {
   updateSeason,
   createSeason,
   deleteSeason,
+  updateMembershipTier,
 } from "./actions";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -26,6 +27,7 @@ export default async function StammdatenPage() {
   const allTariffs = await db.select().from(tariffs).orderBy(asc(tariffs.category));
   const allExtras = await db.select().from(extras).orderBy(asc(extras.sortOrder));
   const allSeasons = await db.select().from(seasons).orderBy(desc(seasons.priority));
+  const allTiers = await db.select().from(membershipTiers).orderBy(asc(membershipTiers.sortOrder));
 
   return (
     <div className="px-8 py-10 max-w-[1200px]">
@@ -508,6 +510,123 @@ export default async function StammdatenPage() {
               Anlegen
             </button>
           </form>
+        </div>
+      </section>
+
+      {/* Mitgliedsbeiträge */}
+      <section className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 mb-8">
+        <h2 className="text-[22px] m-0 mb-1">Mitgliedsbeiträge</h2>
+        <p className="text-xs text-[var(--color-wh-fg-muted)] mb-4">
+          Beitragskategorien für die Skifreunde Gütersloh e.V. — Single-Source-of-Truth für die
+          Mitgliedschaft auf der öffentlichen Vereinsseite. Jede Kategorie kann optional mit einer
+          Stripe Price-ID (Recurring, jährlich) verknüpft werden — sobald hinterlegt, schaltet das
+          Kundenportal für verifizierte Mitglieder dieser Kategorie automatisch den
+          Stripe-Lastschrift-Einzug frei. Ohne Stripe Price-ID läuft die Beitragszahlung weiterhin
+          manuell (Überweisung).
+        </p>
+        {allTiers.length === 0 ? (
+          <p className="text-sm text-[var(--color-wh-fg-muted)] mb-4 italic">
+            Noch keine Beitragskategorien angelegt.
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="border-b border-[var(--color-wh-winter-grey)]">
+                  <th className="text-left py-2 font-semibold text-xs uppercase tracking-wider">
+                    Code
+                  </th>
+                  <th className="text-left py-2 font-semibold text-xs uppercase tracking-wider">
+                    Bezeichnung
+                  </th>
+                  <th className="text-right py-2 font-semibold text-xs uppercase tracking-wider">
+                    Beitrag €/Jahr
+                  </th>
+                  <th className="text-left py-2 font-semibold text-xs uppercase tracking-wider">
+                    Stripe Price-ID
+                  </th>
+                  <th className="text-center py-2 font-semibold text-xs uppercase tracking-wider">
+                    Aktiv
+                  </th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {allTiers.map((t) => (
+                  <tr key={t.id} className="border-b border-[var(--color-wh-winter-grey)]/30">
+                    <td className="py-3 font-mono text-xs">{t.code}</td>
+                    <td className="py-3">
+                      <form
+                        action={async (fd) => {
+                          "use server";
+                          await updateMembershipTier(fd);
+                        }}
+                        className="contents"
+                        id={`tier-${t.id}`}
+                      >
+                        <input type="hidden" name="id" value={t.id} />
+                        <input
+                          type="text"
+                          name="name"
+                          defaultValue={t.name}
+                          className={`${inputBase} w-full max-w-[260px]`}
+                        />
+                      </form>
+                    </td>
+                    <td className="py-3 text-right">
+                      <input
+                        type="number"
+                        name="annualFeeEuros"
+                        step="0.01"
+                        min="0"
+                        defaultValue={(t.annualFeeCents / 100).toFixed(2)}
+                        form={`tier-${t.id}`}
+                        className={`${inputBase} text-right w-24 font-mono`}
+                      />
+                    </td>
+                    <td className="py-3">
+                      <input
+                        type="text"
+                        name="stripePriceId"
+                        defaultValue={t.stripePriceId ?? ""}
+                        placeholder="price_…"
+                        form={`tier-${t.id}`}
+                        className={`${inputBase} w-full min-w-[220px] max-w-[280px] font-mono text-xs`}
+                      />
+                    </td>
+                    <td className="py-3 text-center">
+                      <input
+                        type="checkbox"
+                        name="active"
+                        defaultChecked={t.active}
+                        form={`tier-${t.id}`}
+                      />
+                    </td>
+                    <td className="py-3 text-right">
+                      <button
+                        type="submit"
+                        form={`tier-${t.id}`}
+                        className="rounded-full bg-[var(--color-wh-deep-green)] text-white px-3 py-1 text-xs font-semibold"
+                      >
+                        Speichern
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        <div className="mt-4 rounded-lg bg-[var(--color-wh-winter-grey)]/20 px-4 py-3 text-[12px] leading-relaxed text-[var(--color-wh-fg-muted)]">
+          <strong className="text-[var(--color-wh-fg)]">So legst du eine Stripe Price-ID an:</strong>{" "}
+          Im Stripe-Dashboard → Produktkatalog ein Produkt „Mitgliedschaft – [Kategorie]" anlegen,
+          Preis als wiederkehrend (Jährlich) und Betrag in EUR konfigurieren. Die generierte
+          <code className="mx-1 px-1.5 py-0.5 rounded bg-white border border-[var(--color-wh-winter-grey)] font-mono">
+            price_…
+          </code>
+          hier eintragen. Mitglieder dieser Kategorie sehen daraufhin in ihrem Konto eine Option
+          „Mitgliedsbeitrag automatisch einziehen" und können per SEPA-Lastschrift oder Karte einen
+          jährlichen Abbuchungsauftrag aktivieren.
         </div>
       </section>
     </div>
