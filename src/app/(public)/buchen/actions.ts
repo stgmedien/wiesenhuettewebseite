@@ -1,9 +1,10 @@
 "use server";
 
 import { z } from "zod";
-import { eq } from "drizzle-orm";
+import { eq, and, gt } from "drizzle-orm";
+import { headers } from "next/headers";
 import { db } from "@/lib/db";
-import { bookings, customers, payments, activityLog, users } from "@/lib/db/schema";
+import { bookings, customers, payments, activityLog, users, bookingAttempts } from "@/lib/db/schema";
 import { auth } from "@/lib/auth";
 import { createMagicLinkToken } from "@/lib/magic-link";
 import { sendMail } from "@/lib/mail/send";
@@ -59,6 +60,9 @@ export type ActionResult =
   | { ok: true; checkoutUrl: string; bookingNumber: string }
   | { ok: false; error: string; issues?: { field: string; message: string }[] };
 
+const BOOKING_RATE_WINDOW_MS = 60 * 60_000; // 1 Stunde
+const BOOKING_MAX_PER_WINDOW = 5;
+
 export async function createBookingAndCheckout(raw: unknown): Promise<ActionResult> {
   const parsed = inputSchema.safeParse(raw);
   if (!parsed.success) {
@@ -73,6 +77,38 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
   }
   const data = parsed.data;
   const persons: Persons = { ...data.persons };
+
+  // -----------------------------------------------------------------
+  // Spam-Schutz: max 5 Buchungs-Versuche pro (Email, IP) pro Stunde.
+  // Verhindert Mass-Booking-Spam und Fake-Checkout-Link-Generierung.
+  // -----------------------------------------------------------------
+  const lowerEmail = data.email.toLowerCase().trim();
+  const reqHeaders = await headers();
+  const ip =
+    reqHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    reqHeaders.get("x-real-ip") ||
+    null;
+  const since = new Date(Date.now() - BOOKING_RATE_WINDOW_MS);
+  const recentAttempts = await db
+    .select({ id: bookingAttempts.id })
+    .from(bookingAttempts)
+    .where(
+      and(eq(bookingAttempts.email, lowerEmail), gt(bookingAttempts.at, since))
+    )
+    .limit(BOOKING_MAX_PER_WINDOW + 1);
+  if (recentAttempts.length >= BOOKING_MAX_PER_WINDOW) {
+    return {
+      ok: false,
+      error:
+        "Zu viele Buchungs-Versuche von dieser Email-Adresse in kurzer Zeit. Bitte versuche es in einer Stunde erneut oder kontaktiere uns direkt.",
+    };
+  }
+  // Best-effort log — wenn DB-Insert fehlschlägt, soll Booking trotzdem laufen
+  try {
+    await db.insert(bookingAttempts).values({ email: lowerEmail, ip });
+  } catch (err) {
+    console.error("[booking-throttle] log failed:", err);
+  }
 
   // ---------------------------------------------------------------
   // Member-Discount-Gate: nur verifizierte Vereinsmitglieder duerfen

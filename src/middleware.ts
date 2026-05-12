@@ -22,6 +22,8 @@ export default auth((req) => {
     if (isPublicManagerPath) return undefined;
     const loginUrl = req.nextUrl.clone();
     loginUrl.pathname = "/m/login";
+    // callbackUrl: nur Pfad+Suchparam aus eigenem Request — nie aus Query-Input.
+    // Open-Redirect zusätzlich im NextAuth redirect-Callback geblockt (s. lib/auth.ts).
     loginUrl.searchParams.set("callbackUrl", req.nextUrl.pathname + req.nextUrl.search);
     return NextResponse.redirect(loginUrl);
   }
@@ -51,7 +53,11 @@ export default auth((req) => {
 
   // 4) 2FA-Pflicht — gilt fuer Admins UND fuer User mit explizitem
   //    mustEnable2FA-Flag (gesetzt bei Account-Anlage durch Admin).
-  //    Ohne aktiviertes 2FA wird auf /m/profil gezwungen.
+  //    Wir lesen den Status aus dem JWT-Claim. Bei JWT-Update (z.B. nach 2FA-Setup
+  //    oder nach Admin-mustEnable2FA-Setting) muss der nächste Request den frischen
+  //    Claim haben — das passiert beim nächsten Login. Für Fast-Refresh nach
+  //    Admin-Änderung würde DB-Check helfen (Cost: 1 Query pro Pageview); aktuell
+  //    setzen wir den Claim beim signIn() neu via session-update-Trigger (auth.ts).
   const twoFactorEnabled = (session.user as { twoFactorEnabled?: boolean }).twoFactorEnabled;
   const mustEnable2FA = (session.user as { mustEnable2FA?: boolean }).mustEnable2FA;
   const needs2FA = !twoFactorEnabled && (userRole === "admin" || mustEnable2FA);

@@ -9,6 +9,13 @@ import { auth } from "@/lib/auth";
 import { generateBookingNumber } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
 
+async function requireManager() {
+  const session = await auth();
+  const role = (session?.user as { role?: string } | undefined)?.role;
+  if (role !== "manager" && role !== "admin") throw new Error("Nicht autorisiert");
+  return session!;
+}
+
 const schema = z.object({
   from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -16,8 +23,7 @@ const schema = z.object({
 });
 
 export async function createSperrzeit(formData: FormData) {
-  const session = await auth();
-  if (!session) return { ok: false, error: "Unauthorized" };
+  const session = await requireManager();
 
   const parsed = schema.safeParse({
     from: formData.get("from"),

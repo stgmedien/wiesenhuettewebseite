@@ -14,6 +14,13 @@ import { mailTemplates, mailTemplateVersions } from "@/lib/db/schema";
 import { substituteVars } from "@/lib/mail-render";
 import { buildBookingVars } from "@/lib/mail-template-vars";
 
+async function requireManager() {
+  const session = await auth();
+  const role = (session?.user as { role?: string } | undefined)?.role;
+  if (role !== "manager" && role !== "admin") throw new Error("Nicht autorisiert");
+  return session!;
+}
+
 const ALLOWED_STATUSES = new Set([
   "angefragt",
   "bestaetigt",
@@ -25,8 +32,7 @@ const ALLOWED_STATUSES = new Set([
 ]);
 
 export async function setBookingStatus(bookingId: string, status: string) {
-  const session = await auth();
-  if (!session) throw new Error("Unauthorized");
+  const session = await requireManager();
   if (!ALLOWED_STATUSES.has(status)) throw new Error("Invalid status");
 
   const found = await db.select().from(bookings).where(eq(bookings.id, bookingId)).limit(1);
@@ -79,8 +85,12 @@ export type SendBookingMessageResult =
 export async function sendBookingMessage(
   raw: z.infer<typeof messageSchema>
 ): Promise<SendBookingMessageResult> {
-  const session = await auth();
-  if (!session) return { ok: false, error: "Unauthorized" };
+  let session: Awaited<ReturnType<typeof requireManager>>;
+  try {
+    session = await requireManager();
+  } catch {
+    return { ok: false, error: "Nicht autorisiert" };
+  }
 
   const parsed = messageSchema.safeParse(raw);
   if (!parsed.success) {

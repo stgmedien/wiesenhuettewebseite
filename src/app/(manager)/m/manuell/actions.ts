@@ -29,9 +29,16 @@ const schema = z.object({
   internalNotes: z.string().optional().nullable(),
 });
 
-export async function createManualBooking(formData: FormData): Promise<{ ok: boolean; error?: string; redirectTo?: string }> {
+async function requireManager() {
   const session = await auth();
-  if (!session) return { ok: false, error: "Unauthorized" };
+  const role = (session?.user as { role?: string } | undefined)?.role;
+  if (role !== "manager" && role !== "admin") return null;
+  return session!;
+}
+
+export async function createManualBooking(formData: FormData): Promise<{ ok: boolean; error?: string; redirectTo?: string }> {
+  const session = await requireManager();
+  if (!session) return { ok: false, error: "Nicht autorisiert" };
 
   const raw: Record<string, unknown> = {};
   formData.forEach((v, k) => {

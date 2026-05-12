@@ -42,7 +42,12 @@ const createSchema = z.object({
   email: z.string().email().max(255),
   name: z.string().min(1).max(255),
   role: z.enum(["manager", "admin"]),
-  password: z.string().min(8).max(128),
+  password: z
+    .string()
+    .min(10, "Mindestens 10 Zeichen.")
+    .max(128)
+    .regex(/[A-Za-z]/, "Mindestens ein Buchstabe.")
+    .regex(/[0-9]/, "Mindestens eine Ziffer."),
   sendWelcomeMail: z.boolean().default(true),
 });
 
@@ -163,7 +168,12 @@ export async function updateUserRole(
 
 const resetPwSchema = z.object({
   userId: z.string().uuid(),
-  newPassword: z.string().min(8).max(128),
+  newPassword: z
+    .string()
+    .min(10, "Mindestens 10 Zeichen.")
+    .max(128)
+    .regex(/[A-Za-z]/, "Mindestens ein Buchstabe.")
+    .regex(/[0-9]/, "Mindestens eine Ziffer."),
   sendMail: z.boolean().default(false),
 });
 

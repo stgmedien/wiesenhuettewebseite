@@ -20,12 +20,17 @@ const ANON_PREFIX = "[Anonymisiert nach DSGVO-Antrag]";
  * Wir akzeptieren auch einen einfachen Bearer-Token (CRON_SECRET) fuer manuelle Tests.
  */
 export async function GET(req: Request) {
-  // Aufruf-Schutz
+  // Aufruf-Schutz — fail-closed: ohne CRON_SECRET kein externer Aufruf moeglich
   const auth = req.headers.get("authorization") || "";
   const isVercelCron = !!req.headers.get("x-vercel-cron-signature");
-  const cronSecret = process.env.CRON_SECRET;
-  if (!isVercelCron && cronSecret && auth !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!isVercelCron) {
+    const cronSecret = process.env.CRON_SECRET;
+    if (!cronSecret) {
+      return NextResponse.json({ error: "CRON_SECRET not configured" }, { status: 500 });
+    }
+    if (auth !== `Bearer ${cronSecret}`) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
   }
 
   const stats = {

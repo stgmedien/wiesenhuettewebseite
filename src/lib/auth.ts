@@ -2,11 +2,53 @@ import NextAuth, { CredentialsSignin } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
-import { users, activityLog } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { users, activityLog, loginAttempts } from "@/lib/db/schema";
+import { and, eq, gt } from "drizzle-orm";
 import { z } from "zod";
 import { verifyTotp, consumeBackupCode } from "@/lib/totp";
 import { consumeMagicLinkToken } from "@/lib/magic-link";
+
+/**
+ * Login-Throttle: blockt Authorize, wenn > 10 fehlgeschlagene Login-Versuche
+ * für (email, kind) in den letzten 15 min vorliegen. IP wird zusätzlich
+ * geloggt, aber als Trigger-Kriterium reicht Email (verhindert auch
+ * verteilte Brute-Force über Bot-Netze gegen einen einzelnen Account).
+ */
+const LOGIN_WINDOW_MS = 15 * 60_000;
+const LOGIN_MAX_FAILS = 10;
+
+async function isLoginRateLimited(email: string, kind: string): Promise<boolean> {
+  const since = new Date(Date.now() - LOGIN_WINDOW_MS);
+  const fails = await db
+    .select({ id: loginAttempts.id })
+    .from(loginAttempts)
+    .where(
+      and(
+        eq(loginAttempts.email, email),
+        eq(loginAttempts.kind, kind),
+        eq(loginAttempts.success, false),
+        gt(loginAttempts.at, since)
+      )
+    )
+    .limit(LOGIN_MAX_FAILS + 1);
+  return fails.length >= LOGIN_MAX_FAILS;
+}
+
+async function logLoginAttempt(
+  email: string,
+  kind: string,
+  success: boolean
+): Promise<void> {
+  try {
+    await db.insert(loginAttempts).values({ email, kind, success });
+  } catch (err) {
+    console.error("[login-throttle] log failed:", err);
+  }
+}
+
+class RateLimitedError extends CredentialsSignin {
+  code = "rate_limited";
+}
 
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -48,6 +90,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           .limit(1);
         const u = userRow[0];
         if (!u) return null;
+        if (u.deletedAt) {
+          // Soft-deleted User: kein Login (auch nicht via Magic-Link).
+          await logLoginAttempt(u.email, "magic", false);
+          return null;
+        }
 
         await db
           .update(users)
@@ -86,23 +133,48 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!parsed.success) return null;
 
         const { email, password, totp } = parsed.data;
+        const lowerEmail = email.toLowerCase();
+
+        // Rate-Limit gegen Brute-Force: > 10 fails in 15 min für (email, password) blockt.
+        if (await isLoginRateLimited(lowerEmail, "password")) {
+          throw new RateLimitedError();
+        }
+
         const found = await db
           .select()
           .from(users)
-          .where(eq(users.email, email.toLowerCase()))
+          .where(eq(users.email, lowerEmail))
           .limit(1);
 
         const user = found[0];
-        if (!user || !user.passwordHash) return null;
+        if (!user || !user.passwordHash) {
+          await logLoginAttempt(lowerEmail, "password", false);
+          return null;
+        }
+        if (user.deletedAt) {
+          // Soft-deleted: kein Login möglich.
+          await logLoginAttempt(lowerEmail, "password", false);
+          return null;
+        }
 
         const ok = await bcrypt.compare(password, user.passwordHash);
-        if (!ok) return null;
+        if (!ok) {
+          await logLoginAttempt(lowerEmail, "password", false);
+          return null;
+        }
 
         // 2FA gate (nur Manager/Admin können 2FA aktiviert haben)
         if (user.twoFactorEnabled) {
           if (!totp || totp.trim().length === 0) {
+            // Passwort war korrekt — keinen Fail loggen (sonst Brute-Force-Detektion auf legitimes 2FA-Prompting)
             throw new TotpRequiredError();
           }
+
+          // Eigene Rate-Limit auf TOTP-Versuche
+          if (await isLoginRateLimited(lowerEmail, "totp")) {
+            throw new RateLimitedError();
+          }
+
           const cleaned = totp.trim();
           let totpOk = false;
 
@@ -126,10 +198,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             }
           }
 
-          if (!totpOk) throw new TotpInvalidError();
+          if (!totpOk) {
+            await logLoginAttempt(lowerEmail, "totp", false);
+            throw new TotpInvalidError();
+          }
+          await logLoginAttempt(lowerEmail, "totp", true);
         }
 
-        // Login-Audit aktualisieren
+        // Login erfolgreich — Audit
+        await logLoginAttempt(lowerEmail, "password", true);
         await db
           .update(users)
           .set({ lastLoginAt: new Date(), updatedAt: new Date() })
@@ -213,6 +290,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return !!auth;
       }
       return true;
+    },
+    /**
+     * Open-Redirect-Schutz: NextAuth's default akzeptiert Same-Origin-URLs,
+     * aber wir erzwingen es explizit. Relative Pfade (/foo) → prefixed mit baseUrl.
+     * Absolute URLs werden nur akzeptiert wenn Origin matches.
+     * Protocol-relative (//evil.com) und externe URLs → fallback auf baseUrl.
+     */
+    redirect: async ({ url, baseUrl }) => {
+      if (url.startsWith("/") && !url.startsWith("//")) return `${baseUrl}${url}`;
+      try {
+        const parsed = new URL(url);
+        if (parsed.origin === baseUrl) return url;
+      } catch {
+        // ungültige URL → fallback
+      }
+      return baseUrl;
     },
   },
 });

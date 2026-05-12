@@ -78,6 +78,13 @@
       "when": 1778184453095,
       "tag": "0010_cool_albert_cleary",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1778617264930,
+      "tag": "0011_glossy_lake",
+      "breakpoints": true
     }
   ]
 }

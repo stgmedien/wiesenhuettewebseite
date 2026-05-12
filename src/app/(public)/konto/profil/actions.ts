@@ -114,7 +114,12 @@ export async function updateProfile(formData: FormData) {
 const pwSchema = z
   .object({
     currentPassword: z.string().min(1),
-    newPassword: z.string().min(8).max(200),
+    newPassword: z
+      .string()
+      .min(10, "Mindestens 10 Zeichen.")
+      .max(200)
+      .regex(/[A-Za-z]/, "Mindestens ein Buchstabe.")
+      .regex(/[0-9]/, "Mindestens eine Ziffer."),
     newPasswordConfirm: z.string(),
   })
   .refine((d) => d.newPassword === d.newPasswordConfirm, {

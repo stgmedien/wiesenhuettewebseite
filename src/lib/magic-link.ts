@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { magicLinkTokens, users } from "@/lib/db/schema";
-import { eq, and, gt, lt } from "drizzle-orm";
+import { eq, and, gt, lt, isNull } from "drizzle-orm";
 import crypto from "crypto";
 
 const TOKEN_BYTES = 32;
@@ -66,27 +66,43 @@ export const consumeMagicLinkToken = async (
   if (!token || typeof token !== "string") return { ok: false, reason: "invalid" };
   const tokenHash = hashToken(token);
 
-  const found = await db
-    .select()
-    .from(magicLinkTokens)
-    .where(eq(magicLinkTokens.tokenHash, tokenHash))
-    .limit(1);
-
-  const tk = found[0];
-  if (!tk) return { ok: false, reason: "invalid" };
-  if (tk.consumedAt) return { ok: false, reason: "consumed" };
-  if (tk.expiresAt.getTime() < Date.now()) return { ok: false, reason: "expired" };
-
-  // Mark consumed
-  await db
+  // Atomares Conditional Update: nur erfolgreich wenn Token existiert,
+  // noch nicht consumed UND noch nicht expired. Verhindert die Race-Condition
+  // zwischen Check und Update bei parallelen Requests.
+  const updated = await db
     .update(magicLinkTokens)
     .set({ consumedAt: new Date() })
-    .where(eq(magicLinkTokens.id, tk.id));
+    .where(
+      and(
+        eq(magicLinkTokens.tokenHash, tokenHash),
+        isNull(magicLinkTokens.consumedAt),
+        gt(magicLinkTokens.expiresAt, new Date())
+      )
+    )
+    .returning();
+
+  if (updated.length === 0) {
+    // Disambiguation NUR für UX, race-frei: Consumption ist schon passiert (oder nicht).
+    const probe = await db
+      .select()
+      .from(magicLinkTokens)
+      .where(eq(magicLinkTokens.tokenHash, tokenHash))
+      .limit(1);
+    const tk = probe[0];
+    if (!tk) return { ok: false, reason: "invalid" };
+    if (tk.consumedAt) return { ok: false, reason: "consumed" };
+    return { ok: false, reason: "expired" };
+  }
+  const tk = updated[0];
 
   // Find or auto-create user (Customer-Rolle)
   const userRow = await db.select().from(users).where(eq(users.email, tk.email)).limit(1);
   let user = userRow[0];
   let isNewUser = false;
+  if (user?.deletedAt) {
+    // Soft-deleted User darf sich nicht einloggen — Token als "invalid" zurückweisen.
+    return { ok: false, reason: "invalid" };
+  }
   if (!user) {
     const ins = await db
       .insert(users)

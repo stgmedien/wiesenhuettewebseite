@@ -57,7 +57,12 @@ export async function updateMyName(name: string): Promise<{ ok: boolean; error?:
 
 const pwSchema = z.object({
   current: z.string().min(1),
-  next: z.string().min(8).max(128),
+  next: z
+    .string()
+    .min(10, "Mindestens 10 Zeichen.")
+    .max(128)
+    .regex(/[A-Za-z]/, "Mindestens ein Buchstabe.")
+    .regex(/[0-9]/, "Mindestens eine Ziffer."),
 });
 
 export async function changeMyPassword(

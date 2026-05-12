@@ -817,6 +817,60 @@ export const permissions = pgTable(
 );
 
 // =============================================================
+// SECURITY — Stripe-Webhook-Idempotency, Login-Throttle, Booking-Throttle
+// =============================================================
+
+/**
+ * Dedupe für Stripe-Webhook-Events: bei Retries derselbe `event.id` wird
+ * geblockt durch PRIMARY KEY → INSERT scheitert → wir antworten 200 deduped.
+ * status ermöglicht spätere Retry-after-failure-Semantik (bisher nur "processed").
+ */
+export const stripeWebhookEvents = pgTable("stripe_webhook_events", {
+  eventId: text("event_id").primaryKey(),
+  eventType: text("event_type").notNull(),
+  status: varchar("status", { length: 20 }).notNull().default("processed"),
+  receivedAt: timestamp("received_at").notNull().defaultNow(),
+});
+
+/**
+ * Login-Throttle: pro (email,ip) zählen wir Fehlversuche in den letzten 15 min.
+ * Bei > 10 Failures wird Login-Endpoint blockiert.
+ * Auch erfolgreiche Logins werden geloggt für Audit-Trail.
+ */
+export const loginAttempts = pgTable(
+  "login_attempts",
+  {
+    id: serial("id").primaryKey(),
+    email: varchar("email", { length: 255 }).notNull(),
+    ip: varchar("ip", { length: 64 }),
+    kind: varchar("kind", { length: 20 }).notNull(), // "password" | "totp" | "magic"
+    success: boolean("success").notNull(),
+    at: timestamp("at").notNull().defaultNow(),
+  },
+  (t) => ({
+    emailAtIdx: index("login_attempts_email_at_idx").on(t.email, t.at),
+    ipAtIdx: index("login_attempts_ip_at_idx").on(t.ip, t.at),
+  })
+);
+
+/**
+ * Booking-Spam-Throttle: pro (email,ip) max 5 Booking-Versuche pro Stunde.
+ */
+export const bookingAttempts = pgTable(
+  "booking_attempts",
+  {
+    id: serial("id").primaryKey(),
+    email: varchar("email", { length: 255 }),
+    ip: varchar("ip", { length: 64 }),
+    at: timestamp("at").notNull().defaultNow(),
+  },
+  (t) => ({
+    emailAtIdx: index("booking_attempts_email_at_idx").on(t.email, t.at),
+    ipAtIdx: index("booking_attempts_ip_at_idx").on(t.ip, t.at),
+  })
+);
+
+// =============================================================
 // RELATIONS
 // =============================================================
 

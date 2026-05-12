@@ -18,7 +18,12 @@ const signupSchema = z
     firstName: z.string().min(1).max(120),
     lastName: z.string().min(1).max(120),
     email: z.string().email().max(255),
-    password: z.string().min(8).max(200),
+    password: z
+      .string()
+      .min(10, "Mindestens 10 Zeichen.")
+      .max(200)
+      .regex(/[A-Za-z]/, "Mindestens ein Buchstabe.")
+      .regex(/[0-9]/, "Mindestens eine Ziffer."),
     passwordConfirm: z.string(),
     phone: z.string().max(60).optional().nullable(),
     isMember: z.literal("on").optional(),

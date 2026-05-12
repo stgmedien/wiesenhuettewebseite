@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { db } from "@/lib/db";
-import { bookings, customers, payments, activityLog, emailLog } from "@/lib/db/schema";
+import { bookings, customers, payments, activityLog, emailLog, stripeWebhookEvents } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
 import { sendMail } from "@/lib/mail/send";
 import BookingConfirmedEmail from "@/lib/mail/templates/booking-confirmed";
@@ -53,6 +53,21 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     const msg = err instanceof Error ? err.message : "unknown";
     return NextResponse.json({ error: `signature verification failed: ${msg}` }, { status: 400 });
+  }
+
+  // Idempotenz: bei Stripe-Retry (z.B. Network-Glitch) blockt PRIMARY KEY den
+  // zweiten INSERT → wir antworten 200 deduped ohne Handler nochmal laufen zu lassen.
+  // Insertion erfolgt VOR Handler-Logic — sollte ein Handler crashen, bleibt der
+  // Event in DB als "processed" markiert und Stripe wird nicht weiter retryen.
+  // (Failure-Recovery wäre eine spätere Verbesserung mit status-column-Flow.)
+  try {
+    await db.insert(stripeWebhookEvents).values({
+      eventId: event.id,
+      eventType: event.type,
+    });
+  } catch {
+    // Unique-Violation → schon verarbeitet
+    return NextResponse.json({ received: true, deduped: true });
   }
 
   try {
