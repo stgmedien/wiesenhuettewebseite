@@ -60,6 +60,7 @@ const profileSchema = z.object({
   zip: z.string().max(20).optional().nullable(),
   city: z.string().max(120).optional().nullable(),
   country: z.string().max(60).optional().nullable(),
+  newsletterOptIn: z.boolean().default(true),
 });
 
 export async function updateProfile(formData: FormData) {
@@ -73,6 +74,7 @@ export async function updateProfile(formData: FormData) {
     zip: formData.get("zip") || null,
     city: formData.get("city") || null,
     country: formData.get("country") || null,
+    newsletterOptIn: formData.get("newsletterOptIn") === "on",
   });
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Bitte alle Pflichtfelder ausfüllen." };
   const data = parsed.data;
@@ -88,6 +90,7 @@ export async function updateProfile(formData: FormData) {
         lastName: data.lastName,
         phone: data.phone,
         birthDate: data.birthDate ?? null,
+        emailOptOut: !data.newsletterOptIn,
         street: data.street,
         zip: data.zip,
         city: data.city,
@@ -103,6 +106,7 @@ export async function updateProfile(formData: FormData) {
       email: user.email,
       phone: data.phone,
       birthDate: data.birthDate ?? null,
+      emailOptOut: !data.newsletterOptIn,
       street: data.street,
       zip: data.zip,
       city: data.city,

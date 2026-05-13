@@ -58,6 +58,7 @@ export default async function ProfilPage() {
                 lastName: c.lastName,
                 phone: c.phone,
                 birthDate: c.birthDate,
+                emailOptOut: c.emailOptOut,
                 street: c.street,
                 zip: c.zip,
                 city: c.city,

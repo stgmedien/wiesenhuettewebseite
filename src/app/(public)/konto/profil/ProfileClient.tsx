@@ -18,6 +18,7 @@ type Customer = {
   lastName: string;
   phone: string | null;
   birthDate: string | null; // ISO yyyy-mm-dd
+  emailOptOut: boolean;
   street: string | null;
   zip: string | null;
   city: string | null;
@@ -550,6 +551,23 @@ function ProfileSection({ user, customer }: { user: User; customer: Customer | n
           </div>
         </div>
         <input type="hidden" name="country" value={customer?.country ?? "DE"} />
+        <div className="pt-3 mt-2 border-t border-[var(--color-wh-winter-grey)]/40">
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              name="newsletterOptIn"
+              defaultChecked={!customer?.emailOptOut}
+              className="mt-1"
+            />
+            <div>
+              <p className="m-0 text-sm font-medium">Newsletter & gelegentliche Mails</p>
+              <p className="m-0 mt-0.5 text-[12px] text-[var(--color-wh-black)]/55">
+                Ab und zu News aus der Hütte, Saisonstart-Hinweise. Buchungs-Mails kommen
+                unabhängig davon immer.
+              </p>
+            </div>
+          </label>
+        </div>
         <div className="flex items-center gap-3">
           <button
             type="submit"
