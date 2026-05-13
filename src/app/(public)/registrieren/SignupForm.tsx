@@ -2,8 +2,73 @@
 
 import { useState, useTransition } from "react";
 import { signupAction } from "./actions";
+import type { Locale } from "@/lib/i18n-shared";
 
-export function SignupForm() {
+const COPY = {
+  de: {
+    firstName: "Vorname",
+    lastName: "Nachname",
+    email: "E-Mail",
+    phone: "Telefon (optional)",
+    password: "Passwort",
+    passwordConfirm: "Wiederholen",
+    memberCheckbox: "Ich bin Vereinsmitglied der Skifreunde Gütersloh.",
+    memberHint: "Wir prüfen Deinen Status manuell. Bis zur Bestätigung gelten die Nichtmitglieds-Tarife.",
+    memberId: "Mitgliedsnummer (falls bekannt)",
+    accept: "Ich habe die",
+    acceptAgb: "AGB",
+    acceptAnd: "und die",
+    acceptPrivacy: "Datenschutzerklärung",
+    acceptEnd: "gelesen und akzeptiere sie.",
+    submitting: "Wird angelegt …",
+    submit: "Konto anlegen",
+    alreadyRegistered: "Schon registriert?",
+    login: "Login",
+  },
+  en: {
+    firstName: "First name",
+    lastName: "Last name",
+    email: "Email",
+    phone: "Phone (optional)",
+    password: "Password",
+    passwordConfirm: "Repeat",
+    memberCheckbox: "I'm a member of Skifreunde Gütersloh.",
+    memberHint: "We verify your status manually. Until confirmation the non-member rates apply.",
+    memberId: "Membership number (if known)",
+    accept: "I have read and accept the",
+    acceptAgb: "terms",
+    acceptAnd: "and the",
+    acceptPrivacy: "privacy policy",
+    acceptEnd: ".",
+    submitting: "Creating …",
+    submit: "Create account",
+    alreadyRegistered: "Already registered?",
+    login: "Log in",
+  },
+  nl: {
+    firstName: "Voornaam",
+    lastName: "Achternaam",
+    email: "E-mail",
+    phone: "Telefoon (optioneel)",
+    password: "Wachtwoord",
+    passwordConfirm: "Herhaal",
+    memberCheckbox: "Ik ben lid van Skifreunde Gütersloh.",
+    memberHint: "We controleren je status handmatig. Tot de bevestiging gelden de niet-leden-tarieven.",
+    memberId: "Lidnummer (indien bekend)",
+    accept: "Ik heb",
+    acceptAgb: "de voorwaarden",
+    acceptAnd: "en",
+    acceptPrivacy: "het privacybeleid",
+    acceptEnd: "gelezen en aanvaard.",
+    submitting: "Aanmaken …",
+    submit: "Account aanmaken",
+    alreadyRegistered: "Al geregistreerd?",
+    login: "Inloggen",
+  },
+} as const;
+
+export function SignupForm({ locale = "de" }: { locale?: Locale }) {
+  const t = COPY[locale];
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [errorField, setErrorField] = useState<string | undefined>();
@@ -30,7 +95,7 @@ export function SignupForm() {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label htmlFor="firstName" className="block text-sm font-medium mb-1">
-            Vorname
+            {t.firstName}
           </label>
           <input
             id="firstName"
@@ -42,7 +107,7 @@ export function SignupForm() {
         </div>
         <div>
           <label htmlFor="lastName" className="block text-sm font-medium mb-1">
-            Nachname
+            {t.lastName}
           </label>
           <input
             id="lastName"
@@ -55,7 +120,7 @@ export function SignupForm() {
       </div>
       <div>
         <label htmlFor="email" className="block text-sm font-medium mb-1">
-          E-Mail
+          {t.email}
         </label>
         <input
           id="email"
@@ -68,14 +133,14 @@ export function SignupForm() {
       </div>
       <div>
         <label htmlFor="phone" className="block text-sm font-medium mb-1">
-          Telefon (optional)
+          {t.phone}
         </label>
         <input id="phone" name="phone" type="tel" autoComplete="tel" className={inputBase} />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label htmlFor="password" className="block text-sm font-medium mb-1">
-            Passwort
+            {t.password}
           </label>
           <input
             id="password"
@@ -89,7 +154,7 @@ export function SignupForm() {
         </div>
         <div>
           <label htmlFor="passwordConfirm" className="block text-sm font-medium mb-1">
-            Wiederholen
+            {t.passwordConfirm}
           </label>
           <input
             id="passwordConfirm"
@@ -113,17 +178,17 @@ export function SignupForm() {
             className="mt-1"
           />
           <div className="text-sm">
-            <span className="font-medium">Ich bin Vereinsmitglied der Skifreunde Gütersloh.</span>
+            <span className="font-medium">{t.memberCheckbox}</span>
             <br />
             <span className="text-[var(--color-wh-black)]/70">
-              Wir prüfen Deinen Status manuell. Bis zur Bestätigung gelten die Nichtmitglieds-Tarife.
+              {t.memberHint}
             </span>
           </div>
         </label>
         {isMember && (
           <div>
             <label htmlFor="memberId" className="block text-sm font-medium mb-1">
-              Mitgliedsnummer (falls bekannt)
+              {t.memberId}
             </label>
             <input id="memberId" name="memberId" type="text" className={inputBase} />
           </div>
@@ -133,15 +198,15 @@ export function SignupForm() {
       <label className="flex items-start gap-3 text-sm cursor-pointer">
         <input type="checkbox" name="acceptTerms" required className="mt-1" />
         <span>
-          Ich habe die{" "}
+          {t.accept}{" "}
           <a href="/agb" className="text-[var(--color-wh-deep-green)] underline">
-            AGB
+            {t.acceptAgb}
           </a>{" "}
-          und die{" "}
+          {t.acceptAnd}{" "}
           <a href="/datenschutz" className="text-[var(--color-wh-deep-green)] underline">
-            Datenschutzerklärung
+            {t.acceptPrivacy}
           </a>{" "}
-          gelesen und akzeptiere sie.
+          {t.acceptEnd}
         </span>
       </label>
 
@@ -150,7 +215,7 @@ export function SignupForm() {
         disabled={pending}
         className="w-full rounded-full bg-[var(--color-wh-deep-green)] text-white py-3 font-semibold disabled:opacity-50"
       >
-        {pending ? "Wird angelegt …" : "Konto anlegen"}
+        {pending ? t.submitting : t.submit}
       </button>
 
       {error && (
@@ -160,9 +225,9 @@ export function SignupForm() {
       )}
 
       <p className="text-sm text-[var(--color-wh-black)]/80">
-        Schon registriert?{" "}
+        {t.alreadyRegistered}{" "}
         <a href="/login" className="text-[var(--color-wh-deep-green)] underline font-medium">
-          Login
+          {t.login}
         </a>
       </p>
     </form>

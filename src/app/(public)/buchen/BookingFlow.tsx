@@ -61,7 +61,338 @@ type BookingFlowProps = {
   wartungDates: string[];
   prefill?: Prefill;
   repeatHint?: RepeatHint;
+  locale?: "de" | "en" | "nl";
 };
+
+const BF_COPY = {
+  de: {
+    steps: ["Zeitraum", "Personen & Pauschalen", "Kontakt", "Übersicht"],
+    s0H: "Wann?",
+    s1H: "Wer kommt?",
+    s1Pauschalen: "Pauschalen",
+    s2H: "Eure Daten",
+    s3H: "Übersicht",
+    rangeBlocked: "Mindestens ein Tag in diesem Zeitraum ist bereits belegt — bitte einen anderen Zeitraum wählen.",
+    arrival: "Anreise",
+    departure: "Abreise",
+    purpose: "Anlass (optional)",
+    purposePlaceholder: "z. B. Familienurlaub, Klassenfahrt, Vereinsfahrt",
+    firstName: "Vorname",
+    lastName: "Nachname",
+    email: "E-Mail",
+    phone: "Telefon (empfohlen)",
+    company: "Firma / Verein",
+    street: "Straße",
+    zip: "PLZ",
+    city: "Ort",
+    msg: "Nachricht (optional)",
+    msgHint: "Sonderwünsche, Fragen, geplante Anreisezeit ...",
+    accept: "Ich habe die",
+    acceptAgb: "AGB",
+    acceptPrivacy: "Datenschutzerklärung",
+    acceptHausordnung: "Hausordnung",
+    acceptEnd: "gelesen und akzeptiere sie.",
+    andWord: "und",
+    discountH: "Rabatt-Code (optional)",
+    discountApply: "Anwenden",
+    discountChecking: "Prüfe …",
+    discountRemove: "Entfernen",
+    discountPlaceholder: "z.B. WH-A1B2-C3D4",
+    discountAppliedPre: "Code",
+    discountAppliedPost: "angewendet",
+    dueToday: "Heute fällig:",
+    deposit: "Anzahlung",
+    bookingTotalAfter: "50 % der Buchungssumme",
+    afterDiscount: "nach Rabatt",
+    kaution: "Kaution",
+    restzahlung: "Restzahlung von",
+    restzahlungBody: "wird vor Anreise per separater Zahlungsaufforderung eingezogen. Die Kaution wird innerhalb von 14 Tagen nach mangelfreier Abreise zurückerstattet.",
+    kurtaxeNote: "Hinweis: Die Kurtaxe Hochsauerland wird seit Mai 2026 separat über das offizielle Kurtaxen-Portal abgerechnet — Du erhältst nach der Buchung eine eigene E-Mail mit dem Link.",
+    stornoH: "Stornierungs-Regelwerk",
+    stornoToday: (d: number, p: number) => `Bei Storno heute (${d} Tage vor Anreise): ${p}% Rückerstattung`,
+    stornoTodayNoDays: (p: number) => `Bei Storno heute: ${p}% Rückerstattung`,
+    stornoVerfaellt: "— Buchung verfällt.",
+    stornoBody: "Vollständige Stornogebühren-Staffel (gerechnet von der Anreise rückwärts):",
+    stornoRefund: "Rückerstattung",
+    stornoNote: "Die Kaution wird unabhängig davon immer voll erstattet (sofern keine Schäden). Stornierungen müssen schriftlich erfolgen.",
+    next: "Weiter",
+    back: "Zurück",
+    overview: "Übersicht",
+    payNow: "Jetzt zahlen",
+    redirecting: "Leite weiter ...",
+    // Persons / pricing
+    personsRange: (n: number, min: number, max: number) => `${n} von ${min}–${max} Personen.`,
+    endreinigungTitle: "Endreinigung — 190,00 € (Pflicht)",
+    endreinigungBody: "Die finale Reinigung wird von uns durchgeführt und ist in jeder Buchung enthalten.",
+    soloTitle: "Allein-/Exklusivnutzung — 50,00 €",
+    soloBody: "Aufschlag für die alleinige Nutzung der Hütte.",
+    whoBooks: "Wer bucht?",
+    ctPrivat: "Privat",
+    ctMitglied: "Vereinsmitglied",
+    ctVerein: "Verein / Schule",
+    ctFirma: "Firma",
+    loginHint1: "💡 Hast Du schon ein Konto?",
+    loginHintLink: "Hier einloggen",
+    loginHint2: "— oder weiter buchen, wir legen automatisch ein Konto für Dich an.",
+    // PersonsEditor
+    adultsLabel: "Erwachsene (Nichtmitglieder)",
+    adultsHint: "ab 16 Jahren · 18,00 € / Nacht",
+    membersLabel: "Erwachsene Vereinsmitglieder",
+    membersHint: "7,50 € / Nacht",
+    childrenLabel: "Kinder (4–15 Jahre)",
+    childrenHint: "10,00 € / Nacht",
+    pupilsLabel: "Schüler (Schulgruppen)",
+    pupilsHint: "7,50 € / Nacht",
+    teachersLabel: "Lehrkräfte",
+    teachersHint: "bei Schulgruppen · zählen wie Erwachsene",
+    memberLockedLabel: "Erwachsene Vereinsmitglieder",
+    memberLockedHintPre: "Nur für verifizierte Skifreunde-Mitglieder.",
+    memberLockedLogin: "Login",
+    memberLockedOr: "oder im",
+    memberLockedProfile: "Konto-Profil",
+    memberLockedEnd: "Mitgliedschaft beantragen.",
+    memberLockedState: "gesperrt",
+    ariaLess: "Weniger",
+    ariaMore: "Mehr",
+    // PriceSummary
+    priceSummaryH: "Preisübersicht",
+    priceSummaryEmpty: "Datum & Personen wählen, um die Preise zu sehen.",
+    nightsLabel: "Nächte",
+    personsLabel: "Personen",
+    bookingSum: "Buchungssumme",
+    dueTodayShort: "Heute fällig",
+    prepayment50: "Anzahlung 50 %",
+    plusKaution: "+ Kaution",
+    todayToPay: "Heute zu zahlen",
+    remainderBefore: "Restzahlung (vor Anreise)",
+    kurtaxeShort: "Kurtaxe wird separat über das Hochsauerland-Portal abgerechnet.",
+    // ReviewBlock
+    zeitraum: "Zeitraum",
+    bucher: "Bucher",
+    totalSuffix: "gesamt",
+    adultsShort: "Erw.",
+    membersShort: "Mitgl.",
+    childrenShort: "Kinder",
+    pupilsShort: "Schüler",
+    teachersShort: "Lehrer",
+  },
+  en: {
+    steps: ["Dates", "Guests & options", "Contact", "Summary"],
+    s0H: "When?",
+    s1H: "Who's coming?",
+    s1Pauschalen: "Flat-rates",
+    s2H: "Your details",
+    s3H: "Summary",
+    rangeBlocked: "At least one day in this range is already booked — please pick another range.",
+    arrival: "Arrival",
+    departure: "Departure",
+    purpose: "Purpose (optional)",
+    purposePlaceholder: "e.g. family holiday, school trip, club outing",
+    firstName: "First name",
+    lastName: "Last name",
+    email: "Email",
+    phone: "Phone (recommended)",
+    company: "Company / club",
+    street: "Street",
+    zip: "ZIP",
+    city: "City",
+    msg: "Message (optional)",
+    msgHint: "Special requests, questions, planned arrival time ...",
+    accept: "I have read and accept the",
+    acceptAgb: "terms",
+    acceptPrivacy: "privacy policy",
+    acceptHausordnung: "house rules",
+    acceptEnd: ".",
+    andWord: "and",
+    discountH: "Discount code (optional)",
+    discountApply: "Apply",
+    discountChecking: "Checking …",
+    discountRemove: "Remove",
+    discountPlaceholder: "e.g. WH-A1B2-C3D4",
+    discountAppliedPre: "Code",
+    discountAppliedPost: "applied",
+    dueToday: "Due today:",
+    deposit: "Deposit",
+    bookingTotalAfter: "50 % of booking total",
+    afterDiscount: "after discount",
+    kaution: "Damage deposit",
+    restzahlung: "Remaining amount of",
+    restzahlungBody: "will be charged before arrival via a separate payment request. The damage deposit is refunded within 14 days of a clean departure.",
+    kurtaxeNote: "Note: Since May 2026 the Hochsauerland tourist tax is settled separately via the official portal — you'll receive a dedicated email with the link after booking.",
+    stornoH: "Cancellation policy",
+    stornoToday: (d: number, p: number) => `If cancelled today (${d} days before arrival): ${p}% refund`,
+    stornoTodayNoDays: (p: number) => `If cancelled today: ${p}% refund`,
+    stornoVerfaellt: "— booking forfeits.",
+    stornoBody: "Full cancellation tiers (counted backwards from arrival):",
+    stornoRefund: "refund",
+    stornoNote: "The damage deposit is always refunded in full (provided no damage). Cancellations must be made in writing.",
+    next: "Next",
+    back: "Back",
+    overview: "Summary",
+    payNow: "Pay now",
+    redirecting: "Redirecting ...",
+    personsRange: (n: number, min: number, max: number) => `${n} of ${min}–${max} guests.`,
+    endreinigungTitle: "Final cleaning — 190.00 € (mandatory)",
+    endreinigungBody: "We carry out the final cleaning ourselves — it is included in every booking.",
+    soloTitle: "Exclusive use — 50.00 €",
+    soloBody: "Surcharge for sole use of the hut.",
+    whoBooks: "Who's booking?",
+    ctPrivat: "Private",
+    ctMitglied: "Club member",
+    ctVerein: "Club / school",
+    ctFirma: "Company",
+    loginHint1: "💡 Already have an account?",
+    loginHintLink: "Log in here",
+    loginHint2: "— or continue booking; we'll create an account for you automatically.",
+    adultsLabel: "Adults (non-members)",
+    adultsHint: "16+ · 18.00 € / night",
+    membersLabel: "Adult club members",
+    membersHint: "7.50 € / night",
+    childrenLabel: "Children (4–15 years)",
+    childrenHint: "10.00 € / night",
+    pupilsLabel: "Pupils (school groups)",
+    pupilsHint: "7.50 € / night",
+    teachersLabel: "Teachers",
+    teachersHint: "for school groups · counted as adults",
+    memberLockedLabel: "Adult club members",
+    memberLockedHintPre: "Only for verified Skifreunde members.",
+    memberLockedLogin: "Log in",
+    memberLockedOr: "or apply for membership in your",
+    memberLockedProfile: "account profile",
+    memberLockedEnd: ".",
+    memberLockedState: "locked",
+    ariaLess: "Less",
+    ariaMore: "More",
+    priceSummaryH: "Price summary",
+    priceSummaryEmpty: "Pick dates and guests to see prices.",
+    nightsLabel: "nights",
+    personsLabel: "guests",
+    bookingSum: "Booking total",
+    dueTodayShort: "Due today",
+    prepayment50: "Deposit 50 %",
+    plusKaution: "+ Damage deposit",
+    todayToPay: "Due today",
+    remainderBefore: "Remaining amount (before arrival)",
+    kurtaxeShort: "Tourist tax is settled separately via the Hochsauerland portal.",
+    zeitraum: "Period",
+    bucher: "Booker",
+    totalSuffix: "total",
+    adultsShort: "adults",
+    membersShort: "members",
+    childrenShort: "children",
+    pupilsShort: "pupils",
+    teachersShort: "teachers",
+  },
+  nl: {
+    steps: ["Periode", "Personen & opties", "Contact", "Overzicht"],
+    s0H: "Wanneer?",
+    s1H: "Wie komt er?",
+    s1Pauschalen: "Pakketten",
+    s2H: "Jullie gegevens",
+    s3H: "Overzicht",
+    rangeBlocked: "Minstens één dag in deze periode is al geboekt — kies een andere periode.",
+    arrival: "Aankomst",
+    departure: "Vertrek",
+    purpose: "Aanleiding (optioneel)",
+    purposePlaceholder: "bv. familievakantie, schoolreis, verenigingsreis",
+    firstName: "Voornaam",
+    lastName: "Achternaam",
+    email: "E-mail",
+    phone: "Telefoon (aanbevolen)",
+    company: "Bedrijf / vereniging",
+    street: "Straat",
+    zip: "Postcode",
+    city: "Plaats",
+    msg: "Bericht (optioneel)",
+    msgHint: "Bijzondere wensen, vragen, geplande aankomsttijd ...",
+    accept: "Ik heb",
+    acceptAgb: "de voorwaarden",
+    acceptPrivacy: "het privacybeleid",
+    acceptHausordnung: "de huisregels",
+    acceptEnd: "gelezen en aanvaard.",
+    andWord: "en",
+    discountH: "Kortingscode (optioneel)",
+    discountApply: "Toepassen",
+    discountChecking: "Controleren …",
+    discountRemove: "Verwijderen",
+    discountPlaceholder: "bv. WH-A1B2-C3D4",
+    discountAppliedPre: "Code",
+    discountAppliedPost: "toegepast",
+    dueToday: "Vandaag te betalen:",
+    deposit: "Aanbetaling",
+    bookingTotalAfter: "50 % van de boekingssom",
+    afterDiscount: "na korting",
+    kaution: "Borg",
+    restzahlung: "Restbedrag van",
+    restzahlungBody: "wordt vóór aankomst geïncasseerd via een apart betaalverzoek. De borg wordt binnen 14 dagen na schadevrije afreis terugbetaald.",
+    kurtaxeNote: "Let op: Sinds mei 2026 wordt de toeristenbelasting Hochsauerland apart afgerekend via het officiële portaal — je ontvangt na de boeking een aparte e-mail met de link.",
+    stornoH: "Annuleringsregeling",
+    stornoToday: (d: number, p: number) => `Bij annulering vandaag (${d} dagen vóór aankomst): ${p}% terugbetaling`,
+    stornoTodayNoDays: (p: number) => `Bij annulering vandaag: ${p}% terugbetaling`,
+    stornoVerfaellt: "— boeking vervalt.",
+    stornoBody: "Volledige annuleringsstaffel (gerekend terug vanaf aankomst):",
+    stornoRefund: "terugbetaling",
+    stornoNote: "De borg wordt altijd volledig terugbetaald (mits geen schade). Annuleringen moeten schriftelijk gebeuren.",
+    next: "Volgende",
+    back: "Terug",
+    overview: "Overzicht",
+    payNow: "Nu betalen",
+    redirecting: "Doorsturen ...",
+    personsRange: (n: number, min: number, max: number) => `${n} van ${min}–${max} personen.`,
+    endreinigungTitle: "Eindschoonmaak — € 190,00 (verplicht)",
+    endreinigungBody: "De eindschoonmaak doen wij zelf — die zit in elke boeking inbegrepen.",
+    soloTitle: "Exclusief gebruik — € 50,00",
+    soloBody: "Toeslag voor exclusief gebruik van de hut.",
+    whoBooks: "Wie boekt?",
+    ctPrivat: "Privé",
+    ctMitglied: "Verenigingslid",
+    ctVerein: "Vereniging / school",
+    ctFirma: "Bedrijf",
+    loginHint1: "💡 Heb je al een account?",
+    loginHintLink: "Hier inloggen",
+    loginHint2: "— of ga door met boeken, we maken automatisch een account voor je aan.",
+    adultsLabel: "Volwassenen (geen lid)",
+    adultsHint: "vanaf 16 jaar · € 18,00 / nacht",
+    membersLabel: "Volwassen verenigingsleden",
+    membersHint: "€ 7,50 / nacht",
+    childrenLabel: "Kinderen (4–15 jaar)",
+    childrenHint: "€ 10,00 / nacht",
+    pupilsLabel: "Leerlingen (schoolgroepen)",
+    pupilsHint: "€ 7,50 / nacht",
+    teachersLabel: "Docenten",
+    teachersHint: "bij schoolgroepen · tellen als volwassenen",
+    memberLockedLabel: "Volwassen verenigingsleden",
+    memberLockedHintPre: "Alleen voor geverifieerde Skifreunde-leden.",
+    memberLockedLogin: "Inloggen",
+    memberLockedOr: "of vraag lidmaatschap aan in je",
+    memberLockedProfile: "accountprofiel",
+    memberLockedEnd: ".",
+    memberLockedState: "geblokkeerd",
+    ariaLess: "Minder",
+    ariaMore: "Meer",
+    priceSummaryH: "Prijsoverzicht",
+    priceSummaryEmpty: "Kies datum en personen om de prijzen te zien.",
+    nightsLabel: "nachten",
+    personsLabel: "personen",
+    bookingSum: "Boekingssom",
+    dueTodayShort: "Vandaag te betalen",
+    prepayment50: "Aanbetaling 50 %",
+    plusKaution: "+ Borg",
+    todayToPay: "Vandaag te betalen",
+    remainderBefore: "Restbedrag (vóór aankomst)",
+    kurtaxeShort: "Toeristenbelasting wordt apart afgerekend via het Hochsauerland-portaal.",
+    zeitraum: "Periode",
+    bucher: "Boeker",
+    totalSuffix: "totaal",
+    adultsShort: "volw.",
+    membersShort: "leden",
+    childrenShort: "kinderen",
+    pupilsShort: "leerl.",
+    teachersShort: "docenten",
+  },
+} as const;
+
+type BfCopy = (typeof BF_COPY)[keyof typeof BF_COPY];
 
 export const BookingFlow = ({
   bookedDates,
@@ -69,7 +400,9 @@ export const BookingFlow = ({
   wartungDates,
   prefill,
   repeatHint,
+  locale = "de",
 }: BookingFlowProps) => {
+  const tt = BF_COPY[locale];
   // Internal: union of all unavailable days for the rangeBlocked guard.
   const blockedDates = [...bookedDates, ...cleaningDates, ...wartungDates];
   const [step, setStep] = useState<Step>(0);
@@ -199,11 +532,11 @@ export const BookingFlow = ({
   return (
     <div className="grid lg:grid-cols-[1fr_380px] gap-6 lg:gap-8">
       <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-4 sm:p-6 lg:p-8">
-        <Stepper step={step} />
+        <Stepper step={step} labels={tt.steps} />
 
         {step === 0 && (
           <div className="mt-8 space-y-6">
-            <h3 className="text-[22px] sm:text-[24px] m-0">Wann?</h3>
+            <h3 className="text-[22px] sm:text-[24px] m-0">{tt.s0H}</h3>
 
             <AvailabilityCalendar
               bookedDates={bookedDates}
@@ -220,7 +553,7 @@ export const BookingFlow = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
                 id="arrival"
-                label="Anreise"
+                label={tt.arrival}
                 type="date"
                 min={todayIso()}
                 value={arrival}
@@ -233,7 +566,7 @@ export const BookingFlow = ({
               />
               <Input
                 id="departure"
-                label="Abreise"
+                label={tt.departure}
                 type="date"
                 min={arrival ? addDaysIso(arrival, RULES.minNights) : todayIso()}
                 value={departure}
@@ -242,23 +575,23 @@ export const BookingFlow = ({
             </div>
             {rangeBlocked && (
               <div className="text-[var(--color-wh-sunset)] text-sm font-semibold">
-                Mindestens ein Tag in diesem Zeitraum ist bereits belegt — bitte einen anderen
-                Zeitraum wählen.
+                {tt.rangeBlocked}
               </div>
             )}
 
-            <h3 className="text-[22px] sm:text-[24px] mt-12 mb-0">Wer kommt?</h3>
+            <h3 className="text-[22px] sm:text-[24px] mt-12 mb-0">{tt.s1H}</h3>
             <PersonsEditor
               persons={persons}
               onChange={setPersons}
               memberAllowed={!!prefill?.membershipVerified}
+              tt={tt}
             />
             <div
               className={`text-sm ${
                 personsValid ? "text-[var(--color-wh-fg-muted)]" : "text-[var(--color-wh-sunset)]"
               }`}
             >
-              {totalPersons} von {RULES.minPersons}–{RULES.maxPersons} Personen.
+              {tt.personsRange(totalPersons, RULES.minPersons, RULES.maxPersons)}
             </div>
 
             <div className="flex justify-end pt-2">
@@ -267,7 +600,7 @@ export const BookingFlow = ({
                 onClick={() => setStep(1)}
                 iconRight={<ArrowRight size={18} />}
               >
-                Weiter
+                {tt.next}
               </Button>
             </div>
           </div>
@@ -275,27 +608,27 @@ export const BookingFlow = ({
 
         {step === 1 && (
           <div className="mt-8 space-y-6">
-            <h3 className="text-[22px] sm:text-[24px] m-0">Pauschalen</h3>
+            <h3 className="text-[22px] sm:text-[24px] m-0">{tt.s1Pauschalen}</h3>
             <div className="bg-[var(--color-wh-green-soft)] border border-[var(--color-wh-green)]/30 rounded-[var(--radius-card)] p-5">
               <div className="font-semibold text-[var(--color-wh-deep-green)]">
-                Endreinigung — 190,00 € (Pflicht)
+                {tt.endreinigungTitle}
               </div>
               <div className="text-sm text-[var(--color-wh-fg-muted)] mt-1">
-                Die finale Reinigung wird von uns durchgeführt und ist in jeder Buchung enthalten.
+                {tt.endreinigungBody}
               </div>
             </div>
 
             <ExtraToggle
               checked={soloUse}
               onChange={setSoloUse}
-              title="Allein-/Exklusivnutzung — 50,00 €"
-              body="Aufschlag für die alleinige Nutzung der Hütte."
+              title={tt.soloTitle}
+              body={tt.soloBody}
             />
 
             <Input
               id="purpose"
-              label="Anlass / Bezeichnung (optional)"
-              placeholder="z. B. Familienurlaub, Klassenfahrt, Vereinsfahrt"
+              label={tt.purpose}
+              placeholder={tt.purposePlaceholder}
               value={purpose}
               onChange={(e) => setPurpose(e.target.value)}
             />
@@ -306,14 +639,14 @@ export const BookingFlow = ({
                 onClick={() => setStep(0)}
                 iconLeft={<ArrowLeft size={18} />}
               >
-                Zurück
+                {tt.back}
               </Button>
               <Button
                 disabled={!canGoStep2}
                 onClick={() => setStep(2)}
                 iconRight={<ArrowRight size={18} />}
               >
-                Weiter
+                {tt.next}
               </Button>
             </div>
           </div>
@@ -321,50 +654,50 @@ export const BookingFlow = ({
 
         {step === 2 && (
           <div className="mt-8 space-y-6">
-            <h3 className="text-[22px] sm:text-[24px] m-0">Eure Daten</h3>
+            <h3 className="text-[22px] sm:text-[24px] m-0">{tt.s2H}</h3>
 
             <div>
               <SegmentedControl
-                label="Wer bucht?"
+                label={tt.whoBooks}
                 value={customerType}
                 options={[
-                  { value: "privat", label: "Privat" },
+                  { value: "privat", label: tt.ctPrivat },
                   ...(prefill?.membershipVerified
-                    ? [{ value: "mitglied", label: "Vereinsmitglied" }]
+                    ? [{ value: "mitglied", label: tt.ctMitglied }]
                     : []),
-                  { value: "verein", label: "Verein / Schule" },
-                  { value: "firma", label: "Firma" },
+                  { value: "verein", label: tt.ctVerein },
+                  { value: "firma", label: tt.ctFirma },
                 ]}
                 onChange={(v) => setCustomerType(v as typeof customerType)}
               />
               {!prefill?.loggedIn && (
                 <p className="text-xs text-[var(--color-wh-fg-muted)] mt-2">
-                  💡 Hast Du schon ein Konto?{" "}
+                  {tt.loginHint1}{" "}
                   <a href="/login?callbackUrl=/buchen" className="underline">
-                    Hier einloggen
+                    {tt.loginHintLink}
                   </a>
-                  {" "}— oder weiter buchen, wir legen automatisch ein Konto für Dich an.
+                  {" "}{tt.loginHint2}
                 </p>
               )}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input id="firstName" label="Vorname" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
-              <Input id="lastName" label="Nachname" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
-              <Input id="email" type="email" label="E-Mail" value={email} onChange={(e) => setEmail(e.target.value)} required />
-              <Input id="phone" type="tel" label="Telefon (empfohlen)" value={phone} onChange={(e) => setPhone(e.target.value)} />
+              <Input id="firstName" label={tt.firstName} value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
+              <Input id="lastName" label={tt.lastName} value={lastName} onChange={(e) => setLastName(e.target.value)} required />
+              <Input id="email" type="email" label={tt.email} value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Input id="phone" type="tel" label={tt.phone} value={phone} onChange={(e) => setPhone(e.target.value)} />
               {customerType === "firma" || customerType === "verein" ? (
-                <Input id="company" label="Firma / Verein" value={company} onChange={(e) => setCompany(e.target.value)} />
+                <Input id="company" label={tt.company} value={company} onChange={(e) => setCompany(e.target.value)} />
               ) : null}
-              <Input id="street" label="Straße" value={street} onChange={(e) => setStreet(e.target.value)} />
-              <Input id="zip" label="PLZ" value={zip} onChange={(e) => setZip(e.target.value)} />
-              <Input id="city" label="Ort" value={city} onChange={(e) => setCity(e.target.value)} />
+              <Input id="street" label={tt.street} value={street} onChange={(e) => setStreet(e.target.value)} />
+              <Input id="zip" label={tt.zip} value={zip} onChange={(e) => setZip(e.target.value)} />
+              <Input id="city" label={tt.city} value={city} onChange={(e) => setCity(e.target.value)} />
             </div>
 
             <Textarea
               id="msg"
-              label="Nachricht (optional)"
-              hint="Sonderwünsche, Fragen, geplante Anreisezeit ..."
+              label={tt.msg}
+              hint={tt.msgHint}
               value={customerMessage}
               onChange={(e) => setCustomerMessage(e.target.value)}
             />
@@ -377,19 +710,19 @@ export const BookingFlow = ({
                 className="mt-1"
               />
               <span>
-                Ich habe die{" "}
+                {tt.accept}{" "}
                 <a href="/agb" target="_blank" rel="noreferrer">
-                  AGB
+                  {tt.acceptAgb}
                 </a>
-                , die{" "}
+                ,{" "}
                 <a href="/datenschutz" target="_blank" rel="noreferrer">
-                  Datenschutzerklärung
+                  {tt.acceptPrivacy}
                 </a>{" "}
-                und die{" "}
+                {tt.andWord}{" "}
                 <a href="/hausordnung" target="_blank" rel="noreferrer">
-                  Hausordnung
+                  {tt.acceptHausordnung}
                 </a>{" "}
-                gelesen und akzeptiere sie.
+                {tt.acceptEnd}
               </span>
             </label>
 
@@ -399,14 +732,14 @@ export const BookingFlow = ({
                 onClick={() => setStep(1)}
                 iconLeft={<ArrowLeft size={18} />}
               >
-                Zurück
+                {tt.back}
               </Button>
               <Button
                 disabled={!canGoStep3}
                 onClick={() => setStep(3)}
                 iconRight={<ArrowRight size={18} />}
               >
-                Übersicht
+                {tt.overview}
               </Button>
             </div>
           </div>
@@ -414,7 +747,7 @@ export const BookingFlow = ({
 
         {step === 3 && breakdown && (
           <div className="mt-8 space-y-6">
-            <h3 className="text-[22px] sm:text-[24px] m-0">Übersicht</h3>
+            <h3 className="text-[22px] sm:text-[24px] m-0">{tt.s3H}</h3>
             <ReviewBlock
               arrival={arrival}
               departure={departure}
@@ -423,12 +756,13 @@ export const BookingFlow = ({
               firstName={firstName}
               lastName={lastName}
               email={email}
+              tt={tt}
             />
 
             {/* Discount-Code */}
             <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-4">
               <p className="text-sm font-semibold text-[var(--color-wh-deep-green)] m-0 mb-2">
-                Rabatt-Code (optional)
+                {tt.discountH}
               </p>
               <div className="flex gap-2">
                 <input
@@ -438,7 +772,7 @@ export const BookingFlow = ({
                     setDiscountCode(e.target.value.toUpperCase());
                     setDiscountState({ status: "idle" });
                   }}
-                  placeholder="z.B. WH-A1B2-C3D4"
+                  placeholder={tt.discountPlaceholder}
                   disabled={discountState.status === "valid"}
                   className="flex-1 rounded-lg border border-[var(--color-wh-winter-grey)] px-3 py-2 text-sm font-mono uppercase tracking-wider disabled:bg-[var(--color-wh-beige)] disabled:opacity-70"
                 />
@@ -464,7 +798,7 @@ export const BookingFlow = ({
                     }}
                     className="rounded-full bg-[var(--color-wh-deep-green)] text-white px-4 py-2 text-sm font-semibold disabled:opacity-50"
                   >
-                    {discountState.status === "checking" ? "Prüfe …" : "Anwenden"}
+                    {discountState.status === "checking" ? tt.discountChecking : tt.discountApply}
                   </button>
                 ) : (
                   <button
@@ -475,13 +809,13 @@ export const BookingFlow = ({
                     }}
                     className="rounded-full border border-[var(--color-wh-winter-grey)] px-4 py-2 text-sm"
                   >
-                    Entfernen
+                    {tt.discountRemove}
                   </button>
                 )}
               </div>
               {discountState.status === "valid" && (
                 <p className="text-sm text-emerald-700 mt-2 m-0">
-                  ✓ Code <span className="font-mono">{discountState.code}</span> angewendet —{" "}
+                  ✓ {tt.discountAppliedPre} <span className="font-mono">{discountState.code}</span> {tt.discountAppliedPost} —{" "}
                   <strong>−{formatEuro(discountState.discountCents)}</strong>
                 </p>
               )}
@@ -499,29 +833,25 @@ export const BookingFlow = ({
               const totalDueAfter = prepayAfter + breakdown.depositCents;
               return (
                 <div className="bg-[var(--color-wh-beige)] rounded-[var(--radius-card)] p-5 text-sm text-[var(--color-wh-black)]">
-                  <p className="m-0 font-semibold mb-2">Heute fällig:</p>
+                  <p className="m-0 font-semibold mb-2">{tt.dueToday}</p>
                   <p className="m-0">
-                    <strong>{formatEuro(prepayAfter)}</strong> Anzahlung (50 % der Buchungssumme
-                    {off > 0 ? " nach Rabatt" : ""}) +{" "}
-                    <strong>{formatEuro(breakdown.depositCents)}</strong> Kaution ={" "}
+                    <strong>{formatEuro(prepayAfter)}</strong> {tt.deposit} ({tt.bookingTotalAfter}
+                    {off > 0 ? ` ${tt.afterDiscount}` : ""}) +{" "}
+                    <strong>{formatEuro(breakdown.depositCents)}</strong> {tt.kaution} ={" "}
                     <strong>{formatEuro(totalDueAfter)}</strong>
                   </p>
                   <p className="m-0 mt-3">
-                    Restzahlung von <strong>{formatEuro(remainAfter)}</strong> wird vor Anreise per
-                    separater Zahlungsaufforderung eingezogen. Die Kaution wird innerhalb von 14
-                    Tagen nach mangelfreier Abreise zurückerstattet.
+                    {tt.restzahlung} <strong>{formatEuro(remainAfter)}</strong> {tt.restzahlungBody}
                   </p>
                   <p className="m-0 mt-3 text-[var(--color-wh-fg-muted)]">
-                    Hinweis: Die Kurtaxe Hochsauerland wird seit Mai 2026 separat über das
-                    offizielle Kurtaxen-Portal abgerechnet — Du erhältst nach der Buchung eine
-                    eigene E-Mail mit dem Link.
+                    {tt.kurtaxeNote}
                   </p>
                 </div>
               );
             })()}
 
             {/* Storno-Regelwerk klar im UI */}
-            <CancellationPolicyBox arrival={arrival} />
+            <CancellationPolicyBox arrival={arrival} tt={tt} />
             {error && (
               <div className="bg-[var(--color-wh-sunset)]/10 text-[var(--color-wh-sunset)] rounded-[var(--radius-md)] p-4 text-sm font-medium">
                 {error}
@@ -533,7 +863,7 @@ export const BookingFlow = ({
                 onClick={() => setStep(2)}
                 iconLeft={<ArrowLeft size={18} />}
               >
-                Zurück
+                {tt.back}
               </Button>
               <Button
                 size="lg"
@@ -550,8 +880,8 @@ export const BookingFlow = ({
                   const totalDueAfter =
                     Math.round((subAfter * 50) / 100) + breakdown.depositCents;
                   return submitting
-                    ? "Leite weiter ..."
-                    : `Jetzt zahlen — ${formatEuro(totalDueAfter)}`;
+                    ? tt.redirecting
+                    : `${tt.payNow} — ${formatEuro(totalDueAfter)}`;
                 })()}
               </Button>
             </div>
@@ -565,14 +895,14 @@ export const BookingFlow = ({
           arrival={arrival}
           departure={departure}
           totalPersons={totalPersons}
+          tt={tt}
         />
       </aside>
     </div>
   );
 };
 
-const Stepper = ({ step }: { step: Step }) => {
-  const labels = ["Datum & Personen", "Pauschalen", "Daten", "Zahlung"];
+const Stepper = ({ step, labels }: { step: Step; labels: readonly string[] }) => {
   return (
     <div className="flex items-center gap-2 text-xs sm:text-sm overflow-x-auto pb-2">
       {labels.map((l, i) => (
@@ -607,11 +937,15 @@ const PersonRow = ({
   hint,
   value,
   onChange,
+  ariaLess,
+  ariaMore,
 }: {
   label: string;
   hint?: string;
   value: number;
   onChange: (v: number) => void;
+  ariaLess: string;
+  ariaMore: string;
 }) => (
   <div className="flex items-center justify-between gap-4 py-3 border-b border-[var(--color-wh-winter-grey)] last:border-b-0">
     <div className="min-w-0">
@@ -623,7 +957,7 @@ const PersonRow = ({
         type="button"
         className="w-9 h-9 rounded-full border border-[var(--color-wh-winter-grey)] text-[var(--color-wh-deep-green)] hover:bg-[var(--color-wh-green-soft)] cursor-pointer text-lg font-semibold"
         onClick={() => onChange(Math.max(0, value - 1))}
-        aria-label="Weniger"
+        aria-label={ariaLess}
       >
         −
       </button>
@@ -632,7 +966,7 @@ const PersonRow = ({
         type="button"
         className="w-9 h-9 rounded-full border border-[var(--color-wh-winter-grey)] text-[var(--color-wh-deep-green)] hover:bg-[var(--color-wh-green-soft)] cursor-pointer text-lg font-semibold"
         onClick={() => onChange(value + 1)}
-        aria-label="Mehr"
+        aria-label={ariaMore}
       >
         +
       </button>
@@ -644,63 +978,75 @@ const PersonsEditor = ({
   persons,
   onChange,
   memberAllowed,
+  tt,
 }: {
   persons: Persons;
   onChange: (p: Persons) => void;
   memberAllowed: boolean;
+  tt: BfCopy;
 }) => (
   <div className="bg-[var(--color-wh-snow)] border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-4">
     <PersonRow
-      label="Erwachsene (Nichtmitglieder)"
-      hint="ab 16 Jahren · 18,00 € / Nacht"
+      label={tt.adultsLabel}
+      hint={tt.adultsHint}
       value={persons.adults}
       onChange={(v) => onChange({ ...persons, adults: v })}
+      ariaLess={tt.ariaLess}
+      ariaMore={tt.ariaMore}
     />
     {memberAllowed ? (
       <PersonRow
-        label="Erwachsene Vereinsmitglieder"
-        hint="7,50 € / Nacht"
+        label={tt.membersLabel}
+        hint={tt.membersHint}
         value={persons.members}
         onChange={(v) => onChange({ ...persons, members: v })}
+        ariaLess={tt.ariaLess}
+        ariaMore={tt.ariaMore}
       />
     ) : (
       <div className="border-b border-[var(--color-wh-winter-grey)]/50 py-3 flex items-center justify-between gap-4 text-sm">
         <div>
           <div className="font-medium text-[var(--color-wh-fg-muted)]">
-            Erwachsene Vereinsmitglieder
+            {tt.memberLockedLabel}
           </div>
           <div className="text-xs text-[var(--color-wh-fg-muted)]/80">
-            Nur für verifizierte Skifreunde-Mitglieder.{" "}
+            {tt.memberLockedHintPre}{" "}
             <a href="/login?callbackUrl=/buchen" className="underline">
-              Login
+              {tt.memberLockedLogin}
             </a>{" "}
-            oder im{" "}
+            {tt.memberLockedOr}{" "}
             <a href="/registrieren" className="underline">
-              Konto-Profil
-            </a>{" "}
-            Mitgliedschaft beantragen.
+              {tt.memberLockedProfile}
+            </a>
+            {tt.memberLockedEnd}
           </div>
         </div>
-        <div className="text-[var(--color-wh-fg-muted)]/60 text-sm shrink-0">gesperrt</div>
+        <div className="text-[var(--color-wh-fg-muted)]/60 text-sm shrink-0">{tt.memberLockedState}</div>
       </div>
     )}
     <PersonRow
-      label="Kinder (4–15 Jahre)"
-      hint="10,00 € / Nacht"
+      label={tt.childrenLabel}
+      hint={tt.childrenHint}
       value={persons.children}
       onChange={(v) => onChange({ ...persons, children: v })}
+      ariaLess={tt.ariaLess}
+      ariaMore={tt.ariaMore}
     />
     <PersonRow
-      label="Schüler (Schulgruppen)"
-      hint="7,50 € / Nacht"
+      label={tt.pupilsLabel}
+      hint={tt.pupilsHint}
       value={persons.pupils}
       onChange={(v) => onChange({ ...persons, pupils: v })}
+      ariaLess={tt.ariaLess}
+      ariaMore={tt.ariaMore}
     />
     <PersonRow
-      label="Lehrkräfte"
-      hint="bei Schulgruppen · zählen wie Erwachsene"
+      label={tt.teachersLabel}
+      hint={tt.teachersHint}
       value={persons.teachers}
       onChange={(v) => onChange({ ...persons, teachers: v })}
+      ariaLess={tt.ariaLess}
+      ariaMore={tt.ariaMore}
     />
   </div>
 );
@@ -769,18 +1115,20 @@ const PriceSummary = ({
   arrival,
   departure,
   totalPersons,
+  tt,
 }: {
   breakdown: Breakdown | null;
   arrival: string;
   departure: string;
   totalPersons: number;
+  tt: BfCopy;
 }) => {
   if (!breakdown) {
     return (
       <div className="bg-[var(--color-wh-beige)] rounded-[var(--radius-card)] p-5 sm:p-6">
-        <div className="eyebrow">Preisübersicht</div>
+        <div className="eyebrow">{tt.priceSummaryH}</div>
         <p className="mt-3 text-[var(--color-wh-fg-muted)] text-sm m-0">
-          Datum & Personen wählen, um die Preise zu sehen.
+          {tt.priceSummaryEmpty}
         </p>
       </div>
     );
@@ -788,9 +1136,9 @@ const PriceSummary = ({
 
   return (
     <div className="bg-[var(--color-wh-beige)] rounded-[var(--radius-card)] p-5 sm:p-6">
-      <div className="eyebrow">Preisübersicht</div>
+      <div className="eyebrow">{tt.priceSummaryH}</div>
       <div className="mt-3 text-sm font-semibold">
-        {arrival} → {departure} · {breakdown.nights} Nächte · {totalPersons} Personen
+        {arrival} → {departure} · {breakdown.nights} {tt.nightsLabel} · {totalPersons} {tt.personsLabel}
       </div>
       <ul className="mt-5 divide-y divide-[var(--color-wh-winter-grey)]">
         {breakdown.lines.map((l) => (
@@ -806,25 +1154,25 @@ const PriceSummary = ({
 
       <div className="border-t border-[var(--color-wh-winter-grey)] mt-4 pt-4 space-y-2 text-sm">
         <div className="flex justify-between">
-          <span>Buchungssumme</span>
+          <span>{tt.bookingSum}</span>
           <span className="font-semibold">{formatEuro(breakdown.subtotalCents)}</span>
         </div>
       </div>
 
       <div className="border-t border-[var(--color-wh-winter-grey)] mt-4 pt-4 space-y-2 text-sm">
         <div className="text-xs uppercase tracking-wider text-[var(--color-wh-fg-muted)] mb-2">
-          Heute fällig
+          {tt.dueTodayShort}
         </div>
         <div className="flex justify-between">
-          <span>Anzahlung 50 %</span>
+          <span>{tt.prepayment50}</span>
           <span className="font-semibold">{formatEuro(breakdown.prepaymentCents)}</span>
         </div>
         <div className="flex justify-between">
-          <span>+ Kaution</span>
+          <span>{tt.plusKaution}</span>
           <span className="font-semibold">{formatEuro(breakdown.depositCents)}</span>
         </div>
         <div className="flex justify-between text-base pt-2 border-t border-[var(--color-wh-winter-grey)]">
-          <span className="font-bold">Heute zu zahlen</span>
+          <span className="font-bold">{tt.todayToPay}</span>
           <span className="font-bold text-[var(--color-wh-deep-green)]">
             {formatEuro(breakdown.totalDueCents)}
           </span>
@@ -833,10 +1181,10 @@ const PriceSummary = ({
 
       <div className="border-t border-[var(--color-wh-winter-grey)] mt-4 pt-4 space-y-1 text-xs text-[var(--color-wh-fg-muted)]">
         <div className="flex justify-between">
-          <span>Restzahlung (vor Anreise)</span>
+          <span>{tt.remainderBefore}</span>
           <span>{formatEuro(breakdown.remainderCents)}</span>
         </div>
-        <div>Kurtaxe wird separat über das Hochsauerland-Portal abgerechnet.</div>
+        <div>{tt.kurtaxeShort}</div>
       </div>
     </div>
   );
@@ -850,6 +1198,7 @@ const ReviewBlock = ({
   firstName,
   lastName,
   email,
+  tt,
 }: {
   arrival: string;
   departure: string;
@@ -858,35 +1207,36 @@ const ReviewBlock = ({
   firstName: string;
   lastName: string;
   email: string;
+  tt: BfCopy;
 }) => (
   <div className="bg-[var(--color-wh-snow)] border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-5 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
     <div>
-      <div className="text-xs uppercase tracking-wider text-[var(--color-wh-fg-muted)]">Zeitraum</div>
+      <div className="text-xs uppercase tracking-wider text-[var(--color-wh-fg-muted)]">{tt.zeitraum}</div>
       <div className="font-semibold">
         {arrival} → {departure}
       </div>
-      <div className="text-[var(--color-wh-fg-muted)]">{nights} Nächte</div>
+      <div className="text-[var(--color-wh-fg-muted)]">{nights} {tt.nightsLabel}</div>
     </div>
     <div>
-      <div className="text-xs uppercase tracking-wider text-[var(--color-wh-fg-muted)]">Personen</div>
+      <div className="text-xs uppercase tracking-wider text-[var(--color-wh-fg-muted)]">{tt.personsLabel}</div>
       <div className="font-semibold">
         {persons.adults + persons.members + persons.children + persons.pupils + persons.teachers}{" "}
-        gesamt
+        {tt.totalSuffix}
       </div>
       <div className="text-[var(--color-wh-fg-muted)]">
         {[
-          persons.adults && `${persons.adults} Erw.`,
-          persons.members && `${persons.members} Mitgl.`,
-          persons.children && `${persons.children} Kinder`,
-          persons.pupils && `${persons.pupils} Schüler`,
-          persons.teachers && `${persons.teachers} Lehrer`,
+          persons.adults && `${persons.adults} ${tt.adultsShort}`,
+          persons.members && `${persons.members} ${tt.membersShort}`,
+          persons.children && `${persons.children} ${tt.childrenShort}`,
+          persons.pupils && `${persons.pupils} ${tt.pupilsShort}`,
+          persons.teachers && `${persons.teachers} ${tt.teachersShort}`,
         ]
           .filter(Boolean)
           .join(" · ")}
       </div>
     </div>
     <div className="sm:col-span-2 pt-3 border-t border-[var(--color-wh-winter-grey)]">
-      <div className="text-xs uppercase tracking-wider text-[var(--color-wh-fg-muted)]">Bucher</div>
+      <div className="text-xs uppercase tracking-wider text-[var(--color-wh-fg-muted)]">{tt.bucher}</div>
       <div className="font-semibold">
         {firstName} {lastName}
       </div>
@@ -895,7 +1245,7 @@ const ReviewBlock = ({
   </div>
 );
 
-const CancellationPolicyBox = ({ arrival }: { arrival: string }) => {
+const CancellationPolicyBox = ({ arrival, tt }: { arrival: string; tt: BfCopy }) => {
   if (!arrival) return null;
   const days = daysUntil(arrival);
   const currentTier = getCancellationTier(days);
@@ -904,17 +1254,20 @@ const CancellationPolicyBox = ({ arrival }: { arrival: string }) => {
       <summary className="cursor-pointer list-none flex items-center justify-between gap-3">
         <div>
           <div className="text-xs uppercase tracking-wider text-[var(--color-wh-deep-green)] font-semibold mb-1">
-            Stornierungs-Regelwerk
+            {tt.stornoH}
           </div>
           <p className="m-0 text-[var(--color-wh-black)]">
-            Bei Storno {days >= 0 ? `heute (${days} Tage vor Anreise)` : `heute`}: <strong>{currentTier.refundPercent}% Rückerstattung</strong> {currentTier.refundPercent === 0 && "— Buchung verfällt."}
+            {days >= 0
+              ? tt.stornoToday(days, currentTier.refundPercent)
+              : tt.stornoTodayNoDays(currentTier.refundPercent)}{" "}
+            {currentTier.refundPercent === 0 && tt.stornoVerfaellt}
           </p>
         </div>
         <span className="text-[var(--color-wh-deep-green)] text-xl group-open:rotate-45 transition-transform shrink-0">+</span>
       </summary>
       <div className="mt-4 pt-4 border-t border-[var(--color-wh-winter-grey)]/40">
         <p className="text-[var(--color-wh-fg-muted)] m-0 mb-3 text-xs">
-          Vollständige Stornogebühren-Staffel (gerechnet von der Anreise rückwärts):
+          {tt.stornoBody}
         </p>
         <ul className="list-none p-0 m-0 space-y-2">
           {CANCELLATION_TIERS.map((tier, i) => {
@@ -929,13 +1282,13 @@ const CancellationPolicyBox = ({ arrival }: { arrival: string }) => {
                 }`}
               >
                 <span>{tier.label}</span>
-                <span className="font-mono">{tier.refundPercent} % Rückerstattung</span>
+                <span className="font-mono">{tier.refundPercent} % {tt.stornoRefund}</span>
               </li>
             );
           })}
         </ul>
         <p className="text-[var(--color-wh-fg-muted)] m-0 mt-3 text-xs italic">
-          Die Kaution wird unabhängig davon immer voll erstattet (sofern keine Schäden). Stornierungen müssen schriftlich erfolgen.
+          {tt.stornoNote}
         </p>
       </div>
     </details>
