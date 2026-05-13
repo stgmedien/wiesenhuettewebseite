@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // Erlaubt grössere FormData für Server Actions (Gäste-Buch-Photos, Wandertouren-GPX,
+    // Übergabe-Signaturen + Photos). Default ist 1 MB; wir erlauben bis 10 MB.
+    serverActions: { bodySizeLimit: "10mb" },
+  },
   // Pakete, die Node-only oder native-deps haben und nicht in den Edge/Turbopack-Bundle
   // sollen (sonst "Failed to load external module" beim Aufruf einer Server-Action).
   serverExternalPackages: [

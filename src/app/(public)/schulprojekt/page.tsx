@@ -1,6 +1,13 @@
 import Image from "next/image";
 import { PhotoGallery } from "@/components/public/PhotoGallery";
 import { FeaturedQuote } from "@/components/public/FeaturedQuote";
+import { CommunityEntryCard, type CommunityEntryView } from "@/components/public/CommunityEntryCard";
+import { CommunitySubmitForm } from "@/components/public/CommunitySubmitForm";
+import { db } from "@/lib/db";
+import { communityEntries } from "@/lib/db/schema";
+import { and, desc, eq } from "drizzle-orm";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "ESG-Projekt · Wiesenhütte als Lernort",
@@ -12,6 +19,7 @@ const TOC = [
   { id: "einstieg", label: "Eine Schule, eine Hütte" },
   { id: "tagebuch", label: "Projekttagebuch" },
   { id: "jahrgaenge", label: "Was Mittelstufe an der Hütte tut" },
+  { id: "anekdoten", label: "Anekdoten der Schüler:innen" },
   { id: "stimmen", label: "Kontakt zur Hüttenarbeit" },
   { id: "lernort", label: "Wie aus einer Hütte ein Lernort wird" },
   { id: "fragen", label: "Häufige Elternfragen" },
@@ -38,7 +46,30 @@ const PROJEKTFAHRT_BILDER = [
   { src: "/media/photos/projektfahrten/voegelhaeurser_bemalen.jpeg", alt: "Vogelhäuser werden bemalt" },
 ];
 
-export default function EsgPage() {
+export default async function EsgPage() {
+  // Schüler-Anekdoten — approved entries vom Community-Feed
+  const anekdotenRows = await db
+    .select({
+      id: communityEntries.id,
+      authorName: communityEntries.authorName,
+      authorContext: communityEntries.authorContext,
+      title: communityEntries.title,
+      body: communityEntries.body,
+      photoUrls: communityEntries.photoUrls,
+      visitDate: communityEntries.visitDate,
+      submittedAt: communityEntries.submittedAt,
+    })
+    .from(communityEntries)
+    .where(
+      and(
+        eq(communityEntries.kind, "schulprojekt"),
+        eq(communityEntries.status, "approved")
+      )
+    )
+    .orderBy(desc(communityEntries.submittedAt))
+    .limit(50);
+  const anekdoten: CommunityEntryView[] = anekdotenRows;
+
   return (
     <div>
       {/* ---------------------------------------------------------------- */}
@@ -481,6 +512,42 @@ export default function EsgPage() {
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ---------------------------------------------------------------- */}
+      {/* Anekdoten — Schüler:innen schreiben selbst (mit Moderation) */}
+      {/* ---------------------------------------------------------------- */}
+      <section id="anekdoten" className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-16 sm:py-24">
+        <div className="max-w-[760px] mx-auto">
+          <div className="eyebrow">Anekdoten der Schüler:innen</div>
+          <h2 className="text-[32px] sm:text-[44px] mt-3 mb-3 leading-tight">
+            Was wir mitgenommen haben.
+          </h2>
+          <p className="text-[var(--color-wh-fg-muted)] text-[16px] max-w-2xl mb-10">
+            Klassen, die an der Hütte waren, hinterlassen hier ihre Erinnerungen. Die Einträge
+            werden vor Veröffentlichung gesichtet — der Rest entsteht aus den Klassen heraus.
+          </p>
+
+          {anekdoten.length === 0 ? (
+            <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-8 text-center mb-10">
+              <p className="text-[var(--color-wh-fg-muted)] italic m-0">
+                Noch keine Einträge — bist Du Schüler:in einer Klasse, die kürzlich da war?
+                Schreib unten den ersten Beitrag.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-6 mb-12">
+              {anekdoten.map((e) => (
+                <CommunityEntryCard key={e.id} entry={e} />
+              ))}
+            </div>
+          )}
+
+          <CommunitySubmitForm
+            kind="schulprojekt"
+            contextPlaceholder="z.B. Klasse 9b, ESG Gütersloh"
+          />
         </div>
       </section>
 

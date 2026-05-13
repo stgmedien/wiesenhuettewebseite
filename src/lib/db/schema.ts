@@ -2,6 +2,7 @@ import {
   pgTable,
   text,
   integer,
+  real,
   timestamp,
   date,
   boolean,
@@ -813,6 +814,66 @@ export const permissions = pgTable(
   },
   (t) => ({
     uniq: uniqueIndex("permissions_role_cap_uniq").on(t.role, t.capability),
+  })
+);
+
+// =============================================================
+// COMMUNITY — Gäste-Buch & Schulprojekt-Anekdoten (User-Generated)
+// Ein-Tabellen-Design mit "kind"-Discriminator, weil Schema identisch ist.
+// =============================================================
+
+export const communityEntries = pgTable(
+  "community_entries",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    kind: varchar("kind", { length: 20 }).notNull(), // "guestbook" | "schulprojekt"
+    authorName: varchar("author_name", { length: 120 }).notNull(),
+    authorContext: varchar("author_context", { length: 200 }), // z.B. "Klasse 9b, ESG" oder "Familie aus Bielefeld"
+    authorEmail: varchar("author_email", { length: 255 }), // intern, nicht öffentlich
+    title: varchar("title", { length: 200 }),
+    body: text("body").notNull(),
+    photoUrls: jsonb("photo_urls").$type<string[]>().notNull().default([]),
+    visitDate: date("visit_date"), // wann der Aufenthalt/das Projekt war
+    submittedAt: timestamp("submitted_at").notNull().defaultNow(),
+    submittedIp: varchar("submitted_ip", { length: 64 }),
+    status: varchar("status", { length: 20 }).notNull().default("pending"), // pending | approved | rejected
+    moderatedBy: varchar("moderated_by", { length: 255 }),
+    moderatedAt: timestamp("moderated_at"),
+    moderationNote: text("moderation_note"),
+  },
+  (t) => ({
+    kindStatusIdx: index("community_entries_kind_status_idx").on(t.kind, t.status),
+    submittedAtIdx: index("community_entries_submitted_at_idx").on(t.submittedAt),
+  })
+);
+
+// =============================================================
+// WANDERTOUREN — Kuratierte Routen rund um Langewiese mit GPX
+// =============================================================
+
+export const hikingRoutes = pgTable(
+  "hiking_routes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    slug: varchar("slug", { length: 120 }).notNull().unique(),
+    name: varchar("name", { length: 200 }).notNull(),
+    summary: varchar("summary", { length: 500 }), // 1-2 Zeilen Teaser
+    description: text("description"), // Markdown / Multi-Absatz
+    difficulty: varchar("difficulty", { length: 20 }).notNull(), // leicht | mittel | schwer
+    distanceKm: real("distance_km"),
+    elevationGainM: integer("elevation_gain_m"),
+    durationMinutes: integer("duration_minutes"),
+    startLat: real("start_lat"),
+    startLng: real("start_lng"),
+    gpxUrl: text("gpx_url"), // Vercel Blob URL
+    coverImageUrl: text("cover_image_url"),
+    sortOrder: integer("sort_order").notNull().default(0),
+    active: boolean("active").notNull().default(true),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    slugIdx: uniqueIndex("hiking_routes_slug_uniq").on(t.slug),
   })
 );
 
