@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { Mountain } from "lucide-react";
 import { CookieSettingsLink } from "@/components/consent/CookieBanner";
+import { t, type Locale } from "@/lib/i18n";
 
-export const Footer = () => (
+export const Footer = ({ locale }: { locale: Locale }) => (
   <footer className="bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] mt-auto">
     <div className="max-w-[1280px] mx-auto px-6 lg:px-8 py-14 sm:py-16 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
       <div className="lg:col-span-2">
@@ -20,49 +21,49 @@ export const Footer = () => (
 
       <nav className="text-sm flex flex-col gap-2 items-start">
         <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-wh-snow)]/70 mb-2">
-          Hütte
+          {t("footer.huette.heading", locale)}
         </span>
         <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/buchen">
-          Buchen
+          {t("nav.book", locale)}
         </Link>
         <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/huette">
-          Ausstattung
+          {t("footer.huette.ausstattung", locale)}
         </Link>
         <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/lage">
-          Lage & Anfahrt
+          {t("footer.huette.lage", locale)}
         </Link>
         <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/wandertouren">
-          Wandertouren
+          {t("footer.huette.wandertouren", locale)}
         </Link>
         <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/empfehlungen">
-          Empfehlungen
+          {t("footer.huette.empfehlungen", locale)}
         </Link>
         <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/packliste">
-          Packliste
+          {t("footer.huette.packliste", locale)}
         </Link>
         <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/geschenk">
-          Geschenk-Gutschein
+          {t("footer.huette.geschenk", locale)}
         </Link>
         <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/hausordnung">
-          Hausordnung
+          {t("footer.huette.hausordnung", locale)}
         </Link>
       </nav>
 
       <nav className="text-sm flex flex-col gap-2 items-start">
         <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-wh-snow)]/70 mb-2">
-          Verein
+          {t("footer.verein.heading", locale)}
         </span>
         <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/verein">
-          Skifreunde Gütersloh
+          {t("footer.verein.skifreunde", locale)}
         </Link>
         <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/schulprojekt">
-          Schulprojekt mit dem ESG
+          {t("footer.verein.schulprojekt", locale)}
         </Link>
         <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/blog">
-          Blog
+          {t("footer.verein.blog", locale)}
         </Link>
         <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/kontakt">
-          Kontakt
+          {t("footer.verein.kontakt", locale)}
         </Link>
       </nav>
     </div>

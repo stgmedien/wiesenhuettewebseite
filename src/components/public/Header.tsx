@@ -5,13 +5,15 @@ import { usePathname } from "next/navigation";
 import { Mountain, Menu, X, UserCircle, LogIn } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { t, type Locale } from "@/lib/i18n-shared";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
-const NAV = [
-  { href: "/huette", label: "Hütte" },
-  { href: "/verein", label: "Verein" },
-  { href: "/schulprojekt", label: "Schulprojekt" },
-  { href: "/lage", label: "Lage" },
-  { href: "/kontakt", label: "Kontakt" },
+const NAV_KEYS: Array<{ href: string; key: string }> = [
+  { href: "/huette", key: "nav.huette" },
+  { href: "/verein", key: "nav.verein" },
+  { href: "/schulprojekt", key: "nav.schulprojekt" },
+  { href: "/lage", key: "nav.lage" },
+  { href: "/kontakt", key: "nav.kontakt" },
 ];
 
 const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
@@ -23,7 +25,8 @@ export type HeaderSession = {
   role?: string;
 };
 
-export const Header = ({ session }: { session: HeaderSession }) => {
+export const Header = ({ session, locale }: { session: HeaderSession; locale: Locale }) => {
+  const NAV = NAV_KEYS.map((n) => ({ href: n.href, label: t(n.key, locale) }));
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -126,6 +129,9 @@ export const Header = ({ session }: { session: HeaderSession }) => {
           </nav>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="hidden md:block bg-white/10 rounded-full p-0.5">
+              <LanguageSwitcher current={locale} />
+            </div>
             {session.loggedIn ? (
               <Link
                 href={
@@ -134,13 +140,13 @@ export const Header = ({ session }: { session: HeaderSession }) => {
                     : "/konto"
                 }
                 className="hidden sm:inline-flex h-9 px-3 items-center gap-1.5 rounded-full text-[var(--color-wh-snow)]/90 text-sm font-medium no-underline hover:bg-white/12 transition-colors whitespace-nowrap"
-                title={session.name ?? "Mein Konto"}
+                title={session.name ?? t("nav.account", locale)}
               >
                 <UserCircle size={16} />
                 <span className="hidden lg:inline">
                   {session.role === "manager" || session.role === "admin"
                     ? "Manager"
-                    : "Mein Konto"}
+                    : t("nav.account", locale)}
                 </span>
               </Link>
             ) : (
@@ -149,14 +155,14 @@ export const Header = ({ session }: { session: HeaderSession }) => {
                 className="hidden sm:inline-flex h-9 px-3 items-center gap-1.5 rounded-full text-[var(--color-wh-snow)]/90 text-sm font-medium no-underline hover:bg-white/12 transition-colors whitespace-nowrap"
               >
                 <LogIn size={16} />
-                Login
+                {t("nav.login", locale)}
               </Link>
             )}
             <Link
               href="/buchen"
               className="inline-flex h-9 px-4 sm:px-5 items-center rounded-full bg-[var(--color-wh-snow)] text-[var(--color-wh-deep-green)] text-sm font-semibold no-underline hover:bg-white transition-colors whitespace-nowrap"
             >
-              Buchen
+              {t("nav.book", locale)}
             </Link>
             <button
               type="button"
