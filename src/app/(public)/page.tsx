@@ -14,6 +14,11 @@ import { makeT, type Locale } from "@/lib/i18n-shared";
 import { loadTrustData, type TrustData } from "@/lib/trust-reviews";
 import { TrustBadgeButton } from "@/components/public/TrustBadgeButton";
 
+// Hero zeigt aktuelle Trust-Daten (DB-Aggregat) — keine Static-Render-Cache,
+// damit Manager-seitige Aenderungen (Reviews ein/ausblenden) sofort sichtbar
+// werden.
+export const dynamic = "force-dynamic";
+
 const FEATURE_ICONS = [Users, MountainSnow, Route, CookingPot, Armchair, Flame];
 
 export default async function HomePage() {
