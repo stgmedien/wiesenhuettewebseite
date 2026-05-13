@@ -216,9 +216,43 @@ export const Header = ({ session, locale }: { session: HeaderSession; locale: Lo
 
         {open && (
           <nav
-            className="md:hidden bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] border-t border-white/15"
+            className="md:hidden bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] border-t border-white/15 max-h-[calc(100vh-3.5rem)] overflow-y-auto"
           >
             <div className="px-5 py-3 flex flex-col gap-1">
+              {/* Sprache zuerst — direkt sichtbar beim Aufklappen, kein Scrollen noetig. */}
+              <div className="flex items-center gap-2 mb-3 pb-3 border-b border-white/12">
+                <Globe size={16} className="text-[var(--color-wh-snow)]/70 shrink-0" />
+                <span className="sr-only">{hc.language}</span>
+                <div className="flex gap-1.5 flex-1">
+                  {LOCALES.map((l) => {
+                    const isCurrent = l === locale;
+                    return (
+                      <button
+                        key={l}
+                        type="button"
+                        disabled={langPending || isCurrent}
+                        onClick={() => {
+                          startLangTransition(async () => {
+                            await setLocale(l);
+                            setOpen(false);
+                          });
+                        }}
+                        aria-label={LOCALE_LABELS[l].native}
+                        className={cn(
+                          "flex-1 inline-flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-full text-xs font-semibold transition-colors",
+                          isCurrent
+                            ? "bg-white/25 text-[var(--color-wh-snow)] cursor-default"
+                            : "bg-white/8 text-[var(--color-wh-snow)]/80 hover:bg-white/15 cursor-pointer"
+                        )}
+                      >
+                        <span className="text-base leading-none">{LOCALE_LABELS[l].flag}</span>
+                        <span className="uppercase tracking-wider">{l}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               {NAV.map((n) => {
                 const active = pathname === n.href;
                 return (
@@ -272,42 +306,6 @@ export const Header = ({ session, locale }: { session: HeaderSession; locale: Lo
                     </Link>
                   </>
                 )}
-              </div>
-
-              {/* Sprache wechseln — direkt im Mobile-Menu, damit auf dem Handy
-                  ueberhaupt erreichbar. Auf Desktop liegt das im Top-Bar (md:block). */}
-              <div className="border-t border-white/12 mt-2 pt-3">
-                <div className="px-3 mb-2 flex items-center gap-2 text-xs uppercase tracking-wider text-[var(--color-wh-snow)]/60 font-semibold">
-                  <Globe size={14} />
-                  {hc.language}
-                </div>
-                <div className="grid grid-cols-3 gap-2 px-2 pb-1">
-                  {LOCALES.map((l) => {
-                    const isCurrent = l === locale;
-                    return (
-                      <button
-                        key={l}
-                        type="button"
-                        disabled={langPending || isCurrent}
-                        onClick={() => {
-                          startLangTransition(async () => {
-                            await setLocale(l);
-                            setOpen(false);
-                          });
-                        }}
-                        className={cn(
-                          "flex flex-col items-center gap-0.5 py-2 rounded-md text-sm font-medium transition-colors",
-                          isCurrent
-                            ? "bg-white/20 text-[var(--color-wh-snow)] cursor-default"
-                            : "text-[var(--color-wh-snow)]/85 hover:bg-white/12 cursor-pointer"
-                        )}
-                      >
-                        <span className="text-xl leading-none">{LOCALE_LABELS[l].flag}</span>
-                        <span className="text-[11px]">{LOCALE_LABELS[l].native}</span>
-                      </button>
-                    );
-                  })}
-                </div>
               </div>
             </div>
           </nav>
