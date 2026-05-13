@@ -25,6 +25,7 @@ import {
 import { isRangeAvailable } from "@/lib/availability";
 import { stripe } from "@/lib/stripe";
 import { generateBookingNumber } from "@/lib/utils";
+import { CURRENT_HAUSORDNUNG_VERSION } from "@/lib/hausordnung";
 
 const personsSchema = z.object({
   adults: z.coerce.number().int().min(0),
@@ -394,6 +395,9 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
       soloUse: data.soloUse,
       source: "Portal",
       customerMessage: data.customerMessage ?? null,
+      // Hausordnung-Akzept (versioniert, fuer rechtliche Nachvollziehbarkeit)
+      acceptedHausordnungVersion: CURRENT_HAUSORDNUNG_VERSION,
+      acceptedHausordnungAt: new Date(),
     })
     .returning({ id: bookings.id, bookingNumber: bookings.bookingNumber });
 

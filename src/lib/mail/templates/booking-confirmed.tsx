@@ -147,6 +147,28 @@ export default function BookingConfirmedEmail({
             diese Mail.
           </Text>
 
+          <Heading as="h3" style={{ ...heading, fontSize: "20px", margin: "24px 0 8px 0" }}>
+            Falls ihr stornieren müsst
+          </Heading>
+          <Text style={text}>
+            Wir verstehen, dass sich Pläne ändern. Die Storno-Staffel (vom Anreisetag rückwärts gerechnet):
+          </Text>
+          <Text style={{ ...text, margin: "0 0 4px 0" }}>
+            • <strong>60 Tage oder mehr vorher:</strong> 100 % Rückerstattung
+          </Text>
+          <Text style={{ ...text, margin: "0 0 4px 0" }}>
+            • <strong>30 bis 59 Tage vorher:</strong> 50 % Rückerstattung
+          </Text>
+          <Text style={{ ...text, margin: "0 0 4px 0" }}>
+            • <strong>14 bis 29 Tage vorher:</strong> 25 % Rückerstattung
+          </Text>
+          <Text style={{ ...text, margin: "0 0 12px 0" }}>
+            • <strong>Weniger als 14 Tage vorher:</strong> 0 % Rückerstattung
+          </Text>
+          <Text style={text}>
+            Die Kaution wird unabhängig davon immer voll erstattet, sofern keine Schäden vorliegen.
+          </Text>
+
           <Hr style={{ borderColor: "#C8CEC4", margin: "32px 0 16px 0" }} />
           <Text style={muted}>
             Wiesenhütte · Skifreunde Gütersloh e.V. · Langewiese, Hochsauerland

@@ -5,6 +5,7 @@ import { ArrowRight, ArrowLeft, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
 import { calculatePrice, formatEuro, RULES, type Persons } from "@/lib/pricing";
+import { CANCELLATION_TIERS, daysUntil, getCancellationTier } from "@/lib/cancellation";
 import { createBookingAndCheckout, previewDiscountAction } from "./actions";
 import { AvailabilityCalendar } from "./AvailabilityCalendar";
 
@@ -379,10 +380,14 @@ export const BookingFlow = ({
                 Ich habe die{" "}
                 <a href="/agb" target="_blank" rel="noreferrer">
                   AGB
-                </a>{" "}
-                und die{" "}
+                </a>
+                , die{" "}
                 <a href="/datenschutz" target="_blank" rel="noreferrer">
                   Datenschutzerklärung
+                </a>{" "}
+                und die{" "}
+                <a href="/hausordnung" target="_blank" rel="noreferrer">
+                  Hausordnung
                 </a>{" "}
                 gelesen und akzeptiere sie.
               </span>
@@ -514,6 +519,9 @@ export const BookingFlow = ({
                 </div>
               );
             })()}
+
+            {/* Storno-Regelwerk klar im UI */}
+            <CancellationPolicyBox arrival={arrival} />
             {error && (
               <div className="bg-[var(--color-wh-sunset)]/10 text-[var(--color-wh-sunset)] rounded-[var(--radius-md)] p-4 text-sm font-medium">
                 {error}
@@ -886,3 +894,50 @@ const ReviewBlock = ({
     </div>
   </div>
 );
+
+const CancellationPolicyBox = ({ arrival }: { arrival: string }) => {
+  if (!arrival) return null;
+  const days = daysUntil(arrival);
+  const currentTier = getCancellationTier(days);
+  return (
+    <details className="group bg-[var(--color-wh-snow)] border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-5 text-sm">
+      <summary className="cursor-pointer list-none flex items-center justify-between gap-3">
+        <div>
+          <div className="text-xs uppercase tracking-wider text-[var(--color-wh-deep-green)] font-semibold mb-1">
+            Stornierungs-Regelwerk
+          </div>
+          <p className="m-0 text-[var(--color-wh-black)]">
+            Bei Storno {days >= 0 ? `heute (${days} Tage vor Anreise)` : `heute`}: <strong>{currentTier.refundPercent}% Rückerstattung</strong> {currentTier.refundPercent === 0 && "— Buchung verfällt."}
+          </p>
+        </div>
+        <span className="text-[var(--color-wh-deep-green)] text-xl group-open:rotate-45 transition-transform shrink-0">+</span>
+      </summary>
+      <div className="mt-4 pt-4 border-t border-[var(--color-wh-winter-grey)]/40">
+        <p className="text-[var(--color-wh-fg-muted)] m-0 mb-3 text-xs">
+          Vollständige Stornogebühren-Staffel (gerechnet von der Anreise rückwärts):
+        </p>
+        <ul className="list-none p-0 m-0 space-y-2">
+          {CANCELLATION_TIERS.map((tier, i) => {
+            const isCurrent = tier.daysBeforeArrival === currentTier.daysBeforeArrival;
+            return (
+              <li
+                key={i}
+                className={`flex justify-between gap-3 p-2.5 rounded-md ${
+                  isCurrent
+                    ? "bg-[var(--color-wh-beige)] font-semibold"
+                    : "text-[var(--color-wh-fg-muted)]"
+                }`}
+              >
+                <span>{tier.label}</span>
+                <span className="font-mono">{tier.refundPercent} % Rückerstattung</span>
+              </li>
+            );
+          })}
+        </ul>
+        <p className="text-[var(--color-wh-fg-muted)] m-0 mt-3 text-xs italic">
+          Die Kaution wird unabhängig davon immer voll erstattet (sofern keine Schäden). Stornierungen müssen schriftlich erfolgen.
+        </p>
+      </div>
+    </details>
+  );
+};
