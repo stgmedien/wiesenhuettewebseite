@@ -40,6 +40,9 @@ export const Footer = () => (
         <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/packliste">
           Packliste
         </Link>
+        <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/geschenk">
+          Geschenk-Gutschein
+        </Link>
         <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/hausordnung">
           Hausordnung
         </Link>

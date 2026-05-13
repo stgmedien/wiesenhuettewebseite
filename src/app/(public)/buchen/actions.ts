@@ -336,26 +336,45 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
   let discountCents = 0;
   let appliedDiscountCode: string | null = null;
   let appliedDiscountCodeId: string | null = null;
+  let appliedVoucherId: string | null = null;
   if (data.discountCode && data.discountCode.trim()) {
-    const r = await validateDiscountCode(
-      data.discountCode,
-      customerId,
-      breakdown.subtotalCents
-    );
-    if (!r.ok) {
-      return {
-        ok: false,
-        error: `Rabatt-Code: ${r.error}`,
-        issues: [{ field: "discountCode", message: r.error }],
-      };
+    const trimmed = data.discountCode.trim().toUpperCase();
+    if (trimmed.startsWith("WH-GIFT-")) {
+      // Geschenk-Gutschein-Pfad
+      const { previewVoucher } = await import("@/lib/voucher-redeem");
+      const r = await previewVoucher(trimmed, breakdown.subtotalCents);
+      if (!r.ok) {
+        return {
+          ok: false,
+          error: `Gutschein: ${r.error}`,
+          issues: [{ field: "discountCode", message: r.error }],
+        };
+      }
+      discountCents = r.discountCents;
+      appliedDiscountCode = r.code;
+      appliedVoucherId = r.voucherId;
+    } else {
+      // Normaler Rabatt-Code
+      const r = await validateDiscountCode(
+        data.discountCode,
+        customerId,
+        breakdown.subtotalCents
+      );
+      if (!r.ok) {
+        return {
+          ok: false,
+          error: `Rabatt-Code: ${r.error}`,
+          issues: [{ field: "discountCode", message: r.error }],
+        };
+      }
+      discountCents = calculateDiscountCents(
+        breakdown.subtotalCents,
+        r.percentOff,
+        r.fixedOffCents
+      );
+      appliedDiscountCode = r.code;
+      appliedDiscountCodeId = r.codeId;
     }
-    discountCents = calculateDiscountCents(
-      breakdown.subtotalCents,
-      r.percentOff,
-      r.fixedOffCents
-    );
-    appliedDiscountCode = r.code;
-    appliedDiscountCodeId = r.codeId;
   }
 
   // Effektive Werte nach Rabatt
@@ -398,6 +417,9 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
       // Hausordnung-Akzept (versioniert, fuer rechtliche Nachvollziehbarkeit)
       acceptedHausordnungVersion: CURRENT_HAUSORDNUNG_VERSION,
       acceptedHausordnungAt: new Date(),
+      // Geschenk-Gutschein-Einlösung (separat von discount_codes)
+      voucherId: appliedVoucherId,
+      voucherDiscountCents: appliedVoucherId ? discountCents : 0,
     })
     .returning({ id: bookings.id, bookingNumber: bookings.bookingNumber });
 
@@ -576,6 +598,21 @@ export async function previewDiscountAction(
   | { ok: true; code: string; discountCents: number; percentOff: number; fixedOffCents: number }
   | { ok: false; error: string }
 > {
+  // Heuristik: wenn Code mit WH-GIFT- anfängt, ist es ein Geschenk-Gutschein
+  const trimmed = rawCode.trim().toUpperCase();
+  if (trimmed.startsWith("WH-GIFT-")) {
+    const { previewVoucher } = await import("@/lib/voucher-redeem");
+    const r = await previewVoucher(trimmed, subtotalCents);
+    if (!r.ok) return { ok: false, error: r.error };
+    return {
+      ok: true,
+      code: r.code,
+      discountCents: r.discountCents,
+      percentOff: 0,
+      fixedOffCents: r.discountCents,
+    };
+  }
+  // Sonst normaler Discount-Code-Pfad
   const session = await auth();
   const sessionUserId = (session?.user as { id?: string } | undefined)?.id;
   let customerId: string | null = null;

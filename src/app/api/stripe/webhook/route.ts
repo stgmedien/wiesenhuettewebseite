@@ -1,13 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { db } from "@/lib/db";
-import { bookings, customers, payments, activityLog, emailLog, stripeWebhookEvents } from "@/lib/db/schema";
+import {
+  bookings,
+  customers,
+  payments,
+  activityLog,
+  emailLog,
+  stripeWebhookEvents,
+  vouchers,
+} from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
 import { sendMail } from "@/lib/mail/send";
 import BookingConfirmedEmail from "@/lib/mail/templates/booking-confirmed";
 import BookingInternalEmail from "@/lib/mail/templates/booking-internal";
 import KurtaxeInfoEmail from "@/lib/mail/templates/kurtaxe-info";
 import MietvertragEmail from "@/lib/mail/templates/mietvertrag";
+import VoucherPurchaseEmail from "@/lib/mail/templates/voucher-purchase";
+import VoucherGiftEmail from "@/lib/mail/templates/voucher-gift";
 import { formatDateLong } from "@/lib/utils";
 import { createInvoiceForBooking } from "@/lib/invoice";
 import type Stripe from "stripe";
@@ -131,8 +141,15 @@ export async function POST(req: NextRequest) {
 }
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
-  const bookingId = session.metadata?.bookingId;
   const kind = session.metadata?.kind;
+
+  // Geschenk-Gutschein-Kauf: separater Pfad (kein bookingId)
+  if (kind === "gift-voucher") {
+    await handleGiftVoucherPaid(session);
+    return;
+  }
+
+  const bookingId = session.metadata?.bookingId;
   if (!bookingId) {
     console.warn("[webhook] checkout.session.completed without bookingId");
     return;
@@ -204,6 +221,21 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     what: `Anzahlung erhalten — Buchung ${booking.bookingNumber} bestätigt (${(amountCents / 100).toFixed(2)} €)`,
     bookingId,
   });
+
+  // Geschenk-Gutschein einlösen, falls bei der Buchung verwendet
+  if (booking.voucherId && booking.voucherDiscountCents > 0) {
+    try {
+      const { markVoucherRedeemed } = await import("@/lib/voucher-redeem");
+      await markVoucherRedeemed(booking.voucherId, booking.id, booking.voucherDiscountCents);
+      await db.insert(activityLog).values({
+        who: "Stripe",
+        what: `Gutschein eingelöst — ${(booking.voucherDiscountCents / 100).toFixed(2)} € für Buchung ${booking.bookingNumber}`,
+        bookingId,
+      });
+    } catch (err) {
+      console.error("[webhook] voucher redemption tracking failed (non-blocking):", err);
+    }
+  }
 
   // GoBD-Rechnung anlegen (atomare Nummer via Postgres-Sequence)
   try {
@@ -718,4 +750,90 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
     who: "Stripe",
     what: `Mitgliedsbeitrag-Lastschrift fehlgeschlagen — ${customer.firstName} ${customer.lastName} (Sub ${subscriptionId})`,
   });
+}
+
+// =============================================================
+// GESCHENK-GUTSCHEIN — Zahlung erfolgreich, Code aktivieren + Mails
+// =============================================================
+
+async function handleGiftVoucherPaid(session: Stripe.Checkout.Session) {
+  const voucherId = session.metadata?.voucherId;
+  if (!voucherId) {
+    console.warn("[webhook] gift-voucher session without voucherId");
+    return;
+  }
+
+  const found = await db.select().from(vouchers).where(eq(vouchers.id, voucherId)).limit(1);
+  const v = found[0];
+  if (!v) {
+    console.warn(`[webhook] voucher ${voucherId} not found`);
+    return;
+  }
+  if (v.paidAt) {
+    // Idempotent: schon verarbeitet
+    return;
+  }
+
+  const piId = (session.payment_intent as string | null) ?? null;
+  await db
+    .update(vouchers)
+    .set({
+      stripePaymentIntentId: piId,
+      paidAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .where(eq(vouchers.id, voucherId));
+
+  await db.insert(activityLog).values({
+    who: "Stripe",
+    what: `Geschenk-Gutschein ${v.code} bezahlt (${(v.valueCents / 100).toFixed(2)} €)`,
+  });
+
+  const valueEuros = (v.valueCents / 100).toFixed(2).replace(".", ",");
+  const expiresAtFormatted = v.expiresAt
+    ? v.expiresAt.toLocaleDateString("de-DE", { day: "2-digit", month: "long", year: "numeric" })
+    : "—";
+  const bookingUrl = (process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000") + "/buchen";
+
+  // Mail an Käufer (immer)
+  try {
+    await sendMail({
+      to: v.purchaserEmail,
+      subject: `Dein Wiesenhütte-Gutschein über ${valueEuros} € ist bereit`,
+      template: "voucher_purchase",
+      react: VoucherPurchaseEmail({
+        purchaserName: v.purchaserName,
+        recipientName: v.recipientName,
+        recipientEmail: v.recipientEmail,
+        deliveryMode: v.deliveryMode as "email" | "print",
+        code: v.code,
+        valueEuros,
+        expiresAtFormatted,
+      }),
+    });
+  } catch (err) {
+    console.error("[webhook] voucher purchase mail failed", err);
+  }
+
+  // Mail an Empfänger:in (nur bei deliveryMode=email)
+  if (v.deliveryMode === "email" && v.recipientEmail && v.recipientName) {
+    try {
+      await sendMail({
+        to: v.recipientEmail,
+        subject: `🎁 Ein Geschenk von ${v.purchaserName}: Wiesenhütte-Gutschein über ${valueEuros} €`,
+        template: "voucher_gift",
+        react: VoucherGiftEmail({
+          recipientName: v.recipientName,
+          purchaserName: v.purchaserName,
+          personalMessage: v.personalMessage,
+          code: v.code,
+          valueEuros,
+          expiresAtFormatted,
+          bookingUrl,
+        }),
+      });
+    } catch (err) {
+      console.error("[webhook] voucher gift mail failed", err);
+    }
+  }
 }
