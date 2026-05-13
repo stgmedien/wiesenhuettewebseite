@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   Clock,
   Phone,
@@ -385,7 +386,7 @@ const RecCard = ({
         ? pc.season_summer
         : pc.season_all;
   const SeasonIcon = rec.season === "winter" ? Snowflake : rec.season === "summer" ? Sun : Compass;
-  const gmaps = `https://www.google.com/maps/search/?api=1&query=${rec.lat},${rec.lng}`;
+  const hasImage = !!rec.imageUrl;
 
   return (
     <div
@@ -393,32 +394,61 @@ const RecCard = ({
         isOdd ? "md:[&>.media]:order-2" : ""
       }`}
     >
-      {/* Media — Gradient-Card mit Emoji statt echtem Bild */}
+      {/* Media-Slot */}
       <div className="media md:col-span-5">
         <TiltCard className="relative">
           <div
-            className={`relative aspect-[4/3] rounded-[28px] overflow-hidden border border-[var(--color-wh-winter-grey)] shadow-[0_20px_50px_rgba(47,74,53,0.12)] bg-gradient-to-br ${rec.gradient}`}
+            className={`relative aspect-[4/3] rounded-[28px] overflow-hidden border border-[var(--color-wh-winter-grey)] shadow-[0_20px_50px_rgba(47,74,53,0.12)] ${
+              hasImage ? "bg-[var(--color-wh-beige)]" : `bg-gradient-to-br ${rec.gradient}`
+            }`}
           >
-            {/* Backdrop-Pattern */}
-            <div
-              className="absolute inset-0 opacity-30"
-              style={{
-                backgroundImage:
-                  "radial-gradient(circle at 30% 30%, rgba(255,255,255,0.6) 0px, transparent 40%), radial-gradient(circle at 70% 70%, rgba(0,0,0,0.05) 0px, transparent 40%)",
-              }}
-              aria-hidden
-            />
-            {/* Center Emoji */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span
-                className="leading-none select-none drop-shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
-                style={{ fontSize: "clamp(80px, 14vw, 180px)" }}
-              >
-                {rec.emoji}
-              </span>
-            </div>
+            {hasImage ? (
+              <>
+                <Image
+                  src={rec.imageUrl!}
+                  alt={rec.name}
+                  fill
+                  sizes="(min-width: 1024px) 480px, (min-width: 768px) 45vw, 92vw"
+                  className="object-cover"
+                  unoptimized={false}
+                />
+                {/* Subtiler Gradient unten fuer Badge-Lesbarkeit */}
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background:
+                      "linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.35) 100%)",
+                  }}
+                  aria-hidden
+                />
+                {/* Kleines Emoji als Akzent oben rechts */}
+                <div className="absolute top-4 right-4 inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm shadow-md text-xl">
+                  <span aria-hidden>{rec.emoji}</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div
+                  className="absolute inset-0 opacity-30"
+                  style={{
+                    backgroundImage:
+                      "radial-gradient(circle at 30% 30%, rgba(255,255,255,0.6) 0px, transparent 40%), radial-gradient(circle at 70% 70%, rgba(0,0,0,0.05) 0px, transparent 40%)",
+                  }}
+                  aria-hidden
+                />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span
+                    className="leading-none select-none drop-shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
+                    style={{ fontSize: "clamp(80px, 14vw, 180px)" }}
+                  >
+                    {rec.emoji}
+                  </span>
+                </div>
+              </>
+            )}
+
             {/* Top-left Badge: Season */}
-            <div className="absolute top-4 left-4 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/85 backdrop-blur-sm border border-white text-[var(--color-wh-deep-green)] text-[11px] font-semibold uppercase tracking-wider shadow-sm">
+            <div className="absolute top-4 left-4 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-sm border border-white text-[var(--color-wh-deep-green)] text-[11px] font-semibold uppercase tracking-wider shadow-sm">
               <SeasonIcon size={12} />
               {seasonLabel}
             </div>
@@ -429,6 +459,13 @@ const RecCard = ({
             </div>
           </div>
         </TiltCard>
+
+        {/* CC-Attribution sehr klein unter dem Bild */}
+        {rec.imageAttribution && (
+          <p className="text-[10px] text-[var(--color-wh-fg-muted)]/70 mt-2 text-right m-0">
+            {rec.imageAttribution}
+          </p>
+        )}
       </div>
 
       {/* Text */}
@@ -460,7 +497,7 @@ const RecCard = ({
         {/* Meta-Row */}
         <div className="flex flex-wrap gap-x-5 gap-y-2 text-[13px] text-[var(--color-wh-fg-muted)] mb-5">
           <a
-            href={gmaps}
+            href={rec.googleMapsUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 text-[var(--color-wh-deep-green)] font-semibold no-underline hover:underline"
