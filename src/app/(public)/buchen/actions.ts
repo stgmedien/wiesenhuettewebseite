@@ -28,6 +28,47 @@ import { generateBookingNumber } from "@/lib/utils";
 import { CURRENT_HAUSORDNUNG_VERSION } from "@/lib/hausordnung";
 import type { Locale } from "@/lib/i18n-shared";
 
+const STRIPE_LOCALE: Record<Locale, "de" | "en" | "nl"> = {
+  de: "de",
+  en: "en",
+  nl: "nl",
+};
+
+const CHECKOUT_LINES: Record<Locale, {
+  depositName: (arrival: string, departure: string) => string;
+  depositDescription: (
+    persons: number,
+    nights: number,
+    bookingNumber: string,
+    discount: string | null,
+    remainder: string
+  ) => string;
+  kautionName: string;
+  kautionDescription: string;
+}> = {
+  de: {
+    depositName: (a, d) => `Anzahlung 50 % — Wiesenhütte ${a} bis ${d}`,
+    depositDescription: (p, n, bn, disc, rem) =>
+      `${p} Personen · ${n} Nächte · Buchung ${bn}${disc ? ` · Rabatt ${disc}` : ""} · Restzahlung ${rem} folgt vor Anreise.`,
+    kautionName: "Kaution",
+    kautionDescription: "Erstattung innerhalb 14 Tagen nach mangelfreier Abreise.",
+  },
+  en: {
+    depositName: (a, d) => `Deposit 50 % — Wiesenhütte ${a} to ${d}`,
+    depositDescription: (p, n, bn, disc, rem) =>
+      `${p} guests · ${n} nights · Booking ${bn}${disc ? ` · Discount ${disc}` : ""} · Remaining ${rem} due before arrival.`,
+    kautionName: "Damage deposit",
+    kautionDescription: "Refunded within 14 days of a clean departure.",
+  },
+  nl: {
+    depositName: (a, d) => `Aanbetaling 50 % — Wiesenhütte ${a} t/m ${d}`,
+    depositDescription: (p, n, bn, disc, rem) =>
+      `${p} personen · ${n} nachten · Boeking ${bn}${disc ? ` · Korting ${disc}` : ""} · Restbedrag ${rem} vóór aankomst.`,
+    kautionName: "Borg",
+    kautionDescription: "Terugbetaling binnen 14 dagen na schadevrije afreis.",
+  },
+};
+
 const ACTION_ERRORS: Record<Locale, {
   invalidInput: string;
   tooManyAttempts: string;
@@ -493,10 +534,14 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
   let checkoutSession;
   try {
+    const CL = CHECKOUT_LINES[locale];
+    const discountSnippet = discountCents > 0
+      ? `${formatEuro(discountCents, locale)} (${appliedDiscountCode})`
+      : null;
     checkoutSession = await stripe.checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card"],
-      locale: "de",
+      locale: STRIPE_LOCALE[locale],
       customer_email: effectiveEmail,
       billing_address_collection: "auto",
       line_items: [
@@ -506,10 +551,14 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
             currency: "eur",
             unit_amount: effectivePrepayment,
             product_data: {
-              name: `Anzahlung 50 % — Wiesenhütte ${data.arrival} bis ${data.departure}`,
-              description: `${totalPersons} Personen · ${breakdown.nights} Nächte · Buchung ${bookingNumber}${
-                discountCents > 0 ? ` · Rabatt ${formatEuro(discountCents)} (${appliedDiscountCode})` : ""
-              } · Restzahlung ${formatEuro(effectiveRemainder)} folgt vor Anreise.`,
+              name: CL.depositName(data.arrival, data.departure),
+              description: CL.depositDescription(
+                totalPersons,
+                breakdown.nights,
+                bookingNumber,
+                discountSnippet,
+                formatEuro(effectiveRemainder, locale)
+              ),
             },
           },
         },
@@ -519,8 +568,8 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
             currency: "eur",
             unit_amount: breakdown.depositCents,
             product_data: {
-              name: "Kaution",
-              description: "Erstattung innerhalb 14 Tagen nach mangelfreier Abreise.",
+              name: CL.kautionName,
+              description: CL.kautionDescription,
             },
           },
         },
