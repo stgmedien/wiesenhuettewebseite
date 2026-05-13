@@ -1,18 +1,41 @@
 import { db } from "@/lib/db";
 import { magicLinkTokens, users } from "@/lib/db/schema";
 import { eq, and, gt, lt, isNull } from "drizzle-orm";
-import crypto from "crypto";
+
+// Web-Crypto-API statt Node-`crypto` — funktioniert in Edge-Runtime UND
+// Node.js. Magic-Link wird ueber auth.ts vom middleware.ts (Edge) gepulled,
+// daher darf hier kein Node-only-Modul vorkommen.
 
 const TOKEN_BYTES = 32;
 const TOKEN_TTL_MINUTES = 15;
 const REQUESTS_PER_HOUR = 5;          // Rate-Limit pro E-Mail
 const ONE_HOUR_MS = 60 * 60 * 1000;
 
-export const hashToken = (token: string): string =>
-  crypto.createHash("sha256").update(token).digest("hex");
+const textEncoder = new TextEncoder();
 
-export const generateToken = (): string =>
-  crypto.randomBytes(TOKEN_BYTES).toString("base64url");
+const bufferToHex = (buf: ArrayBuffer): string =>
+  Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+
+const bytesToBase64Url = (bytes: Uint8Array): string => {
+  let bin = "";
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  // btoa ist in beiden Runtimes verfuegbar
+  const b64 = btoa(bin);
+  return b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+};
+
+export const hashToken = async (token: string): Promise<string> => {
+  const digest = await crypto.subtle.digest("SHA-256", textEncoder.encode(token));
+  return bufferToHex(digest);
+};
+
+export const generateToken = (): string => {
+  const bytes = new Uint8Array(TOKEN_BYTES);
+  crypto.getRandomValues(bytes);
+  return bytesToBase64Url(bytes);
+};
 
 /**
  * Erzeugt einen neuen Magic-Link-Token, speichert den Hash in der DB und
@@ -39,7 +62,7 @@ export const createMagicLinkToken = async (
   }
 
   const token = generateToken();
-  const tokenHash = hashToken(token);
+  const tokenHash = await hashToken(token);
   const expiresAt = new Date(Date.now() + TOKEN_TTL_MINUTES * 60 * 1000);
 
   await db.insert(magicLinkTokens).values({
@@ -64,7 +87,7 @@ export const consumeMagicLinkToken = async (
   token: string
 ): Promise<MagicLinkConsumeResult> => {
   if (!token || typeof token !== "string") return { ok: false, reason: "invalid" };
-  const tokenHash = hashToken(token);
+  const tokenHash = await hashToken(token);
 
   // Atomares Conditional Update: nur erfolgreich wenn Token existiert,
   // noch nicht consumed UND noch nicht expired. Verhindert die Race-Condition
