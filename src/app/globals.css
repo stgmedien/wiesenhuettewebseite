@@ -69,6 +69,14 @@
     text-rendering: optimizeLegibility;
   }
 
+  html {
+    /* Smooth scroll fuer Anker-Links (#section). Respektiert prefers-reduced-motion. */
+    scroll-behavior: smooth;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+  }
+
   *, *::before, *::after {
     box-sizing: border-box;
   }

@@ -261,10 +261,6 @@ export default async function GeschenkPage() {
             <div className="mt-10">
               <a
                 href="#buy"
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById("buy")?.scrollIntoView({ behavior: "smooth" });
-                }}
                 className="inline-flex items-center gap-2 h-13 sm:h-14 px-7 rounded-full bg-[var(--color-wh-snow)] text-[var(--color-wh-deep-green)] font-semibold no-underline hover:bg-white transition-colors shadow-[var(--shadow-float)]"
               >
                 {c.scrollCta}
