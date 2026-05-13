@@ -34,6 +34,9 @@ export const Footer = () => (
         <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/wandertouren">
           Wandertouren
         </Link>
+        <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/empfehlungen">
+          Empfehlungen
+        </Link>
         <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/packliste">
           Packliste
         </Link>
