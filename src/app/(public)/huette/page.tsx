@@ -1,5 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
+import { getServerLocale } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n-shared";
 
 export const metadata = {
   title: "Die Hütte · Wiesenhütte Langewiese",
@@ -7,60 +9,283 @@ export const metadata = {
     "33 Schlafplätze in 5 Schlafzimmern, voll ausgestattete Großküche, zwei Aufenthaltsräume, Skikeller, Feuerstelle. Selbstversorgerhütte für Gruppen in Langewiese, Hochsauerland.",
 };
 
-const ROOMS = [
-  {
-    name: "Naturtraum",
-    floor: "1. Etage",
-    detail: "8 Schlafplätze in 4 Etagenbetten",
-  },
-  {
-    name: "Waldblick",
-    floor: "1. Etage",
-    detail: "4 Schlafplätze in 4 Bodenbetten · über Innentreppe verbunden",
-  },
-  {
-    name: "Sonnenplatz",
-    floor: "1. Etage",
-    detail: `4 Schlafplätze in 2 Etagenbetten · Sitzecke mit Tisch ("Lehrerzimmer")`,
-  },
-  {
-    name: "Vogelnest",
-    floor: "Dachgeschoss",
-    detail: "4 Schlafplätze in 4 Bodenbetten",
-  },
-  {
-    name: "Baumkrone",
-    floor: "Dachgeschoss",
-    detail: "13 Schlafplätze (3 + 10) · durch Vorhang abgetrennter Großschlafraum",
-  },
-];
+type Copy = {
+  hero: { eyebrow: string; h1l1: string; h1l2: string };
+  facts: { sleeps: string; rooms: string; lounges: string; occupancy: string };
+  desc: { eyebrow: string; h2: string; body: string };
+  rooms: {
+    heading: string;
+    items: Array<{ name: string; floor: string; detail: string }>;
+  };
+  ausstattung: {
+    heading: string;
+    eg: { heading: string; items: string[] };
+    ug: { heading: string; items: string[] };
+    aussen: { heading: string; items: string[] };
+    heat: { heading: string; items: string[] };
+  };
+  gallery: { eyebrow: string; h2: string };
+  hub: {
+    eyebrow: string;
+    h2: string;
+    body: string;
+    routes: { eye: string; title: string; body: string; cta: string };
+    list: { eye: string; title: string; body: string; cta: string };
+  };
+  cta: { eyebrow: string; h2: string; button: string };
+};
 
-const FACTS = [
-  { kpi: "33", label: "Schlafplätze" },
-  { kpi: "5", label: "Schlafzimmer" },
-  { kpi: "2", label: "Aufenthaltsräume" },
-  { kpi: "10–33", label: "Personen Belegung" },
+const COPY: Record<Locale, Copy> = {
+  de: {
+    hero: { eyebrow: "Die Hütte", h1l1: "Echte Holzhütte.", h1l2: "Selbstversorgung." },
+    facts: { sleeps: "Schlafplätze", rooms: "Schlafzimmer", lounges: "Aufenthaltsräume", occupancy: "Personen Belegung" },
+    desc: {
+      eyebrow: "Beschreibung",
+      h2: "Zwei Vollgeschosse, Dachboden, Untergeschoss.",
+      body: "Die Wiesenhütte liegt etwa 50 m unterhalb der Bundesstraße am Hang in Langewiese, einem Höhendorf bei Winterberg im Hochsauerland. Sie ist eine Selbstversorgerhütte für Vereins-, Schul-, Klassen- und Gruppenfahrten. Atmosphäre: bewusst entschleunigt, gemeinsames Kochen, Abende an der Feuerstelle, Natur direkt vor der Tür.",
+    },
+    rooms: {
+      heading: "Schlafzimmer",
+      items: [
+        { name: "Naturtraum", floor: "1. Etage", detail: "8 Schlafplätze in 4 Etagenbetten" },
+        { name: "Waldblick", floor: "1. Etage", detail: "4 Schlafplätze in 4 Bodenbetten · über Innentreppe verbunden" },
+        { name: "Sonnenplatz", floor: "1. Etage", detail: `4 Schlafplätze in 2 Etagenbetten · Sitzecke mit Tisch („Lehrerzimmer")` },
+        { name: "Vogelnest", floor: "Dachgeschoss", detail: "4 Schlafplätze in 4 Bodenbetten" },
+        { name: "Baumkrone", floor: "Dachgeschoss", detail: "13 Schlafplätze (3 + 10) · durch Vorhang abgetrennter Großschlafraum" },
+      ],
+    },
+    ausstattung: {
+      heading: "Räume & Ausstattung",
+      eg: {
+        heading: "Erdgeschoss",
+        items: [
+          "Windfang mit Garderobe und Schuhregal",
+          "Esszimmer mit 4 Tischen für mind. 6 Personen",
+          "Großküche: 2 Herde, Backofen, Mikrowelle, Spülmaschine, Filter-Kaffeemaschine",
+          "Vorratsraum mit großem und kleinem Kühlschrank (mit Gefrierfach)",
+          "Aufenthaltsraum mit 4 Tischen",
+          "Gästetoilette",
+        ],
+      },
+      ug: {
+        heading: "Untergeschoss",
+        items: [
+          "2 Sanitärräume mit je 2 Duschen, 2 Toiletten, 4 Waschbecken",
+          "Skikeller / Radkeller von außen zugänglich",
+          "Grill",
+        ],
+      },
+      aussen: {
+        heading: "Außenbereich",
+        items: ["Freisitz", "Baumbank", "Selbstgebaute Feuerstelle", "Eigener Rodelhang neben der Hütte"],
+      },
+      heat: {
+        heading: "Heizung & Verpflegung",
+        items: [
+          "Zentralheizung in allen Räumen",
+          "Selbstversorgung — Hygieneartikel bitte mitbringen",
+          "Bäckerei Gerke direkt gegenüber",
+          "Catering nach Absprache (Gasthof Graberhof, Hoheleye)",
+        ],
+      },
+    },
+    gallery: { eyebrow: "Galerie", h2: "Innen, außen, Natur." },
+    hub: {
+      eyebrow: "Für Deinen Aufenthalt",
+      h2: "Damit Du gut vorbereitet bist.",
+      body: "Zwei kleine Tools, die wir Gästen vor und während des Aufenthalts an die Hand geben: kuratierte Wandertouren rund um die Hütte (mit GPX-Datei für Komoot oder Garmin) und einen persönlichen Packlisten-Generator, der zu Saison und Plan passt.",
+      routes: {
+        eye: "Outdoor · GPX-Download",
+        title: "Wandertouren rund um die Hütte.",
+        body: "Hand-kuratierte Routen direkt von der Wiesenhütte aus — mit Schwierigkeit, Distanz und Höhenmetern. Jede Tour kommt mit GPX-Datei, die Du in Komoot, Outdooractive oder auf Dein Garmin laden kannst.",
+        cta: "Touren ansehen →",
+      },
+      list: {
+        eye: "Vor der Anreise · Persönlich",
+        title: "Persönliche Packliste.",
+        body: `Saison + geplante Aktivitäten eintragen, und Du bekommst eine maßgeschneiderte Liste für Dich selbst — inklusive einer Sektion „Gruppen-Items zum Absprechen". Druckbar als PDF mit Häkchen-Boxen.`,
+        cta: "Packliste erstellen →",
+      },
+    },
+    cta: { eyebrow: "Bereit?", h2: "Termin auswählen, Personen eintragen, buchen.", button: "Verfügbarkeit prüfen" },
+  },
+  en: {
+    hero: { eyebrow: "The Cabin", h1l1: "A real wooden cabin.", h1l2: "Self-catering." },
+    facts: { sleeps: "Sleeping spots", rooms: "Bedrooms", lounges: "Common rooms", occupancy: "Guest capacity" },
+    desc: {
+      eyebrow: "Description",
+      h2: "Two full floors, attic, basement.",
+      body: "The Wiesenhütte sits about 50 m below the main road on a hillside in Langewiese, a highland village near Winterberg in the Hochsauerland. It is a self-catering cabin for clubs, schools, classes and groups. The atmosphere is intentionally slow: cooking together, evenings at the fire pit, nature right outside the door.",
+    },
+    rooms: {
+      heading: "Bedrooms",
+      items: [
+        { name: "Naturtraum (\"Nature dream\")", floor: "1st floor", detail: "8 beds in 4 bunk beds" },
+        { name: "Waldblick (\"Forest view\")", floor: "1st floor", detail: "4 beds on the floor · connected by internal stairs" },
+        { name: "Sonnenplatz (\"Sunny spot\")", floor: "1st floor", detail: `4 beds in 2 bunk beds · seating corner with table ("teacher's room")` },
+        { name: "Vogelnest (\"Bird's nest\")", floor: "Attic", detail: "4 beds on the floor" },
+        { name: "Baumkrone (\"Treetop\")", floor: "Attic", detail: "13 beds (3 + 10) · large dorm separated by curtain" },
+      ],
+    },
+    ausstattung: {
+      heading: "Rooms & equipment",
+      eg: {
+        heading: "Ground floor",
+        items: [
+          "Entryway with wardrobe and shoe rack",
+          "Dining room with 4 tables for at least 6 people each",
+          "Large kitchen: 2 stoves, oven, microwave, dishwasher, drip coffee maker",
+          "Pantry with large and small fridge (with freezer)",
+          "Common room with 4 tables",
+          "Guest toilet",
+        ],
+      },
+      ug: {
+        heading: "Basement",
+        items: [
+          "2 bathrooms each with 2 showers, 2 toilets, 4 sinks",
+          "Ski / bike cellar accessible from outside",
+          "BBQ grill",
+        ],
+      },
+      aussen: {
+        heading: "Outdoors",
+        items: ["Patio seating", "Log bench", "Self-built fire pit", "Private sledding slope next to the cabin"],
+      },
+      heat: {
+        heading: "Heating & catering",
+        items: [
+          "Central heating in all rooms",
+          "Self-catering — please bring your own hygiene items",
+          "Bakery Gerke directly across the road",
+          "Catering on request (Gasthof Graberhof, Hoheleye)",
+        ],
+      },
+    },
+    gallery: { eyebrow: "Gallery", h2: "Inside, outside, nature." },
+    hub: {
+      eyebrow: "For your stay",
+      h2: "So you're well prepared.",
+      body: "Two small tools we hand to guests before and during their stay: curated hiking routes around the cabin (with GPX files for Komoot or Garmin) and a personal packing-list generator that matches season and plan.",
+      routes: {
+        eye: "Outdoor · GPX download",
+        title: "Hiking routes around the cabin.",
+        body: "Hand-curated routes straight from the Wiesenhütte — with difficulty, distance and elevation. Each tour comes with a GPX file you can load into Komoot, Outdooractive or your Garmin.",
+        cta: "View routes →",
+      },
+      list: {
+        eye: "Before arrival · Personal",
+        title: "Personal packing list.",
+        body: "Enter season + planned activities and you get a tailor-made list for yourself — including a \"group items to coordinate\" section. Printable as PDF with checkboxes.",
+        cta: "Create packing list →",
+      },
+    },
+    cta: { eyebrow: "Ready?", h2: "Pick dates, enter guests, book.", button: "Check availability" },
+  },
+  nl: {
+    hero: { eyebrow: "De hut", h1l1: "Echte houten hut.", h1l2: "Zelfvoorzienend." },
+    facts: { sleeps: "Slaapplaatsen", rooms: "Slaapkamers", lounges: "Verblijfsruimtes", occupancy: "Personen capaciteit" },
+    desc: {
+      eyebrow: "Beschrijving",
+      h2: "Twee volledige verdiepingen, zolder, kelder.",
+      body: "De Wiesenhütte ligt ongeveer 50 m onder de hoofdweg op een helling in Langewiese, een hooggelegen dorp bij Winterberg in het Hochsauerland. Het is een zelfvoorzienende hut voor verenigingen, scholen, klassen en groepen. De sfeer is bewust rustig: samen koken, avonden bij de vuurplaats, natuur direct voor de deur.",
+    },
+    rooms: {
+      heading: "Slaapkamers",
+      items: [
+        { name: "Naturtraum (\"Natuurdroom\")", floor: "1e verdieping", detail: "8 slaapplaatsen in 4 stapelbedden" },
+        { name: "Waldblick (\"Bosuitzicht\")", floor: "1e verdieping", detail: "4 slaapplaatsen op de vloer · verbonden via interne trap" },
+        { name: "Sonnenplatz (\"Zonnige plek\")", floor: "1e verdieping", detail: `4 slaapplaatsen in 2 stapelbedden · zithoek met tafel ("lerarenkamer")` },
+        { name: "Vogelnest (\"Vogelnest\")", floor: "Zolder", detail: "4 slaapplaatsen op de vloer" },
+        { name: "Baumkrone (\"Boomkruin\")", floor: "Zolder", detail: "13 slaapplaatsen (3 + 10) · grote slaapzaal gescheiden door gordijn" },
+      ],
+    },
+    ausstattung: {
+      heading: "Ruimtes & voorzieningen",
+      eg: {
+        heading: "Begane grond",
+        items: [
+          "Entree met garderobe en schoenenrek",
+          "Eetkamer met 4 tafels voor minimaal 6 personen",
+          "Grote keuken: 2 fornuizen, oven, magnetron, vaatwasser, filterkoffieapparaat",
+          "Voorraadkamer met grote en kleine koelkast (met vriesvak)",
+          "Verblijfsruimte met 4 tafels",
+          "Gastentoilet",
+        ],
+      },
+      ug: {
+        heading: "Kelder",
+        items: [
+          "2 sanitaire ruimtes met elk 2 douches, 2 toiletten, 4 wastafels",
+          "Ski- / fietskelder van buiten toegankelijk",
+          "Grill",
+        ],
+      },
+      aussen: {
+        heading: "Buitengebied",
+        items: ["Terras", "Boombank", "Zelfgebouwde vuurplaats", "Eigen sleehelling naast de hut"],
+      },
+      heat: {
+        heading: "Verwarming & maaltijden",
+        items: [
+          "Centrale verwarming in alle ruimtes",
+          "Zelfvoorzienend — hygiëne-artikelen graag zelf meenemen",
+          "Bakkerij Gerke direct tegenover",
+          "Catering op aanvraag (Gasthof Graberhof, Hoheleye)",
+        ],
+      },
+    },
+    gallery: { eyebrow: "Galerij", h2: "Binnen, buiten, natuur." },
+    hub: {
+      eyebrow: "Voor je verblijf",
+      h2: "Zodat je goed voorbereid bent.",
+      body: "Twee kleine tools die we gasten meegeven vóór en tijdens hun verblijf: samengestelde wandelroutes rond de hut (met GPX-bestand voor Komoot of Garmin) en een persoonlijke paklijst-generator op maat van seizoen en plan.",
+      routes: {
+        eye: "Outdoor · GPX-download",
+        title: "Wandelroutes rond de hut.",
+        body: "Met de hand samengestelde routes direct vanaf de Wiesenhütte — met moeilijkheid, afstand en hoogtemeters. Elke tour komt met een GPX-bestand voor Komoot, Outdooractive of Garmin.",
+        cta: "Routes bekijken →",
+      },
+      list: {
+        eye: "Voor aankomst · Persoonlijk",
+        title: "Persoonlijke paklijst.",
+        body: "Seizoen + geplande activiteiten invoeren en je krijgt een lijst op maat voor jezelf — inclusief een sectie \"groepsitems om af te stemmen\". Afdrukbaar als PDF met aanvinkvakjes.",
+        cta: "Paklijst maken →",
+      },
+    },
+    cta: { eyebrow: "Klaar?", h2: "Datum kiezen, personen invoeren, boeken.", button: "Beschikbaarheid bekijken" },
+  },
+};
+
+const FACT_KPIS = [
+  { kpi: "33", labelKey: "sleeps" as const },
+  { kpi: "5", labelKey: "rooms" as const },
+  { kpi: "2", labelKey: "lounges" as const },
+  { kpi: "10–33", labelKey: "occupancy" as const },
 ];
 
 const GALLERY = [
-  { src: "/media/photos/exterior-main.jpg", alt: "Wiesenhütte Hauptansicht von außen" },
-  { src: "/media/photos/interior-7496.jpg", alt: "Aufenthaltsraum mit Holzeinrichtung" },
-  { src: "/media/photos/interior-7517.jpg", alt: "Schlafzimmer mit Etagenbetten" },
-  { src: "/media/photos/interior-7547.jpg", alt: "Großküche mit Herd und Spülmaschine" },
-  { src: "/media/photos/interior-7593.jpg", alt: "Esszimmer für Gruppen" },
-  { src: "/media/photos/interior-7649.jpg", alt: "Sanitärbereich" },
-  { src: "/media/photos/aerial-1.jpg", alt: "Wiesenhütte aus der Vogelperspektive" },
-  { src: "/media/photos/nature-1.jpg", alt: "Hütte eingebettet in die Sauerländer Natur" },
-  { src: "/media/photos/exterior-front.jpg", alt: "Eingangsbereich der Hütte im Schnee" },
+  { src: "/media/photos/exterior-main.jpg" },
+  { src: "/media/photos/interior-7496.jpg" },
+  { src: "/media/photos/interior-7517.jpg" },
+  { src: "/media/photos/interior-7547.jpg" },
+  { src: "/media/photos/interior-7593.jpg" },
+  { src: "/media/photos/interior-7649.jpg" },
+  { src: "/media/photos/aerial-1.jpg" },
+  { src: "/media/photos/nature-1.jpg" },
+  { src: "/media/photos/exterior-front.jpg" },
 ];
 
-export default function HuettePage() {
+export default async function HuettePage() {
+  const locale = await getServerLocale();
+  const c = COPY[locale];
+
   return (
     <div>
       <section className="relative h-[420px] sm:h-[520px] overflow-hidden">
         <Image
           src="/media/photos/aerial-1.jpg"
-          alt="Wiesenhütte aus der Vogelperspektive"
+          alt="Wiesenhütte"
           fill
           priority
           className="object-cover"
@@ -68,11 +293,11 @@ export default function HuettePage() {
         />
         <div className="absolute inset-0 bg-black/40" />
         <div className="relative max-w-[1080px] mx-auto h-full px-6 sm:px-8 flex flex-col justify-end pb-10 sm:pb-12">
-          <div className="eyebrow text-[var(--color-wh-snow)]/85">Die Hütte</div>
+          <div className="eyebrow text-[var(--color-wh-snow)]/85">{c.hero.eyebrow}</div>
           <h1 className="text-[var(--color-wh-snow)] font-display font-bold text-[44px] sm:text-[64px] leading-tight m-0 mt-3 sm:mt-4">
-            Echte Holzhütte.
+            {c.hero.h1l1}
             <br />
-            Selbstversorgung.
+            {c.hero.h1l2}
           </h1>
         </div>
       </section>
@@ -80,12 +305,12 @@ export default function HuettePage() {
       <section className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24">
         <div className="max-w-[1080px] mx-auto">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8">
-            {FACTS.map((f) => (
-              <div key={f.label}>
+            {FACT_KPIS.map((f) => (
+              <div key={f.labelKey}>
                 <div className="font-display text-[40px] sm:text-[48px] leading-none text-[var(--color-wh-deep-green)] font-bold">
                   {f.kpi}
                 </div>
-                <div className="mt-2 text-sm sm:text-base text-[var(--color-wh-fg-muted)]">{f.label}</div>
+                <div className="mt-2 text-sm sm:text-base text-[var(--color-wh-fg-muted)]">{c.facts[f.labelKey]}</div>
               </div>
             ))}
           </div>
@@ -94,18 +319,13 @@ export default function HuettePage() {
 
       <section className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-16 sm:py-24">
         <div className="max-w-[920px] mx-auto">
-          <div className="eyebrow">Beschreibung</div>
-          <h2 className="text-[32px] sm:text-[40px] mt-3 sm:mt-4">Zwei Vollgeschosse, Dachboden, Untergeschoss.</h2>
-          <p className="text-base sm:text-[17px] leading-relaxed text-[var(--color-wh-black)] mt-4">
-            Die Wiesenhütte liegt etwa 50 m unterhalb der Bundesstraße am Hang in Langewiese,
-            einem Höhendorf bei Winterberg im Hochsauerland. Sie ist eine Selbstversorgerhütte
-            für Vereins-, Schul-, Klassen- und Gruppenfahrten. Atmosphäre: bewusst entschleunigt,
-            gemeinsames Kochen, Abende an der Feuerstelle, Natur direkt vor der Tür.
-          </p>
+          <div className="eyebrow">{c.desc.eyebrow}</div>
+          <h2 className="text-[32px] sm:text-[40px] mt-3 sm:mt-4">{c.desc.h2}</h2>
+          <p className="text-base sm:text-[17px] leading-relaxed text-[var(--color-wh-black)] mt-4">{c.desc.body}</p>
 
-          <h3 className="mt-12 mb-4 text-[22px] sm:text-[26px]">Schlafzimmer</h3>
+          <h3 className="mt-12 mb-4 text-[22px] sm:text-[26px]">{c.rooms.heading}</h3>
           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 list-none p-0">
-            {ROOMS.map((r) => (
+            {c.rooms.items.map((r) => (
               <li
                 key={r.name}
                 className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-md)] p-4"
@@ -121,53 +341,20 @@ export default function HuettePage() {
             ))}
           </ul>
 
-          <h3 className="mt-12 mb-4 text-[22px] sm:text-[26px]">Räume & Ausstattung</h3>
+          <h3 className="mt-12 mb-4 text-[22px] sm:text-[26px]">{c.ausstattung.heading}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 text-base">
-            <Block
-              heading="Erdgeschoss"
-              items={[
-                "Windfang mit Garderobe und Schuhregal",
-                "Esszimmer mit 4 Tischen für mind. 6 Personen",
-                "Großküche: 2 Herde, Backofen, Mikrowelle, Spülmaschine, Filter-Kaffeemaschine",
-                "Vorratsraum mit großem und kleinem Kühlschrank (mit Gefrierfach)",
-                "Aufenthaltsraum mit 4 Tischen",
-                "Gästetoilette",
-              ]}
-            />
-            <Block
-              heading="Untergeschoss"
-              items={[
-                "2 Sanitärräume mit je 2 Duschen, 2 Toiletten, 4 Waschbecken",
-                "Skikeller / Radkeller von außen zugänglich",
-                "Grill",
-              ]}
-            />
-            <Block
-              heading="Außenbereich"
-              items={[
-                "Freisitz",
-                "Baumbank",
-                "Selbstgebaute Feuerstelle",
-                "Eigener Rodelhang neben der Hütte",
-              ]}
-            />
-            <Block
-              heading="Heizung & Verpflegung"
-              items={[
-                "Zentralheizung in allen Räumen",
-                "Selbstversorgung — Hygieneartikel bitte mitbringen",
-                "Bäckerei Gerke direkt gegenüber",
-                "Catering nach Absprache (Gasthof Graberhof, Hoheleye)",
-              ]}
-            />
+            <Block heading={c.ausstattung.eg.heading} items={c.ausstattung.eg.items} />
+            <Block heading={c.ausstattung.ug.heading} items={c.ausstattung.ug.items} />
+            <Block heading={c.ausstattung.aussen.heading} items={c.ausstattung.aussen.items} />
+            <Block heading={c.ausstattung.heat.heading} items={c.ausstattung.heat.items} />
           </div>
         </div>
       </section>
 
       <section className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24">
         <div className="max-w-[1280px] mx-auto">
-          <div className="eyebrow">Galerie</div>
-          <h2 className="text-[32px] sm:text-[40px] mt-3 sm:mt-4 mb-10">Innen, außen, Natur.</h2>
+          <div className="eyebrow">{c.gallery.eyebrow}</div>
+          <h2 className="text-[32px] sm:text-[40px] mt-3 sm:mt-4 mb-10">{c.gallery.h2}</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
             {GALLERY.map((g) => (
               <div
@@ -176,7 +363,7 @@ export default function HuettePage() {
               >
                 <Image
                   src={g.src}
-                  alt={g.alt}
+                  alt=""
                   fill
                   className="object-cover"
                   sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
@@ -187,20 +374,11 @@ export default function HuettePage() {
         </div>
       </section>
 
-      {/* ---------------------------------------------------------------- */}
-      {/* Hub für Aufenthalts-Mehrwert: Wandertouren + Packliste            */}
-      {/* ---------------------------------------------------------------- */}
       <section className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-16 sm:py-24">
         <div className="max-w-[1080px] mx-auto">
-          <div className="eyebrow">Für Deinen Aufenthalt</div>
-          <h2 className="text-[32px] sm:text-[44px] mt-3 mb-3 leading-tight">
-            Damit Du gut vorbereitet bist.
-          </h2>
-          <p className="text-[var(--color-wh-fg-muted)] text-[16px] max-w-2xl mb-10">
-            Zwei kleine Tools, die wir Gästen vor und während des Aufenthalts an die Hand geben:
-            kuratierte Wandertouren rund um die Hütte (mit GPX-Datei für Komoot oder Garmin) und
-            einen persönlichen Packlisten-Generator, der zu Saison und Plan passt.
-          </p>
+          <div className="eyebrow">{c.hub.eyebrow}</div>
+          <h2 className="text-[32px] sm:text-[44px] mt-3 mb-3 leading-tight">{c.hub.h2}</h2>
+          <p className="text-[var(--color-wh-fg-muted)] text-[16px] max-w-2xl mb-10">{c.hub.body}</p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
             <Link
@@ -215,18 +393,16 @@ export default function HuettePage() {
               </div>
               <div className="relative">
                 <div className="text-[10px] uppercase tracking-wider text-[var(--color-wh-deep-green)]/80 font-bold mb-2">
-                  Outdoor · GPX-Download
+                  {c.hub.routes.eye}
                 </div>
                 <h3 className="font-display font-bold text-[24px] sm:text-[26px] text-[var(--color-wh-deep-green)] mt-0 mb-3 leading-tight">
-                  Wandertouren rund um die Hütte.
+                  {c.hub.routes.title}
                 </h3>
                 <p className="text-[14px] sm:text-[15px] leading-relaxed text-[var(--color-wh-black)] m-0 mb-4">
-                  Hand-kuratierte Routen direkt von der Wiesenhütte aus — mit Schwierigkeit,
-                  Distanz und Höhenmetern. Jede Tour kommt mit GPX-Datei, die Du in Komoot,
-                  Outdooractive oder auf Dein Garmin laden kannst.
+                  {c.hub.routes.body}
                 </p>
                 <span className="inline-flex items-center gap-1 text-[14px] text-[var(--color-wh-deep-green)] font-semibold group-hover:gap-2 transition-all">
-                  Touren ansehen →
+                  {c.hub.routes.cta}
                 </span>
               </div>
             </Link>
@@ -243,18 +419,16 @@ export default function HuettePage() {
               </div>
               <div className="relative">
                 <div className="text-[10px] uppercase tracking-wider text-[var(--color-wh-deep-green)]/80 font-bold mb-2">
-                  Vor der Anreise · Persönlich
+                  {c.hub.list.eye}
                 </div>
                 <h3 className="font-display font-bold text-[24px] sm:text-[26px] text-[var(--color-wh-deep-green)] mt-0 mb-3 leading-tight">
-                  Persönliche Packliste.
+                  {c.hub.list.title}
                 </h3>
                 <p className="text-[14px] sm:text-[15px] leading-relaxed text-[var(--color-wh-black)] m-0 mb-4">
-                  Saison + geplante Aktivitäten eintragen, und Du bekommst eine maßgeschneiderte
-                  Liste für Dich selbst — inklusive einer Sektion „Gruppen-Items zum Absprechen".
-                  Druckbar als PDF mit Häkchen-Boxen.
+                  {c.hub.list.body}
                 </p>
                 <span className="inline-flex items-center gap-1 text-[14px] text-[var(--color-wh-deep-green)] font-semibold group-hover:gap-2 transition-all">
-                  Packliste erstellen →
+                  {c.hub.list.cta}
                 </span>
               </div>
             </Link>
@@ -264,15 +438,13 @@ export default function HuettePage() {
 
       <section className="bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-20">
         <div className="max-w-[820px] mx-auto text-center">
-          <div className="eyebrow text-[var(--color-wh-snow)]/80">Bereit?</div>
-          <h2 className="text-[var(--color-wh-snow)] text-[32px] sm:text-[40px] mt-3">
-            Termin auswählen, Personen eintragen, buchen.
-          </h2>
+          <div className="eyebrow text-[var(--color-wh-snow)]/80">{c.cta.eyebrow}</div>
+          <h2 className="text-[var(--color-wh-snow)] text-[32px] sm:text-[40px] mt-3">{c.cta.h2}</h2>
           <Link
             href="/buchen"
             className="inline-flex mt-6 h-12 px-6 items-center rounded-[var(--radius-btn)] bg-[var(--color-wh-snow)] text-[var(--color-wh-deep-green)] no-underline font-semibold hover:bg-white transition-colors"
           >
-            Verfügbarkeit prüfen
+            {c.cta.button}
           </Link>
         </div>
       </section>
