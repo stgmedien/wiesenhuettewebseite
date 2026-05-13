@@ -33,10 +33,35 @@ export default async function BewertungenPage() {
   const role = (session?.user as { role?: string } | undefined)?.role;
   if (role !== "manager" && role !== "admin") redirect("/m/dashboard");
 
-  const all = await db
-    .select()
-    .from(externalReviews)
-    .orderBy(desc(externalReviews.reviewedAt), desc(externalReviews.createdAt));
+  type ReviewRow = typeof externalReviews.$inferSelect;
+  let all: ReviewRow[] = [];
+  let dbError: string | null = null;
+  try {
+    all = await db
+      .select()
+      .from(externalReviews)
+      .orderBy(desc(externalReviews.reviewedAt), desc(externalReviews.createdAt));
+  } catch (err) {
+    dbError =
+      err instanceof Error
+        ? err.message
+        : "Tabelle external_reviews nicht erreichbar.";
+  }
+
+  if (dbError) {
+    return (
+      <div className="p-6 max-w-3xl">
+        <h1 className="font-display text-3xl font-bold mb-3">Bewertungen</h1>
+        <div className="bg-amber-50 border-l-4 border-amber-500 rounded p-4 text-sm">
+          <p className="m-0 mb-2 font-semibold">Tabelle <code>external_reviews</code> noch nicht angelegt.</p>
+          <p className="m-0 mb-2">Lokal ausführen:</p>
+          <pre className="bg-white border border-amber-200 rounded p-2 text-xs overflow-x-auto"><code>npm run db:migrate
+npm run db:seed:reviews</code></pre>
+          <p className="m-0 mt-2 text-xs text-amber-900/70">DB-Fehler: {dbError}</p>
+        </div>
+      </div>
+    );
+  }
 
   // Aggregat pro Quelle (nur published)
   const aggregates: Record<string, { count: number; avg: number | null; published: number }> = {};

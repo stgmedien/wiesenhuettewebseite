@@ -53,44 +53,56 @@ const SOURCE_LABELS: Record<string, string> = {
 export async function TrustBadge({ locale }: { locale: Locale }) {
   const c = COPY[locale];
 
-  // Aggregat: nur published Reviews
-  const rated = await db
-    .select({
-      rating: externalReviews.rating,
-      source: externalReviews.source,
-    })
-    .from(externalReviews)
-    .where(and(eq(externalReviews.published, true), isNotNull(externalReviews.rating)));
+  // Resilient: wenn die Tabelle (noch) nicht existiert (Migration nicht
+  // gelaufen) oder die DB-Query aus anderen Gruenden scheitert, blenden
+  // wir den Block einfach aus — die Landing-Page soll deswegen nicht
+  // crashen.
+  type ReviewRow = typeof externalReviews.$inferSelect;
+  let rated: { rating: number | null; source: string }[] = [];
+  let highlights: ReviewRow[] = [];
+  let fallback: ReviewRow[] = [];
+  try {
+    rated = await db
+      .select({
+        rating: externalReviews.rating,
+        source: externalReviews.source,
+      })
+      .from(externalReviews)
+      .where(and(eq(externalReviews.published, true), isNotNull(externalReviews.rating)));
 
-  if (rated.length === 0) return null;
+    if (rated.length === 0) return null;
+
+    highlights = await db
+      .select()
+      .from(externalReviews)
+      .where(and(eq(externalReviews.published, true), eq(externalReviews.highlight, true)))
+      .orderBy(desc(externalReviews.reviewedAt))
+      .limit(6);
+
+    fallback =
+      highlights.length >= 3
+        ? []
+        : await db
+            .select()
+            .from(externalReviews)
+            .where(
+              and(
+                eq(externalReviews.published, true),
+                isNotNull(externalReviews.text)
+              )
+            )
+            .orderBy(desc(externalReviews.reviewedAt))
+            .limit(6 - highlights.length);
+  } catch (err) {
+    // Tabelle existiert nicht / DB nicht erreichbar — Block ausblenden
+    console.warn("[TrustBadge] DB-Query fehlgeschlagen — Block wird ausgeblendet:", err);
+    return null;
+  }
 
   const avg = rated.reduce((acc, r) => acc + (r.rating ?? 0), 0) / rated.length;
   const sources = Array.from(new Set(rated.map((r) => r.source))).map(
     (s) => SOURCE_LABELS[s as string] ?? s
   ).filter(Boolean);
-
-  // Highlights mit Text laden — bevorzugt highlight=true, ansonsten gestreut neuste mit Text
-  const highlights = await db
-    .select()
-    .from(externalReviews)
-    .where(and(eq(externalReviews.published, true), eq(externalReviews.highlight, true)))
-    .orderBy(desc(externalReviews.reviewedAt))
-    .limit(6);
-
-  const fallback =
-    highlights.length >= 3
-      ? []
-      : await db
-          .select()
-          .from(externalReviews)
-          .where(
-            and(
-              eq(externalReviews.published, true),
-              isNotNull(externalReviews.text)
-            )
-          )
-          .orderBy(desc(externalReviews.reviewedAt))
-          .limit(6 - highlights.length);
 
   // De-duplicate (highlights kann mit fallback überlappen)
   const seen = new Set<string>();
