@@ -24,6 +24,10 @@ import {
   MessageSquare,
   Footprints,
   Star,
+  Gift,
+  Wrench,
+  Send,
+  MapPin,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -37,6 +41,10 @@ const NAV_ALL = [
   { href: "/m/feedback", label: "Feedback", Icon: Star, adminOnly: false },
   { href: "/m/wandertouren", label: "Wandertouren", Icon: Footprints, adminOnly: false },
   { href: "/m/community", label: "Anekdoten", Icon: MessageSquare, adminOnly: false },
+  { href: "/m/gutscheine", label: "Gutscheine", Icon: Gift, adminOnly: false },
+  { href: "/m/wartung", label: "Wartung", Icon: Wrench, adminOnly: false },
+  { href: "/m/bulk-mail", label: "Bulk-Mail", Icon: Send, adminOnly: false },
+  { href: "/m/empfehlungen", label: "Empfehlungen", Icon: MapPin, adminOnly: false },
   { href: "/m/benutzer", label: "Benutzer", Icon: Users2, adminOnly: false },
   { href: "/m/mitgliedschaften", label: "Mitgliedschaften", Icon: BadgeCheck, adminOnly: false },
   { href: "/m/reporting", label: "Reporting", Icon: BarChart3, adminOnly: false },

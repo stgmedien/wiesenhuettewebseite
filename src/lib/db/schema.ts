@@ -196,6 +196,14 @@ export const customers = pgTable(
     loyaltyTier: integer("loyalty_tier").notNull().default(0), // Stufe: 0=keine, 1=>=3 Aufenthalte, 2=>=10
     loyaltyDiscountIssuedAt: timestamp("loyalty_discount_issued_at"),
 
+    // Geburtstagsmail + persönliche Daten
+    birthDate: date("birth_date"),
+    // Bulk-Mail Opt-Out: wenn true, schickt unser Bulk-Mailer KEINE Newsletter mehr
+    // (transaktionale Mails wie Buchungsbestätigung bleiben unberührt)
+    emailOptOut: boolean("email_opt_out").notNull().default(false),
+    // Sprach-Präferenz für Mails + Public-Pages (de | en | nl)
+    preferredLanguage: varchar("preferred_language", { length: 5 }).notNull().default("de"),
+
     // DSGVO: anonymisiert nach Konto-Loeschung. Buchungen+Rechnungen bleiben erhalten
     // (10 Jahre handelsrechtliche Aufbewahrungspflicht), aber PII wird ueberschrieben.
     anonymizedAt: timestamp("anonymized_at"),
@@ -205,6 +213,7 @@ export const customers = pgTable(
   (t) => ({
     emailIdx: index("customers_email_idx").on(t.email),
     membershipStatusIdx: index("customers_membership_status_idx").on(t.membershipStatus),
+    birthDateIdx: index("customers_birth_date_idx").on(t.birthDate),
   })
 );
 
@@ -271,6 +280,14 @@ export const bookings = pgTable(
 
     internalNotes: text("internal_notes"),
     customerMessage: text("customer_message"),
+
+    // Hausordnungs-Akzept (versioniert für rechtliche Nachvollziehbarkeit)
+    acceptedHausordnungVersion: varchar("accepted_hausordnung_version", { length: 20 }),
+    acceptedHausordnungAt: timestamp("accepted_hausordnung_at"),
+
+    // Geschenk-Gutschein-Einlösung (separate von discount_codes)
+    voucherId: uuid("voucher_id"),
+    voucherDiscountCents: integer("voucher_discount_cents").notNull().default(0),
 
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
@@ -915,6 +932,143 @@ export const hikingRoutes = pgTable(
   },
   (t) => ({
     slugIdx: uniqueIndex("hiking_routes_slug_uniq").on(t.slug),
+  })
+);
+
+// =============================================================
+// GESCHENK-GUTSCHEINE — bezahlte Gift-Cards (separat von discount_codes)
+// =============================================================
+
+export const vouchers = pgTable(
+  "vouchers",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    code: varchar("code", { length: 24 }).notNull().unique(), // WH-GIFT-XXXX-YYYY
+    valueCents: integer("value_cents").notNull(),
+    redeemedCents: integer("redeemed_cents").notNull().default(0),
+    // Käufer
+    purchaserName: varchar("purchaser_name", { length: 200 }).notNull(),
+    purchaserEmail: varchar("purchaser_email", { length: 255 }).notNull(),
+    // Empfänger (kann gleich Käufer sein)
+    recipientName: varchar("recipient_name", { length: 200 }),
+    recipientEmail: varchar("recipient_email", { length: 255 }),
+    personalMessage: text("personal_message"),
+    deliveryMode: varchar("delivery_mode", { length: 20 }).notNull().default("email"), // email | print
+    // Stripe payment
+    stripeSessionId: text("stripe_session_id"),
+    stripePaymentIntentId: text("stripe_payment_intent_id"),
+    paidAt: timestamp("paid_at"),
+    // Lifecycle
+    expiresAt: timestamp("expires_at"), // typisch 3 Jahre nach Kauf
+    firstRedeemedAt: timestamp("first_redeemed_at"),
+    fullyRedeemed: boolean("fully_redeemed").notNull().default(false),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    codeIdx: uniqueIndex("vouchers_code_uniq").on(t.code),
+    recipientIdx: index("vouchers_recipient_email_idx").on(t.recipientEmail),
+    purchaserIdx: index("vouchers_purchaser_email_idx").on(t.purchaserEmail),
+  })
+);
+
+// =============================================================
+// WARTUNGS-TICKETS — Hüttenwart-Mängelliste
+// =============================================================
+
+export const maintenanceTickets = pgTable(
+  "maintenance_tickets",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    title: varchar("title", { length: 200 }).notNull(),
+    description: text("description"),
+    location: varchar("location", { length: 200 }), // z.B. "Bad EG", "Küche", "Außen"
+    severity: varchar("severity", { length: 20 }).notNull().default("medium"), // low | medium | high | urgent
+    status: varchar("status", { length: 20 }).notNull().default("open"), // open | in_progress | resolved
+    photoUrls: jsonb("photo_urls").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+    createdBy: varchar("created_by", { length: 255 }),
+    assignedTo: varchar("assigned_to", { length: 255 }),
+    resolvedAt: timestamp("resolved_at"),
+    resolutionNote: text("resolution_note"),
+    bookingId: uuid("booking_id").references(() => bookings.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    statusIdx: index("maintenance_tickets_status_idx").on(t.status),
+    severityIdx: index("maintenance_tickets_severity_idx").on(t.severity),
+    createdAtIdx: index("maintenance_tickets_created_at_idx").on(t.createdAt),
+  })
+);
+
+// =============================================================
+// BULK-MAIL — Kampagnen + per-Empfänger Sendings (Opt-Out-tauglich)
+// =============================================================
+
+export const bulkMailCampaigns = pgTable("bulk_mail_campaigns", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  subject: varchar("subject", { length: 200 }).notNull(),
+  body: text("body").notNull(), // Markdown
+  audience: varchar("audience", { length: 40 }).notNull(), // all_customers | verified_members | recent_guests | upcoming_guests
+  audienceFilter: jsonb("audience_filter"), // optional saved JSON filter
+  createdBy: varchar("created_by", { length: 255 }).notNull(),
+  status: varchar("status", { length: 20 }).notNull().default("draft"), // draft | sending | sent | cancelled
+  totalRecipients: integer("total_recipients").notNull().default(0),
+  totalSent: integer("total_sent").notNull().default(0),
+  totalFailed: integer("total_failed").notNull().default(0),
+  totalOptedOut: integer("total_opted_out").notNull().default(0),
+  scheduledFor: timestamp("scheduled_for"),
+  sentAt: timestamp("sent_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const bulkMailSends = pgTable(
+  "bulk_mail_sends",
+  {
+    id: serial("id").primaryKey(),
+    campaignId: uuid("campaign_id")
+      .notNull()
+      .references(() => bulkMailCampaigns.id, { onDelete: "cascade" }),
+    customerId: uuid("customer_id").references(() => customers.id, { onDelete: "set null" }),
+    email: varchar("email", { length: 255 }).notNull(),
+    status: varchar("status", { length: 20 }).notNull(), // sent | failed | opted_out
+    errorMessage: text("error_message"),
+    sentAt: timestamp("sent_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    campaignIdx: index("bulk_mail_sends_campaign_idx").on(t.campaignId),
+  })
+);
+
+// =============================================================
+// REGIONALE EMPFEHLUNGEN — Post-Checkout "Was kannst Du hier machen?"
+// =============================================================
+
+export const regionalRecommendations = pgTable(
+  "regional_recommendations",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    category: varchar("category", { length: 40 }).notNull(),
+    // category-Vokabular: restaurant | einkauf | aktivitaet | sehenswuerdigkeit | notdienst | verleih
+    name: varchar("name", { length: 200 }).notNull(),
+    description: text("description"),
+    address: varchar("address", { length: 500 }),
+    websiteUrl: text("website_url"),
+    phone: varchar("phone", { length: 60 }),
+    openingHours: varchar("opening_hours", { length: 500 }),
+    distanceFromHuetteKm: real("distance_from_huette_km"),
+    lat: real("lat"),
+    lng: real("lng"),
+    imageUrl: text("image_url"),
+    seasonalOnly: varchar("seasonal_only", { length: 40 }), // null | winter | sommer
+    sortOrder: integer("sort_order").notNull().default(0),
+    active: boolean("active").notNull().default(true),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    categoryIdx: index("regional_recommendations_category_idx").on(t.category),
+    activeIdx: index("regional_recommendations_active_idx").on(t.active),
   })
 );
 
