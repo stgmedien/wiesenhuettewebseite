@@ -313,7 +313,7 @@ export default async function EmpfehlungenPage() {
           <ScrollReveal>
             <Compass size={42} className="mx-auto mb-6 opacity-80" strokeWidth={1.2} />
             <h2
-              className="font-display font-bold m-0 mb-5 leading-tight"
+              className="font-display font-bold m-0 mb-5 leading-tight text-[var(--color-wh-snow)]"
               style={{ fontSize: "clamp(32px, 5vw, 56px)", letterSpacing: "-0.02em" }}
             >
               {pc.ctaH2}

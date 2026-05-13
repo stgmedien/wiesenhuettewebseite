@@ -168,7 +168,7 @@ export default async function ErfolgPage({ searchParams }: Props) {
               {c.recsTeaserEyebrow}
             </div>
             <h2
-              className="font-display font-extrabold m-0 mb-5 leading-[1.05]"
+              className="font-display font-extrabold m-0 mb-5 leading-[1.05] text-[var(--color-wh-snow)]"
               style={{ fontSize: "clamp(32px, 4.5vw, 52px)", letterSpacing: "-0.02em" }}
             >
               {c.recsTeaserH}
