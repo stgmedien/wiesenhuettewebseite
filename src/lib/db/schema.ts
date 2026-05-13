@@ -1127,6 +1127,52 @@ export const bookingAttempts = pgTable(
 );
 
 // =============================================================
+// EXTERNAL REVIEWS — Bewertungen aus Drittquellen (Google, Plattformen)
+// kuratiert ueber Manager-Backend. Anzeige im Trust-Badge auf der Landing-Page.
+// =============================================================
+
+export const externalReviewSourceEnum = pgEnum("external_review_source", [
+  "google",
+  "gruppenhaus",
+  "gruppenunterkuenfte",
+  "manual",
+]);
+
+export const externalReviews = pgTable(
+  "external_reviews",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    source: externalReviewSourceEnum("source").notNull(),
+    authorName: varchar("author_name", { length: 200 }).notNull(),
+    rating: integer("rating"), // 1-5; null = keine Sterne (z.B. Text-only Plattformen)
+    text: text("text"),
+    // Approximatives Review-Datum (bei Google nur als "vor X Jahren" gegeben → wir
+    // schaetzen ab Zeitpunkt der Aufnahme rueckwaerts).
+    reviewedAt: date("reviewed_at"),
+    // Original-Relative-Time-Text fuer Audit ("vor 5 Monaten")
+    relativeTime: varchar("relative_time", { length: 60 }),
+    // Quellen-Referenz (URL oder stabile Hash-ID); Eindeutigkeits-Constraint je
+    // (source, source_ref), damit Re-Imports keine Duplikate erzeugen.
+    sourceRef: varchar("source_ref", { length: 255 }),
+    sourceUrl: text("source_url"),
+    // Original-Sprache des Reviews (falls von Google uebersetzt: hier die original-locale)
+    originalLanguage: varchar("original_language", { length: 5 }),
+    translated: boolean("translated").notNull().default(false),
+    // Manager-Kontrolle: nur published=true scheinen auf der Landing-Page auf.
+    published: boolean("published").notNull().default(true),
+    // Highlight: explizit fuer den Trust-Badge-Carousel ausgewaehlt.
+    highlight: boolean("highlight").notNull().default(false),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    sourceRefIdx: uniqueIndex("ext_reviews_source_ref_idx").on(t.source, t.sourceRef),
+    publishedIdx: index("ext_reviews_published_idx").on(t.published),
+    sourceIdx: index("ext_reviews_source_idx").on(t.source),
+  })
+);
+
+// =============================================================
 // RELATIONS
 // =============================================================
 
@@ -1227,3 +1273,5 @@ export type MembershipTier = typeof membershipTiers.$inferSelect;
 export type NewMembershipTier = typeof membershipTiers.$inferInsert;
 export type MailTemplateVersion = typeof mailTemplateVersions.$inferSelect;
 export type NewMailTemplateVersion = typeof mailTemplateVersions.$inferInsert;
+export type ExternalReview = typeof externalReviews.$inferSelect;
+export type NewExternalReview = typeof externalReviews.$inferInsert;

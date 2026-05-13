@@ -28,6 +28,7 @@ import {
   Wrench,
   Send,
   MapPin,
+  ThumbsUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +40,7 @@ const NAV_ALL = [
   { href: "/m/sperrzeiten", label: "Sperrzeiten", Icon: Lock, adminOnly: false },
   { href: "/m/blog", label: "Blog", Icon: FileText, adminOnly: false },
   { href: "/m/feedback", label: "Feedback", Icon: Star, adminOnly: false },
+  { href: "/m/bewertungen", label: "Bewertungen", Icon: ThumbsUp, adminOnly: false },
   { href: "/m/wandertouren", label: "Wandertouren", Icon: Footprints, adminOnly: false },
   { href: "/m/community", label: "Anekdoten", Icon: MessageSquare, adminOnly: false },
   { href: "/m/gutscheine", label: "Gutscheine", Icon: Gift, adminOnly: false },
