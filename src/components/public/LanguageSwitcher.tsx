@@ -28,7 +28,7 @@ export function LanguageSwitcher({ current }: { current: Locale }) {
             onClick={() => setOpen(false)}
             aria-hidden
           />
-          <div className="absolute right-0 mt-2 w-44 bg-white border border-[var(--color-wh-winter-grey)] rounded-lg shadow-lg z-20 overflow-hidden">
+          <div className="absolute right-0 mt-2 w-44 bg-white border border-[var(--color-wh-winter-grey)] rounded-lg shadow-lg z-20 overflow-hidden text-[var(--color-wh-black)]">
             {LOCALES.map((l) => (
               <button
                 key={l}
@@ -40,7 +40,7 @@ export function LanguageSwitcher({ current }: { current: Locale }) {
                     setOpen(false);
                   });
                 }}
-                className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 hover:bg-[var(--color-wh-beige)] disabled:cursor-default ${
+                className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 text-[var(--color-wh-black)] hover:bg-[var(--color-wh-beige)] disabled:cursor-default ${
                   l === current ? "bg-[var(--color-wh-beige)]/60 font-semibold" : ""
                 }`}
               >

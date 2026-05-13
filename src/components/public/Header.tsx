@@ -177,7 +177,6 @@ export const Header = ({
           </nav>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
-            {trust && <TrustBadgeButton trust={trust} locale={locale} variant="header" />}
             <div className="hidden md:block bg-white/10 rounded-full p-0.5">
               <LanguageSwitcher current={locale} />
             </div>
@@ -207,6 +206,7 @@ export const Header = ({
                 {t("nav.login", locale)}
               </Link>
             )}
+            {trust && <TrustBadgeButton trust={trust} locale={locale} variant="header" />}
             <Link
               href="/buchen"
               className="inline-flex h-9 px-4 sm:px-5 items-center rounded-full bg-[var(--color-wh-snow)] text-[var(--color-wh-deep-green)] text-sm font-semibold no-underline hover:bg-white transition-colors whitespace-nowrap"
