@@ -19,9 +19,14 @@ export const metadata = {
   das Postfach — abmahn-anfällig, aber nicht akut illegal.
 */
 
-export default function Impressum() {
+import { DeOnlyBanner } from "@/components/public/DeOnlyBanner";
+import { getServerLocale } from "@/lib/i18n";
+
+export default async function Impressum() {
+  const locale = await getServerLocale();
   return (
     <div className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24">
+      <DeOnlyBanner locale={locale} />
       <div className="max-w-[820px] mx-auto">
         <div className="eyebrow">Rechtliches</div>
         <h1 className="text-[40px] sm:text-[56px] mt-4 mb-3">Impressum</h1>

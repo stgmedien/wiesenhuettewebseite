@@ -1,6 +1,5 @@
 import { Header } from "@/components/public/Header";
 import { Footer } from "@/components/public/Footer";
-import { DeOnlyBanner } from "@/components/public/DeOnlyBanner";
 import { ConsentProvider } from "@/components/consent/ConsentContext";
 import { CookieBanner } from "@/components/consent/CookieBanner";
 import { auth } from "@/lib/auth";
@@ -22,7 +21,6 @@ export default async function PublicLayout({
   return (
     <ConsentProvider>
       <Header session={headerSession} locale={locale} />
-      <DeOnlyBanner locale={locale} />
       <main className="flex-1">{children}</main>
       <Footer locale={locale} />
       <CookieBanner />

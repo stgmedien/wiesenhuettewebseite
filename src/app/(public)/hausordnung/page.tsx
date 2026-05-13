@@ -1,12 +1,17 @@
+import { DeOnlyBanner } from "@/components/public/DeOnlyBanner";
+import { getServerLocale } from "@/lib/i18n";
+
 export const metadata = {
   title: "Hausordnung · Wiesenhütte",
   description:
     "Hausordnung der Wiesenhütte: Anreise-Hinweise, Verhalten in der Hütte, Abreise-Checkliste. Gilt verbindlich für alle Gäste.",
 };
 
-export default function HausordnungPage() {
+export default async function HausordnungPage() {
+  const locale = await getServerLocale();
   return (
     <div className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24">
+      <DeOnlyBanner locale={locale} />
       <div className="max-w-[820px] mx-auto">
         <div className="eyebrow">Hausordnung</div>
         <h1 className="text-[44px] sm:text-[56px] mt-4 mb-2">Damit's für alle gut wird.</h1>

@@ -3,9 +3,11 @@ import { PhotoGallery } from "@/components/public/PhotoGallery";
 import { FeaturedQuote } from "@/components/public/FeaturedQuote";
 import { CommunityEntryCard, type CommunityEntryView } from "@/components/public/CommunityEntryCard";
 import { CommunitySubmitForm } from "@/components/public/CommunitySubmitForm";
+import { DeOnlyBanner } from "@/components/public/DeOnlyBanner";
 import { db } from "@/lib/db";
 import { communityEntries } from "@/lib/db/schema";
 import { and, desc, eq } from "drizzle-orm";
+import { getServerLocale } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -47,6 +49,7 @@ const PROJEKTFAHRT_BILDER = [
 ];
 
 export default async function EsgPage() {
+  const locale = await getServerLocale();
   // Schüler-Anekdoten — approved entries vom Community-Feed
   const anekdotenRows = await db
     .select({
@@ -72,6 +75,7 @@ export default async function EsgPage() {
 
   return (
     <div>
+      <DeOnlyBanner locale={locale} />
       {/* ---------------------------------------------------------------- */}
       {/* HERO BILD — Kollaboration ESG × Wiesenhütte */}
       {/* ---------------------------------------------------------------- */}

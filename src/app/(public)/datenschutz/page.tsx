@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { DeOnlyBanner } from "@/components/public/DeOnlyBanner";
+import { getServerLocale } from "@/lib/i18n";
 
 export const metadata = {
   title: "Datenschutzerklärung · Wiesenhütte",
@@ -6,9 +8,11 @@ export const metadata = {
     "Datenschutzerklärung der Wiesenhütte (Skifreunde Gütersloh e.V.) — welche Daten wir verarbeiten, wie und warum.",
 };
 
-export default function Datenschutz() {
+export default async function Datenschutz() {
+  const locale = await getServerLocale();
   return (
     <div className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24">
+      <DeOnlyBanner locale={locale} />
       <div className="max-w-[860px] mx-auto">
         <div className="eyebrow">Rechtliches</div>
         <h1 className="text-[40px] sm:text-[56px] mt-4 mb-3">Datenschutzerklärung</h1>

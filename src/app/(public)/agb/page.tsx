@@ -1,12 +1,17 @@
+import { DeOnlyBanner } from "@/components/public/DeOnlyBanner";
+import { getServerLocale } from "@/lib/i18n";
+
 export const metadata = {
   title: "AGB · Wiesenhütte",
   description:
     "Allgemeine Geschäftsbedingungen für die Anmietung der Wiesenhütte der Skifreunde Gütersloh e.V. in Langewiese.",
 };
 
-export default function AGB() {
+export default async function AGB() {
+  const locale = await getServerLocale();
   return (
     <div className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24">
+      <DeOnlyBanner locale={locale} />
       <div className="max-w-[820px] mx-auto">
         <div className="eyebrow">Rechtliches</div>
         <h1 className="text-[40px] sm:text-[56px] mt-4 mb-2">
