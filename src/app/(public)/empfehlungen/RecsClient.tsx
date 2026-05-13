@@ -3,67 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { Locale } from "@/lib/i18n-shared";
 
-/**
- * Wrapper-Component fuer Scroll-Reveal-Effekte. Kinder bekommen die Klasse
- * `opacity-0 translate-y-6` initial; sobald der Container in den Viewport
- * kommt, wird `opacity-100 translate-y-0` gesetzt — mit Tailwind-Transition.
- *
- * Verwendet IntersectionObserver. Ein Re-Trigger (z.B. beim Hoch-Scrollen)
- * passiert NICHT — Reveal ist ein once-per-Mount Effekt.
- */
-export function ScrollReveal({
-  children,
-  delay = 0,
-  className = "",
-  as: As = "div",
-}: {
-  children: React.ReactNode;
-  /** Verzoegerung in ms (per Inline-Style, kein extra Tailwind-Util) */
-  delay?: number;
-  className?: string;
-  as?: keyof React.JSX.IntrinsicElements;
-}) {
-  const ref = useRef<HTMLElement | null>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (typeof IntersectionObserver === "undefined") {
-      setVisible(true);
-      return;
-    }
-    const obs = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) {
-            setVisible(true);
-            obs.disconnect();
-            break;
-          }
-        }
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
-  // Wir bauen die Komponente dynamisch — funktioniert für div/section/article/li
-  const Tag = As as unknown as React.ElementType;
-
-  return (
-    <Tag
-      ref={ref as React.RefObject<HTMLElement>}
-      style={{ transitionDelay: `${delay}ms` }}
-      className={`transition-all duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform ${
-        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-      } ${className}`}
-    >
-      {children}
-    </Tag>
-  );
-}
+// Re-export aus shared component, damit bestehende Importe nicht brechen.
+export { ScrollReveal } from "@/components/public/ScrollReveal";
 
 const STICKY_COPY: Record<Locale, { jumpTo: string }> = {
   de: { jumpTo: "Springe zu" },
