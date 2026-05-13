@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { getServerLocale } from "@/lib/i18n";
 import { makeT } from "@/lib/i18n-shared";
-import { TrustBadge } from "@/components/public/TrustBadge";
 
 const FEATURE_ICONS = [Users, MountainSnow, Route, CookingPot, Armchair, Flame];
 
@@ -23,7 +22,6 @@ export default async function HomePage() {
       <Hero tr={tr} />
       <IntroBlock tr={tr} />
       <FeatureGrid tr={tr} />
-      <TrustBadge locale={locale} />
       <HistoryTeaser tr={tr} />
       <CTABand tr={tr} />
     </div>
