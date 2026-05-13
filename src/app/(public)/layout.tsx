@@ -4,7 +4,6 @@ import { ConsentProvider } from "@/components/consent/ConsentContext";
 import { CookieBanner } from "@/components/consent/CookieBanner";
 import { auth } from "@/lib/auth";
 import { getServerLocale } from "@/lib/i18n";
-import { loadTrustData } from "@/lib/trust-reviews";
 
 export default async function PublicLayout({
   children,
@@ -13,7 +12,6 @@ export default async function PublicLayout({
 }) {
   const session = await auth();
   const locale = await getServerLocale();
-  const trust = await loadTrustData();
   const headerSession = {
     loggedIn: !!session?.user,
     name: session?.user?.name ?? null,
@@ -22,7 +20,7 @@ export default async function PublicLayout({
 
   return (
     <ConsentProvider>
-      <Header session={headerSession} locale={locale} trust={trust} />
+      <Header session={headerSession} locale={locale} />
       <main className="flex-1">{children}</main>
       <Footer locale={locale} />
       <CookieBanner />

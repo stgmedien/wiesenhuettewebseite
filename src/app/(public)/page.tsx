@@ -10,16 +10,19 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { getServerLocale } from "@/lib/i18n";
-import { makeT } from "@/lib/i18n-shared";
+import { makeT, type Locale } from "@/lib/i18n-shared";
+import { loadTrustData, type TrustData } from "@/lib/trust-reviews";
+import { TrustBadgeButton } from "@/components/public/TrustBadgeButton";
 
 const FEATURE_ICONS = [Users, MountainSnow, Route, CookingPot, Armchair, Flame];
 
 export default async function HomePage() {
   const locale = await getServerLocale();
   const tr = makeT(locale);
+  const trust = await loadTrustData();
   return (
     <div>
-      <Hero tr={tr} />
+      <Hero tr={tr} trust={trust} locale={locale} />
       <IntroBlock tr={tr} />
       <FeatureGrid tr={tr} />
       <HistoryTeaser tr={tr} />
@@ -30,7 +33,15 @@ export default async function HomePage() {
 
 type Tr = (key: string) => string;
 
-const Hero = ({ tr }: { tr: Tr }) => (
+const Hero = ({
+  tr,
+  trust,
+  locale,
+}: {
+  tr: Tr;
+  trust: TrustData | null;
+  locale: Locale;
+}) => (
   <section className="relative h-[600px] sm:h-[680px] overflow-hidden">
     <video
       autoPlay
@@ -60,7 +71,7 @@ const Hero = ({ tr }: { tr: Tr }) => (
       <p className="text-base sm:text-[19px] leading-relaxed text-[var(--color-wh-snow)]/95 m-0 max-w-xl drop-shadow">
         {tr("home.hero.lead")}
       </p>
-      <div className="flex gap-3 flex-wrap">
+      <div className="flex gap-3 flex-wrap items-center">
         <Link
           href="/buchen"
           className="inline-flex h-13 sm:h-14 px-6 sm:px-7 items-center gap-2.5 rounded-[var(--radius-btn)] bg-[var(--color-wh-snow)] text-[var(--color-wh-deep-green)] font-semibold no-underline hover:bg-white transition-all shadow-[var(--shadow-float)] hover:shadow-[var(--shadow-deep)]"
@@ -79,6 +90,7 @@ const Hero = ({ tr }: { tr: Tr }) => (
         >
           {tr("home.hero.cta.more")}
         </Link>
+        {trust && <TrustBadgeButton trust={trust} locale={locale} variant="hero" />}
       </div>
     </div>
     <div className="absolute right-6 top-6 sm:right-8 sm:top-8 text-[var(--color-wh-snow)] text-xs uppercase tracking-[0.18em] opacity-90 drop-shadow">

@@ -8,8 +8,6 @@ import { cn } from "@/lib/utils";
 import { t, type Locale, LOCALES, LOCALE_LABELS } from "@/lib/i18n-shared";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { setLocale } from "@/app/i18n-actions";
-import { TrustBadgeButton } from "./TrustBadgeButton";
-import type { TrustData } from "@/lib/trust-reviews";
 
 // Locale-aware Strings, die NICHT im zentralen Dict liegen (Header-spezifisch).
 const HEADER_COPY: Record<Locale, {
@@ -66,11 +64,9 @@ export type HeaderSession = {
 export const Header = ({
   session,
   locale,
-  trust,
 }: {
   session: HeaderSession;
   locale: Locale;
-  trust?: TrustData | null;
 }) => {
   const NAV = NAV_KEYS.map((n) => ({ href: n.href, label: t(n.key, locale) }));
   const hc = HEADER_COPY[locale];
@@ -206,7 +202,6 @@ export const Header = ({
                 {t("nav.login", locale)}
               </Link>
             )}
-            {trust && <TrustBadgeButton trust={trust} locale={locale} variant="header" />}
             <Link
               href="/buchen"
               className="inline-flex h-9 px-4 sm:px-5 items-center rounded-full bg-[var(--color-wh-snow)] text-[var(--color-wh-deep-green)] text-sm font-semibold no-underline hover:bg-white transition-colors whitespace-nowrap"
@@ -230,14 +225,6 @@ export const Header = ({
             className="md:hidden bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] border-t border-white/15 max-h-[calc(100vh-3.5rem)] overflow-y-auto"
           >
             <div className="px-5 py-3 flex flex-col gap-1">
-              {/* Trust-Badge ganz oben — auf Mobile sonst nicht sichtbar (im Top-Bar
-                  versteckt durch hidden sm:inline-flex). */}
-              {trust && (
-                <div className="mb-3">
-                  <TrustBadgeButton trust={trust} locale={locale} variant="mobile-menu" />
-                </div>
-              )}
-
               {/* Sprache — direkt sichtbar beim Aufklappen, kein Scrollen noetig. */}
               <div className="flex items-center gap-2 mb-3 pb-3 border-b border-white/12">
                 <Globe size={16} className="text-[var(--color-wh-snow)]/70 shrink-0" />

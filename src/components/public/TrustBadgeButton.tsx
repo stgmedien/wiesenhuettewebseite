@@ -13,6 +13,7 @@ const COPY: Record<Locale, {
   noText: string;
   close: string;
   translated: string;
+  reviewsWord: string;
 }> = {
   de: {
     ariaLabel: "Bewertungen anzeigen",
@@ -22,6 +23,7 @@ const COPY: Record<Locale, {
     noText: "(keine Textbewertung)",
     close: "Schließen",
     translated: "übersetzt aus",
+    reviewsWord: "Bewertungen",
   },
   en: {
     ariaLabel: "Show reviews",
@@ -31,6 +33,7 @@ const COPY: Record<Locale, {
     noText: "(no text review)",
     close: "Close",
     translated: "translated from",
+    reviewsWord: "reviews",
   },
   nl: {
     ariaLabel: "Reviews tonen",
@@ -40,6 +43,7 @@ const COPY: Record<Locale, {
     noText: "(geen tekstreview)",
     close: "Sluiten",
     translated: "vertaald uit",
+    reviewsWord: "reviews",
   },
 };
 
@@ -57,7 +61,7 @@ export function TrustBadgeButton({
 }: {
   trust: TrustData;
   locale: Locale;
-  variant?: "header" | "mobile-menu";
+  variant?: "header" | "mobile-menu" | "hero";
 }) {
   const c = COPY[locale];
   const [open, setOpen] = useState(false);
@@ -92,9 +96,14 @@ export function TrustBadgeButton({
     </>
   );
 
+  // Volle 5 Sterne fuer Hero (groesser, mit Halbsternen)
+  const full = Math.floor(trust.avg);
+  const halfStar = trust.avg - full >= 0.25 && trust.avg - full < 0.75;
+  const showFull = trust.avg - full >= 0.75 ? full + 1 : full;
+
   return (
     <>
-      {variant === "header" ? (
+      {variant === "header" && (
         <button
           type="button"
           onClick={() => setOpen(true)}
@@ -103,8 +112,8 @@ export function TrustBadgeButton({
         >
           {PillContent}
         </button>
-      ) : (
-        // mobile-menu Variante: groesserer, gut tappbarer Button
+      )}
+      {variant === "mobile-menu" && (
         <button
           type="button"
           onClick={() => setOpen(true)}
@@ -113,6 +122,47 @@ export function TrustBadgeButton({
         >
           {PillContent}
           <span className="opacity-70">›</span>
+        </button>
+      )}
+      {variant === "hero" && (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label={c.ariaLabel}
+          className="inline-flex items-center gap-2.5 h-13 sm:h-14 px-5 sm:px-6 rounded-[var(--radius-btn)] backdrop-blur-sm cursor-pointer transition-colors no-underline group"
+          style={{
+            background: "rgba(17,17,17,0.4)",
+            border: "1px solid rgba(247,247,242,0.7)",
+          }}
+        >
+          <span className="flex items-center gap-0.5 text-amber-400 shrink-0">
+            {Array.from({ length: 5 }).map((_, i) => {
+              const isFull = i < showFull;
+              const isHalf = !isFull && i === full && halfStar;
+              return (
+                <Star
+                  key={i}
+                  size={16}
+                  fill={isFull ? "currentColor" : isHalf ? "url(#half-hero)" : "none"}
+                  strokeWidth={1.5}
+                />
+              );
+            })}
+            <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden>
+              <defs>
+                <linearGradient id="half-hero" x1="0%" x2="100%" y1="0%" y2="0%">
+                  <stop offset="50%" stopColor="currentColor" />
+                  <stop offset="50%" stopColor="transparent" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </span>
+          <span className="flex items-baseline gap-1.5 text-[var(--color-wh-snow)]">
+            <span className="font-bold tabular-nums text-sm sm:text-base">{avgRounded}</span>
+            <span className="text-xs sm:text-sm opacity-90 whitespace-nowrap">
+              · {trust.count} {c.reviewsWord}
+            </span>
+          </span>
         </button>
       )}
 
