@@ -1,13 +1,22 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { bookings, customers, payments, emailLog, activityLog, feedbackEntries } from "@/lib/db/schema";
-import { and, eq, gte, lte } from "drizzle-orm";
+import {
+  bookings,
+  customers,
+  payments,
+  emailLog,
+  activityLog,
+  feedbackEntries,
+  discountCodes,
+} from "@/lib/db/schema";
+import { and, eq, gte, lte, sql } from "drizzle-orm";
 import { stripe } from "@/lib/stripe";
 import { sendMail } from "@/lib/mail/send";
 import PaymentReminderEmail from "@/lib/mail/templates/payment-reminder";
 import ArrivalInfoEmail from "@/lib/mail/templates/arrival-info";
 import KeyHandoverEmail from "@/lib/mail/templates/key-handover";
 import FeedbackRequestEmail from "@/lib/mail/templates/feedback-request";
+import BirthdayEmail from "@/lib/mail/templates/birthday";
 import { formatDateLong } from "@/lib/utils";
 import {
   generateFeedbackToken,
@@ -15,6 +24,18 @@ import {
   feedbackUrl,
   feedbackExpiry,
 } from "@/lib/feedback";
+import crypto from "crypto";
+
+const BIRTHDAY_DISCOUNT_PERCENT = 10;
+const BIRTHDAY_VALID_DAYS = 60;
+
+function generateBirthdayCode(): string {
+  const alphabet = "ABCDEFGHJKMNPQRSTVWXYZ23456789"; // ohne 0,1,I,L,O,U
+  let s = "";
+  const bytes = crypto.randomBytes(8);
+  for (let i = 0; i < 8; i++) s += alphabet[bytes[i] % alphabet.length];
+  return `HBD-${s.slice(0, 4)}-${s.slice(4)}`;
+}
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -62,6 +83,7 @@ export async function GET(req: Request) {
     arrivalInfoSent: 0,
     keyHandoverSent: 0,
     feedbackRequestSent: 0,
+    birthdaySent: 0,
     autoChargeSucceeded: 0,
     autoChargeFailed: 0,
   };
@@ -309,6 +331,78 @@ export async function GET(req: Request) {
     } catch (err) {
       console.error("[cron] feedback_request failed:", err);
     }
+  }
+
+  // ---------- Geburtstagsmail mit Discount-Code ----------
+  // Tägliche Suche nach Customers, deren birth_date heute Monat+Tag-Match liefert.
+  // Pro Jahr nur einmal pro Customer (issuedReason='Geburtstag YYYY' im
+  // discount_codes-Audit).
+  const todayDate = new Date();
+  const todayMonth = todayDate.getMonth() + 1;
+  const todayDay = todayDate.getDate();
+  const thisYear = todayDate.getFullYear();
+  const birthdayReason = `Geburtstag ${thisYear}`;
+
+  try {
+    const birthdayRows = (await db.execute(sql`
+      SELECT c.id, c.email, c.first_name
+      FROM customers c
+      WHERE c.birth_date IS NOT NULL
+        AND EXTRACT(MONTH FROM c.birth_date) = ${todayMonth}
+        AND EXTRACT(DAY FROM c.birth_date) = ${todayDay}
+        AND c.email_opt_out = false
+        AND c.anonymized_at IS NULL
+        AND c.email NOT LIKE '%@wiesenhuette.invalid'
+        AND NOT EXISTS (
+          SELECT 1 FROM discount_codes dc
+          WHERE dc.customer_id = c.id
+            AND dc.issued_reason = ${birthdayReason}
+        )
+    `)) as unknown as Array<{ id: string; email: string; first_name: string }>;
+
+    for (const row of birthdayRows) {
+      const code = generateBirthdayCode();
+      const validUntil = new Date();
+      validUntil.setDate(validUntil.getDate() + BIRTHDAY_VALID_DAYS);
+
+      try {
+        await db.insert(discountCodes).values({
+          code,
+          kind: "promo",
+          percentOff: BIRTHDAY_DISCOUNT_PERCENT,
+          customerId: row.id,
+          issuedReason: birthdayReason,
+          validUntil: validUntil.toISOString().slice(0, 10),
+          maxRedemptions: 1,
+          active: true,
+        });
+        await sendMail({
+          to: row.email,
+          subject: `🎉 Alles Gute zum Geburtstag, ${row.first_name}!`,
+          template: "birthday",
+          react: BirthdayEmail({
+            firstName: row.first_name,
+            discountCode: code,
+            discountPercent: BIRTHDAY_DISCOUNT_PERCENT,
+            validUntilFormatted: validUntil.toLocaleDateString("de-DE", {
+              day: "2-digit",
+              month: "long",
+              year: "numeric",
+            }),
+            bookingUrl: `${BASE_URL}/buchen`,
+          }),
+        });
+        await db.insert(activityLog).values({
+          who: "System (Geburtstags-Cron)",
+          what: `Geburtstagsmail an ${row.email} versendet (Code ${code}, ${BIRTHDAY_DISCOUNT_PERCENT}% bis ${validUntil.toLocaleDateString("de-DE")})`,
+        });
+        stats.birthdaySent++;
+      } catch (err) {
+        console.error(`[cron] birthday mail failed for ${row.email}:`, err);
+      }
+    }
+  } catch (err) {
+    console.error("[cron] birthday query failed:", err);
   }
 
   return NextResponse.json({ ok: true, date: isoDayOffset(0), stats });

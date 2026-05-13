@@ -51,6 +51,11 @@ const profileSchema = z.object({
   firstName: z.string().min(1).max(120),
   lastName: z.string().min(1).max(120),
   phone: z.string().max(60).optional().nullable(),
+  birthDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Format JJJJ-MM-TT")
+    .optional()
+    .nullable(),
   street: z.string().max(255).optional().nullable(),
   zip: z.string().max(20).optional().nullable(),
   city: z.string().max(120).optional().nullable(),
@@ -63,12 +68,13 @@ export async function updateProfile(formData: FormData) {
     firstName: formData.get("firstName"),
     lastName: formData.get("lastName"),
     phone: formData.get("phone") || null,
+    birthDate: (formData.get("birthDate") || "").toString().trim() || null,
     street: formData.get("street") || null,
     zip: formData.get("zip") || null,
     city: formData.get("city") || null,
     country: formData.get("country") || null,
   });
-  if (!parsed.success) return { ok: false, error: "Bitte alle Pflichtfelder ausfüllen." };
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Bitte alle Pflichtfelder ausfüllen." };
   const data = parsed.data;
 
   const fullName = `${data.firstName} ${data.lastName}`.trim();
@@ -81,6 +87,7 @@ export async function updateProfile(formData: FormData) {
         firstName: data.firstName,
         lastName: data.lastName,
         phone: data.phone,
+        birthDate: data.birthDate ?? null,
         street: data.street,
         zip: data.zip,
         city: data.city,
@@ -95,6 +102,7 @@ export async function updateProfile(formData: FormData) {
       lastName: data.lastName,
       email: user.email,
       phone: data.phone,
+      birthDate: data.birthDate ?? null,
       street: data.street,
       zip: data.zip,
       city: data.city,

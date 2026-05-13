@@ -17,6 +17,7 @@ type Customer = {
   firstName: string;
   lastName: string;
   phone: string | null;
+  birthDate: string | null; // ISO yyyy-mm-dd
   street: string | null;
   zip: string | null;
   city: string | null;
@@ -511,14 +512,28 @@ function ProfileSection({ user, customer }: { user: User; customer: Customer | n
             />
           </div>
         </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Telefon</label>
-          <input
-            name="phone"
-            type="tel"
-            defaultValue={customer?.phone ?? ""}
-            className={inputBase}
-          />
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-sm font-medium mb-1">Telefon</label>
+            <input
+              name="phone"
+              type="tel"
+              defaultValue={customer?.phone ?? ""}
+              className={inputBase}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Geburtsdatum (optional)</label>
+            <input
+              name="birthDate"
+              type="date"
+              defaultValue={customer?.birthDate ?? ""}
+              className={inputBase}
+            />
+            <p className="text-[11px] text-[var(--color-wh-black)]/55 mt-0.5">
+              Wir schicken Dir eine kleine Aufmerksamkeit zum Geburtstag.
+            </p>
+          </div>
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Straße + Nr.</label>
