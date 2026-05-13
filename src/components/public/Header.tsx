@@ -2,11 +2,47 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Mountain, Menu, X, UserCircle, LogIn } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Mountain, Menu, X, UserCircle, LogIn, Globe } from "lucide-react";
+import { useState, useEffect, useTransition } from "react";
 import { cn } from "@/lib/utils";
-import { t, type Locale } from "@/lib/i18n-shared";
+import { t, type Locale, LOCALES, LOCALE_LABELS } from "@/lib/i18n-shared";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { setLocale } from "@/app/i18n-actions";
+
+// Locale-aware Strings, die NICHT im zentralen Dict liegen (Header-spezifisch).
+const HEADER_COPY: Record<Locale, {
+  menu: string;
+  managerBackend: string;
+  myAccount: string;
+  login: string;
+  signup: string;
+  language: string;
+}> = {
+  de: {
+    menu: "Menü",
+    managerBackend: "Manager-Backend",
+    myAccount: "Mein Konto",
+    login: "Login",
+    signup: "Konto anlegen",
+    language: "Sprache",
+  },
+  en: {
+    menu: "Menu",
+    managerBackend: "Manager backend",
+    myAccount: "My account",
+    login: "Log in",
+    signup: "Sign up",
+    language: "Language",
+  },
+  nl: {
+    menu: "Menu",
+    managerBackend: "Manager-backend",
+    myAccount: "Mijn account",
+    login: "Inloggen",
+    signup: "Account aanmaken",
+    language: "Taal",
+  },
+};
 
 const NAV_KEYS: Array<{ href: string; key: string }> = [
   { href: "/huette", key: "nav.huette" },
@@ -27,10 +63,12 @@ export type HeaderSession = {
 
 export const Header = ({ session, locale }: { session: HeaderSession; locale: Locale }) => {
   const NAV = NAV_KEYS.map((n) => ({ href: n.href, label: t(n.key, locale) }));
+  const hc = HEADER_COPY[locale];
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [langPending, startLangTransition] = useTransition();
 
   // Viewport-Detection: nur ab >=768px morphen wir den Header in den Pill-State.
   // Auf Mobile bleibt er full-width, sonst entsteht der "Blob"-Effekt im Burger-Menu.
@@ -168,7 +206,7 @@ export const Header = ({ session, locale }: { session: HeaderSession; locale: Lo
               type="button"
               className="md:hidden inline-flex w-9 h-9 items-center justify-center rounded-full text-[var(--color-wh-snow)] hover:bg-white/12 cursor-pointer transition-colors"
               onClick={() => setOpen(!open)}
-              aria-label="Menü"
+              aria-label={hc.menu}
               aria-expanded={open}
             >
               {open ? <X size={20} /> : <Menu size={20} />}
@@ -211,8 +249,8 @@ export const Header = ({ session, locale }: { session: HeaderSession; locale: Lo
                   >
                     <UserCircle size={18} />
                     {session.role === "manager" || session.role === "admin"
-                      ? "Manager-Backend"
-                      : "Mein Konto"}
+                      ? hc.managerBackend
+                      : hc.myAccount}
                   </Link>
                 ) : (
                   <>
@@ -222,7 +260,7 @@ export const Header = ({ session, locale }: { session: HeaderSession; locale: Lo
                       className="flex items-center gap-2 px-3 py-3 text-base font-medium no-underline rounded-md text-[var(--color-wh-snow)]/90 hover:bg-white/12"
                     >
                       <LogIn size={18} />
-                      Login
+                      {hc.login}
                     </Link>
                     <Link
                       href="/registrieren"
@@ -230,10 +268,46 @@ export const Header = ({ session, locale }: { session: HeaderSession; locale: Lo
                       className="flex items-center gap-2 px-3 py-3 text-base font-medium no-underline rounded-md text-[var(--color-wh-snow)]/90 hover:bg-white/12"
                     >
                       <UserCircle size={18} />
-                      Konto anlegen
+                      {hc.signup}
                     </Link>
                   </>
                 )}
+              </div>
+
+              {/* Sprache wechseln — direkt im Mobile-Menu, damit auf dem Handy
+                  ueberhaupt erreichbar. Auf Desktop liegt das im Top-Bar (md:block). */}
+              <div className="border-t border-white/12 mt-2 pt-3">
+                <div className="px-3 mb-2 flex items-center gap-2 text-xs uppercase tracking-wider text-[var(--color-wh-snow)]/60 font-semibold">
+                  <Globe size={14} />
+                  {hc.language}
+                </div>
+                <div className="grid grid-cols-3 gap-2 px-2 pb-1">
+                  {LOCALES.map((l) => {
+                    const isCurrent = l === locale;
+                    return (
+                      <button
+                        key={l}
+                        type="button"
+                        disabled={langPending || isCurrent}
+                        onClick={() => {
+                          startLangTransition(async () => {
+                            await setLocale(l);
+                            setOpen(false);
+                          });
+                        }}
+                        className={cn(
+                          "flex flex-col items-center gap-0.5 py-2 rounded-md text-sm font-medium transition-colors",
+                          isCurrent
+                            ? "bg-white/20 text-[var(--color-wh-snow)] cursor-default"
+                            : "text-[var(--color-wh-snow)]/85 hover:bg-white/12 cursor-pointer"
+                        )}
+                      >
+                        <span className="text-xl leading-none">{LOCALE_LABELS[l].flag}</span>
+                        <span className="text-[11px]">{LOCALE_LABELS[l].native}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </nav>
