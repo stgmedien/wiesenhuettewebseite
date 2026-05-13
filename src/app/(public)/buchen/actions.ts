@@ -26,6 +26,61 @@ import { isRangeAvailable } from "@/lib/availability";
 import { stripe } from "@/lib/stripe";
 import { generateBookingNumber } from "@/lib/utils";
 import { CURRENT_HAUSORDNUNG_VERSION } from "@/lib/hausordnung";
+import type { Locale } from "@/lib/i18n-shared";
+
+const ACTION_ERRORS: Record<Locale, {
+  invalidInput: string;
+  tooManyAttempts: string;
+  memberLocked: string;
+  memberLockedField: string;
+  rangeUnavailable: string;
+  rangeBlocked: string;
+  voucherPrefix: string;
+  discountPrefix: string;
+  stripeFailed: (msg: string) => string;
+  stripeUnknown: string;
+  checkoutUrlMissing: string;
+}> = {
+  de: {
+    invalidInput: "Ungültige Eingaben.",
+    tooManyAttempts: "Zu viele Buchungs-Versuche von dieser Email-Adresse in kurzer Zeit. Bitte versuche es in einer Stunde erneut oder kontaktiere uns direkt.",
+    memberLocked: "Der Mitglieds-Tarif ist nur für verifizierte Vereinsmitglieder buchbar. Bitte logge Dich ein und beantrage die Mitgliedschaft im Konto-Profil.",
+    memberLockedField: "Mitglieds-Tarif gesperrt",
+    rangeUnavailable: "Dieser Zeitraum ist leider nicht mehr verfügbar.",
+    rangeBlocked: "Zeitraum belegt",
+    voucherPrefix: "Gutschein",
+    discountPrefix: "Rabatt-Code",
+    stripeFailed: (msg) => `Zahlung konnte nicht initialisiert werden: ${msg}`,
+    stripeUnknown: "unbekannter Stripe-Fehler",
+    checkoutUrlMissing: "Stripe-Checkout konnte nicht erstellt werden.",
+  },
+  en: {
+    invalidInput: "Invalid input.",
+    tooManyAttempts: "Too many booking attempts from this email address recently. Please try again in an hour or contact us directly.",
+    memberLocked: "The member rate is only bookable for verified club members. Please log in and apply for membership in your account profile.",
+    memberLockedField: "Member rate locked",
+    rangeUnavailable: "Sorry, this range is no longer available.",
+    rangeBlocked: "Range booked",
+    voucherPrefix: "Voucher",
+    discountPrefix: "Discount code",
+    stripeFailed: (msg) => `Payment could not be initialised: ${msg}`,
+    stripeUnknown: "unknown Stripe error",
+    checkoutUrlMissing: "Stripe checkout could not be created.",
+  },
+  nl: {
+    invalidInput: "Ongeldige invoer.",
+    tooManyAttempts: "Te veel boekingspogingen vanaf dit e-mailadres in korte tijd. Probeer het over een uur opnieuw of neem direct contact op.",
+    memberLocked: "Het ledentarief is alleen beschikbaar voor geverifieerde verenigingsleden. Log in en vraag lidmaatschap aan in je accountprofiel.",
+    memberLockedField: "Ledentarief geblokkeerd",
+    rangeUnavailable: "Deze periode is helaas niet meer beschikbaar.",
+    rangeBlocked: "Periode geboekt",
+    voucherPrefix: "Cadeaubon",
+    discountPrefix: "Kortingscode",
+    stripeFailed: (msg) => `Betaling kon niet worden gestart: ${msg}`,
+    stripeUnknown: "onbekende Stripe-fout",
+    checkoutUrlMissing: "Stripe-checkout kon niet worden aangemaakt.",
+  },
+};
 
 const personsSchema = z.object({
   adults: z.coerce.number().int().min(0),
@@ -53,6 +108,7 @@ const inputSchema = z.object({
   customerMessage: z.string().max(2000).optional().nullable(),
   discountCode: z.string().max(30).optional().nullable(),
   acceptedTerms: z.literal(true),
+  locale: z.enum(["de", "en", "nl"]).default("de"),
 });
 
 export type BookingInput = z.infer<typeof inputSchema>;
@@ -65,11 +121,18 @@ const BOOKING_RATE_WINDOW_MS = 60 * 60_000; // 1 Stunde
 const BOOKING_MAX_PER_WINDOW = 5;
 
 export async function createBookingAndCheckout(raw: unknown): Promise<ActionResult> {
+  // Erste Locale-Extraktion bevor Schema-Validierung — fuer korrekte Fehlertexte
+  // selbst wenn der Rest des Inputs ungueltig ist.
+  const rawLocale = (raw as { locale?: string } | null)?.locale;
+  const earlyLocale: Locale =
+    rawLocale === "en" || rawLocale === "nl" ? rawLocale : "de";
+  const E = ACTION_ERRORS[earlyLocale];
+
   const parsed = inputSchema.safeParse(raw);
   if (!parsed.success) {
     return {
       ok: false,
-      error: "Ungültige Eingaben.",
+      error: E.invalidInput,
       issues: parsed.error.issues.map((i) => ({
         field: i.path.join("."),
         message: i.message,
@@ -78,6 +141,8 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
   }
   const data = parsed.data;
   const persons: Persons = { ...data.persons };
+  const locale: Locale = data.locale;
+  const T = ACTION_ERRORS[locale];
 
   // -----------------------------------------------------------------
   // Spam-Schutz: max 5 Buchungs-Versuche pro (Email, IP) pro Stunde.
@@ -100,8 +165,7 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
   if (recentAttempts.length >= BOOKING_MAX_PER_WINDOW) {
     return {
       ok: false,
-      error:
-        "Zu viele Buchungs-Versuche von dieser Email-Adresse in kurzer Zeit. Bitte versuche es in einer Stunde erneut oder kontaktiere uns direkt.",
+      error: T.tooManyAttempts,
     };
   }
   // Best-effort log — wenn DB-Insert fehlschlägt, soll Booking trotzdem laufen
@@ -131,12 +195,11 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
   if (persons.members > 0 && !isVerifiedMember) {
     return {
       ok: false,
-      error:
-        "Der Mitglieds-Tarif ist nur für verifizierte Vereinsmitglieder buchbar. Bitte logge Dich ein und beantrage die Mitgliedschaft im Konto-Profil.",
+      error: T.memberLocked,
       issues: [
         {
           field: "persons.members",
-          message: "Mitglieds-Tarif gesperrt",
+          message: T.memberLockedField,
         },
       ],
     };
@@ -152,6 +215,7 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
     departure: data.departure,
     persons,
     soloUse: data.soloUse,
+    locale,
   });
   if (issues.length > 0) {
     return { ok: false, error: issues.map((i) => i.message).join(" "), issues };
@@ -164,8 +228,8 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
   if (!free) {
     return {
       ok: false,
-      error: "Dieser Zeitraum ist leider nicht mehr verfügbar.",
-      issues: [{ field: "dates", message: "Zeitraum belegt" }],
+      error: T.rangeUnavailable,
+      issues: [{ field: "dates", message: T.rangeBlocked }],
     };
   }
 
@@ -178,6 +242,7 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
     persons,
     soloUse: data.soloUse,
     tariffs: resolvedTariffs,
+    locale,
   });
 
   const totalPersons = breakdown.totalPersons;
@@ -346,7 +411,7 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
       if (!r.ok) {
         return {
           ok: false,
-          error: `Gutschein: ${r.error}`,
+          error: `${T.voucherPrefix}: ${r.error}`,
           issues: [{ field: "discountCode", message: r.error }],
         };
       }
@@ -363,7 +428,7 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
       if (!r.ok) {
         return {
           ok: false,
-          error: `Rabatt-Code: ${r.error}`,
+          error: `${T.discountPrefix}: ${r.error}`,
           issues: [{ field: "discountCode", message: r.error }],
         };
       }
@@ -502,7 +567,7 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
     console.error("[stripe sessions.create] failed:", err);
     return {
       ok: false,
-      error: `Zahlung konnte nicht initialisiert werden: ${e.message ?? "unbekannter Stripe-Fehler"}`,
+      error: T.stripeFailed(e.message ?? T.stripeUnknown),
     };
   }
 
@@ -577,7 +642,7 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
   }
 
   if (!checkoutSession.url) {
-    return { ok: false, error: "Stripe-Checkout konnte nicht erstellt werden." };
+    return { ok: false, error: T.checkoutUrlMissing };
   }
 
   return { ok: true, checkoutUrl: checkoutSession.url, bookingNumber };

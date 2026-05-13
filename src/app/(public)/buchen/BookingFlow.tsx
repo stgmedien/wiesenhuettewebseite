@@ -5,7 +5,7 @@ import { ArrowRight, ArrowLeft, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
 import { calculatePrice, formatEuro, RULES, type Persons } from "@/lib/pricing";
-import { CANCELLATION_TIERS, daysUntil, getCancellationTier } from "@/lib/cancellation";
+import { daysUntil, getCancellationTier, getCancellationTiers } from "@/lib/cancellation";
 import { createBookingAndCheckout, previewDiscountAction } from "./actions";
 import { AvailabilityCalendar } from "./AvailabilityCalendar";
 
@@ -476,8 +476,9 @@ export const BookingFlow = ({
       departure,
       persons,
       soloUse,
+      locale,
     });
-  }, [arrival, departure, persons, soloUse, datesValid, personsValid]);
+  }, [arrival, departure, persons, soloUse, datesValid, personsValid, locale]);
 
   const rangeBlocked = useMemo(() => {
     if (!datesValid) return false;
@@ -520,6 +521,7 @@ export const BookingFlow = ({
         discountCode:
           discountState.status === "valid" ? discountState.code : discountCode.trim() || null,
         acceptedTerms: true,
+        locale,
       });
       if (!res.ok) {
         setError(res.error);
@@ -548,6 +550,7 @@ export const BookingFlow = ({
                 setArrival(a);
                 setDeparture(d);
               }}
+              locale={locale}
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -816,7 +819,7 @@ export const BookingFlow = ({
               {discountState.status === "valid" && (
                 <p className="text-sm text-emerald-700 mt-2 m-0">
                   ✓ {tt.discountAppliedPre} <span className="font-mono">{discountState.code}</span> {tt.discountAppliedPost} —{" "}
-                  <strong>−{formatEuro(discountState.discountCents)}</strong>
+                  <strong>−{formatEuro(discountState.discountCents, locale)}</strong>
                 </p>
               )}
               {discountState.status === "invalid" && (
@@ -835,13 +838,13 @@ export const BookingFlow = ({
                 <div className="bg-[var(--color-wh-beige)] rounded-[var(--radius-card)] p-5 text-sm text-[var(--color-wh-black)]">
                   <p className="m-0 font-semibold mb-2">{tt.dueToday}</p>
                   <p className="m-0">
-                    <strong>{formatEuro(prepayAfter)}</strong> {tt.deposit} ({tt.bookingTotalAfter}
+                    <strong>{formatEuro(prepayAfter, locale)}</strong> {tt.deposit} ({tt.bookingTotalAfter}
                     {off > 0 ? ` ${tt.afterDiscount}` : ""}) +{" "}
-                    <strong>{formatEuro(breakdown.depositCents)}</strong> {tt.kaution} ={" "}
-                    <strong>{formatEuro(totalDueAfter)}</strong>
+                    <strong>{formatEuro(breakdown.depositCents, locale)}</strong> {tt.kaution} ={" "}
+                    <strong>{formatEuro(totalDueAfter, locale)}</strong>
                   </p>
                   <p className="m-0 mt-3">
-                    {tt.restzahlung} <strong>{formatEuro(remainAfter)}</strong> {tt.restzahlungBody}
+                    {tt.restzahlung} <strong>{formatEuro(remainAfter, locale)}</strong> {tt.restzahlungBody}
                   </p>
                   <p className="m-0 mt-3 text-[var(--color-wh-fg-muted)]">
                     {tt.kurtaxeNote}
@@ -851,7 +854,7 @@ export const BookingFlow = ({
             })()}
 
             {/* Storno-Regelwerk klar im UI */}
-            <CancellationPolicyBox arrival={arrival} tt={tt} />
+            <CancellationPolicyBox arrival={arrival} tt={tt} locale={locale} />
             {error && (
               <div className="bg-[var(--color-wh-sunset)]/10 text-[var(--color-wh-sunset)] rounded-[var(--radius-md)] p-4 text-sm font-medium">
                 {error}
@@ -881,7 +884,7 @@ export const BookingFlow = ({
                     Math.round((subAfter * 50) / 100) + breakdown.depositCents;
                   return submitting
                     ? tt.redirecting
-                    : `${tt.payNow} — ${formatEuro(totalDueAfter)}`;
+                    : `${tt.payNow} — ${formatEuro(totalDueAfter, locale)}`;
                 })()}
               </Button>
             </div>
@@ -896,6 +899,7 @@ export const BookingFlow = ({
           departure={departure}
           totalPersons={totalPersons}
           tt={tt}
+          locale={locale}
         />
       </aside>
     </div>
@@ -1116,12 +1120,14 @@ const PriceSummary = ({
   departure,
   totalPersons,
   tt,
+  locale,
 }: {
   breakdown: Breakdown | null;
   arrival: string;
   departure: string;
   totalPersons: number;
   tt: BfCopy;
+  locale: "de" | "en" | "nl";
 }) => {
   if (!breakdown) {
     return (
@@ -1147,7 +1153,7 @@ const PriceSummary = ({
               <div className="font-medium">{l.label}</div>
               {l.detail && <div className="text-xs text-[var(--color-wh-fg-muted)]">{l.detail}</div>}
             </div>
-            <div className="font-semibold whitespace-nowrap">{formatEuro(l.totalCents)}</div>
+            <div className="font-semibold whitespace-nowrap">{formatEuro(l.totalCents, locale)}</div>
           </li>
         ))}
       </ul>
@@ -1155,7 +1161,7 @@ const PriceSummary = ({
       <div className="border-t border-[var(--color-wh-winter-grey)] mt-4 pt-4 space-y-2 text-sm">
         <div className="flex justify-between">
           <span>{tt.bookingSum}</span>
-          <span className="font-semibold">{formatEuro(breakdown.subtotalCents)}</span>
+          <span className="font-semibold">{formatEuro(breakdown.subtotalCents, locale)}</span>
         </div>
       </div>
 
@@ -1165,16 +1171,16 @@ const PriceSummary = ({
         </div>
         <div className="flex justify-between">
           <span>{tt.prepayment50}</span>
-          <span className="font-semibold">{formatEuro(breakdown.prepaymentCents)}</span>
+          <span className="font-semibold">{formatEuro(breakdown.prepaymentCents, locale)}</span>
         </div>
         <div className="flex justify-between">
           <span>{tt.plusKaution}</span>
-          <span className="font-semibold">{formatEuro(breakdown.depositCents)}</span>
+          <span className="font-semibold">{formatEuro(breakdown.depositCents, locale)}</span>
         </div>
         <div className="flex justify-between text-base pt-2 border-t border-[var(--color-wh-winter-grey)]">
           <span className="font-bold">{tt.todayToPay}</span>
           <span className="font-bold text-[var(--color-wh-deep-green)]">
-            {formatEuro(breakdown.totalDueCents)}
+            {formatEuro(breakdown.totalDueCents, locale)}
           </span>
         </div>
       </div>
@@ -1182,7 +1188,7 @@ const PriceSummary = ({
       <div className="border-t border-[var(--color-wh-winter-grey)] mt-4 pt-4 space-y-1 text-xs text-[var(--color-wh-fg-muted)]">
         <div className="flex justify-between">
           <span>{tt.remainderBefore}</span>
-          <span>{formatEuro(breakdown.remainderCents)}</span>
+          <span>{formatEuro(breakdown.remainderCents, locale)}</span>
         </div>
         <div>{tt.kurtaxeShort}</div>
       </div>
@@ -1245,10 +1251,19 @@ const ReviewBlock = ({
   </div>
 );
 
-const CancellationPolicyBox = ({ arrival, tt }: { arrival: string; tt: BfCopy }) => {
+const CancellationPolicyBox = ({
+  arrival,
+  tt,
+  locale,
+}: {
+  arrival: string;
+  tt: BfCopy;
+  locale: "de" | "en" | "nl";
+}) => {
   if (!arrival) return null;
   const days = daysUntil(arrival);
   const currentTier = getCancellationTier(days);
+  const localizedTiers = getCancellationTiers(locale);
   return (
     <details className="group bg-[var(--color-wh-snow)] border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-5 text-sm">
       <summary className="cursor-pointer list-none flex items-center justify-between gap-3">
@@ -1270,7 +1285,7 @@ const CancellationPolicyBox = ({ arrival, tt }: { arrival: string; tt: BfCopy })
           {tt.stornoBody}
         </p>
         <ul className="list-none p-0 m-0 space-y-2">
-          {CANCELLATION_TIERS.map((tier, i) => {
+          {localizedTiers.map((tier, i) => {
             const isCurrent = tier.daysBeforeArrival === currentTier.daysBeforeArrival;
             return (
               <li

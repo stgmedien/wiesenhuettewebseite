@@ -2,12 +2,73 @@
 
 import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import type { Locale } from "@/lib/i18n-shared";
 
-const MONTHS = [
-  "Januar", "Februar", "März", "April", "Mai", "Juni",
-  "Juli", "August", "September", "Oktober", "November", "Dezember",
-];
-const WEEKDAYS_SHORT = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
+const CAL_COPY: Record<Locale, {
+  months: readonly string[];
+  weekdays: readonly string[];
+  prevMonth: string;
+  nextMonth: string;
+  availability: string;
+  tipCleaning: string;
+  tipWartung: string;
+  tipBooked: string;
+  legendFree: string;
+  legendBooked: string;
+  legendCleaning: string;
+  legendWartung: string;
+  legendSelected: string;
+  legendArrivalDeparture: string;
+}> = {
+  de: {
+    months: ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"],
+    weekdays: ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"],
+    prevMonth: "Vorheriger Monat",
+    nextMonth: "Nächster Monat",
+    availability: "Verfügbarkeit",
+    tipCleaning: "Reinigungstag — nicht buchbar",
+    tipWartung: "Wartung",
+    tipBooked: "Belegt",
+    legendFree: "frei",
+    legendBooked: "belegt",
+    legendCleaning: "Reinigungstag",
+    legendWartung: "Wartung",
+    legendSelected: "ausgewählt",
+    legendArrivalDeparture: "An-/Abreise",
+  },
+  en: {
+    months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+    weekdays: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    prevMonth: "Previous month",
+    nextMonth: "Next month",
+    availability: "Availability",
+    tipCleaning: "Cleaning day — not bookable",
+    tipWartung: "Maintenance",
+    tipBooked: "Booked",
+    legendFree: "free",
+    legendBooked: "booked",
+    legendCleaning: "Cleaning day",
+    legendWartung: "Maintenance",
+    legendSelected: "selected",
+    legendArrivalDeparture: "Arrival / departure",
+  },
+  nl: {
+    months: ["januari", "februari", "maart", "april", "mei", "juni", "juli", "augustus", "september", "oktober", "november", "december"],
+    weekdays: ["ma", "di", "wo", "do", "vr", "za", "zo"],
+    prevMonth: "Vorige maand",
+    nextMonth: "Volgende maand",
+    availability: "Beschikbaarheid",
+    tipCleaning: "Schoonmaakdag — niet boekbaar",
+    tipWartung: "Onderhoud",
+    tipBooked: "Geboekt",
+    legendFree: "vrij",
+    legendBooked: "geboekt",
+    legendCleaning: "Schoonmaakdag",
+    legendWartung: "Onderhoud",
+    legendSelected: "geselecteerd",
+    legendArrivalDeparture: "Aankomst / vertrek",
+  },
+};
 
 const todayIso = () => {
   const d = new Date();
@@ -31,6 +92,7 @@ type Props = {
   arrival: string;
   departure: string;
   onSelect: (arrival: string, departure: string) => void;
+  locale?: Locale;
 };
 
 export const AvailabilityCalendar = ({
@@ -40,7 +102,9 @@ export const AvailabilityCalendar = ({
   arrival,
   departure,
   onSelect,
+  locale = "de",
 }: Props) => {
+  const c = CAL_COPY[locale];
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [monthIdx, setMonthIdx] = useState(now.getMonth());
@@ -95,9 +159,9 @@ export const AvailabilityCalendar = ({
 
     const titleOf = (d: Date): string | undefined => {
       const iso = d.toISOString().slice(0, 10);
-      if (cleaningSet.has(iso)) return "Reinigungstag — nicht buchbar";
-      if (wartungSet.has(iso)) return "Wartung";
-      if (bookedSet.has(iso)) return "Belegt";
+      if (cleaningSet.has(iso)) return c.tipCleaning;
+      if (wartungSet.has(iso)) return c.tipWartung;
+      if (bookedSet.has(iso)) return c.tipBooked;
       return undefined;
     };
 
@@ -197,18 +261,18 @@ export const AvailabilityCalendar = ({
           type="button"
           onClick={goPrev}
           className="w-9 h-9 inline-flex items-center justify-center rounded-full border border-[var(--color-wh-winter-grey)] text-[var(--color-wh-deep-green)] hover:bg-[var(--color-wh-green-soft)] cursor-pointer"
-          aria-label="Vorheriger Monat"
+          aria-label={c.prevMonth}
         >
           <ChevronLeft size={18} />
         </button>
         <div className="text-sm font-semibold text-[var(--color-wh-deep-green)]">
-          Verfügbarkeit
+          {c.availability}
         </div>
         <button
           type="button"
           onClick={goNext}
           className="w-9 h-9 inline-flex items-center justify-center rounded-full border border-[var(--color-wh-winter-grey)] text-[var(--color-wh-deep-green)] hover:bg-[var(--color-wh-green-soft)] cursor-pointer"
-          aria-label="Nächster Monat"
+          aria-label={c.nextMonth}
         >
           <ChevronRight size={18} />
         </button>
@@ -216,31 +280,31 @@ export const AvailabilityCalendar = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <MonthBlock
-          title={`${MONTHS[monthIdx]} ${year}`}
-          weekdays={WEEKDAYS_SHORT}
+          title={`${c.months[monthIdx]} ${year}`}
+          weekdays={[...c.weekdays]}
           cells={renderMonth(year, monthIdx)}
         />
         <MonthBlock
-          title={`${MONTHS[nextMonthIdx]} ${nextYear}`}
-          weekdays={WEEKDAYS_SHORT}
+          title={`${c.months[nextMonthIdx]} ${nextYear}`}
+          weekdays={[...c.weekdays]}
           cells={renderMonth(nextYear, nextMonthIdx)}
         />
       </div>
 
       <div className="mt-5 pt-4 border-t border-[var(--color-wh-winter-grey)] flex flex-wrap gap-x-5 gap-y-2 text-xs text-[var(--color-wh-fg-muted)]">
-        <Legend swatch="bg-white border border-[var(--color-wh-winter-grey)]" label="frei" />
-        <Legend swatch="bg-[var(--color-wh-winter-grey)]/60" label="belegt" />
+        <Legend swatch="bg-white border border-[var(--color-wh-winter-grey)]" label={c.legendFree} />
+        <Legend swatch="bg-[var(--color-wh-winter-grey)]/60" label={c.legendBooked} />
         <Legend
           swatchStyle={{
             backgroundImage:
               "repeating-linear-gradient(45deg, rgba(138,90,56,0.18) 0 4px, transparent 4px 8px)",
             border: "1px solid rgba(138,90,56,0.3)",
           }}
-          label="Reinigungstag"
+          label={c.legendCleaning}
         />
-        <Legend swatch="bg-[var(--color-wh-black)]/80" label="Wartung" />
-        <Legend swatch="bg-[var(--color-wh-green-soft)]" label="ausgewählt" />
-        <Legend swatch="bg-[var(--color-wh-deep-green)]" label="An-/Abreise" />
+        <Legend swatch="bg-[var(--color-wh-black)]/80" label={c.legendWartung} />
+        <Legend swatch="bg-[var(--color-wh-green-soft)]" label={c.legendSelected} />
+        <Legend swatch="bg-[var(--color-wh-deep-green)]" label={c.legendArrivalDeparture} />
       </div>
     </div>
   );

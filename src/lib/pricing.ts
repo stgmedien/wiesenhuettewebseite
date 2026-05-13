@@ -9,6 +9,79 @@
 // Endreinigung ist Pflicht.
 // =============================================================
 
+import type { Locale } from "@/lib/i18n-shared";
+
+// Lokalisierte Bezeichnungen fuer Buchungs-Positions-Labels und Validierungs-Fehler.
+const PRICING_LABELS: Record<Locale, {
+  adultsNonMember: string;
+  members: string;
+  children: string;
+  pupils: string;
+  energyFlat: string;
+  cleaning: string;
+  soloSurcharge: string;
+  nights: string;
+  detailNXN: (q: number, n: number) => string;
+  detailNightsAt: (n: number, perNight: string) => string;
+  validMinNights: (n: number) => string;
+  validMinPersons: (n: number) => string;
+  validMaxPersons: (n: number) => string;
+  validDepartureAfter: string;
+  validArrivalNotPast: string;
+}> = {
+  de: {
+    adultsNonMember: "Erwachsene (Nichtmitglieder)",
+    members: "Erwachsene Vereinsmitglieder",
+    children: "Kinder (4–15 Jahre)",
+    pupils: "Schüler (Schulgruppe)",
+    energyFlat: "Energiepauschale",
+    cleaning: "Endreinigung (Pflicht)",
+    soloSurcharge: "Aufschlag Allein-/Exklusivnutzung",
+    nights: "Nächte",
+    detailNXN: (q, n) => `${q} × ${n} Nächte`,
+    detailNightsAt: (n, perNight) => `${n} Nächte × ${perNight}`,
+    validMinNights: (n) => `Mindestaufenthalt ${n} Nächte.`,
+    validMinPersons: (n) => `Mindestbelegung ${n} Personen.`,
+    validMaxPersons: (n) => `Maximalbelegung ${n} Personen.`,
+    validDepartureAfter: "Abreise muss nach Anreise liegen.",
+    validArrivalNotPast: "Anreise darf nicht in der Vergangenheit liegen.",
+  },
+  en: {
+    adultsNonMember: "Adults (non-members)",
+    members: "Adult club members",
+    children: "Children (4–15 years)",
+    pupils: "Pupils (school group)",
+    energyFlat: "Energy flat-rate",
+    cleaning: "Final cleaning (mandatory)",
+    soloSurcharge: "Exclusive-use surcharge",
+    nights: "nights",
+    detailNXN: (q, n) => `${q} × ${n} nights`,
+    detailNightsAt: (n, perNight) => `${n} nights × ${perNight}`,
+    validMinNights: (n) => `Minimum stay ${n} nights.`,
+    validMinPersons: (n) => `Minimum ${n} guests.`,
+    validMaxPersons: (n) => `Maximum ${n} guests.`,
+    validDepartureAfter: "Departure must be after arrival.",
+    validArrivalNotPast: "Arrival cannot be in the past.",
+  },
+  nl: {
+    adultsNonMember: "Volwassenen (geen lid)",
+    members: "Volwassen verenigingsleden",
+    children: "Kinderen (4–15 jaar)",
+    pupils: "Leerlingen (schoolgroep)",
+    energyFlat: "Energiepakket",
+    cleaning: "Eindschoonmaak (verplicht)",
+    soloSurcharge: "Toeslag exclusief gebruik",
+    nights: "nachten",
+    detailNXN: (q, n) => `${q} × ${n} nachten`,
+    detailNightsAt: (n, perNight) => `${n} nachten × ${perNight}`,
+    validMinNights: (n) => `Minimaal ${n} nachten.`,
+    validMinPersons: (n) => `Minimaal ${n} personen.`,
+    validMaxPersons: (n) => `Maximaal ${n} personen.`,
+    validDepartureAfter: "Vertrek moet na aankomst liggen.",
+    validArrivalNotPast: "Aankomst mag niet in het verleden liggen.",
+  },
+};
+
 export const PRICES = {
   // pro Person & Nacht
   adultNonMemberCents: 1800,   // 18,00 € — Erwachsene Nichtmitglieder ab 16 (inkl. Lehrkräfte)
@@ -99,6 +172,11 @@ export type PriceInput = {
     lehrer: number;
     seasonName?: string | null;
   };
+  /**
+   * Locale fuer Bezeichnungen in `lines[]` und Validierungs-Fehlern.
+   * Default: "de" (Backwards-compat).
+   */
+  locale?: Locale;
 };
 
 const toDate = (d: Date | string) => (typeof d === "string" ? new Date(d) : d);
@@ -119,33 +197,29 @@ export const validateBookingInput = (input: PriceInput): ValidationIssue[] => {
   const issues: ValidationIssue[] = [];
   const nights = nightsBetween(input.arrival, input.departure);
   const persons = sumPersons(input.persons);
+  const L = PRICING_LABELS[input.locale ?? "de"];
 
   if (nights < RULES.minNights) {
-    issues.push({ field: "dates", message: `Mindestaufenthalt ${RULES.minNights} Nächte.` });
+    issues.push({ field: "dates", message: L.validMinNights(RULES.minNights) });
   }
   if (persons < RULES.minPersons) {
-    issues.push({
-      field: "persons",
-      message: `Mindestbelegung ${RULES.minPersons} Personen.`,
-    });
+    issues.push({ field: "persons", message: L.validMinPersons(RULES.minPersons) });
   }
   if (persons > RULES.maxPersons) {
-    issues.push({
-      field: "persons",
-      message: `Maximalbelegung ${RULES.maxPersons} Personen.`,
-    });
+    issues.push({ field: "persons", message: L.validMaxPersons(RULES.maxPersons) });
   }
   if (toDate(input.arrival) >= toDate(input.departure)) {
-    issues.push({ field: "dates", message: "Abreise muss nach Anreise liegen." });
+    issues.push({ field: "dates", message: L.validDepartureAfter });
   }
   if (toDate(input.arrival) < new Date(new Date().toDateString())) {
-    issues.push({ field: "dates", message: "Anreise darf nicht in der Vergangenheit liegen." });
+    issues.push({ field: "dates", message: L.validArrivalNotPast });
   }
 
   return issues;
 };
 
 export const calculatePrice = (input: PriceInput): PriceBreakdown => {
+  const L = PRICING_LABELS[input.locale ?? "de"];
   const nights = nightsBetween(input.arrival, input.departure);
   const p = input.persons;
   const adultsNonMember = p.adults + p.teachers; // Lehrkräfte zählen als Nichtmitglieder
@@ -192,8 +266,8 @@ export const calculatePrice = (input: PriceInput): PriceBreakdown => {
     const totalC =
       p.adults * adultNonMemberCents * nights + p.teachers * teacherCents * nights;
     lines.push({
-      label: "Erwachsene (Nichtmitglieder)",
-      detail: `${adultsNonMember} × ${nights} Nächte`,
+      label: L.adultsNonMember,
+      detail: L.detailNXN(adultsNonMember, nights),
       qty: adultsNonMember * nights,
       unitCents: blendedUnit,
       totalCents: totalC,
@@ -201,8 +275,8 @@ export const calculatePrice = (input: PriceInput): PriceBreakdown => {
   }
   if (p.members > 0) {
     lines.push({
-      label: "Erwachsene Vereinsmitglieder",
-      detail: `${p.members} × ${nights} Nächte`,
+      label: L.members,
+      detail: L.detailNXN(p.members, nights),
       qty: p.members * nights,
       unitCents: adultMemberCents,
       totalCents: p.members * adultMemberCents * nights,
@@ -210,8 +284,8 @@ export const calculatePrice = (input: PriceInput): PriceBreakdown => {
   }
   if (p.children > 0) {
     lines.push({
-      label: "Kinder (4–15 Jahre)",
-      detail: `${p.children} × ${nights} Nächte`,
+      label: L.children,
+      detail: L.detailNXN(p.children, nights),
       qty: p.children * nights,
       unitCents: childCents,
       totalCents: p.children * childCents * nights,
@@ -219,29 +293,29 @@ export const calculatePrice = (input: PriceInput): PriceBreakdown => {
   }
   if (p.pupils > 0) {
     lines.push({
-      label: "Schüler (Schulgruppe)",
-      detail: `${p.pupils} × ${nights} Nächte`,
+      label: L.pupils,
+      detail: L.detailNXN(p.pupils, nights),
       qty: p.pupils * nights,
       unitCents: pupilCents,
       totalCents: p.pupils * pupilCents * nights,
     });
   }
   lines.push({
-    label: "Energiepauschale",
-    detail: `${nights} Nächte × 22,00 €`,
+    label: L.energyFlat,
+    detail: L.detailNightsAt(nights, formatEuro(PRICES.energyFlatPerNightCents, input.locale)),
     qty: nights,
     unitCents: PRICES.energyFlatPerNightCents,
     totalCents: energyFlatCents,
   });
   lines.push({
-    label: "Endreinigung (Pflicht)",
+    label: L.cleaning,
     qty: 1,
     unitCents: PRICES.cleaningCents,
     totalCents: cleaningCents,
   });
   if (soloSurchargeCents > 0) {
     lines.push({
-      label: "Aufschlag Allein-/Exklusivnutzung",
+      label: L.soloSurcharge,
       qty: 1,
       unitCents: PRICES.soloSurchargeCents,
       totalCents: soloSurchargeCents,
@@ -250,7 +324,7 @@ export const calculatePrice = (input: PriceInput): PriceBreakdown => {
   for (const e of input.extras ?? []) {
     lines.push({
       label: e.label,
-      detail: `${e.qty} × ${formatEuro(e.unitCents)}`,
+      detail: `${e.qty} × ${formatEuro(e.unitCents, input.locale)}`,
       qty: e.qty,
       unitCents: e.unitCents,
       totalCents: e.totalCents,
@@ -274,9 +348,15 @@ export const calculatePrice = (input: PriceInput): PriceBreakdown => {
   };
 };
 
-export const formatEuro = (cents: number): string => {
+const FORMAT_LOCALES: Record<Locale, string> = {
+  de: "de-DE",
+  en: "en-IE", // Irish-EN: nutzt Euro mit Punkt-Dezimaltrennzeichen, native English wording
+  nl: "nl-NL",
+};
+
+export const formatEuro = (cents: number, locale: Locale = "de"): string => {
   const euros = cents / 100;
-  return euros.toLocaleString("de-DE", {
+  return euros.toLocaleString(FORMAT_LOCALES[locale], {
     style: "currency",
     currency: "EUR",
     minimumFractionDigits: 2,

@@ -13,18 +13,47 @@
  * in der Buchungs-Confirmation-Mail.
  */
 
+import type { Locale } from "@/lib/i18n-shared";
+
 export type CancellationTier = {
   daysBeforeArrival: number;
   refundPercent: number;
   label: string;
 };
 
-export const CANCELLATION_TIERS: CancellationTier[] = [
-  { daysBeforeArrival: 60, refundPercent: 100, label: "60 Tage oder mehr vorher" },
-  { daysBeforeArrival: 30, refundPercent: 50, label: "30 bis 59 Tage vorher" },
-  { daysBeforeArrival: 14, refundPercent: 25, label: "14 bis 29 Tage vorher" },
-  { daysBeforeArrival: 0, refundPercent: 0, label: "Weniger als 14 Tage vorher" },
+const TIER_LABELS: Record<Locale, [string, string, string, string]> = {
+  de: [
+    "60 Tage oder mehr vorher",
+    "30 bis 59 Tage vorher",
+    "14 bis 29 Tage vorher",
+    "Weniger als 14 Tage vorher",
+  ],
+  en: [
+    "60 days or more in advance",
+    "30 to 59 days in advance",
+    "14 to 29 days in advance",
+    "Less than 14 days in advance",
+  ],
+  nl: [
+    "60 dagen of meer vooraf",
+    "30 tot 59 dagen vooraf",
+    "14 tot 29 dagen vooraf",
+    "Minder dan 14 dagen vooraf",
+  ],
+};
+
+const buildTiers = (locale: Locale): CancellationTier[] => [
+  { daysBeforeArrival: 60, refundPercent: 100, label: TIER_LABELS[locale][0] },
+  { daysBeforeArrival: 30, refundPercent: 50, label: TIER_LABELS[locale][1] },
+  { daysBeforeArrival: 14, refundPercent: 25, label: TIER_LABELS[locale][2] },
+  { daysBeforeArrival: 0, refundPercent: 0, label: TIER_LABELS[locale][3] },
 ];
+
+/** Backwards-compatible Default-Export (DE). */
+export const CANCELLATION_TIERS: CancellationTier[] = buildTiers("de");
+
+/** Locale-aware Tier-Liste fuer UI-Anzeige. */
+export const getCancellationTiers = (locale: Locale): CancellationTier[] => buildTiers(locale);
 
 export function getCancellationRefundPercent(daysBeforeArrival: number): number {
   for (const tier of CANCELLATION_TIERS) {
