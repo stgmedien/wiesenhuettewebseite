@@ -5,12 +5,13 @@ import { hikingRoutes } from "@/lib/db/schema";
 import { asc, eq } from "drizzle-orm";
 import {
   DIFFICULTY_BADGE_CLASS,
-  DIFFICULTY_LABEL,
   formatDuration,
   formatDistance,
   formatElevation,
   type Difficulty,
 } from "@/lib/hiking";
+import { getServerLocale } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n-shared";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +21,34 @@ export const metadata = {
     "Kuratierte Wandertouren rund um die Wiesenhütte und Langewiese im Sauerland — mit GPX-Download für Komoot, Outdooractive und Garmin.",
 };
 
+const COPY: Record<Locale, { eyebrow: string; h1: string; lead: string; empty: string; difficulty: Record<Difficulty, string> }> = {
+  de: {
+    eyebrow: "Wandern",
+    h1: "Wandertouren rund um die Hütte.",
+    lead: "Hand-kuratierte Routen direkt von der Wiesenhütte aus. Jede Tour mit Schwierigkeit, Distanz und Höhenmetern — und mit GPX-Datei, die Du direkt in Komoot, Outdooractive oder auf Dein Garmin laden kannst.",
+    empty: "Demnächst — die ersten Touren werden gerade aufgenommen.",
+    difficulty: { leicht: "Leicht", mittel: "Mittel", schwer: "Schwer" },
+  },
+  en: {
+    eyebrow: "Hiking",
+    h1: "Hiking routes around the cabin.",
+    lead: "Hand-curated routes straight from the Wiesenhütte. Each tour with difficulty, distance and elevation — and with a GPX file you can load into Komoot, Outdooractive or your Garmin.",
+    empty: "Coming soon — the first routes are being added.",
+    difficulty: { leicht: "Easy", mittel: "Moderate", schwer: "Difficult" },
+  },
+  nl: {
+    eyebrow: "Wandelen",
+    h1: "Wandelroutes rond de hut.",
+    lead: "Met de hand samengestelde routes direct vanaf de Wiesenhütte. Iedere tour met moeilijkheid, afstand en hoogtemeters — en met een GPX-bestand voor Komoot, Outdooractive of Garmin.",
+    empty: "Binnenkort — de eerste routes worden net toegevoegd.",
+    difficulty: { leicht: "Makkelijk", mittel: "Middel", schwer: "Zwaar" },
+  },
+};
+
 export default async function WandertourenPage() {
+  const locale = await getServerLocale();
+  const c = COPY[locale];
+
   const routes = await db
     .select()
     .from(hikingRoutes)
@@ -31,14 +59,12 @@ export default async function WandertourenPage() {
     <div>
       <section className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-16 sm:py-24">
         <div className="max-w-[1080px] mx-auto">
-          <div className="eyebrow mb-3">Wandern</div>
+          <div className="eyebrow mb-3">{c.eyebrow}</div>
           <h1 className="text-[36px] sm:text-[56px] m-0 mb-4 leading-[1.05] font-display font-bold text-[var(--color-wh-deep-green)]">
-            Wandertouren rund um die Hütte.
+            {c.h1}
           </h1>
           <p className="text-[16px] sm:text-[18px] leading-relaxed max-w-2xl text-[var(--color-wh-black)] m-0">
-            Hand-kuratierte Routen direkt von der Wiesenhütte aus. Jede Tour mit Schwierigkeit,
-            Distanz und Höhenmetern — und mit GPX-Datei, die Du direkt in Komoot, Outdooractive
-            oder auf Dein Garmin laden kannst.
+            {c.lead}
           </p>
         </div>
       </section>
@@ -46,9 +72,7 @@ export default async function WandertourenPage() {
       <section className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-12 sm:py-16">
         <div className="max-w-[1080px] mx-auto">
           {routes.length === 0 ? (
-            <p className="text-[var(--color-wh-fg-muted)] italic text-center">
-              Demnächst — die ersten Touren werden gerade aufgenommen.
-            </p>
+            <p className="text-[var(--color-wh-fg-muted)] italic text-center">{c.empty}</p>
           ) : (
             <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 list-none p-0 m-0">
               {routes.map((r) => (
@@ -74,11 +98,10 @@ export default async function WandertourenPage() {
                       <div className="flex items-center gap-2 mb-2">
                         <span
                           className={`px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider font-bold ${
-                            DIFFICULTY_BADGE_CLASS[r.difficulty as Difficulty] ??
-                            "bg-gray-100"
+                            DIFFICULTY_BADGE_CLASS[r.difficulty as Difficulty] ?? "bg-gray-100"
                           }`}
                         >
-                          {DIFFICULTY_LABEL[r.difficulty as Difficulty] ?? r.difficulty}
+                          {c.difficulty[r.difficulty as Difficulty] ?? r.difficulty}
                         </span>
                       </div>
                       <h3 className="font-display font-bold text-[18px] sm:text-[20px] text-[var(--color-wh-deep-green)] m-0 mb-1.5 leading-snug">

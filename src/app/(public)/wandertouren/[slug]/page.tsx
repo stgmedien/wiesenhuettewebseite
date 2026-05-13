@@ -12,8 +12,58 @@ import {
   formatElevation,
   type Difficulty,
 } from "@/lib/hiking";
+import { getServerLocale } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n-shared";
 
 export const dynamic = "force-dynamic";
+
+const DETAIL_COPY: Record<Locale, {
+  difficulty: Record<Difficulty, string>;
+  stat: { distance: string; elevation: string; duration: string };
+  cta: { download: string; directions: string };
+  help: { h: string; komoot: string; outdoor: string; garmin: string; maps: string };
+  back: string;
+}> = {
+  de: {
+    difficulty: { leicht: "Leicht", mittel: "Mittel", schwer: "Schwer" },
+    stat: { distance: "Distanz", elevation: "Höhenmeter", duration: "Dauer" },
+    cta: { download: "⬇ GPX herunterladen", directions: "🗺 Anfahrt zum Startpunkt" },
+    help: {
+      h: "Wie nutze ich die GPX-Datei?",
+      komoot: "App öffnen → Profil → „Importieren\" → GPX-Datei auswählen → Tour ist offline-tauglich gespeichert.",
+      outdoor: "App → „+\" → „GPX importieren\" → Datei wählen.",
+      garmin: "Connect-Web öffnen → Training → Strecken → „Strecke importieren\" → an Uhr senden.",
+      maps: "unterstützen GPX nicht direkt — nutze Komoot oder Outdooractive zum Navigieren.",
+    },
+    back: "← zurück zur Tour-Übersicht",
+  },
+  en: {
+    difficulty: { leicht: "Easy", mittel: "Moderate", schwer: "Difficult" },
+    stat: { distance: "Distance", elevation: "Elevation gain", duration: "Duration" },
+    cta: { download: "⬇ Download GPX", directions: "🗺 Directions to start" },
+    help: {
+      h: "How do I use the GPX file?",
+      komoot: "Open app → Profile → \"Import\" → select GPX file → tour is saved offline-ready.",
+      outdoor: "App → \"+\" → \"Import GPX\" → choose file.",
+      garmin: "Open Connect web → Training → Courses → \"Import course\" → send to watch.",
+      maps: "don't support GPX directly — use Komoot or Outdooractive to navigate.",
+    },
+    back: "← back to all routes",
+  },
+  nl: {
+    difficulty: { leicht: "Makkelijk", mittel: "Middel", schwer: "Zwaar" },
+    stat: { distance: "Afstand", elevation: "Hoogtemeters", duration: "Duur" },
+    cta: { download: "⬇ GPX downloaden", directions: "🗺 Route naar start" },
+    help: {
+      h: "Hoe gebruik ik het GPX-bestand?",
+      komoot: "App openen → Profiel → \"Importeren\" → GPX-bestand kiezen → tour is offline beschikbaar.",
+      outdoor: "App → \"+\" → \"GPX importeren\" → bestand kiezen.",
+      garmin: "Connect web openen → Trainen → Routes → \"Route importeren\" → naar horloge sturen.",
+      maps: "ondersteunen GPX niet direct — gebruik Komoot of Outdooractive om te navigeren.",
+    },
+    back: "← terug naar alle routes",
+  },
+};
 
 type Params = { slug: string };
 
@@ -34,6 +84,8 @@ export default async function HikingRouteDetailPage({
 }: {
   params: Promise<Params>;
 }) {
+  const locale = await getServerLocale();
+  const dc = DETAIL_COPY[locale];
   const { slug } = await params;
   const row = (
     await db
@@ -74,7 +126,7 @@ export default async function HikingRouteDetailPage({
                     DIFFICULTY_BADGE_CLASS[row.difficulty as Difficulty] ?? "bg-gray-100"
                   }`}
                 >
-                  {DIFFICULTY_LABEL[row.difficulty as Difficulty] ?? row.difficulty}
+                  {dc.difficulty[row.difficulty as Difficulty] ?? row.difficulty}
                 </span>
               </div>
               <h1 className="text-[32px] sm:text-[48px] md:text-[56px] m-0 text-white leading-[1.05] drop-shadow-md font-display font-bold">
@@ -106,9 +158,9 @@ export default async function HikingRouteDetailPage({
         <div className="max-w-[760px] mx-auto">
           {/* Stat-Box */}
           <div className="grid grid-cols-3 gap-4 bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-5 mb-8">
-            <Stat label="Distanz" value={formatDistance(row.distanceKm)} />
-            <Stat label="Höhenmeter" value={formatElevation(row.elevationGainM)} />
-            <Stat label="Dauer" value={formatDuration(row.durationMinutes)} />
+            <Stat label={dc.stat.distance} value={formatDistance(row.distanceKm)} />
+            <Stat label={dc.stat.elevation} value={formatElevation(row.elevationGainM)} />
+            <Stat label={dc.stat.duration} value={formatDuration(row.durationMinutes)} />
           </div>
 
           {/* Summary */}
@@ -137,7 +189,7 @@ export default async function HikingRouteDetailPage({
                 download={`${row.slug}.gpx`}
                 className="inline-flex items-center gap-2 rounded-full bg-[var(--color-wh-deep-green)] text-white px-5 py-2.5 text-sm font-semibold no-underline hover:opacity-90"
               >
-                ⬇ GPX herunterladen
+                {dc.cta.download}
               </a>
             )}
             {mapsLink && (
@@ -147,7 +199,7 @@ export default async function HikingRouteDetailPage({
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-full border border-[var(--color-wh-deep-green)] text-[var(--color-wh-deep-green)] px-5 py-2.5 text-sm font-semibold no-underline hover:bg-[var(--color-wh-beige)]"
               >
-                🗺 Anfahrt zum Startpunkt
+                {dc.cta.directions}
               </a>
             )}
           </div>
@@ -156,23 +208,20 @@ export default async function HikingRouteDetailPage({
           {row.gpxUrl && (
             <details className="bg-[var(--color-wh-beige)] rounded-[var(--radius-md)] p-4 mb-8 text-[14px] cursor-pointer">
               <summary className="font-semibold text-[var(--color-wh-deep-green)]">
-                Wie nutze ich die GPX-Datei?
+                {dc.help.h}
               </summary>
               <div className="pt-3 space-y-2 text-[14px] leading-relaxed">
                 <p className="m-0">
-                  <strong>Komoot:</strong> App öffnen → Profil → „Importieren" → GPX-Datei auswählen
-                  → Tour ist offline-tauglich gespeichert.
+                  <strong>Komoot:</strong> {dc.help.komoot}
                 </p>
                 <p className="m-0">
-                  <strong>Outdooractive:</strong> App → „+" → „GPX importieren" → Datei wählen.
+                  <strong>Outdooractive:</strong> {dc.help.outdoor}
                 </p>
                 <p className="m-0">
-                  <strong>Garmin Connect / Garmin-Uhr:</strong> Connect-Web öffnen → Training →
-                  Strecken → „Strecke importieren" → an Uhr senden.
+                  <strong>Garmin Connect:</strong> {dc.help.garmin}
                 </p>
                 <p className="m-0">
-                  <strong>Apple/Google Maps:</strong> unterstützen GPX nicht direkt — nutze
-                  Komoot oder Outdooractive zum Navigieren.
+                  <strong>Apple/Google Maps:</strong> {dc.help.maps}
                 </p>
               </div>
             </details>
@@ -182,7 +231,7 @@ export default async function HikingRouteDetailPage({
             href="/wandertouren"
             className="text-[14px] text-[var(--color-wh-deep-green)] no-underline hover:underline"
           >
-            ← zurück zur Tour-Übersicht
+            {dc.back}
           </Link>
         </div>
       </section>

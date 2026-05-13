@@ -2,13 +2,87 @@
 
 import { useState, useTransition } from "react";
 import { createGiftCheckoutSession } from "./actions";
+import type { Locale } from "@/lib/i18n-shared";
 
 const PRESETS = [50, 100, 150, 250];
 
 const inputBase =
   "w-full rounded-lg border border-[var(--color-wh-winter-grey)] px-3 py-2 bg-white focus:border-[var(--color-wh-deep-green)] focus:outline-none text-[15px]";
 
-export function PurchaseClient() {
+type Copy = {
+  value: string;
+  custom: string;
+  delivery: string;
+  email: { title: string; body: string };
+  print: { title: string; body: string };
+  purchaserName: string;
+  purchaserEmail: string;
+  recipientName: string;
+  recipientEmail: string;
+  message: string;
+  messageHint: string;
+  conditions: string;
+  due: string;
+  submit: string;
+  submitting: string;
+};
+
+const COPY: Record<Locale, Copy> = {
+  de: {
+    value: "Wertbetrag *",
+    custom: "oder individuell:",
+    delivery: "Versand *",
+    email: { title: "Direkt an Empfänger:in per Mail", body: "Wir mailen den Gutschein-Code direkt nach Zahlung." },
+    print: { title: "Ich drucke selbst", body: "Wir mailen Dir das druckbare PDF — Du übergibst es persönlich." },
+    purchaserName: "Dein Name *",
+    purchaserEmail: "Deine E-Mail *",
+    recipientName: "Name des Empfängers *",
+    recipientEmail: "E-Mail des Empfängers *",
+    message: "Persönliche Nachricht (optional)",
+    messageHint: `Erscheint auf dem Gutschein, z.B. „Für dein Wanderwochenende!"`,
+    conditions: "Gutschein-Bedingungen: 3 Jahre gültig ab Ausstellung. Einlösbar beim Buchen einer Übernachtung. Partielle Einlösung möglich (Restwert bleibt auf dem Code, bis erschöpft). Nicht in bar auszahlbar.",
+    due: "Heute fällig:",
+    submit: "Gutschein kaufen",
+    submitting: "Weiterleitung zu Stripe …",
+  },
+  en: {
+    value: "Value *",
+    custom: "or custom:",
+    delivery: "Delivery *",
+    email: { title: "Directly to recipient by email", body: "We'll email the voucher code right after payment." },
+    print: { title: "I'll print it myself", body: "We'll email you the printable PDF — you hand it over in person." },
+    purchaserName: "Your name *",
+    purchaserEmail: "Your email *",
+    recipientName: "Recipient's name *",
+    recipientEmail: "Recipient's email *",
+    message: "Personal message (optional)",
+    messageHint: `Appears on the voucher, e.g. "For your hiking weekend!"`,
+    conditions: "Voucher terms: Valid for 3 years from issue date. Redeemable when booking a stay. Partial redemption possible (remaining value stays on the code until used up). Not redeemable for cash.",
+    due: "Due today:",
+    submit: "Buy voucher",
+    submitting: "Redirecting to Stripe …",
+  },
+  nl: {
+    value: "Waarde *",
+    custom: "of zelf bepalen:",
+    delivery: "Verzending *",
+    email: { title: "Direct naar ontvanger per mail", body: "We mailen de code direct na betaling." },
+    print: { title: "Ik print zelf", body: "We mailen je de afdrukbare PDF — jij overhandigt persoonlijk." },
+    purchaserName: "Jouw naam *",
+    purchaserEmail: "Jouw e-mail *",
+    recipientName: "Naam ontvanger *",
+    recipientEmail: "E-mail ontvanger *",
+    message: "Persoonlijk bericht (optioneel)",
+    messageHint: `Verschijnt op de cadeaubon, bv. "Voor jullie wandelweekend!"`,
+    conditions: "Voorwaarden: 3 jaar geldig vanaf uitgifte. In te wisselen bij boeking van een verblijf. Gedeeltelijk inwisselen mogelijk (restwaarde blijft op de code tot op). Niet uit te betalen in contanten.",
+    due: "Vandaag te betalen:",
+    submit: "Cadeaubon kopen",
+    submitting: "Doorsturen naar Stripe …",
+  },
+};
+
+export function PurchaseClient({ locale }: { locale: Locale }) {
+  const c = COPY[locale];
   const [value, setValue] = useState(100);
   const [delivery, setDelivery] = useState<"email" | "print">("email");
   const [pending, startTransition] = useTransition();
@@ -32,7 +106,7 @@ export function PurchaseClient() {
       className="space-y-5"
     >
       <div>
-        <label className="block text-sm font-medium mb-2">Wertbetrag *</label>
+        <label className="block text-sm font-medium mb-2">{c.value}</label>
         <div className="grid grid-cols-4 gap-2 mb-2">
           {PRESETS.map((v) => (
             <button
@@ -50,7 +124,7 @@ export function PurchaseClient() {
           ))}
         </div>
         <div className="flex items-center gap-2 text-sm">
-          <span className="text-[var(--color-wh-fg-muted)]">oder individuell:</span>
+          <span className="text-[var(--color-wh-fg-muted)]">{c.custom}</span>
           <input
             type="number"
             min={25}
@@ -67,7 +141,7 @@ export function PurchaseClient() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-2">Versand *</label>
+        <label className="block text-sm font-medium mb-2">{c.delivery}</label>
         <div className="grid grid-cols-2 gap-3">
           <label
             className={`flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition ${
@@ -84,9 +158,9 @@ export function PurchaseClient() {
               className="mt-0.5"
             />
             <div>
-              <p className="font-semibold m-0 text-[14px]">Direkt an Empfänger:in per Mail</p>
+              <p className="font-semibold m-0 text-[14px]">{c.email.title}</p>
               <p className="text-[12px] text-[var(--color-wh-fg-muted)] m-0 mt-0.5">
-                Wir mailen den Gutschein-Code direkt nach Zahlung.
+                {c.email.body}
               </p>
             </div>
           </label>
@@ -105,9 +179,9 @@ export function PurchaseClient() {
               className="mt-0.5"
             />
             <div>
-              <p className="font-semibold m-0 text-[14px]">Ich drucke selbst</p>
+              <p className="font-semibold m-0 text-[14px]">{c.print.title}</p>
               <p className="text-[12px] text-[var(--color-wh-fg-muted)] m-0 mt-0.5">
-                Wir mailen Dir das druckbare PDF — Du übergibst es persönlich.
+                {c.print.body}
               </p>
             </div>
           </label>
@@ -116,24 +190,22 @@ export function PurchaseClient() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label className="block text-sm font-medium mb-1">Dein Name *</label>
+          <label className="block text-sm font-medium mb-1">{c.purchaserName}</label>
           <input
             name="purchaserName"
             type="text"
             required
             maxLength={200}
-            placeholder="z.B. Anna Müller"
             className={inputBase}
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Deine E-Mail *</label>
+          <label className="block text-sm font-medium mb-1">{c.purchaserEmail}</label>
           <input
             name="purchaserEmail"
             type="email"
             required
             maxLength={255}
-            placeholder="anna@example.com"
             className={inputBase}
           />
         </div>
@@ -142,24 +214,22 @@ export function PurchaseClient() {
       {delivery === "email" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 bg-[var(--color-wh-beige)]/40 rounded-lg">
           <div>
-            <label className="block text-sm font-medium mb-1">Name des Empfängers *</label>
+            <label className="block text-sm font-medium mb-1">{c.recipientName}</label>
             <input
               name="recipientName"
               type="text"
               required={delivery === "email"}
               maxLength={200}
-              placeholder="z.B. Max Beispiel"
               className={inputBase}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">E-Mail des Empfängers *</label>
+            <label className="block text-sm font-medium mb-1">{c.recipientEmail}</label>
             <input
               name="recipientEmail"
               type="email"
               required={delivery === "email"}
               maxLength={255}
-              placeholder="max@example.com"
               className={inputBase}
             />
           </div>
@@ -167,24 +237,18 @@ export function PurchaseClient() {
       )}
 
       <div>
-        <label className="block text-sm font-medium mb-1">
-          Persönliche Nachricht (optional)
-        </label>
+        <label className="block text-sm font-medium mb-1">{c.message}</label>
         <textarea
           name="personalMessage"
           rows={3}
           maxLength={1000}
-          placeholder={`Erscheint auf dem Gutschein, z.B. „Für dein Wanderwochenende!"`}
+          placeholder={c.messageHint}
           className={inputBase}
         />
       </div>
 
       <div className="bg-[var(--color-wh-beige)]/60 rounded-lg p-4 text-[13px] text-[var(--color-wh-black)] leading-relaxed">
-        <p className="m-0">
-          <strong>Gutschein-Bedingungen:</strong> 3 Jahre gültig ab Ausstellung. Einlösbar
-          beim Buchen einer Übernachtung. Partielle Einlösung möglich (Restwert bleibt
-          auf dem Code, bis erschöpft). Nicht in bar auszahlbar.
-        </p>
+        <p className="m-0">{c.conditions}</p>
       </div>
 
       {error && (
@@ -195,14 +259,14 @@ export function PurchaseClient() {
 
       <div className="flex items-center justify-between gap-3 pt-2">
         <p className="text-[14px] text-[var(--color-wh-fg-muted)] m-0">
-          Heute fällig: <strong className="text-[var(--color-wh-deep-green)]">{value.toFixed(2)} €</strong>
+          {c.due} <strong className="text-[var(--color-wh-deep-green)]">{value.toFixed(2)} €</strong>
         </p>
         <button
           type="submit"
           disabled={pending}
           className="rounded-full bg-[var(--color-wh-deep-green)] text-white px-6 py-2.5 text-sm font-semibold disabled:opacity-50"
         >
-          {pending ? "Weiterleitung zu Stripe …" : `Gutschein kaufen — ${value} €`}
+          {pending ? c.submitting : `${c.submit} — ${value} €`}
         </button>
       </div>
     </form>

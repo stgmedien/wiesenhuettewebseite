@@ -12,13 +12,64 @@ export const metadata = {
     "Restaurants, Einkauf, Aktivitäten und Notdienste rund um Langewiese — kuratiert von den Skifreunden Gütersloh.",
 };
 
-const CATEGORY_META: Record<string, { label: string; description: string; icon: React.ElementType }> = {
-  restaurant: { label: "Essen & Trinken", description: "Wo Du Dich satt essen kannst", icon: Utensils },
-  einkauf: { label: "Einkauf", description: "Supermarkt & Hofläden in der Nähe", icon: ShoppingBasket },
-  aktivitaet: { label: "Aktivitäten", description: "Was Du im Sauerland erleben kannst", icon: Mountain },
-  sehenswuerdigkeit: { label: "Sehenswürdigkeiten", description: "Lohnt sich für einen Ausflug", icon: Compass },
-  notdienst: { label: "Notdienste", description: "Apotheke, Arzt, Polizei", icon: Stethoscope },
-  verleih: { label: "Verleih", description: "Skiverleih & Co.", icon: Wrench },
+import { getServerLocale } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n-shared";
+
+const CATEGORY_ICONS: Record<string, React.ElementType> = {
+  restaurant: Utensils,
+  einkauf: ShoppingBasket,
+  aktivitaet: Mountain,
+  sehenswuerdigkeit: Compass,
+  notdienst: Stethoscope,
+  verleih: Wrench,
+};
+
+const CATEGORY_LABELS: Record<Locale, Record<string, { label: string; description: string }>> = {
+  de: {
+    restaurant: { label: "Essen & Trinken", description: "Wo Du Dich satt essen kannst" },
+    einkauf: { label: "Einkauf", description: "Supermarkt & Hofläden in der Nähe" },
+    aktivitaet: { label: "Aktivitäten", description: "Was Du im Sauerland erleben kannst" },
+    sehenswuerdigkeit: { label: "Sehenswürdigkeiten", description: "Lohnt sich für einen Ausflug" },
+    notdienst: { label: "Notdienste", description: "Apotheke, Arzt, Polizei" },
+    verleih: { label: "Verleih", description: "Skiverleih & Co." },
+  },
+  en: {
+    restaurant: { label: "Food & drink", description: "Where to eat well" },
+    einkauf: { label: "Shopping", description: "Supermarkets & farm shops nearby" },
+    aktivitaet: { label: "Activities", description: "What to do in the Sauerland" },
+    sehenswuerdigkeit: { label: "Sights", description: "Worth a trip" },
+    notdienst: { label: "Emergency services", description: "Pharmacy, doctor, police" },
+    verleih: { label: "Rentals", description: "Ski rentals & co." },
+  },
+  nl: {
+    restaurant: { label: "Eten & drinken", description: "Waar je goed kunt eten" },
+    einkauf: { label: "Boodschappen", description: "Supermarkten & boerderijwinkels in de buurt" },
+    aktivitaet: { label: "Activiteiten", description: "Wat je in het Sauerland kunt doen" },
+    sehenswuerdigkeit: { label: "Bezienswaardigheden", description: "Een uitstapje waard" },
+    notdienst: { label: "Noodhulp", description: "Apotheek, arts, politie" },
+    verleih: { label: "Verhuur", description: "Skiverhuur & meer" },
+  },
+};
+
+const PAGE_COPY: Record<Locale, { eyebrow: string; h1: string; lead: string; empty: string }> = {
+  de: {
+    eyebrow: "Vor Ort",
+    h1: "Was rund um die Hütte lohnt.",
+    lead: "Kuratierte Tipps für Deinen Aufenthalt — wo Du essen, einkaufen, etwas erleben oder im Notfall Hilfe finden kannst. Von Stammgästen + Vorstand zusammengetragen.",
+    empty: "Demnächst — die ersten Empfehlungen werden gerade kuratiert.",
+  },
+  en: {
+    eyebrow: "Local",
+    h1: "What's worth doing around the cabin.",
+    lead: "Curated tips for your stay — where to eat, shop, do something fun, or get help in an emergency. Collected by regular guests and the club board.",
+    empty: "Coming soon — the first recommendations are being curated.",
+  },
+  nl: {
+    eyebrow: "Ter plaatse",
+    h1: "Wat de moeite waard is rond de hut.",
+    lead: "Samengestelde tips voor je verblijf — waar je kunt eten, winkelen, iets beleven of hulp vinden in een noodgeval. Verzameld door vaste gasten en bestuur.",
+    empty: "Binnenkort — de eerste aanbevelingen worden net samengesteld.",
+  },
 };
 
 const CATEGORY_ORDER = ["restaurant", "einkauf", "aktivitaet", "sehenswuerdigkeit", "verleih", "notdienst"];
@@ -29,6 +80,9 @@ function currentSeason(): "winter" | "sommer" {
 }
 
 export default async function EmpfehlungenPage() {
+  const locale = await getServerLocale();
+  const labels = CATEGORY_LABELS[locale];
+  const pc = PAGE_COPY[locale];
   const season = currentSeason();
   const all = await db
     .select()
@@ -56,13 +110,12 @@ export default async function EmpfehlungenPage() {
     <div>
       <section className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-16 sm:py-24">
         <div className="max-w-[1080px] mx-auto">
-          <div className="eyebrow mb-3">Vor Ort</div>
+          <div className="eyebrow mb-3">{pc.eyebrow}</div>
           <h1 className="text-[36px] sm:text-[56px] m-0 mb-4 leading-[1.05] font-display font-bold text-[var(--color-wh-deep-green)]">
-            Was rund um die Hütte lohnt.
+            {pc.h1}
           </h1>
           <p className="text-[16px] sm:text-[18px] leading-relaxed max-w-2xl text-[var(--color-wh-black)] m-0">
-            Kuratierte Tipps für Deinen Aufenthalt — wo Du essen, einkaufen, etwas erleben oder
-            im Notfall Hilfe finden kannst. Von Stammgästen + Vorstand zusammengetragen.
+            {pc.lead}
           </p>
         </div>
       </section>
@@ -70,16 +123,14 @@ export default async function EmpfehlungenPage() {
       <section className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-12 sm:py-16">
         <div className="max-w-[1080px] mx-auto">
           {all.length === 0 ? (
-            <p className="text-[var(--color-wh-fg-muted)] italic text-center">
-              Demnächst — die ersten Empfehlungen werden gerade kuratiert.
-            </p>
+            <p className="text-[var(--color-wh-fg-muted)] italic text-center">{pc.empty}</p>
           ) : (
             <div className="space-y-12">
               {CATEGORY_ORDER.map((cat) => {
                 const items = byCategory.get(cat);
                 if (!items || items.length === 0) return null;
-                const meta = CATEGORY_META[cat];
-                const Icon = meta?.icon ?? Mountain;
+                const meta = labels[cat];
+                const Icon = CATEGORY_ICONS[cat] ?? Mountain;
                 return (
                   <section key={cat}>
                     <div className="flex items-center gap-3 mb-4">
