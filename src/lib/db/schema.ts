@@ -818,8 +818,49 @@ export const permissions = pgTable(
 );
 
 // =============================================================
-// COMMUNITY — Gäste-Buch & Schulprojekt-Anekdoten (User-Generated)
-// Ein-Tabellen-Design mit "kind"-Discriminator, weil Schema identisch ist.
+// FEEDBACK — Strukturiertes Gäste-Feedback nach dem Aufenthalt
+// (intern, NICHT öffentlich; Token-Mail-Workflow + Manager-Analytics)
+// =============================================================
+
+export const feedbackEntries = pgTable(
+  "feedback_entries",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    bookingId: uuid("booking_id")
+      .notNull()
+      .references(() => bookings.id, { onDelete: "cascade" }),
+    tokenHash: text("token_hash").notNull().unique(),
+    // Status-Zeitstempel
+    sentAt: timestamp("sent_at").notNull().defaultNow(),
+    expiresAt: timestamp("expires_at").notNull(),
+    respondedAt: timestamp("responded_at"),
+    // Ratings 1-5 (null bis Antwort kommt)
+    overallRating: integer("overall_rating"),
+    cleanlinessRating: integer("cleanliness_rating"),
+    comfortRating: integer("comfort_rating"),
+    locationRating: integer("location_rating"),
+    communicationRating: integer("communication_rating"),
+    pricePerformanceRating: integer("price_performance_rating"),
+    // NPS-artige Frage
+    wouldRecommend: boolean("would_recommend"),
+    // Freitext-Felder
+    highlightText: text("highlight_text"), // "Was hat dir am besten gefallen?"
+    improvementText: text("improvement_text"), // "Was könnte besser sein?"
+    surpriseText: text("surprise_text"), // "Hat dich was überrascht?"
+    // Quote-Permission für interne Nutzung (z.B. Vereins-Berichte)
+    allowQuoteInternally: boolean("allow_quote_internally").notNull().default(false),
+    // Optionale Verfasser-Info (vom Buchungs-Customer abweichend möglich)
+    respondentName: varchar("respondent_name", { length: 120 }),
+  },
+  (t) => ({
+    bookingIdx: index("feedback_entries_booking_idx").on(t.bookingId),
+    respondedIdx: index("feedback_entries_responded_idx").on(t.respondedAt),
+  })
+);
+
+// =============================================================
+// COMMUNITY — Schulprojekt-Anekdoten (User-Generated, moderiert)
+// (Ehem. auch Gäste-Buch; ersetzt durch feedback_entries oben.)
 // =============================================================
 
 export const communityEntries = pgTable(

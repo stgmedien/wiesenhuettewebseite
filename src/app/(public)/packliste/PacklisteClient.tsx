@@ -26,23 +26,21 @@ function detectSeasonForToday(): Season {
 
 export function PacklisteClient() {
   const [season, setSeason] = useState<Season>(detectSeasonForToday());
-  const [persons, setPersons] = useState(8);
   const [nights, setNights] = useState(3);
   const [activities, setActivities] = useState<Activity[]>(["wandern", "lagerfeuer"]);
 
-  const input: PackInput = { season, persons, nights, activities };
+  const input: PackInput = { season, nights, activities };
 
-  const cats = useMemo(() => buildPackliste(input), [season, persons, nights, activities]);
+  const cats = useMemo(() => buildPackliste(input), [season, nights, activities]);
 
   const pdfUrl = useMemo(() => {
     const sp = new URLSearchParams({
       season,
-      persons: String(persons),
       nights: String(nights),
     });
     if (activities.length > 0) sp.set("activities", activities.join(","));
     return `/api/packliste?${sp.toString()}`;
-  }, [season, persons, nights, activities]);
+  }, [season, nights, activities]);
 
   const toggleActivity = (a: Activity) => {
     setActivities((prev) => (prev.includes(a) ? prev.filter((x) => x !== a) : [...prev, a]));
@@ -53,9 +51,13 @@ export function PacklisteClient() {
       {/* Eingabe-Form */}
       <aside className="lg:sticky lg:top-24 lg:self-start bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6">
         <div className="eyebrow mb-2">Konfigurieren</div>
-        <h2 className="text-[22px] font-display font-bold m-0 mb-5 text-[var(--color-wh-deep-green)]">
+        <h2 className="text-[22px] font-display font-bold m-0 mb-2 text-[var(--color-wh-deep-green)]">
           Deine Tour.
         </h2>
+        <p className="text-[12px] text-[var(--color-wh-fg-muted)] m-0 mb-5">
+          Die Liste ist für eine Person — jede:r packt für sich selbst. Gruppen-Items
+          (Gewürze, Karten, Bluetooth-Box) findest Du in einer eigenen Sektion zum Absprechen.
+        </p>
 
         <div className="space-y-5">
           <div>
@@ -84,29 +86,16 @@ export function PacklisteClient() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium mb-1">Personen</label>
-              <input
-                type="number"
-                min={1}
-                max={40}
-                value={persons}
-                onChange={(e) => setPersons(Math.max(1, Math.min(40, Number(e.target.value) || 1)))}
-                className={inputBase}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Übernachtungen</label>
-              <input
-                type="number"
-                min={1}
-                max={21}
-                value={nights}
-                onChange={(e) => setNights(Math.max(1, Math.min(21, Number(e.target.value) || 1)))}
-                className={inputBase}
-              />
-            </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Übernachtungen</label>
+            <input
+              type="number"
+              min={1}
+              max={21}
+              value={nights}
+              onChange={(e) => setNights(Math.max(1, Math.min(21, Number(e.target.value) || 1)))}
+              className={inputBase}
+            />
           </div>
 
           <div>
@@ -137,7 +126,7 @@ export function PacklisteClient() {
 
           <a
             href={pdfUrl}
-            download={`packliste-wiesenhuette-${season}-${persons}p-${nights}n.pdf`}
+            download={`packliste-wiesenhuette-${season}-${nights}n.pdf`}
             className="block text-center rounded-full bg-[var(--color-wh-deep-green)] text-white px-5 py-3 text-sm font-semibold no-underline hover:opacity-90"
           >
             ⬇ Als PDF herunterladen
@@ -162,8 +151,8 @@ export function PacklisteClient() {
               {cat.items.map((item, i) => (
                 <li key={i} className="flex items-start gap-3 text-[14px] sm:text-[15px]">
                   <span className="w-4 h-4 rounded border-2 border-[var(--color-wh-deep-green)]/50 shrink-0 mt-0.5" />
-                  <span className="font-mono text-[12px] text-[var(--color-wh-fg-muted)] w-10 shrink-0 pt-0.5">
-                    {renderItemQuantity(item, persons)}
+                  <span className="font-mono text-[12px] text-[var(--color-wh-fg-muted)] w-8 shrink-0 pt-0.5">
+                    {renderItemQuantity(item)}
                   </span>
                   <span className="flex-1 min-w-0">
                     <span className="block">{item.name}</span>

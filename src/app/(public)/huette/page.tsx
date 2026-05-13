@@ -187,6 +187,81 @@ export default function HuettePage() {
         </div>
       </section>
 
+      {/* ---------------------------------------------------------------- */}
+      {/* Hub für Aufenthalts-Mehrwert: Wandertouren + Packliste            */}
+      {/* ---------------------------------------------------------------- */}
+      <section className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-16 sm:py-24">
+        <div className="max-w-[1080px] mx-auto">
+          <div className="eyebrow">Für Deinen Aufenthalt</div>
+          <h2 className="text-[32px] sm:text-[44px] mt-3 mb-3 leading-tight">
+            Damit Du gut vorbereitet bist.
+          </h2>
+          <p className="text-[var(--color-wh-fg-muted)] text-[16px] max-w-2xl mb-10">
+            Zwei kleine Tools, die wir Gästen vor und während des Aufenthalts an die Hand geben:
+            kuratierte Wandertouren rund um die Hütte (mit GPX-Datei für Komoot oder Garmin) und
+            einen persönlichen Packlisten-Generator, der zu Saison und Plan passt.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+            <Link
+              href="/wandertouren"
+              className="group relative block bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 sm:p-8 no-underline hover:shadow-md transition-shadow overflow-hidden"
+            >
+              <div
+                aria-hidden
+                className="absolute -top-4 -right-2 text-[120px] leading-none text-[var(--color-wh-deep-green)]/[0.07] font-display font-bold pointer-events-none select-none"
+              >
+                ↗
+              </div>
+              <div className="relative">
+                <div className="text-[10px] uppercase tracking-wider text-[var(--color-wh-deep-green)]/80 font-bold mb-2">
+                  Outdoor · GPX-Download
+                </div>
+                <h3 className="font-display font-bold text-[24px] sm:text-[26px] text-[var(--color-wh-deep-green)] mt-0 mb-3 leading-tight">
+                  Wandertouren rund um die Hütte.
+                </h3>
+                <p className="text-[14px] sm:text-[15px] leading-relaxed text-[var(--color-wh-black)] m-0 mb-4">
+                  Hand-kuratierte Routen direkt von der Wiesenhütte aus — mit Schwierigkeit,
+                  Distanz und Höhenmetern. Jede Tour kommt mit GPX-Datei, die Du in Komoot,
+                  Outdooractive oder auf Dein Garmin laden kannst.
+                </p>
+                <span className="inline-flex items-center gap-1 text-[14px] text-[var(--color-wh-deep-green)] font-semibold group-hover:gap-2 transition-all">
+                  Touren ansehen →
+                </span>
+              </div>
+            </Link>
+
+            <Link
+              href="/packliste"
+              className="group relative block bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 sm:p-8 no-underline hover:shadow-md transition-shadow overflow-hidden"
+            >
+              <div
+                aria-hidden
+                className="absolute -top-4 -right-2 text-[120px] leading-none text-[var(--color-wh-deep-green)]/[0.07] font-display font-bold pointer-events-none select-none"
+              >
+                ✓
+              </div>
+              <div className="relative">
+                <div className="text-[10px] uppercase tracking-wider text-[var(--color-wh-deep-green)]/80 font-bold mb-2">
+                  Vor der Anreise · Persönlich
+                </div>
+                <h3 className="font-display font-bold text-[24px] sm:text-[26px] text-[var(--color-wh-deep-green)] mt-0 mb-3 leading-tight">
+                  Persönliche Packliste.
+                </h3>
+                <p className="text-[14px] sm:text-[15px] leading-relaxed text-[var(--color-wh-black)] m-0 mb-4">
+                  Saison + geplante Aktivitäten eintragen, und Du bekommst eine maßgeschneiderte
+                  Liste für Dich selbst — inklusive einer Sektion „Gruppen-Items zum Absprechen".
+                  Druckbar als PDF mit Häkchen-Boxen.
+                </p>
+                <span className="inline-flex items-center gap-1 text-[14px] text-[var(--color-wh-deep-green)] font-semibold group-hover:gap-2 transition-all">
+                  Packliste erstellen →
+                </span>
+              </div>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <section className="bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-20">
         <div className="max-w-[820px] mx-auto text-center">
           <div className="eyebrow text-[var(--color-wh-snow)]/80">Bereit?</div>

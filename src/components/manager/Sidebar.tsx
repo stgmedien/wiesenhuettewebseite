@@ -23,6 +23,7 @@ import {
   BookOpen,
   MessageSquare,
   Footprints,
+  Star,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -33,8 +34,9 @@ const NAV_ALL = [
   { href: "/m/manuell", label: "Manuelle Buchung", Icon: PlusCircle, adminOnly: false },
   { href: "/m/sperrzeiten", label: "Sperrzeiten", Icon: Lock, adminOnly: false },
   { href: "/m/blog", label: "Blog", Icon: FileText, adminOnly: false },
-  { href: "/m/community", label: "Community", Icon: MessageSquare, adminOnly: false },
+  { href: "/m/feedback", label: "Feedback", Icon: Star, adminOnly: false },
   { href: "/m/wandertouren", label: "Wandertouren", Icon: Footprints, adminOnly: false },
+  { href: "/m/community", label: "Anekdoten", Icon: MessageSquare, adminOnly: false },
   { href: "/m/benutzer", label: "Benutzer", Icon: Users2, adminOnly: false },
   { href: "/m/mitgliedschaften", label: "Mitgliedschaften", Icon: BadgeCheck, adminOnly: false },
   { href: "/m/reporting", label: "Reporting", Icon: BarChart3, adminOnly: false },

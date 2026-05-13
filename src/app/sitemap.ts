@@ -14,7 +14,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/schulprojekt",
     "/wandertouren",
     "/packliste",
-    "/gaestebuch",
     "/lage",
     "/kontakt",
     "/buchen",
@@ -26,7 +25,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ].map((p) => ({
     url: `${baseUrl}${p}`,
     lastModified: now,
-    changeFrequency: p === "" || p === "/buchen" || p === "/blog" || p === "/gaestebuch" ? "weekly" : "monthly",
+    changeFrequency: p === "" || p === "/buchen" || p === "/blog" ? "weekly" : "monthly",
     priority: p === "" ? 1 : p === "/buchen" ? 0.9 : 0.7,
   }));
 

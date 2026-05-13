@@ -1,14 +1,20 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { bookings, customers, payments, emailLog, activityLog } from "@/lib/db/schema";
+import { bookings, customers, payments, emailLog, activityLog, feedbackEntries } from "@/lib/db/schema";
 import { and, eq, gte, lte } from "drizzle-orm";
 import { stripe } from "@/lib/stripe";
 import { sendMail } from "@/lib/mail/send";
 import PaymentReminderEmail from "@/lib/mail/templates/payment-reminder";
 import ArrivalInfoEmail from "@/lib/mail/templates/arrival-info";
 import KeyHandoverEmail from "@/lib/mail/templates/key-handover";
-import ReviewRequestEmail from "@/lib/mail/templates/review-request";
+import FeedbackRequestEmail from "@/lib/mail/templates/feedback-request";
 import { formatDateLong } from "@/lib/utils";
+import {
+  generateFeedbackToken,
+  hashFeedbackToken,
+  feedbackUrl,
+  feedbackExpiry,
+} from "@/lib/feedback";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -55,7 +61,7 @@ export async function GET(req: Request) {
     paymentReminderSent: 0,
     arrivalInfoSent: 0,
     keyHandoverSent: 0,
-    reviewRequestSent: 0,
+    feedbackRequestSent: 0,
     autoChargeSucceeded: 0,
     autoChargeFailed: 0,
   };
@@ -252,38 +258,56 @@ export async function GET(req: Request) {
     }
   }
 
-  // ---------- T+5 nach Abreise: Bewertungsanfrage ----------
-  const tMinus5 = isoDayOffset(-5);
-  const reviewBookings = await db
+  // ---------- T+2 nach Abreise: Feedback-Anfrage (Token-Mail) ----------
+  // Strukturiertes Survey-Feedback unter /feedback/[token]. Antworten landen
+  // in feedback_entries und werden im Manager-Backend ausgewertet.
+  const tMinus2 = isoDayOffset(-2);
+  const feedbackBookings = await db
     .select()
     .from(bookings)
     .where(
-      and(
-        eq(bookings.departure, tMinus5),
-        eq(bookings.status, "abgereist")
-      )
+      and(eq(bookings.departure, tMinus2), eq(bookings.status, "abgereist"))
     );
-  for (const b of reviewBookings) {
-    if (await alreadySent(b.id, "review_request")) continue;
+  for (const b of feedbackBookings) {
+    if (await alreadySent(b.id, "feedback_request")) continue;
+    // Sicherstellen, dass nicht schon ein feedback_entry existiert (Idempotenz
+    // bei Mehrfach-Cron-Aufrufen)
+    const existing = await db
+      .select({ id: feedbackEntries.id })
+      .from(feedbackEntries)
+      .where(eq(feedbackEntries.bookingId, b.id))
+      .limit(1);
+    if (existing[0]) continue;
+
     const customer = b.customerId
       ? (await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1))[0]
       : null;
     if (!customer) continue;
+
+    // Token erzeugen, Hash speichern, Mail versenden
+    const token = generateFeedbackToken();
+    const tokenHash = hashFeedbackToken(token);
+    const expiresAt = feedbackExpiry();
     try {
+      await db.insert(feedbackEntries).values({
+        bookingId: b.id,
+        tokenHash,
+        expiresAt,
+      });
       await sendMail({
         to: customer.email,
-        subject: `Wie war's an der Wiesenhütte? (${b.bookingNumber})`,
-        template: "review_request",
+        subject: `Wie war Dein Aufenthalt? — 2 Min. Feedback (${b.bookingNumber})`,
+        template: "feedback_request",
         bookingId: b.id,
-        react: ReviewRequestEmail({
+        react: FeedbackRequestEmail({
           firstName: customer.firstName,
           bookingNumber: b.bookingNumber,
-          reviewUrl: `${BASE_URL}/konto/buchungen/${b.id}`,
+          feedbackUrl: feedbackUrl(BASE_URL, token),
         }),
       });
-      stats.reviewRequestSent++;
+      stats.feedbackRequestSent++;
     } catch (err) {
-      console.error("[cron] review_request failed:", err);
+      console.error("[cron] feedback_request failed:", err);
     }
   }
 

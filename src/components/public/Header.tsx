@@ -10,8 +10,6 @@ const NAV = [
   { href: "/huette", label: "Hütte" },
   { href: "/verein", label: "Verein" },
   { href: "/schulprojekt", label: "Schulprojekt" },
-  { href: "/wandertouren", label: "Wandertouren" },
-  { href: "/gaestebuch", label: "Gästebuch" },
   { href: "/lage", label: "Lage" },
   { href: "/kontakt", label: "Kontakt" },
 ];

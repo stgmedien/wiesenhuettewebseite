@@ -13,12 +13,12 @@ export default function PacklistePage() {
         <div className="max-w-[1080px] mx-auto">
           <div className="eyebrow mb-3">Vor der Anreise</div>
           <h1 className="text-[36px] sm:text-[56px] m-0 mb-4 leading-[1.05] font-display font-bold text-[var(--color-wh-deep-green)]">
-            Packliste-Generator.
+            Deine persönliche Packliste.
           </h1>
           <p className="text-[16px] sm:text-[18px] leading-relaxed max-w-2xl text-[var(--color-wh-black)] m-0">
-            Erzähl uns kurz, was Ihr vorhabt — wir bauen die passende Packliste. Mengen je nach
-            Personenanzahl und Saison, mit allem was die Hütte selbst nicht bereitstellt.
-            Druckfreundlich als PDF zum Abhaken.
+            Erzähl uns kurz, was Du vorhast — wir bauen die passende Packliste für Dich. Die
+            Liste ist für eine Person; Gruppen-Items zum Absprechen findest Du in einer eigenen
+            Sektion. Druckfreundlich als PDF zum Abhaken.
           </p>
         </div>
       </section>

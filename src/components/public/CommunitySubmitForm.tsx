@@ -1,11 +1,16 @@
 "use client";
 
 import { useState, useTransition, useRef } from "react";
-import { submitCommunityEntry } from "@/app/(public)/gaestebuch/actions";
+import { submitCommunityEntry } from "@/app/(public)/schulprojekt/actions";
 
 type Props = {
-  kind: "guestbook" | "schulprojekt";
-  /** Beispiel: "Klasse 9b, ESG Gütersloh" für Schulprojekt-Variante */
+  /**
+   * Aktuell nur noch "schulprojekt" — das ehemalige öffentliche Gäste-Buch
+   * wurde durch das interne Feedback-System (/feedback/[token]) ersetzt.
+   * Prop bleibt für ggf. spätere Erweiterung erhalten.
+   */
+  kind: "schulprojekt";
+  /** Beispiel: "Klasse 9b, ESG Gütersloh" */
   contextPlaceholder?: string;
   /** Eyebrow + Heading */
   title?: string;
@@ -27,16 +32,14 @@ export function CommunitySubmitForm({
   const [photos, setPhotos] = useState<File[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
 
-  const headline = title ?? (kind === "guestbook" ? "Beitrag fürs Gästebuch" : "Anekdote einreichen");
+  const headline = title ?? "Anekdote einreichen";
   const desc =
     description ??
-    (kind === "guestbook"
-      ? "Erzähl uns von Deinem Aufenthalt. Wir lesen jeden Beitrag und schalten ihn nach kurzer Sichtung frei."
-      : "Schreib eine Erinnerung von Deiner Projektfahrt. Klasse und Schule darfst Du dabei nennen — wir prüfen jeden Beitrag, bevor er erscheint.");
+    "Schreib eine Erinnerung von Deiner Projektfahrt. Klasse und Schule darfst Du dabei nennen — wir prüfen jeden Beitrag, bevor er erscheint.";
 
   return (
     <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 sm:p-8">
-      <div className="eyebrow mb-2">{kind === "guestbook" ? "Gästebuch" : "Schulprojekt"}</div>
+      <div className="eyebrow mb-2">Schulprojekt</div>
       <h3 className="text-[22px] sm:text-[26px] font-display font-bold m-0 mb-2 text-[var(--color-wh-deep-green)]">
         {headline}
       </h3>
@@ -91,14 +94,12 @@ export function CommunitySubmitForm({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">
-              {kind === "schulprojekt" ? "Klasse / Schule" : "Kontext (optional)"}
-            </label>
+            <label className="block text-sm font-medium mb-1">Klasse / Schule</label>
             <input
               name="authorContext"
               type="text"
               maxLength={200}
-              placeholder={contextPlaceholder ?? (kind === "schulprojekt" ? "z.B. Klasse 9b, ESG Gütersloh" : "z.B. Familie aus Bielefeld")}
+              placeholder={contextPlaceholder ?? "z.B. Klasse 9b, ESG Gütersloh"}
               className={inputBase}
             />
           </div>
@@ -129,7 +130,7 @@ export function CommunitySubmitForm({
             name="title"
             type="text"
             maxLength={200}
-            placeholder={kind === "schulprojekt" ? "z.B. Die Nacht am Lagerfeuer" : "z.B. Drei Tage Sauerland-Stille"}
+            placeholder="z.B. Die Nacht am Lagerfeuer"
             className={inputBase}
           />
         </div>
@@ -142,11 +143,7 @@ export function CommunitySubmitForm({
             minLength={20}
             maxLength={4000}
             rows={6}
-            placeholder={
-              kind === "schulprojekt"
-                ? "Was ist Dir besonders in Erinnerung geblieben? Was hast Du gelernt?"
-                : "Erzähl was Du an der Hütte erlebt hast — Anekdoten, Eindrücke, was Du mit nach Hause genommen hast."
-            }
+            placeholder="Was ist Dir besonders in Erinnerung geblieben? Was hast Du gelernt?"
             className={inputBase}
           />
           <p className="text-[11px] text-[var(--color-wh-fg-muted)] mt-1">

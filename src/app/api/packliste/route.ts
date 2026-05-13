@@ -9,20 +9,18 @@ export const dynamic = "force-dynamic";
 
 const inputSchema = z.object({
   season: z.enum(["winter", "uebergang", "sommer"]),
-  persons: z.coerce.number().int().min(1).max(40),
   nights: z.coerce.number().int().min(1).max(21),
   activities: z.array(z.enum(["wandern", "ski", "lagerfeuer", "klassenfahrt"])).default([]),
 });
 
 /**
- * GET /api/packliste?season=winter&persons=8&nights=3&activities=wandern,lagerfeuer
- *   → application/pdf Download mit personalisierter Packliste.
+ * GET /api/packliste?season=winter&nights=3&activities=wandern,lagerfeuer
+ *   → application/pdf Download mit persönlicher Packliste.
  */
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const raw = {
     season: url.searchParams.get("season") || "uebergang",
-    persons: url.searchParams.get("persons") || "8",
     nights: url.searchParams.get("nights") || "3",
     activities:
       url.searchParams
@@ -47,7 +45,7 @@ export async function GET(req: NextRequest) {
     status: 200,
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `inline; filename="packliste-wiesenhuette-${input.season}-${input.persons}p-${input.nights}n.pdf"`,
+      "Content-Disposition": `inline; filename="packliste-wiesenhuette-${input.season}-${input.nights}n.pdf"`,
       "Cache-Control": "no-store",
     },
   });

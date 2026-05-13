@@ -13,15 +13,16 @@ import {
 } from "@/lib/community";
 
 const submitSchema = z.object({
-  kind: z.enum(["guestbook", "schulprojekt"]),
+  // Nur noch "schulprojekt" — Gäste-Buch wurde durch das interne Feedback-System
+  // (siehe /feedback/[token] + /m/feedback) ersetzt.
+  kind: z.literal("schulprojekt"),
   authorName: z.string().min(2, "Bitte Name angeben.").max(120),
   authorContext: z.string().max(200).optional().nullable(),
   authorEmail: z.string().email("Ungültige E-Mail.").max(255).optional().nullable(),
   title: z.string().max(200).optional().nullable(),
   body: z.string().min(20, "Bitte mindestens 20 Zeichen schreiben.").max(4000),
   visitDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
-  // Honey-Pot: dieses Feld ist im UI versteckt; wenn Bots es ausfüllen → abweisen
-  website: z.string().optional().nullable(),
+  website: z.string().optional().nullable(), // Honeypot
 });
 
 export type SubmitResult = { ok: true; pending: true } | { ok: false; error: string };
@@ -46,13 +47,11 @@ export async function submitCommunityEntry(formData: FormData): Promise<SubmitRe
   }
   const data = parsed.data;
 
-  // Honeypot: Bots füllen typischerweise alle Felder aus
+  // Honeypot
   if (data.website && data.website.length > 0) {
-    // Pretend success — Bot soll nichts merken
     return { ok: true, pending: true };
   }
 
-  // Rate-Limit über IP
   const reqHeaders = await headers();
   const ip =
     reqHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ||
@@ -80,7 +79,6 @@ export async function submitCommunityEntry(formData: FormData): Promise<SubmitRe
     }
   }
 
-  // Photo-Upload (best-effort; bei Fehler Eintrag ohne Bilder annehmen)
   const upload = await uploadCommunityPhotos(formData, data.kind);
   if ("error" in upload) {
     return { ok: false, error: upload.error };
@@ -101,12 +99,12 @@ export async function submitCommunityEntry(formData: FormData): Promise<SubmitRe
 
   await db.insert(activityLog).values({
     who: data.authorEmail ?? "anonym",
-    what: `${data.kind === "guestbook" ? "Gästebuch-Eintrag" : "Schulprojekt-Anekdote"} eingereicht von ${data.authorName} — wartet auf Moderation`,
+    what: `Schulprojekt-Anekdote eingereicht von ${data.authorName} — wartet auf Moderation`,
   });
 
-  // Manager-Seite revalidieren (Pending-Counter aktualisieren)
   revalidatePath("/m/community");
   revalidatePath("/m/dashboard");
+  revalidatePath("/schulprojekt");
 
   return { ok: true, pending: true };
 }

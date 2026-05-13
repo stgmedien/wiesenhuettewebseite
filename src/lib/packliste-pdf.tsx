@@ -120,19 +120,15 @@ export function PacklistePdf({
     <Document>
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
-          <Text style={styles.eyebrow}>Wiesenhütte · Personalisierte Packliste</Text>
+          <Text style={styles.eyebrow}>Wiesenhütte · Persönliche Packliste</Text>
           <Text style={styles.title}>Deine Packliste</Text>
           <Text style={styles.subtitle}>
-            Generiert am {generatedAt} · Druck-freundlich mit Häkchen-Boxen zum Abhaken
+            Generiert am {generatedAt} · Druck-freundlich mit Häkchen-Boxen
           </Text>
           <View style={styles.metaRow}>
             <View style={styles.metaItem}>
               <Text style={styles.metaLabel}>Saison</Text>
               <Text style={styles.metaValue}>{SEASON_LABEL[input.season]}</Text>
-            </View>
-            <View style={styles.metaItem}>
-              <Text style={styles.metaLabel}>Personen</Text>
-              <Text style={styles.metaValue}>{input.persons}</Text>
             </View>
             <View style={styles.metaItem}>
               <Text style={styles.metaLabel}>Übernachtungen</Text>
@@ -151,7 +147,7 @@ export function PacklistePdf({
             {cat.items.map((item, idx) => (
               <View key={idx} style={styles.itemRow}>
                 <View style={styles.itemCheck} />
-                <Text style={styles.itemQty}>{renderItemQuantity(item, input.persons)}</Text>
+                <Text style={styles.itemQty}>{renderItemQuantity(item)}</Text>
                 <View style={styles.itemBody}>
                   <Text style={styles.itemName}>{item.name}</Text>
                   {item.hint && <Text style={styles.itemHint}>{item.hint}</Text>}
@@ -163,8 +159,9 @@ export function PacklistePdf({
 
         <View style={styles.smallNote}>
           <Text>
-            Mengen mit „xN" sind pro Person ({input.persons} Personen) bzw. fest („3x"). Die Liste
-            basiert auf Erfahrungswerten — Du kennst Deine Gruppe am besten. Ergänz frei.
+            Mengen mit „xN" sind die empfohlene Stückzahl. Items ohne Zahl: 1 Stück. Die Sektion
+            „Gemeinsam absprechen" enthält Dinge, die nur eine Person aus der Gruppe mitbringen
+            muss — kurz vor der Anreise abstimmen.
           </Text>
         </View>
 
