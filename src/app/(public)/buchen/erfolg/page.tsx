@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { CheckCircle2, MapPin, Footprints, Backpack } from "lucide-react";
+import { CheckCircle2, MapPin, Footprints, Backpack, Sparkles, ArrowRight } from "lucide-react";
 import { getServerLocale } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n-shared";
+import { RECOMMENDATIONS } from "../../empfehlungen/data";
 
 export const metadata = { title: "Buchung erfolgreich · Wiesenhütte" };
 
@@ -15,6 +16,10 @@ type Copy = {
   cards: { title: string; body: string }[];
   hubCta: string;
   accountLink: string;
+  recsTeaserEyebrow: string;
+  recsTeaserH: string;
+  recsTeaserBody: string;
+  recsTeaserCta: string;
 };
 
 const COPY: Record<Locale, Copy> = {
@@ -32,6 +37,10 @@ const COPY: Record<Locale, Copy> = {
     ],
     hubCta: "Ansehen",
     accountLink: "Buchung in Deinem Konto ansehen →",
+    recsTeaserEyebrow: "Vor Ort",
+    recsTeaserH: "Was rund um die Hütte wirklich lohnt.",
+    recsTeaserBody: "Wir haben für Euch alles zusammengestellt, was man sehen, essen und erleben sollte — vom Frühstücks-Bäcker um die Ecke bis zur olympischen Bobbahn. Handverlesen vom Vorstand.",
+    recsTeaserCta: "Alle Empfehlungen entdecken",
   },
   en: {
     title: "Thanks — your booking is confirmed.",
@@ -47,6 +56,10 @@ const COPY: Record<Locale, Copy> = {
     ],
     hubCta: "View",
     accountLink: "View booking in your account →",
+    recsTeaserEyebrow: "On location",
+    recsTeaserH: "What's really worth doing around the cabin.",
+    recsTeaserBody: "We've curated everything you should see, eat and try — from the morning bakery around the corner to the Olympic bob run. Hand-picked by the board.",
+    recsTeaserCta: "Discover all recommendations",
   },
   nl: {
     title: "Bedankt — je boeking is binnen.",
@@ -62,6 +75,10 @@ const COPY: Record<Locale, Copy> = {
     ],
     hubCta: "Bekijken",
     accountLink: "Boeking in je account bekijken →",
+    recsTeaserEyebrow: "Ter plaatse",
+    recsTeaserH: "Wat rond de hut écht de moeite waard is.",
+    recsTeaserBody: "We hebben voor je verzameld wat je moet zien, eten en doen — van de bakker om de hoek tot de Olympische bobbaan. Met de hand gekozen door het bestuur.",
+    recsTeaserCta: "Alle aanbevelingen ontdekken",
   },
 };
 
@@ -130,6 +147,84 @@ export default async function ErfolgPage({ searchParams }: Props) {
             >
               {c.accountLink}
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ============= EMPFEHLUNGEN-TEASER ============= */}
+      <section className="relative overflow-hidden bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] px-6 sm:px-8 py-20 sm:py-28">
+        <div
+          className="absolute inset-0 opacity-15"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 20% 30%, rgba(247,247,242,0.5) 0px, transparent 60%), radial-gradient(circle at 80% 70%, rgba(247,247,242,0.3) 0px, transparent 50%)",
+          }}
+        />
+        <div className="relative max-w-[1080px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+          {/* Left: Text */}
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/30 text-[11px] uppercase tracking-[0.2em] font-semibold mb-6">
+              <Sparkles size={12} />
+              {c.recsTeaserEyebrow}
+            </div>
+            <h2
+              className="font-display font-extrabold m-0 mb-5 leading-[1.05]"
+              style={{ fontSize: "clamp(32px, 4.5vw, 52px)", letterSpacing: "-0.02em" }}
+            >
+              {c.recsTeaserH}
+            </h2>
+            <p className="text-[var(--color-wh-snow)]/85 text-base sm:text-lg leading-relaxed m-0 mb-8 max-w-lg">
+              {c.recsTeaserBody}
+            </p>
+            <Link
+              href="/empfehlungen"
+              className="inline-flex items-center gap-2 h-12 sm:h-13 px-6 sm:px-7 rounded-full bg-[var(--color-wh-snow)] text-[var(--color-wh-deep-green)] font-semibold no-underline hover:bg-white transition-all shadow-[var(--shadow-float)]"
+            >
+              {c.recsTeaserCta}
+              <ArrowRight size={18} />
+            </Link>
+          </div>
+
+          {/* Right: Stack of fanned-out preview cards */}
+          <div className="relative h-[340px] sm:h-[400px]">
+            {RECOMMENDATIONS.slice(0, 4).map((r, i) => {
+              const rotations = [-8, -2, 4, 10];
+              const offsets = [
+                { x: 0, y: 0 },
+                { x: 36, y: 18 },
+                { x: 72, y: 36 },
+                { x: 108, y: 54 },
+              ];
+              const o = offsets[i] ?? { x: 0, y: 0 };
+              return (
+                <div
+                  key={r.id}
+                  className={`absolute top-0 left-1/2 transition-transform duration-500 hover:translate-y-[-8px] hover:rotate-0 hover:z-50`}
+                  style={{
+                    transform: `translate(calc(-50% + ${o.x}px), ${o.y}px) rotate(${rotations[i]}deg)`,
+                    zIndex: i + 1,
+                  }}
+                >
+                  <div
+                    className={`relative w-[180px] sm:w-[220px] aspect-[3/4] rounded-2xl overflow-hidden border-2 border-white shadow-[0_12px_40px_rgba(0,0,0,0.25)] bg-gradient-to-br ${r.gradient}`}
+                  >
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span
+                        className="leading-none select-none drop-shadow-[0_4px_12px_rgba(0,0,0,0.2)]"
+                        style={{ fontSize: "clamp(60px, 10vw, 110px)" }}
+                      >
+                        {r.emoji}
+                      </span>
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 bg-gradient-to-t from-black/70 to-transparent">
+                      <div className="text-white font-semibold text-xs sm:text-sm leading-tight line-clamp-2">
+                        {r.name}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
