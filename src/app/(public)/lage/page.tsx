@@ -1,273 +1,1110 @@
 import Image from "next/image";
+import {
+  MapPin,
+  Compass,
+  Car,
+  TrainFront,
+  Bus,
+  ParkingCircle,
+  Sun,
+  Snowflake,
+  Mountain,
+  Croissant,
+  Utensils,
+  Stethoscope,
+  Phone,
+  ExternalLink,
+  ArrowRight,
+  Clock,
+  TriangleAlert,
+  Backpack,
+} from "lucide-react";
 import { ConsentGate } from "@/components/consent/ConsentGate";
+import { ScrollReveal } from "@/components/public/ScrollReveal";
 import { getServerLocale } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n-shared";
 
 export const metadata = {
   title: "Lage & Anfahrt · Wiesenhütte Langewiese",
   description:
-    "Wiesenhütte, Bundesstraße 6, 59955 Winterberg-Langewiese. Anfahrt mit Auto, Bahn (ZOB Winterberg) und Bus R28. Direkt am Rothaarsteig, Loipen und Rodelhang.",
+    "Wiesenhütte, Bundesstraße 6, 59955 Winterberg-Langewiese. 690 m über NHN im Hochsauerland. Anfahrt mit Auto, Bahn (ZOB Winterberg) und Bus R28 — alle Wege herauf.",
+};
+
+// =============================================================
+// ECHTE KOORDINATEN + ADDRESS
+// =============================================================
+const LAT = 51.3017;
+const LNG = 8.5174;
+const ELEVATION_M = 690;
+const ADDRESS_ENCODED = encodeURIComponent("Bundesstraße 6, 59955 Winterberg-Langewiese");
+
+// Universal Navi-Deep-Links (Apple Maps, Google Maps, Waze, OSM)
+const NAVI_LINKS = {
+  apple: `https://maps.apple.com/?q=Wiesenhütte&address=${ADDRESS_ENCODED}&ll=${LAT},${LNG}`,
+  google: `https://www.google.com/maps/dir/?api=1&destination=${LAT},${LNG}`,
+  waze: `https://waze.com/ul?ll=${LAT}%2C${LNG}&navigate=yes`,
+  osm: `https://www.openstreetmap.org/?mlat=${LAT}&mlon=${LNG}#map=15/${LAT}/${LNG}`,
 };
 
 type Copy = {
-  hero: { eyebrow: string; h1: string };
-  address: { eyebrow: string; h2: string; subtitle: string; intro: string };
-  car: { h3: string; body: string };
-  parking: {
-    h3: string;
-    summer: { label: string; body: string };
-    winter: { label: string; body: string };
+  hero: { meta: string; h1l1: string; h1l2: string; lead: string };
+  address: {
+    eyebrow: string;
+    statement: { l1: string; l2: string; l3: string };
+    metaLines: { coords: string; elevation: string; from: string };
+    ctaApple: string;
+    ctaGoogle: string;
+    ctaWaze: string;
   };
-  transit: { eyebrow: string; h2: string; steps: string[] };
-  map: { eyebrow: string; h2: string; googleLink: string };
+  travelTimes: { eyebrow: string; h2: string; cities: { name: string; hours: string; sub: string }[] };
+  routes: {
+    eyebrow: string;
+    h2: string;
+    lead: string;
+    car: { number: string; title: string; body: string; details: string[] };
+    train: { number: string; title: string; body: string; steps: string[] };
+    arrival: { number: string; title: string; body: string; details: string[] };
+  };
+  parking: {
+    eyebrow: string;
+    h2: string;
+    summer: { label: string; h: string; body: string };
+    winter: { label: string; h: string; body: string };
+  };
+  map: { eyebrow: string; h2: string; lead: string; openIn: string };
   infra: {
     eyebrow: string;
     h2: string;
-    bakery: { title: string; detail: string };
-    catering: { title: string; detail: string };
-    emergency: { title: string; detail: string };
+    lead: string;
+    cards: { icon: "bakery" | "catering" | "emergency"; title: string; distance: string; hours?: string; phone?: string; detail: string }[];
   };
+  notes: {
+    eyebrow: string;
+    h2: string;
+    items: { icon: "mountain" | "alert" | "backpack"; title: string; body: string }[];
+  };
+  cta: { eyebrow: string; h2: string; body: string; button: string };
 };
 
 const COPY: Record<Locale, Copy> = {
   de: {
-    hero: { eyebrow: "Lage", h1: "Langewiese, Hochsauerland." },
+    hero: {
+      meta: `51° 18' N · 8° 31' O · ${ELEVATION_M} m ü. NHN`,
+      h1l1: "Da wo der",
+      h1l2: "Wald sich teilt.",
+      lead: "Langewiese sitzt auf 690 Metern Höhe — auf einem Plateau zwischen dem Rothaarsteig und dem Hochsauerland. Die Hütte liegt 50 Meter unter der Bundesstraße am Hang. Eine Adresse, drei Wege herauf.",
+    },
     address: {
       eyebrow: "Adresse",
-      h2: "Wiesenhütte",
-      subtitle: "Bundesstraße 6 · 59955 Winterberg-Langewiese",
-      intro: "Das Haus liegt etwa 50 Meter unterhalb der Bundesstraße am Hang. Direkt gegenüber ist die Bäckerei Gerke — die Einfahrt zur Wiesenhütte liegt unterhalb der Bundesstraße.",
+      statement: { l1: "Bundesstraße 6", l2: "59955 Winterberg-Langewiese", l3: "Hochsauerland · Deutschland" },
+      metaLines: {
+        coords: "Koordinaten",
+        elevation: "Höhe",
+        from: "Erreichbar in",
+      },
+      ctaApple: "Apple Maps",
+      ctaGoogle: "Google Maps",
+      ctaWaze: "Waze",
     },
-    car: {
-      h3: "Mit dem Auto",
-      body: "Anfahrt über die A44 (Soest/Werl) bzw. A46 (Bestwig). Letzte Etappe über die B480 durch Winterberg ins Höhendorf Langewiese.",
-    },
-    parking: {
-      h3: "Parken",
-      summer: { label: "Sommer:", body: "direkt vor dem Haus und oben an der Bundesstraße auf einer Seite." },
-      winter: { label: "Winter:", body: "aus Sicherheitsgründen ausschließlich oben an der Bundesstraße." },
-    },
-    transit: {
-      eyebrow: "Mit Bahn & Bus",
-      h2: "Anreise mit ÖPNV",
-      steps: [
-        "Bahn bis **Bahnhof Winterberg (Westf)**",
-        "Vom direkt anschließenden ZOB den **Bus R28** Richtung Schmallenberg",
-        "Ausstieg **Langewiese Ortsmitte**",
-        "200 m Fußweg in Fahrtrichtung bis zur **Bäckerei Gerke**",
-        "Direkt gegenüber der Bäckerei: Einfahrt zur Wiesenhütte",
+    travelTimes: {
+      eyebrow: "Anfahrt",
+      h2: "Wie weit Ihr Euch fühlt.",
+      cities: [
+        { name: "Gütersloh", hours: "1:50 h", sub: "Heimat der Skifreunde — die übliche Anreise" },
+        { name: "Düsseldorf", hours: "2:00 h", sub: "Über die A46" },
+        { name: "Köln", hours: "2:20 h", sub: "Über die A4 + A45" },
+        { name: "Berlin", hours: "5:00 h", sub: "Über A2 + Werl" },
       ],
     },
-    map: { eyebrow: "Karte", h2: "Hier liegen wir.", googleLink: "In Google Maps öffnen ↗" },
+    routes: {
+      eyebrow: "Drei Wege herauf",
+      h2: "Mit Auto, Bahn — oder zu Fuß.",
+      lead: "Egal wie Ihr kommt, das Höhendorf ist erreichbar. Im Winter empfehlen wir Schnee-Reifen, im Sommer reicht jedes Auto.",
+      car: {
+        number: "01",
+        title: "Mit dem Auto",
+        body: "Anfahrt über A44 (Soest/Werl) oder A46 (Bestwig). Letzte Etappe über die B480 durch Winterberg ins Höhendorf Langewiese — eine schöne Strecke durch dichten Mischwald.",
+        details: [
+          "A44 ab Ruhrgebiet / A46 ab Düsseldorf",
+          "Ausfahrt Bestwig → B480 nach Winterberg",
+          "Weiter durch Winterberg nach Langewiese (8 km)",
+          "Hausnummer 6 liegt 50 m unterhalb der B480",
+        ],
+      },
+      train: {
+        number: "02",
+        title: "Mit Bahn & Bus",
+        body: "Ohne Auto kommt Ihr trotzdem hoch — das letzte Stück ab Winterberg-Bahnhof ist eine 25-Minuten-Busfahrt. Mit Klassenfahrt-Größen funktioniert das gut.",
+        steps: [
+          "Bahn bis Bahnhof Winterberg (Westf)",
+          "Vom anschließenden ZOB: Bus R28 Richtung Schmallenberg",
+          "Ausstieg Langewiese Ortsmitte",
+          "200 m zu Fuß zur Bäckerei Gerke",
+          "Direkt gegenüber: Einfahrt zur Wiesenhütte",
+        ],
+      },
+      arrival: {
+        number: "03",
+        title: "Letztes Stück",
+        body: "Die Einfahrt liegt unterhalb der Bundesstraße — wer das erste Mal kommt, übersieht sie leicht. Achtet auf die Bäckerei Gerke gegenüber, da ist der Wegweiser.",
+        details: [
+          "Schotterweg, ~50 m bergab",
+          "Im Winter glatt — vorsichtig fahren",
+          "Direkt vor der Hütte parken (im Sommer)",
+          "Schlüssel-Übergabe vor Ort bei Anreise",
+        ],
+      },
+    },
+    parking: {
+      eyebrow: "Parken",
+      h2: "Sommer oder Winter — der Unterschied zählt.",
+      summer: {
+        label: "Im Sommer",
+        h: "Vor dem Haus",
+        body: "Direkt vor der Hütte gibt's Stellplätze für die ganze Gruppe. Zusätzlich oben an der Bundesstraße, einseitig parken.",
+      },
+      winter: {
+        label: "Im Winter",
+        h: "Oben an der Straße",
+        body: "Wenn Schnee liegt, parken alle oben an der Bundesstraße — der Schotterweg ist dann eisig und keine sichere Anfahrt mit dem Wagen.",
+      },
+    },
+    map: {
+      eyebrow: "Karte",
+      h2: "Hier liegen wir.",
+      lead: "Langewiese, Westhang. Drumherum: Asten-Massiv, Hochheide, Rothaarsteig.",
+      openIn: "In Karten-App öffnen",
+    },
     infra: {
-      eyebrow: "Was es im Ort gibt",
-      h2: "Infrastruktur Langewiese.",
-      bakery: { title: "Bäckerei Gerke", detail: "Direkt gegenüber. Mo–Sa 6:30–12:30 + Mo–Fr 15:00–18:00 · Vorbestellungen möglich · Tel. 02758 / 280" },
-      catering: { title: "Catering", detail: "Gasthof Graberhof, Hohenleye 1, Winterberg-Hoheleye · Tel. 02758 / 284 · Handy 0160 7622508" },
-      emergency: { title: "Notfall", detail: "St. Franziskus Hospital Winterberg · Franziskusstr. 2 · Tel. 02981 / 8020 · Bereitschaftsdienst 116 117" },
+      eyebrow: "Im Dorf",
+      h2: "Was Ihr in Lauf-Distanz findet.",
+      lead: "Langewiese ist klein, hat aber alles Notwendige in 200 Metern Umkreis.",
+      cards: [
+        {
+          icon: "bakery",
+          title: "Bäckerei Gerke",
+          distance: "30 m gegenüber",
+          hours: "Mo–Sa 6:30–12:30 · Mo–Fr 15:00–18:00",
+          phone: "+49 2758 280",
+          detail: "Brötchen, Kuchen, Kaffee. Vorbestellungen für Gruppen sind möglich — einfach abends vorher anrufen.",
+        },
+        {
+          icon: "catering",
+          title: "Gasthof Graberhof",
+          distance: "Hoheleye, 4 km",
+          phone: "+49 2758 284",
+          detail: "Catering für Gruppen. Liefert in die Hütte oder Ihr fahrt hin — funktioniert beides. Mobil: 0160 7622508.",
+        },
+        {
+          icon: "emergency",
+          title: "St. Franziskus Hospital",
+          distance: "Winterberg, 8 km",
+          phone: "+49 2981 8020",
+          detail: "24/7 Notaufnahme. Für nicht-akute Fälle: ärztlicher Bereitschaftsdienst 116 117. Bei akutem Notfall immer 112.",
+        },
+      ],
+    },
+    notes: {
+      eyebrow: "Praktisches",
+      h2: "Drei Dinge, die Ihr vor der Anreise wissen solltet.",
+      items: [
+        {
+          icon: "mountain",
+          title: "690 Meter Höhe",
+          body: "Langewiese ist eines der höchsten Dörfer NRWs. Nachts wird's auch im Sommer kühl — eine Jacke nicht vergessen. Im Winter liegt oft Schnee bis April.",
+        },
+        {
+          icon: "alert",
+          title: "Letzte Tankstelle",
+          body: "Die nächste 24h-Tankstelle ist in Winterberg (8 km). Wer abends spät ankommt: vorher tanken.",
+        },
+        {
+          icon: "backpack",
+          title: "Selbstversorger",
+          body: "Vor der Anreise einkaufen — der nächste Supermarkt (EDEKA Löffler) ist in Winterberg, donnerstags geschlossen. Brötchen morgens beim Gerke gegenüber.",
+        },
+      ],
+    },
+    cta: {
+      eyebrow: "Bereit?",
+      h2: "Verfügbarkeit checken, anreisen, ankommen.",
+      body: "Wenn die Lage passt und der Termin frei ist — keine drei Klicks zur Buchung.",
+      button: "Verfügbarkeit prüfen",
     },
   },
   en: {
-    hero: { eyebrow: "Location", h1: "Langewiese, Hochsauerland." },
+    hero: {
+      meta: `51° 18' N · 8° 31' E · ${ELEVATION_M} m above sea level`,
+      h1l1: "Where the",
+      h1l2: "forest parts.",
+      lead: "Langewiese sits at 690 metres elevation — on a plateau between the Rothaarsteig and the Hochsauerland. The cabin lies 50 metres below the main road on the hillside. One address, three ways up.",
+    },
     address: {
       eyebrow: "Address",
-      h2: "Wiesenhütte",
-      subtitle: "Bundesstraße 6 · 59955 Winterberg-Langewiese, Germany",
-      intro: "The cabin sits about 50 metres below the main road on a hillside. Directly opposite is bakery Gerke — the driveway to the Wiesenhütte is below the main road.",
+      statement: { l1: "Bundesstraße 6", l2: "59955 Winterberg-Langewiese", l3: "Hochsauerland · Germany" },
+      metaLines: { coords: "Coordinates", elevation: "Elevation", from: "Reach by" },
+      ctaApple: "Apple Maps",
+      ctaGoogle: "Google Maps",
+      ctaWaze: "Waze",
     },
-    car: {
-      h3: "By car",
-      body: "Take the A44 (Soest/Werl) or A46 (Bestwig). Final leg via the B480 through Winterberg into the highland village of Langewiese.",
-    },
-    parking: {
-      h3: "Parking",
-      summer: { label: "Summer:", body: "directly in front of the cabin and along one side of the main road above." },
-      winter: { label: "Winter:", body: "for safety reasons only along the main road above." },
-    },
-    transit: {
-      eyebrow: "By train & bus",
-      h2: "Public transport",
-      steps: [
-        "Train to **Winterberg (Westf) station**",
-        "From the adjacent bus terminal take **bus R28** towards Schmallenberg",
-        "Get off at **Langewiese Ortsmitte**",
-        "200 m walk in the direction of travel to **bakery Gerke**",
-        "Directly opposite the bakery: driveway to the Wiesenhütte",
+    travelTimes: {
+      eyebrow: "Travel",
+      h2: "How far you feel from home.",
+      cities: [
+        { name: "Gütersloh", hours: "1h 50", sub: "Home of the club — the usual trip" },
+        { name: "Düsseldorf", hours: "2h 00", sub: "Via the A46" },
+        { name: "Cologne", hours: "2h 20", sub: "Via A4 + A45" },
+        { name: "Amsterdam", hours: "4h 00", sub: "Via Cologne" },
       ],
     },
-    map: { eyebrow: "Map", h2: "Here we are.", googleLink: "Open in Google Maps ↗" },
+    routes: {
+      eyebrow: "Three ways up",
+      h2: "By car, train — or on foot.",
+      lead: "Whichever way you come, the highland village is reachable. We recommend winter tyres in snow; any car works in summer.",
+      car: {
+        number: "01",
+        title: "By car",
+        body: "Via A44 (Soest/Werl) or A46 (Bestwig). Final stretch on the B480 through Winterberg up to Langewiese — a beautiful drive through dense mixed forest.",
+        details: [
+          "A44 from the Ruhr / A46 from Düsseldorf",
+          "Exit Bestwig → B480 toward Winterberg",
+          "Continue 8 km through Winterberg to Langewiese",
+          "Number 6 sits 50 m below the B480",
+        ],
+      },
+      train: {
+        number: "02",
+        title: "By train + bus",
+        body: "You can still get up without a car — the final stretch from Winterberg station is a 25-minute bus ride. Works fine for school-group sizes.",
+        steps: [
+          "Train to Winterberg (Westf) station",
+          "From the adjacent ZOB: bus R28 toward Schmallenberg",
+          "Get off at Langewiese Ortsmitte",
+          "200 m on foot to bakery Gerke",
+          "Directly opposite: driveway to the Wiesenhütte",
+        ],
+      },
+      arrival: {
+        number: "03",
+        title: "Last metres",
+        body: "The driveway sits below the main road — first-timers easily miss it. Look out for bakery Gerke across the street, that's the marker.",
+        details: [
+          "Gravel track, ~50 m downhill",
+          "Slippery in winter — drive carefully",
+          "Park right by the cabin (in summer)",
+          "Key handover on site at arrival",
+        ],
+      },
+    },
+    parking: {
+      eyebrow: "Parking",
+      h2: "Summer or winter — it matters.",
+      summer: {
+        label: "Summer",
+        h: "In front of the cabin",
+        body: "Right in front of the cabin there's space for the whole group. Additionally one-sided parking on the main road above.",
+      },
+      winter: {
+        label: "Winter",
+        h: "Up on the main road",
+        body: "When snow lies, everyone parks up on the main road — the gravel track turns icy and isn't a safe drive with a car.",
+      },
+    },
+    map: {
+      eyebrow: "Map",
+      h2: "Here we are.",
+      lead: "Langewiese, west-facing slope. Around: Asten massif, high moor, Rothaarsteig trail.",
+      openIn: "Open in maps app",
+    },
     infra: {
-      eyebrow: "What's in the village",
-      h2: "Langewiese infrastructure.",
-      bakery: { title: "Bakery Gerke", detail: "Directly opposite. Mon–Sat 6:30–12:30 + Mon–Fri 15:00–18:00 · Pre-orders possible · Tel. +49 2758 / 280" },
-      catering: { title: "Catering", detail: "Gasthof Graberhof, Hohenleye 1, Winterberg-Hoheleye · Tel. +49 2758 / 284 · Mobile +49 160 7622508" },
-      emergency: { title: "Emergency", detail: "St. Franziskus Hospital Winterberg · Franziskusstr. 2 · Tel. +49 2981 / 8020 · On-call doctor 116 117" },
+      eyebrow: "In the village",
+      h2: "What you'll find within walking distance.",
+      lead: "Langewiese is small but has everything essential within 200 metres.",
+      cards: [
+        { icon: "bakery", title: "Bakery Gerke", distance: "30 m across", hours: "Mon–Sat 6:30–12:30 · Mon–Fri 15:00–18:00", phone: "+49 2758 280", detail: "Rolls, cake, coffee. Pre-orders for groups possible — just call the evening before." },
+        { icon: "catering", title: "Gasthof Graberhof", distance: "Hoheleye, 4 km", phone: "+49 2758 284", detail: "Catering for groups. Delivers to the cabin or you drive over — both work. Mobile: +49 160 7622508." },
+        { icon: "emergency", title: "St. Franziskus Hospital", distance: "Winterberg, 8 km", phone: "+49 2981 8020", detail: "24/7 ER. For non-acute cases: on-call doctor 116 117. In acute emergencies always dial 112." },
+      ],
+    },
+    notes: {
+      eyebrow: "Practical",
+      h2: "Three things to know before you arrive.",
+      items: [
+        { icon: "mountain", title: "690 metres up", body: "Langewiese is one of NRW's highest villages. Nights get cool even in summer — bring a jacket. In winter, snow often lies until April." },
+        { icon: "alert", title: "Last filling station", body: "The nearest 24h station is in Winterberg (8 km). Late-evening arrivals: refuel beforehand." },
+        { icon: "backpack", title: "Self-catered", body: "Shop before arriving — the nearest supermarket (EDEKA Löffler) is in Winterberg, closed Thursdays. Morning rolls at Gerke across the street." },
+      ],
+    },
+    cta: {
+      eyebrow: "Ready?",
+      h2: "Check dates, travel up, settle in.",
+      body: "If the location fits and the dates are free — booking is three clicks away.",
+      button: "Check availability",
     },
   },
   nl: {
-    hero: { eyebrow: "Ligging", h1: "Langewiese, Hochsauerland." },
+    hero: {
+      meta: `51° 18' N · 8° 31' O · ${ELEVATION_M} m boven NAP`,
+      h1l1: "Waar het bos",
+      h1l2: "zich opent.",
+      lead: "Langewiese ligt op 690 meter hoogte — op een plateau tussen de Rothaarsteig en het Hochsauerland. De hut ligt 50 meter onder de hoofdweg op de helling. Eén adres, drie manieren omhoog.",
+    },
     address: {
       eyebrow: "Adres",
-      h2: "Wiesenhütte",
-      subtitle: "Bundesstraße 6 · 59955 Winterberg-Langewiese, Duitsland",
-      intro: "De hut ligt zo'n 50 meter onder de hoofdweg op een helling. Direct tegenover staat bakkerij Gerke — de oprit naar de Wiesenhütte ligt onder de hoofdweg.",
+      statement: { l1: "Bundesstraße 6", l2: "59955 Winterberg-Langewiese", l3: "Hochsauerland · Duitsland" },
+      metaLines: { coords: "Coördinaten", elevation: "Hoogte", from: "Bereikbaar in" },
+      ctaApple: "Apple Maps",
+      ctaGoogle: "Google Maps",
+      ctaWaze: "Waze",
     },
-    car: {
-      h3: "Met de auto",
-      body: "Aanrijden via de A44 (Soest/Werl) of A46 (Bestwig). Laatste stuk via de B480 door Winterberg naar het hooggelegen dorp Langewiese.",
-    },
-    parking: {
-      h3: "Parkeren",
-      summer: { label: "Zomer:", body: "direct voor de hut en aan één kant van de hoofdweg erboven." },
-      winter: { label: "Winter:", body: "om veiligheidsredenen uitsluitend aan de hoofdweg erboven." },
-    },
-    transit: {
-      eyebrow: "Met trein & bus",
-      h2: "Openbaar vervoer",
-      steps: [
-        "Trein tot **station Winterberg (Westf)**",
-        "Vanaf het aansluitende busstation **bus R28** richting Schmallenberg",
-        "Uitstappen bij **Langewiese Ortsmitte**",
-        "200 m lopen in de rijrichting tot **bakkerij Gerke**",
-        "Direct tegenover de bakkerij: oprit naar de Wiesenhütte",
+    travelTimes: {
+      eyebrow: "Reizen",
+      h2: "Hoe ver je je voelt van huis.",
+      cities: [
+        { name: "Amsterdam", hours: "4u 00", sub: "Via Keulen — voor de Nederlandse gasten" },
+        { name: "Düsseldorf", hours: "2u 00", sub: "Via de A46" },
+        { name: "Keulen", hours: "2u 20", sub: "Via A4 + A45" },
+        { name: "Brussel", hours: "4u 30", sub: "Via Aken + Keulen" },
       ],
     },
-    map: { eyebrow: "Kaart", h2: "Hier liggen we.", googleLink: "In Google Maps openen ↗" },
+    routes: {
+      eyebrow: "Drie wegen omhoog",
+      h2: "Met auto, trein — of te voet.",
+      lead: "Hoe je ook komt, het hooggelegen dorp is bereikbaar. Met sneeuw raden we winterbanden aan; in de zomer volstaat elke auto.",
+      car: {
+        number: "01",
+        title: "Met de auto",
+        body: "Via A44 (Soest/Werl) of A46 (Bestwig). Laatste stuk via de B480 door Winterberg naar Langewiese — een mooie rit door dicht gemengd bos.",
+        details: [
+          "A44 vanaf het Ruhrgebied / A46 vanaf Düsseldorf",
+          "Afrit Bestwig → B480 richting Winterberg",
+          "Door Winterberg verder naar Langewiese (8 km)",
+          "Huisnummer 6 ligt 50 m onder de B480",
+        ],
+      },
+      train: {
+        number: "02",
+        title: "Met trein + bus",
+        body: "Zonder auto kun je ook omhoog — het laatste stuk vanaf station Winterberg is een busrit van 25 minuten. Werkt prima voor schoolgroepen.",
+        steps: [
+          "Trein tot station Winterberg (Westf)",
+          "Vanaf het aansluitende ZOB: bus R28 richting Schmallenberg",
+          "Uitstappen bij Langewiese Ortsmitte",
+          "200 m lopen naar bakkerij Gerke",
+          "Direct tegenover: oprit naar de Wiesenhütte",
+        ],
+      },
+      arrival: {
+        number: "03",
+        title: "Laatste meters",
+        body: "De oprit ligt onder de hoofdweg — eerste keer wordt hij makkelijk gemist. Let op bakkerij Gerke aan de overkant, dat is het herkenningspunt.",
+        details: [
+          "Onverharde weg, ~50 m omlaag",
+          "Glad in de winter — voorzichtig rijden",
+          "Direct voor de hut parkeren (in de zomer)",
+          "Sleuteloverdracht ter plaatse bij aankomst",
+        ],
+      },
+    },
+    parking: {
+      eyebrow: "Parkeren",
+      h2: "Zomer of winter — het verschil telt.",
+      summer: {
+        label: "In de zomer",
+        h: "Voor de hut",
+        body: "Direct voor de hut is plek voor de hele groep. Daarnaast aan één kant boven aan de hoofdweg.",
+      },
+      winter: {
+        label: "In de winter",
+        h: "Boven aan de weg",
+        body: "Bij sneeuw parkeert iedereen boven aan de hoofdweg — de onverharde weg wordt dan ijzig en is niet veilig met de auto.",
+      },
+    },
+    map: {
+      eyebrow: "Kaart",
+      h2: "Hier liggen we.",
+      lead: "Langewiese, helling op het westen. Eromheen: Asten-massief, hoogveen, Rothaarsteig.",
+      openIn: "In kaarten-app openen",
+    },
     infra: {
-      eyebrow: "Wat er in het dorp is",
-      h2: "Infrastructuur Langewiese.",
-      bakery: { title: "Bakkerij Gerke", detail: "Direct tegenover. Ma–Za 6:30–12:30 + Ma–Vr 15:00–18:00 · Vooraf bestellen mogelijk · Tel. +49 2758 / 280" },
-      catering: { title: "Catering", detail: "Gasthof Graberhof, Hohenleye 1, Winterberg-Hoheleye · Tel. +49 2758 / 284 · Mobiel +49 160 7622508" },
-      emergency: { title: "Noodgeval", detail: "St. Franziskus Hospital Winterberg · Franziskusstr. 2 · Tel. +49 2981 / 8020 · Huisartsenpost 116 117" },
+      eyebrow: "In het dorp",
+      h2: "Wat je op loopafstand vindt.",
+      lead: "Langewiese is klein maar heeft alles wat nodig is binnen 200 meter.",
+      cards: [
+        { icon: "bakery", title: "Bakkerij Gerke", distance: "30 m tegenover", hours: "Ma–Za 6:30–12:30 · Ma–Vr 15:00–18:00", phone: "+49 2758 280", detail: "Broodjes, taart, koffie. Vooraf bestellen voor groepen mogelijk — bel even de avond ervoor." },
+        { icon: "catering", title: "Gasthof Graberhof", distance: "Hoheleye, 4 km", phone: "+49 2758 284", detail: "Catering voor groepen. Levert in de hut of je rijdt erheen — beide kan. Mobiel: +49 160 7622508." },
+        { icon: "emergency", title: "St. Franziskus Hospital", distance: "Winterberg, 8 km", phone: "+49 2981 8020", detail: "24/7 spoedhulp. Voor niet-acute gevallen: huisartsenpost 116 117. Bij acuut gevaar altijd 112." },
+      ],
+    },
+    notes: {
+      eyebrow: "Praktisch",
+      h2: "Drie dingen die je voor aankomst moet weten.",
+      items: [
+        { icon: "mountain", title: "690 meter hoogte", body: "Langewiese is een van NRW's hoogste dorpen. Ook in de zomer wordt het 's nachts koel — neem een jas mee. In de winter ligt vaak sneeuw tot april." },
+        { icon: "alert", title: "Laatste tankstation", body: "Het dichtstbijzijnde 24-uurs tankstation is in Winterberg (8 km). Late aankomers: vooraf tanken." },
+        { icon: "backpack", title: "Zelfvoorzienend", body: "Vóór aankomst boodschappen doen — de dichtstbijzijnde supermarkt (EDEKA Löffler) ligt in Winterberg, donderdag dicht. 's Ochtends broodjes bij Gerke tegenover." },
+      ],
+    },
+    cta: {
+      eyebrow: "Klaar?",
+      h2: "Beschikbaarheid checken, omhoog rijden, aankomen.",
+      body: "Als de plek past en de datum vrij is — boeken is drie klikken.",
+      button: "Beschikbaarheid checken",
     },
   },
 };
 
-// Helper: ersetzt **fett** durch <strong>
-function renderInline(text: string): React.ReactNode {
-  const parts = text.split(/(\*\*[^*]+\*\*)/);
-  return parts.map((part, i) =>
-    part.startsWith("**") && part.endsWith("**") ? (
-      <strong key={i}>{part.slice(2, -2)}</strong>
-    ) : (
-      <span key={i}>{part}</span>
-    )
-  );
-}
+const INFRA_ICONS = {
+  bakery: Croissant,
+  catering: Utensils,
+  emergency: Stethoscope,
+} as const;
+
+const NOTE_ICONS = {
+  mountain: Mountain,
+  alert: TriangleAlert,
+  backpack: Backpack,
+} as const;
 
 export default async function LagePage() {
   const locale = await getServerLocale();
   const c = COPY[locale];
 
   return (
-    <div>
-      <section className="relative h-[420px] sm:h-[480px] overflow-hidden">
+    <div className="bg-[var(--color-wh-snow)] overflow-x-clip">
+      {/* ============= CINEMATIC HERO ============= */}
+      <section className="relative min-h-[80vh] sm:min-h-[88vh] flex items-end overflow-hidden">
         <Image
-          src="/media/photos/landscape.jpg"
-          alt="Hochsauerland"
+          src="/media/photos/aerial-1.jpg"
+          alt="Wiesenhütte aus der Luft — Hochsauerland-Plateau"
           fill
           priority
-          className="object-cover"
           sizes="100vw"
+          className="object-cover"
+          style={{ filter: "saturate(0.95) contrast(1.02)" }}
         />
-        <div className="absolute inset-0 bg-black/40" />
-        <div className="relative max-w-[1080px] mx-auto h-full px-6 sm:px-8 flex flex-col justify-end pb-10 sm:pb-12">
-          <div className="eyebrow text-[var(--color-wh-snow)]/85">{c.hero.eyebrow}</div>
-          <h1 className="text-[var(--color-wh-snow)] font-display font-bold text-[44px] sm:text-[64px] leading-tight m-0 mt-3 sm:mt-4">
-            {c.hero.h1}
-          </h1>
-        </div>
-      </section>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/15 to-black/75" />
 
-      <section className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24">
-        <div className="max-w-[1080px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-start">
-          <div>
-            <div className="eyebrow">{c.address.eyebrow}</div>
-            <h2 className="text-[28px] sm:text-[34px] mt-3 mb-2">
-              {c.address.h2}
-              <span className="block text-base sm:text-lg font-normal mt-2 text-[var(--color-wh-fg-muted)]">
-                {c.address.subtitle}
-              </span>
-            </h2>
-            <p className="text-base text-[var(--color-wh-black)] leading-relaxed mt-4">{c.address.intro}</p>
+        {/* Mountain silhouette overlay */}
+        <svg
+          className="absolute bottom-0 left-0 w-full opacity-30 pointer-events-none"
+          viewBox="0 0 1440 200"
+          preserveAspectRatio="none"
+          style={{ height: "25%" }}
+          aria-hidden
+        >
+          <path
+            fill="rgba(17,17,17,0.5)"
+            d="M0,140 L180,90 L320,130 L470,70 L620,110 L780,60 L920,120 L1070,80 L1240,130 L1440,100 L1440,200 L0,200 Z"
+          />
+        </svg>
 
-            <h3 className="mt-10 mb-3 text-[20px]">{c.car.h3}</h3>
-            <p className="text-[var(--color-wh-fg-muted)] leading-relaxed m-0">{c.car.body}</p>
-
-            <h3 className="mt-8 mb-3 text-[20px]">{c.parking.h3}</h3>
-            <ul className="list-disc list-inside marker:text-[var(--color-wh-green)] text-[var(--color-wh-black)] space-y-1.5">
-              <li>
-                <strong>{c.parking.summer.label}</strong> {c.parking.summer.body}
-              </li>
-              <li>
-                <strong>{c.parking.winter.label}</strong> {c.parking.winter.body}
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <div className="eyebrow">{c.transit.eyebrow}</div>
-            <h2 className="text-[28px] sm:text-[34px] mt-3 mb-2">{c.transit.h2}</h2>
-            <ol className="mt-4 space-y-3 text-[var(--color-wh-black)] leading-relaxed list-decimal list-inside marker:text-[var(--color-wh-deep-green)] marker:font-semibold">
-              {c.transit.steps.map((step, i) => (
-                <li key={i}>{renderInline(step)}</li>
-              ))}
-            </ol>
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-16 sm:py-24">
-        <div className="max-w-[1080px] mx-auto">
-          <div className="eyebrow">{c.map.eyebrow}</div>
-          <h2 className="text-[28px] sm:text-[34px] mt-3 mb-6">{c.map.h2}</h2>
-          <ConsentGate
-            category="functional"
-            serviceName="OpenStreetMap"
-            serviceUrl="https://wiki.openstreetmap.org/wiki/Privacy_Policy"
-            className="aspect-[16/9]"
-          >
-            <div className="aspect-[16/9] rounded-[var(--radius-card)] overflow-hidden border border-[var(--color-wh-winter-grey)]">
-              <iframe
-                title="Karte Langewiese"
-                src="https://www.openstreetmap.org/export/embed.html?bbox=8.4500%2C51.2700%2C8.5800%2C51.3300&layer=mapnik&marker=51.3000%2C8.5150"
-                className="w-full h-full"
-                loading="lazy"
-              />
+        <div className="relative max-w-[1280px] mx-auto px-6 sm:px-8 pb-16 sm:pb-24 pt-32 z-10 w-full">
+          <ScrollReveal>
+            <div className="inline-flex items-center gap-3 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/30 text-[var(--color-wh-snow)] text-[11px] uppercase tracking-[0.2em] font-semibold mb-7">
+              <Compass size={13} />
+              {c.hero.meta}
             </div>
-          </ConsentGate>
-          <p className="text-sm text-[var(--color-wh-fg-muted)] mt-3">
-            <a
-              href="https://www.google.com/maps/search/?api=1&query=Bundesstra%C3%9Fe+6+59955+Winterberg-Langewiese"
-              target="_blank"
-              rel="noreferrer"
+          </ScrollReveal>
+
+          <ScrollReveal delay={120}>
+            <h1
+              className="font-display font-extrabold uppercase tracking-tight text-[var(--color-wh-snow)] m-0 leading-[0.92] drop-shadow-lg"
+              style={{ fontSize: "clamp(44px, 8vw, 116px)", letterSpacing: "-0.03em" }}
             >
-              {c.map.googleLink}
-            </a>
-          </p>
+              {c.hero.h1l1}
+              <br />
+              <span className="text-[var(--color-wh-sunset)]">{c.hero.h1l2}</span>
+            </h1>
+          </ScrollReveal>
+
+          <ScrollReveal delay={280}>
+            <p className="text-[var(--color-wh-snow)]/90 text-base sm:text-[19px] leading-relaxed max-w-2xl mt-8 m-0 drop-shadow">
+              {c.hero.lead}
+            </p>
+          </ScrollReveal>
         </div>
       </section>
 
-      <section className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24">
-        <div className="max-w-[1080px] mx-auto">
-          <div className="eyebrow">{c.infra.eyebrow}</div>
-          <h2 className="text-[28px] sm:text-[34px] mt-3 mb-8">{c.infra.h2}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card title={c.infra.bakery.title} detail={c.infra.bakery.detail} />
-            <Card title={c.infra.catering.title} detail={c.infra.catering.detail} />
-            <Card title={c.infra.emergency.title} detail={c.infra.emergency.detail} />
+      {/* ============= ADDRESS STATEMENT ============= */}
+      <section className="px-6 sm:px-8 py-24 sm:py-32 bg-[var(--color-wh-snow)]">
+        <div className="max-w-[1280px] mx-auto">
+          <ScrollReveal>
+            <div className="eyebrow text-[var(--color-wh-deep-green)] mb-8">{c.address.eyebrow}</div>
+          </ScrollReveal>
+
+          <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-12 lg:gap-20 items-end">
+            {/* Big address statement */}
+            <ScrollReveal delay={100}>
+              <div>
+                <h2
+                  className="font-display font-bold text-[var(--color-wh-deep-green)] m-0 leading-[0.96] uppercase"
+                  style={{ fontSize: "clamp(32px, 5.5vw, 76px)", letterSpacing: "-0.025em" }}
+                >
+                  {c.address.statement.l1}
+                  <br />
+                  {c.address.statement.l2}
+                </h2>
+                <p
+                  className="m-0 mt-4 text-[var(--color-wh-deep-green)]/70 text-[11px] sm:text-xs uppercase tracking-[0.3em] font-semibold"
+                >
+                  {c.address.statement.l3}
+                </p>
+              </div>
+            </ScrollReveal>
+
+            {/* Meta + Navi-Buttons */}
+            <ScrollReveal delay={260}>
+              <div className="space-y-6">
+                <dl className="space-y-3 m-0">
+                  <MetaRow icon={<MapPin size={14} />} label={c.address.metaLines.coords}>
+                    {LAT.toFixed(4)}° N · {LNG.toFixed(4)}° O
+                  </MetaRow>
+                  <MetaRow icon={<Mountain size={14} />} label={c.address.metaLines.elevation}>
+                    {ELEVATION_M} m ü. NHN
+                  </MetaRow>
+                </dl>
+                <div className="pt-4 border-t border-[var(--color-wh-winter-grey)]">
+                  <p className="text-[10px] uppercase tracking-[0.25em] font-bold text-[var(--color-wh-deep-green)]/60 m-0 mb-3">
+                    {c.address.metaLines.from}
+                  </p>
+                  <div className="grid grid-cols-3 gap-2">
+                    <NaviButton href={NAVI_LINKS.apple} label={c.address.ctaApple} />
+                    <NaviButton href={NAVI_LINKS.google} label={c.address.ctaGoogle} primary />
+                    <NaviButton href={NAVI_LINKS.waze} label={c.address.ctaWaze} />
+                  </div>
+                </div>
+              </div>
+            </ScrollReveal>
           </div>
+        </div>
+      </section>
+
+      {/* ============= TRAVEL TIMES ============= */}
+      <section className="px-6 sm:px-8 py-20 sm:py-28 bg-[var(--color-wh-beige)]">
+        <div className="max-w-[1280px] mx-auto">
+          <ScrollReveal>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-10 sm:mb-14">
+              <div className="md:col-span-5">
+                <div className="eyebrow text-[var(--color-wh-deep-green)] mb-3">{c.travelTimes.eyebrow}</div>
+                <h2
+                  className="font-display font-bold text-[var(--color-wh-deep-green)] m-0 leading-[1.02]"
+                  style={{ fontSize: "clamp(32px, 5vw, 56px)", letterSpacing: "-0.02em" }}
+                >
+                  {c.travelTimes.h2}
+                </h2>
+              </div>
+            </div>
+          </ScrollReveal>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+            {c.travelTimes.cities.map((city, i) => (
+              <ScrollReveal key={city.name} delay={i * 80}>
+                <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-2xl p-5 sm:p-6 h-full flex flex-col">
+                  <div className="text-[10px] uppercase tracking-[0.25em] font-bold text-[var(--color-wh-deep-green)]/60 mb-3">
+                    {city.name}
+                  </div>
+                  <div
+                    className="font-display font-extrabold text-[var(--color-wh-deep-green)] leading-none tabular-nums mb-3"
+                    style={{ fontSize: "clamp(28px, 3.5vw, 44px)" }}
+                  >
+                    {city.hours}
+                  </div>
+                  <p className="text-[12px] sm:text-[13px] text-[var(--color-wh-fg-muted)] m-0 leading-snug">
+                    {city.sub}
+                  </p>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ============= ROUTES (3 Wege herauf) ============= */}
+      <section className="px-6 sm:px-8 py-24 sm:py-32 bg-[var(--color-wh-snow)]">
+        <div className="max-w-[1280px] mx-auto">
+          <ScrollReveal>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-12 sm:mb-16">
+              <div className="md:col-span-5">
+                <div className="eyebrow text-[var(--color-wh-deep-green)] mb-3">{c.routes.eyebrow}</div>
+                <h2
+                  className="font-display font-bold text-[var(--color-wh-deep-green)] m-0 leading-[1.02]"
+                  style={{ fontSize: "clamp(32px, 5vw, 56px)", letterSpacing: "-0.02em" }}
+                >
+                  {c.routes.h2}
+                </h2>
+              </div>
+              <div className="md:col-span-7 md:pt-3">
+                <p className="text-base sm:text-[18px] leading-[1.7] text-[var(--color-wh-black)] m-0 max-w-2xl">
+                  {c.routes.lead}
+                </p>
+              </div>
+            </div>
+          </ScrollReveal>
+
+          <div className="space-y-10 sm:space-y-14">
+            <ScrollReveal as="article">
+              <RouteRow
+                number={c.routes.car.number}
+                icon={<Car size={28} strokeWidth={1.6} />}
+                title={c.routes.car.title}
+                body={c.routes.car.body}
+                details={c.routes.car.details}
+                imgSrc="/media/photos/exterior-front.jpg"
+                imgAlt="Anfahrt zur Wiesenhütte"
+                imgRight={false}
+              />
+            </ScrollReveal>
+
+            <ScrollReveal as="article">
+              <RouteRow
+                number={c.routes.train.number}
+                icon={<TrainFront size={28} strokeWidth={1.6} />}
+                title={c.routes.train.title}
+                body={c.routes.train.body}
+                stepsList={c.routes.train.steps}
+                imgSrc="/media/photos/landscape.jpg"
+                imgAlt="Sauerland-Landschaft auf der Anreise"
+                imgRight={true}
+              />
+            </ScrollReveal>
+
+            <ScrollReveal as="article">
+              <RouteRow
+                number={c.routes.arrival.number}
+                icon={<MapPin size={28} strokeWidth={1.6} />}
+                title={c.routes.arrival.title}
+                body={c.routes.arrival.body}
+                details={c.routes.arrival.details}
+                imgSrc="/media/photos/ankunft_an_der_huette.png"
+                imgAlt="Ankunft an der Wiesenhütte"
+                imgRight={false}
+              />
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ============= PARKING ============= */}
+      <section className="px-6 sm:px-8 py-20 sm:py-28 bg-[var(--color-wh-beige)]">
+        <div className="max-w-[1280px] mx-auto">
+          <ScrollReveal>
+            <div className="text-center mb-12 sm:mb-16 max-w-2xl mx-auto">
+              <div className="eyebrow text-[var(--color-wh-deep-green)] mb-3 inline-flex items-center gap-2 justify-center">
+                <ParkingCircle size={14} />
+                {c.parking.eyebrow}
+              </div>
+              <h2
+                className="font-display font-bold text-[var(--color-wh-deep-green)] m-0 leading-[1.02]"
+                style={{ fontSize: "clamp(32px, 5vw, 56px)", letterSpacing: "-0.02em" }}
+              >
+                {c.parking.h2}
+              </h2>
+            </div>
+          </ScrollReveal>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-8">
+            <ScrollReveal delay={80}>
+              <ParkingCard
+                icon={<Sun size={32} strokeWidth={1.5} />}
+                accentClass="from-amber-400/30 via-orange-300/20 to-rose-300/10"
+                label={c.parking.summer.label}
+                h={c.parking.summer.h}
+                body={c.parking.summer.body}
+              />
+            </ScrollReveal>
+            <ScrollReveal delay={180}>
+              <ParkingCard
+                icon={<Snowflake size={32} strokeWidth={1.5} />}
+                accentClass="from-sky-300/30 via-blue-200/20 to-indigo-200/10"
+                label={c.parking.winter.label}
+                h={c.parking.winter.h}
+                body={c.parking.winter.body}
+              />
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ============= MAP ============= */}
+      <section className="px-6 sm:px-8 py-20 sm:py-28 bg-[var(--color-wh-snow)]">
+        <div className="max-w-[1280px] mx-auto">
+          <ScrollReveal>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8 sm:mb-12">
+              <div className="md:col-span-5">
+                <div className="eyebrow text-[var(--color-wh-deep-green)] mb-3">{c.map.eyebrow}</div>
+                <h2
+                  className="font-display font-bold text-[var(--color-wh-deep-green)] m-0 leading-[1.02]"
+                  style={{ fontSize: "clamp(32px, 5vw, 56px)", letterSpacing: "-0.02em" }}
+                >
+                  {c.map.h2}
+                </h2>
+              </div>
+              <div className="md:col-span-7 md:pt-3">
+                <p className="text-base sm:text-[18px] leading-[1.7] text-[var(--color-wh-black)] m-0 max-w-2xl">
+                  {c.map.lead}
+                </p>
+              </div>
+            </div>
+          </ScrollReveal>
+
+          <ScrollReveal delay={150}>
+            <ConsentGate
+              category="functional"
+              serviceName="OpenStreetMap"
+              serviceUrl="https://wiki.openstreetmap.org/wiki/Privacy_Policy"
+              className="aspect-[16/9] sm:aspect-[16/7]"
+            >
+              <div className="relative aspect-[16/9] sm:aspect-[16/7] rounded-3xl overflow-hidden border border-[var(--color-wh-winter-grey)] shadow-[0_20px_60px_rgba(47,74,53,0.12)]">
+                <iframe
+                  title="Karte Langewiese"
+                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${LNG - 0.05}%2C${LAT - 0.025}%2C${LNG + 0.05}%2C${LAT + 0.025}&layer=mapnik&marker=${LAT}%2C${LNG}`}
+                  className="w-full h-full"
+                  loading="lazy"
+                />
+              </div>
+            </ConsentGate>
+          </ScrollReveal>
+
+          <ScrollReveal delay={300}>
+            <div className="mt-6 flex flex-wrap gap-2 sm:gap-3 items-center">
+              <span className="text-[11px] uppercase tracking-[0.25em] font-bold text-[var(--color-wh-deep-green)]/60 mr-2">
+                {c.map.openIn}:
+              </span>
+              <MapDeepLink href={NAVI_LINKS.google} label="Google Maps" />
+              <MapDeepLink href={NAVI_LINKS.apple} label="Apple Maps" />
+              <MapDeepLink href={NAVI_LINKS.waze} label="Waze" />
+              <MapDeepLink href={NAVI_LINKS.osm} label="OpenStreetMap" />
+            </div>
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* ============= INFRASTRUCTURE (Im Dorf) ============= */}
+      <section className="px-6 sm:px-8 py-24 sm:py-32 bg-[var(--color-wh-beige)]">
+        <div className="max-w-[1280px] mx-auto">
+          <ScrollReveal>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-12 sm:mb-16">
+              <div className="md:col-span-5">
+                <div className="eyebrow text-[var(--color-wh-deep-green)] mb-3">{c.infra.eyebrow}</div>
+                <h2
+                  className="font-display font-bold text-[var(--color-wh-deep-green)] m-0 leading-[1.02]"
+                  style={{ fontSize: "clamp(32px, 5vw, 56px)", letterSpacing: "-0.02em" }}
+                >
+                  {c.infra.h2}
+                </h2>
+              </div>
+              <div className="md:col-span-7 md:pt-3">
+                <p className="text-base sm:text-[18px] leading-[1.7] text-[var(--color-wh-black)] m-0 max-w-2xl">
+                  {c.infra.lead}
+                </p>
+              </div>
+            </div>
+          </ScrollReveal>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+            {c.infra.cards.map((card, i) => {
+              const Icon = INFRA_ICONS[card.icon];
+              return (
+                <ScrollReveal key={card.title} delay={i * 100}>
+                  <article className="bg-white border border-[var(--color-wh-winter-grey)] rounded-2xl p-6 sm:p-7 h-full flex flex-col">
+                    <div className="w-12 h-12 rounded-full bg-[var(--color-wh-green-soft)] text-[var(--color-wh-deep-green)] flex items-center justify-center mb-5">
+                      <Icon size={22} strokeWidth={1.6} />
+                    </div>
+                    <h3 className="font-display font-bold text-[var(--color-wh-deep-green)] text-[19px] sm:text-[22px] m-0 mb-2 leading-tight">
+                      {card.title}
+                    </h3>
+                    <div className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[var(--color-wh-deep-green)]/70 mb-4">
+                      <MapPin size={11} />
+                      {card.distance}
+                    </div>
+                    <p className="text-[14px] text-[var(--color-wh-black)] leading-relaxed m-0 mb-4">
+                      {card.detail}
+                    </p>
+                    <div className="mt-auto pt-4 border-t border-[var(--color-wh-winter-grey)]/60 space-y-2 text-[12px] text-[var(--color-wh-fg-muted)]">
+                      {card.hours && (
+                        <div className="flex items-start gap-1.5">
+                          <Clock size={11} className="mt-0.5 shrink-0" />
+                          <span>{card.hours}</span>
+                        </div>
+                      )}
+                      {card.phone && (
+                        <a
+                          href={`tel:${card.phone.replace(/\s/g, "")}`}
+                          className="flex items-center gap-1.5 text-[var(--color-wh-deep-green)] font-semibold no-underline hover:underline"
+                        >
+                          <Phone size={11} />
+                          {card.phone}
+                        </a>
+                      )}
+                    </div>
+                  </article>
+                </ScrollReveal>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ============= PRACTICAL NOTES ============= */}
+      <section className="px-6 sm:px-8 py-24 sm:py-32 bg-[var(--color-wh-snow)]">
+        <div className="max-w-[1280px] mx-auto">
+          <ScrollReveal>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-12 sm:mb-16">
+              <div className="md:col-span-5">
+                <div className="eyebrow text-[var(--color-wh-deep-green)] mb-3">{c.notes.eyebrow}</div>
+                <h2
+                  className="font-display font-bold text-[var(--color-wh-deep-green)] m-0 leading-[1.02]"
+                  style={{ fontSize: "clamp(32px, 5vw, 56px)", letterSpacing: "-0.02em" }}
+                >
+                  {c.notes.h2}
+                </h2>
+              </div>
+            </div>
+          </ScrollReveal>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+            {c.notes.items.map((item, i) => {
+              const Icon = NOTE_ICONS[item.icon];
+              return (
+                <ScrollReveal key={item.title} delay={i * 100}>
+                  <article className="border-l-2 border-[var(--color-wh-sunset)] pl-5 sm:pl-6 py-2 h-full">
+                    <Icon size={28} strokeWidth={1.5} className="text-[var(--color-wh-sunset)] mb-4" />
+                    <h3 className="font-display font-bold text-[var(--color-wh-deep-green)] text-[18px] sm:text-[20px] m-0 mb-3 leading-tight">
+                      {item.title}
+                    </h3>
+                    <p className="text-[14px] sm:text-[15px] text-[var(--color-wh-black)] leading-relaxed m-0">
+                      {item.body}
+                    </p>
+                  </article>
+                </ScrollReveal>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ============= CTA ============= */}
+      <section className="relative px-6 sm:px-8 py-24 sm:py-32 bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] overflow-hidden">
+        <div
+          className="absolute inset-0 opacity-15 pointer-events-none"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 25% 35%, rgba(247,247,242,0.5) 0px, transparent 55%), radial-gradient(circle at 78% 70%, rgba(255,170,90,0.3) 0px, transparent 50%)",
+          }}
+        />
+        <div className="relative max-w-[800px] mx-auto text-center">
+          <ScrollReveal>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/30 text-[11px] uppercase tracking-[0.2em] font-semibold mb-6">
+              <Bus size={12} />
+              {c.cta.eyebrow}
+            </div>
+            <h2
+              className="font-display font-bold m-0 mb-5 leading-tight text-[var(--color-wh-snow)]"
+              style={{ fontSize: "clamp(28px, 4.5vw, 48px)", letterSpacing: "-0.02em" }}
+            >
+              {c.cta.h2}
+            </h2>
+            <p className="text-[var(--color-wh-snow)]/85 text-base sm:text-lg leading-relaxed m-0 mb-9 max-w-lg mx-auto">
+              {c.cta.body}
+            </p>
+            <a
+              href="/buchen"
+              className="inline-flex items-center gap-2 h-13 px-7 rounded-full bg-[var(--color-wh-snow)] text-[var(--color-wh-deep-green)] font-semibold no-underline hover:bg-white transition-colors shadow-[var(--shadow-float)]"
+            >
+              {c.cta.button}
+              <ArrowRight size={18} />
+            </a>
+          </ScrollReveal>
         </div>
       </section>
     </div>
   );
 }
 
-const Card = ({ title, detail }: { title: string; detail: string }) => (
-  <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6">
-    <h4 className="font-display font-semibold text-[18px] text-[var(--color-wh-deep-green)] m-0 mb-2">
-      {title}
-    </h4>
-    <p className="text-sm text-[var(--color-wh-fg-muted)] m-0 leading-relaxed">{detail}</p>
+// =============================================================
+// HELPER COMPONENTS
+// =============================================================
+
+const MetaRow = ({
+  icon,
+  label,
+  children,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  children: React.ReactNode;
+}) => (
+  <div className="flex items-baseline gap-3">
+    <span className="text-[var(--color-wh-deep-green)]/50 mt-1 shrink-0">{icon}</span>
+    <div className="flex-1 min-w-0">
+      <dt className="text-[10px] uppercase tracking-[0.25em] font-bold text-[var(--color-wh-deep-green)]/60 m-0 mb-0.5">
+        {label}
+      </dt>
+      <dd className="m-0 text-[15px] sm:text-base text-[var(--color-wh-deep-green)] font-semibold tabular-nums">
+        {children}
+      </dd>
+    </div>
+  </div>
+);
+
+const NaviButton = ({
+  href,
+  label,
+  primary = false,
+}: {
+  href: string;
+  label: string;
+  primary?: boolean;
+}) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noreferrer"
+    className={`inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-[12px] font-semibold no-underline transition-colors ${
+      primary
+        ? "bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] hover:opacity-90"
+        : "bg-white text-[var(--color-wh-deep-green)] border border-[var(--color-wh-winter-grey)] hover:bg-[var(--color-wh-green-soft)]"
+    }`}
+  >
+    {label}
+    <ExternalLink size={11} />
+  </a>
+);
+
+const MapDeepLink = ({ href, label }: { href: string; label: string }) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noreferrer"
+    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[var(--color-wh-winter-grey)] text-[12px] font-semibold text-[var(--color-wh-deep-green)] no-underline hover:bg-[var(--color-wh-green-soft)] transition-colors"
+  >
+    {label}
+    <ExternalLink size={10} />
+  </a>
+);
+
+const RouteRow = ({
+  number,
+  icon,
+  title,
+  body,
+  details,
+  stepsList,
+  imgSrc,
+  imgAlt,
+  imgRight,
+}: {
+  number: string;
+  icon: React.ReactNode;
+  title: string;
+  body: string;
+  details?: string[];
+  stepsList?: string[];
+  imgSrc: string;
+  imgAlt: string;
+  imgRight: boolean;
+}) => (
+  <div
+    className={`grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10 items-center ${
+      imgRight ? "md:[&>.media]:order-2" : ""
+    }`}
+  >
+    <div className="media md:col-span-5">
+      <div className="relative aspect-[4/3] rounded-3xl overflow-hidden border border-[var(--color-wh-winter-grey)] shadow-[0_16px_44px_rgba(47,74,53,0.10)]">
+        <Image src={imgSrc} alt={imgAlt} fill sizes="(min-width: 768px) 45vw, 100vw" className="object-cover" />
+      </div>
+    </div>
+    <div className="md:col-span-7">
+      <div className="flex items-end gap-5 mb-5">
+        <div
+          className="font-display font-extrabold leading-none text-transparent select-none"
+          style={{
+            fontSize: "clamp(56px, 8vw, 110px)",
+            WebkitTextStroke: "1.5px var(--color-wh-deep-green)",
+            letterSpacing: "-0.05em",
+          }}
+        >
+          {number}
+        </div>
+        <div className="pb-2 flex items-center gap-3 text-[var(--color-wh-deep-green)]">
+          {icon}
+          <h3
+            className="font-display font-bold text-[var(--color-wh-deep-green)] m-0 leading-tight"
+            style={{ fontSize: "clamp(24px, 2.8vw, 36px)", letterSpacing: "-0.015em" }}
+          >
+            {title}
+          </h3>
+        </div>
+      </div>
+      <p className="text-[15px] sm:text-base leading-relaxed text-[var(--color-wh-black)] m-0 mb-6 max-w-2xl">
+        {body}
+      </p>
+      {details && (
+        <ul className="list-none p-0 m-0 space-y-2 max-w-xl">
+          {details.map((d, i) => (
+            <li
+              key={i}
+              className="flex items-start gap-2.5 text-[13px] sm:text-[14px] text-[var(--color-wh-deep-green)]/85"
+            >
+              <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[var(--color-wh-sunset)] shrink-0" aria-hidden />
+              {d}
+            </li>
+          ))}
+        </ul>
+      )}
+      {stepsList && (
+        <ol className="list-none p-0 m-0 space-y-3 max-w-xl">
+          {stepsList.map((s, i) => (
+            <li key={i} className="flex items-start gap-3 text-[14px] text-[var(--color-wh-deep-green)]/90">
+              <span className="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-full bg-[var(--color-wh-green-soft)] text-[var(--color-wh-deep-green)] text-[11px] font-bold tabular-nums">
+                {i + 1}
+              </span>
+              <span className="pt-0.5">{s}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+    </div>
+  </div>
+);
+
+const ParkingCard = ({
+  icon,
+  accentClass,
+  label,
+  h,
+  body,
+}: {
+  icon: React.ReactNode;
+  accentClass: string;
+  label: string;
+  h: string;
+  body: string;
+}) => (
+  <div className={`relative aspect-[5/4] sm:aspect-[3/2] rounded-3xl overflow-hidden border border-[var(--color-wh-winter-grey)] bg-gradient-to-br ${accentClass} p-8 sm:p-10 flex flex-col justify-between shadow-[0_16px_44px_rgba(47,74,53,0.08)]`}>
+    <div
+      className="absolute inset-0 opacity-30 pointer-events-none"
+      style={{
+        backgroundImage:
+          "radial-gradient(circle at 30% 25%, rgba(255,255,255,0.55) 0px, transparent 45%)",
+      }}
+      aria-hidden
+    />
+    <div className="relative text-[var(--color-wh-deep-green)] opacity-85">{icon}</div>
+    <div className="relative">
+      <div className="text-[11px] uppercase tracking-[0.25em] font-bold text-[var(--color-wh-deep-green)]/70 mb-3">
+        {label}
+      </div>
+      <h3
+        className="font-display font-bold text-[var(--color-wh-deep-green)] m-0 mb-4 leading-tight"
+        style={{ fontSize: "clamp(24px, 2.8vw, 32px)" }}
+      >
+        {h}
+      </h3>
+      <p className="text-[14px] sm:text-[15px] text-[var(--color-wh-black)]/85 leading-relaxed m-0 max-w-md">
+        {body}
+      </p>
+    </div>
   </div>
 );
