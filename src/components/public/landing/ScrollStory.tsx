@@ -24,8 +24,8 @@ type Beat = {
 
 const BEATS: Beat[] = [
   {
-    photo: "/media/photos/exterior-front.jpg",
-    alt: "Wiesenhütte im Schnee, Anreise am Nachmittag",
+    photo: "/media/photos/ankunft_an_der_huette.png",
+    alt: "Ankunft an der Wiesenhütte",
     eyebrow: { de: "Freitag · 16 Uhr", en: "Friday · 4 PM", nl: "Vrijdag · 16:00" },
     title: {
       de: "Auto auspacken, Tür auf, Holz im Ofen.",
@@ -33,24 +33,24 @@ const BEATS: Beat[] = [
       nl: "Auto uitladen, deur open, hout in de kachel.",
     },
     body: {
-      de: "Die letzten drei Kurven runter, Schnee an der Hauswand, Schlüssel im Briefkasten. Der erste Schritt rein in das Haus riecht nach altem Holz und nach den, die vorher hier waren. Die Heizung läuft schon — die Hüttenwartin hat morgens hochgedreht.",
-      en: "The last three bends down, snow against the wall, key in the letterbox. The first step inside smells like old wood and like those who were here before. The heating is already on — the warden cranked it up this morning.",
-      nl: "De laatste drie bochten omlaag, sneeuw tegen de muur, sleutel in de brievenbus. De eerste stap naar binnen ruikt naar oud hout en naar de mensen die hier eerder waren. De verwarming staat al aan — de huttenwacht heeft hem 's ochtends opgedraaid.",
+      de: "Die letzten drei Kurven runter, Koffer raus, Schlüssel im Briefkasten. Der erste Schritt rein in das Haus riecht nach altem Holz und nach den, die vorher hier waren. Die Heizung läuft schon — die Hüttenwartin hat morgens hochgedreht.",
+      en: "The last three bends down, bags out, key in the letterbox. The first step inside smells like old wood and like those who were here before. The heating is already on — the warden cranked it up this morning.",
+      nl: "De laatste drie bochten omlaag, koffers eruit, sleutel in de brievenbus. De eerste stap naar binnen ruikt naar oud hout en naar de mensen die hier eerder waren. De verwarming staat al aan — de huttenwacht heeft hem 's ochtends opgedraaid.",
     },
   },
   {
-    photo: "/media/photos/feuerstelle_3.jpg",
-    alt: "Lagerfeuer am Abend, Funken steigen auf",
+    photo: "/media/photos/projektfahrten/gemeinsam_uno_spielen.png",
+    alt: "Gemeinsames Uno-Spielen am Abend",
     eyebrow: { de: "Freitag · 20 Uhr", en: "Friday · 8 PM", nl: "Vrijdag · 20:00" },
     title: {
-      de: "Lagerfeuer, Kartenspiel, niemand hat Empfang.",
-      en: "Campfire, cards, nobody has reception.",
-      nl: "Kampvuur, kaartspel, niemand heeft bereik.",
+      de: "Uno-Runde, niemand hat Empfang.",
+      en: "Uno round, nobody has reception.",
+      nl: "Uno-rondje, niemand heeft bereik.",
     },
     body: {
-      de: "Das mit dem Empfang ist hier Feature, nicht Bug. Telefon aus, Holz nachlegen, jemand findet das alte Wizard-Kartenspiel. Draußen klirrend kalt, drinnen wirds laut.",
-      en: "No reception is a feature, not a bug. Phone off, log on, someone finds the old Wizard deck. Bitter cold outside, loud inside.",
-      nl: "Geen bereik is een feature, geen bug. Telefoon uit, blok erbij, iemand vindt het oude Wizard-kaartspel. Bitter koud buiten, luid binnen.",
+      de: "Das mit dem Empfang ist hier Feature, nicht Bug. Handys aus, Karten gemischt, irgendwer setzt aus, jemand bekommt eine Plus-Vier. Draußen klirrend kalt, drinnen wirds laut.",
+      en: "No reception is a feature, not a bug. Phones away, cards shuffled, someone skips a turn, someone gets a plus-four. Bitter cold outside, loud inside.",
+      nl: "Geen bereik is een feature, geen bug. Telefoons weg, kaarten geschud, iemand slaat over, iemand krijgt een plus-vier. Bitter koud buiten, luid binnen.",
     },
   },
   {
@@ -69,8 +69,8 @@ const BEATS: Beat[] = [
     },
   },
   {
-    photo: "/media/photos/interior-7593.jpg",
-    alt: "Gemeinsames Abendessen im Aufenthaltsraum",
+    photo: "/media/photos/projektfahrten/broetchen_holen.png",
+    alt: "Brötchen holen am Sonntagmorgen",
     eyebrow: { de: "Sonntag · 11 Uhr", en: "Sunday · 11 AM", nl: "Zondag · 11:00" },
     title: {
       de: "Brötchen vom Bäcker, Kaffee, niemand hat es eilig.",

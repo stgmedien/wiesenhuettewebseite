@@ -43,7 +43,7 @@ export const BENTO_TILES: GalleryTile[] = [
     },
   },
   {
-    src: "/media/photos/feuerstelle_3.jpg",
+    src: "/media/photos/feuerstelle_8.jpg",
     alt: "Lagerfeuer mit Funkenflug am Abend",
     area: "atmos",
     caption: {
