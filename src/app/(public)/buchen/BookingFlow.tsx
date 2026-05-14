@@ -532,8 +532,8 @@ export const BookingFlow = ({
   };
 
   return (
-    <div className="grid lg:grid-cols-[1fr_380px] gap-6 lg:gap-8">
-      <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-4 sm:p-6 lg:p-8">
+    <div className="grid lg:grid-cols-[1fr_380px] gap-6 lg:gap-8 max-w-full min-w-0">
+      <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-3 sm:p-6 lg:p-8 min-w-0 overflow-hidden">
         <Stepper step={step} labels={tt.steps} />
 
         {step === 0 && (

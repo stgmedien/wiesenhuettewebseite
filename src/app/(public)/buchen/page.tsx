@@ -96,7 +96,7 @@ export default async function BuchenPage({ searchParams }: Props) {
   const pc = PAGE_COPY[locale];
 
   return (
-    <div className="bg-[var(--color-wh-snow)] min-h-screen px-4 sm:px-8 py-12 sm:py-16 overflow-x-clip">
+    <div className="bg-[var(--color-wh-snow)] min-h-screen px-5 sm:px-8 py-10 sm:py-16 overflow-x-clip">
       <div className="max-w-[1080px] mx-auto">
         <div className="eyebrow">{pc.eyebrow}</div>
         <h1 className="text-[36px] sm:text-[56px] mt-4 mb-2 leading-tight">{pc.h1}</h1>
