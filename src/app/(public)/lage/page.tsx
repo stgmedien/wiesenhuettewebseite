@@ -19,7 +19,6 @@ import {
   TriangleAlert,
   Backpack,
 } from "lucide-react";
-import { ConsentGate } from "@/components/consent/ConsentGate";
 import { ScrollReveal } from "@/components/public/ScrollReveal";
 import { getServerLocale } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n-shared";
@@ -650,8 +649,8 @@ export default async function LagePage() {
                 title={c.routes.car.title}
                 body={c.routes.car.body}
                 details={c.routes.car.details}
-                imgSrc="/media/photos/exterior-front.jpg"
-                imgAlt="Anfahrt zur Wiesenhütte"
+                imgSrc="/media/photos/anfahrt_a44.png"
+                imgAlt="Anfahrt über die A44 ins Sauerland"
                 imgRight={false}
               />
             </ScrollReveal>
@@ -663,9 +662,10 @@ export default async function LagePage() {
                 title={c.routes.train.title}
                 body={c.routes.train.body}
                 stepsList={c.routes.train.steps}
-                imgSrc="/media/photos/landscape.jpg"
-                imgAlt="Sauerland-Landschaft auf der Anreise"
+                imgSrc="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/2019-04-19_Bahnhof_Winterberg_%28Westf%29_DB-Baureihe_633_109_%281%29.jpg/1280px-2019-04-19_Bahnhof_Winterberg_%28Westf%29_DB-Baureihe_633_109_%281%29.jpg"
+                imgAlt="Bahnhof Winterberg (Westf) mit DB-Baureihe 633"
                 imgRight={true}
+                imgAttribution="Foto: Fantaglobe11 · CC BY-SA 4.0 · Wikimedia Commons"
               />
             </ScrollReveal>
 
@@ -726,7 +726,7 @@ export default async function LagePage() {
         </div>
       </section>
 
-      {/* ============= MAP ============= */}
+      {/* ============= MAP (custom illustrative) ============= */}
       <section className="px-6 sm:px-8 py-20 sm:py-28 bg-[var(--color-wh-snow)]">
         <div className="max-w-[1280px] mx-auto">
           <ScrollReveal>
@@ -749,21 +749,7 @@ export default async function LagePage() {
           </ScrollReveal>
 
           <ScrollReveal delay={150}>
-            <ConsentGate
-              category="functional"
-              serviceName="OpenStreetMap"
-              serviceUrl="https://wiki.openstreetmap.org/wiki/Privacy_Policy"
-              className="aspect-[16/9] sm:aspect-[16/7]"
-            >
-              <div className="relative aspect-[16/9] sm:aspect-[16/7] rounded-3xl overflow-hidden border border-[var(--color-wh-winter-grey)] shadow-[0_20px_60px_rgba(47,74,53,0.12)]">
-                <iframe
-                  title="Karte Langewiese"
-                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${LNG - 0.05}%2C${LAT - 0.025}%2C${LNG + 0.05}%2C${LAT + 0.025}&layer=mapnik&marker=${LAT}%2C${LNG}`}
-                  className="w-full h-full"
-                  loading="lazy"
-                />
-              </div>
-            </ConsentGate>
+            <IllustratedMap />
           </ScrollReveal>
 
           <ScrollReveal delay={300}>
@@ -994,6 +980,7 @@ const RouteRow = ({
   imgSrc,
   imgAlt,
   imgRight,
+  imgAttribution,
 }: {
   number: string;
   icon: React.ReactNode;
@@ -1004,6 +991,7 @@ const RouteRow = ({
   imgSrc: string;
   imgAlt: string;
   imgRight: boolean;
+  imgAttribution?: string;
 }) => (
   <div
     className={`grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10 items-center ${
@@ -1014,6 +1002,11 @@ const RouteRow = ({
       <div className="relative aspect-[4/3] rounded-3xl overflow-hidden border border-[var(--color-wh-winter-grey)] shadow-[0_16px_44px_rgba(47,74,53,0.10)]">
         <Image src={imgSrc} alt={imgAlt} fill sizes="(min-width: 768px) 45vw, 100vw" className="object-cover" />
       </div>
+      {imgAttribution && (
+        <p className="text-[10px] text-[var(--color-wh-fg-muted)]/70 mt-2 text-right m-0">
+          {imgAttribution}
+        </p>
+      )}
     </div>
     <div className="md:col-span-7">
       <div className="flex items-end gap-5 mb-5">
@@ -1067,6 +1060,278 @@ const RouteRow = ({
       )}
     </div>
   </div>
+);
+
+// =============================================================
+// ILLUSTRATIVE MAP — Custom SVG anstelle eines generischen OSM-Iframes.
+// Vereinfachte Uebersichtskarte des Hochsauerlands rund um Langewiese.
+// Stilisiert, NICHT topographisch exakt — es geht um Orientierung, nicht
+// Vermessung. Wiesenhuette als pulsierender Sunset-Pin im Zentrum,
+// drumherum Winterberg, Niedersfeld+Hochheide, Kahler Asten, Neuastenberg.
+// =============================================================
+const IllustratedMap = () => (
+  <div className="relative aspect-[16/9] sm:aspect-[16/8] rounded-3xl overflow-hidden border border-[var(--color-wh-winter-grey)] shadow-[0_20px_60px_rgba(47,74,53,0.12)] bg-[#f5efe2]">
+    <svg
+      viewBox="0 0 1200 600"
+      preserveAspectRatio="xMidYMid slice"
+      className="w-full h-full"
+      role="img"
+      aria-label="Ubersichtskarte Hochsauerland um die Wiesenhutte"
+    >
+      <defs>
+        {/* Hintergrund-Verlauf: warmes Beige nach kuehlerem Grün-Beige */}
+        <linearGradient id="mapBg" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#f5efe2" />
+          <stop offset="100%" stopColor="#e6ddc8" />
+        </linearGradient>
+        {/* Wald-Patch-Farbe */}
+        <radialGradient id="forest" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#6FA05F" stopOpacity="0.22" />
+          <stop offset="100%" stopColor="#2F4A35" stopOpacity="0.12" />
+        </radialGradient>
+        {/* Pulsierender Wiesenhütten-Ring */}
+        <radialGradient id="huettePulse" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#B85C38" stopOpacity="0.45" />
+          <stop offset="70%" stopColor="#B85C38" stopOpacity="0.15" />
+          <stop offset="100%" stopColor="#B85C38" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+
+      {/* Background */}
+      <rect width="1200" height="600" fill="url(#mapBg)" />
+
+      {/* Subtile Höhenlinien (topographisch angedeutet) */}
+      <g stroke="#bfa980" strokeWidth="0.8" fill="none" opacity="0.35">
+        <path d="M-50,180 Q300,140 600,200 T1250,180" />
+        <path d="M-50,250 Q300,210 600,270 T1250,250" />
+        <path d="M-50,320 Q300,280 600,340 T1250,320" />
+        <path d="M-50,390 Q300,350 600,410 T1250,390" />
+        <path d="M-50,460 Q300,420 600,480 T1250,460" />
+      </g>
+
+      {/* Wald-Patches (große Areale) */}
+      <ellipse cx="220" cy="380" rx="170" ry="100" fill="url(#forest)" />
+      <ellipse cx="970" cy="180" rx="180" ry="110" fill="url(#forest)" />
+      <ellipse cx="1020" cy="450" rx="150" ry="90" fill="url(#forest)" />
+      <ellipse cx="380" cy="150" rx="140" ry="80" fill="url(#forest)" />
+
+      {/* Verstreute Tannen-Symbole */}
+      {[
+        [120, 380],
+        [180, 420],
+        [260, 360],
+        [320, 410],
+        [240, 300],
+        [900, 160],
+        [970, 130],
+        [1040, 200],
+        [980, 230],
+        [990, 440],
+        [1060, 470],
+        [1020, 510],
+        [340, 130],
+        [400, 170],
+        [460, 100],
+        [60, 250],
+        [60, 480],
+        [1140, 280],
+        [80, 100],
+        [1150, 90],
+        [780, 530],
+        [200, 540],
+      ].map(([x, y], i) => (
+        <g key={i} transform={`translate(${x},${y}) scale(0.9)`}>
+          <path d="M0,-10 L7,4 L-7,4 Z" fill="#3a5a3f" opacity="0.7" />
+          <path d="M0,-3 L9,10 L-9,10 Z" fill="#2F4A35" opacity="0.78" />
+          <rect x="-1.5" y="9" width="3" height="4" fill="#5a4830" />
+        </g>
+      ))}
+
+      {/* B480 — geschwungene gestrichelte Strasse */}
+      <path
+        d="M 100,140 Q 350,220 480,260 Q 580,290 600,300 Q 650,330 760,360 Q 920,410 1100,500"
+        stroke="#5a4830"
+        strokeWidth="3"
+        strokeDasharray="10 7"
+        fill="none"
+        opacity="0.55"
+      />
+      <text
+        x="200"
+        y="220"
+        fontSize="13"
+        fontFamily="ui-monospace,monospace"
+        fill="#5a4830"
+        opacity="0.7"
+        fontWeight="600"
+        letterSpacing="2"
+      >
+        B 480
+      </text>
+
+      {/* Rothaarsteig — angedeuteter Wanderweg */}
+      <path
+        d="M 50,200 Q 300,160 500,230 Q 700,300 900,260 Q 1080,230 1180,290"
+        stroke="#B85C38"
+        strokeWidth="2"
+        strokeDasharray="3 4"
+        fill="none"
+        opacity="0.6"
+      />
+      <text
+        x="930"
+        y="248"
+        fontSize="10"
+        fontFamily="var(--font-display, serif)"
+        fill="#B85C38"
+        opacity="0.8"
+        fontStyle="italic"
+      >
+        Rothaarsteig
+      </text>
+
+      {/* === PINS === */}
+
+      {/* Pin: Niedersfeld + Hochheide (Norden) */}
+      <SvgPin x={480} y={110} label="Niedersfeld" sublabel="Hochheide · 6 km" />
+
+      {/* Pin: Kahler Asten (Nordosten) */}
+      <SvgPin x={760} y={200} label="Kahler Asten" sublabel="Aussichtsturm · 841 m" />
+
+      {/* Pin: Winterberg (Sudosten) */}
+      <SvgPin x={920} y={430} label="Winterberg" sublabel="Skigebiet · 8 km" />
+
+      {/* Pin: Neuastenberg (Sudwesten) */}
+      <SvgPin x={380} y={420} label="Neuastenberg" sublabel="Postwiese · 4 km" />
+
+      {/* Pin: WIESENHUTTE — gross, zentriert, mit pulsierendem Ring */}
+      <g transform="translate(600,320)">
+        {/* Pulse Ring */}
+        <circle cx="0" cy="0" r="60" fill="url(#huettePulse)">
+          <animate
+            attributeName="r"
+            values="40;70;40"
+            dur="3.5s"
+            repeatCount="indefinite"
+          />
+          <animate
+            attributeName="opacity"
+            values="0.7;0.1;0.7"
+            dur="3.5s"
+            repeatCount="indefinite"
+          />
+        </circle>
+        {/* Pin */}
+        <circle cx="0" cy="0" r="18" fill="#B85C38" />
+        <circle cx="0" cy="0" r="18" fill="none" stroke="#fff" strokeWidth="3" />
+        <circle cx="0" cy="0" r="6" fill="#fff" />
+        {/* Label */}
+        <g transform="translate(0,42)">
+          <rect x="-65" y="-2" width="130" height="22" rx="3" fill="#2F4A35" />
+          <text
+            x="0"
+            y="14"
+            textAnchor="middle"
+            fontSize="12"
+            fontFamily="var(--font-display, sans-serif)"
+            fill="#F7F7F2"
+            fontWeight="700"
+            letterSpacing="1"
+          >
+            WIESENHÜTTE
+          </text>
+        </g>
+        <text
+          x="0"
+          y="78"
+          textAnchor="middle"
+          fontSize="10"
+          fontFamily="ui-monospace,monospace"
+          fill="#2F4A35"
+          opacity="0.75"
+          letterSpacing="1.5"
+        >
+          LANGEWIESE · 690 m
+        </text>
+      </g>
+
+      {/* Compass-Rose oben rechts */}
+      <g transform="translate(1110, 80)">
+        <circle cx="0" cy="0" r="32" fill="#F7F7F2" stroke="#2F4A35" strokeOpacity="0.4" strokeWidth="1.2" />
+        {/* N-Pfeil */}
+        <path d="M 0,-22 L 6,4 L 0,-2 L -6,4 Z" fill="#B85C38" />
+        <path d="M 0,22 L 6,-4 L 0,2 L -6,-4 Z" fill="#2F4A35" opacity="0.4" />
+        <text
+          x="0"
+          y="-28"
+          textAnchor="middle"
+          fontSize="11"
+          fontFamily="var(--font-display, sans-serif)"
+          fill="#2F4A35"
+          fontWeight="700"
+        >
+          N
+        </text>
+      </g>
+
+      {/* Scale-bar unten links */}
+      <g transform="translate(60, 540)">
+        <rect x="0" y="0" width="80" height="6" fill="#2F4A35" opacity="0.7" />
+        <rect x="80" y="0" width="80" height="6" fill="none" stroke="#2F4A35" strokeWidth="1.2" opacity="0.7" />
+        <text x="0" y="22" fontSize="10" fontFamily="ui-monospace,monospace" fill="#2F4A35" opacity="0.65" letterSpacing="1">
+          0
+        </text>
+        <text x="76" y="22" fontSize="10" fontFamily="ui-monospace,monospace" fill="#2F4A35" opacity="0.65" letterSpacing="1">
+          2
+        </text>
+        <text x="156" y="22" fontSize="10" fontFamily="ui-monospace,monospace" fill="#2F4A35" opacity="0.65" letterSpacing="1">
+          4 km
+        </text>
+      </g>
+
+      {/* Issue-Stempel oben links */}
+      <g transform="translate(60, 70)" opacity="0.6">
+        <text x="0" y="0" fontSize="9" fontFamily="ui-monospace,monospace" fill="#2F4A35" letterSpacing="2" fontWeight="700">
+          HOCHSAUERLAND
+        </text>
+        <text x="0" y="14" fontSize="9" fontFamily="ui-monospace,monospace" fill="#2F4A35" letterSpacing="2">
+          51° 18′ N · 8° 31′ O
+        </text>
+      </g>
+    </svg>
+  </div>
+);
+
+// SVG-Pin (kleiner) fuer Nachbarorte — NICHT der MapPin aus lucide-react!
+const SvgPin = ({ x, y, label, sublabel }: { x: number; y: number; label: string; sublabel?: string }) => (
+  <g transform={`translate(${x},${y})`}>
+    <circle cx="0" cy="0" r="9" fill="#2F4A35" />
+    <circle cx="0" cy="0" r="9" fill="none" stroke="#fff" strokeWidth="2" />
+    <circle cx="0" cy="0" r="3" fill="#fff" />
+    <text
+      x="14"
+      y="-3"
+      fontSize="13"
+      fontFamily="var(--font-display, sans-serif)"
+      fill="#2F4A35"
+      fontWeight="700"
+    >
+      {label}
+    </text>
+    {sublabel && (
+      <text
+        x="14"
+        y="12"
+        fontSize="10"
+        fontFamily="ui-monospace,monospace"
+        fill="#2F4A35"
+        opacity="0.65"
+        letterSpacing="0.5"
+      >
+        {sublabel}
+      </text>
+    )}
+  </g>
 );
 
 const ParkingCard = ({
