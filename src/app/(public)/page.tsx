@@ -1,25 +1,19 @@
 import Link from "next/link";
-import Image from "next/image";
-import {
-  Users,
-  MountainSnow,
-  Route,
-  CookingPot,
-  Armchair,
-  Flame,
-  ArrowRight,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { getServerLocale } from "@/lib/i18n";
 import { makeT, type Locale } from "@/lib/i18n-shared";
 import { loadTrustData, type TrustData } from "@/lib/trust-reviews";
 import { TrustBadgeButton } from "@/components/public/TrustBadgeButton";
+import { EditorialGallery } from "@/components/public/landing/EditorialGallery";
+import { PullQuote } from "@/components/public/landing/PullQuote";
+import { ScrollStory } from "@/components/public/landing/ScrollStory";
+import { HistoryTimeline } from "@/components/public/landing/HistoryTimeline";
+import { HuettenbuchSection } from "@/components/public/landing/HuettenbuchSection";
 
 // Hero zeigt aktuelle Trust-Daten (DB-Aggregat) — keine Static-Render-Cache,
 // damit Manager-seitige Aenderungen (Reviews ein/ausblenden) sofort sichtbar
 // werden.
 export const dynamic = "force-dynamic";
-
-const FEATURE_ICONS = [Users, MountainSnow, Route, CookingPot, Armchair, Flame];
 
 export default async function HomePage() {
   const locale = await getServerLocale();
@@ -29,8 +23,11 @@ export default async function HomePage() {
     <div>
       <Hero tr={tr} trust={trust} locale={locale} />
       <IntroBlock tr={tr} />
-      <FeatureGrid tr={tr} />
-      <HistoryTeaser tr={tr} />
+      <EditorialGallery locale={locale} />
+      <PullQuote locale={locale} />
+      <ScrollStory locale={locale} />
+      <HistoryTimeline locale={locale} />
+      <HuettenbuchSection locale={locale} />
       <CTABand tr={tr} />
     </div>
   );
@@ -61,6 +58,14 @@ const Hero = ({
     </video>
     <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-black/10 to-black/65" />
     <div className="relative max-w-[1320px] mx-auto px-6 sm:px-8 pt-24 pb-16 flex flex-col items-start gap-6 sm:gap-7 h-full justify-end">
+      {/* Editorial Meta-Issue-Zeile im Magazin-Stil */}
+      <div className="text-[11px] sm:text-[12px] uppercase tracking-[0.3em] font-semibold text-[var(--color-wh-snow)]/85 drop-shadow flex items-center gap-3">
+        <span
+          className="inline-block w-6 h-px bg-[var(--color-wh-snow)]/60"
+          aria-hidden
+        />
+        {tr("home.hero.issue")}
+      </div>
       <h1
         className="font-display font-extrabold uppercase tracking-tight text-[var(--color-wh-snow)] m-0 drop-shadow-lg"
         style={{
@@ -120,70 +125,6 @@ const IntroBlock = ({ tr }: { tr: Tr }) => (
         <p className="text-base sm:text-[18px] leading-[1.7] text-[var(--color-wh-fg-muted)] mt-5">
           {tr("home.intro.p2")}
         </p>
-      </div>
-    </div>
-  </section>
-);
-
-const FeatureGrid = ({ tr }: { tr: Tr }) => (
-  <section className="bg-[var(--color-wh-snow)] px-6 sm:px-8 pb-20 sm:pb-32">
-    <div className="max-w-[1280px] mx-auto">
-      <div className="flex flex-col gap-3.5 mb-10 sm:mb-14">
-        <div className="eyebrow">{tr("home.features.eyebrow")}</div>
-        <h2 className="text-[36px] sm:text-[44px] font-display font-bold tracking-tight text-[var(--color-wh-deep-green)] m-0">
-          {tr("home.features.h2")}
-        </h2>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {FEATURE_ICONS.map((Icon, i) => {
-          const n = i + 1;
-          return (
-            <article
-              key={n}
-              className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 sm:p-7 flex flex-col gap-3"
-            >
-              <Icon size={28} strokeWidth={1.6} className="text-[var(--color-wh-deep-green)]" />
-              <div className="eyebrow">{tr(`home.feature.${n}.eye`)}</div>
-              <h4 className="font-display font-semibold text-[22px] sm:text-[24px] text-[var(--color-wh-deep-green)] m-0">
-                {tr(`home.feature.${n}.title`)}
-              </h4>
-              <p className="m-0 text-[var(--color-wh-fg-muted)] leading-relaxed">
-                {tr(`home.feature.${n}.body`)}
-              </p>
-            </article>
-          );
-        })}
-      </div>
-    </div>
-  </section>
-);
-
-const HistoryTeaser = ({ tr }: { tr: Tr }) => (
-  <section className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-20 sm:py-32">
-    <div className="max-w-[1080px] mx-auto grid grid-cols-1 md:grid-cols-[1fr_1.2fr] gap-10 md:gap-16 items-center">
-      <div className="relative aspect-square rounded-[var(--radius-card)] overflow-hidden bg-[var(--color-wh-snow)]">
-        <Image
-          src="/media/photos/historical-pic-1.png"
-          alt="Skifreunde Gütersloh — historical"
-          fill
-          className="object-cover"
-          sizes="(min-width: 768px) 460px, 100vw"
-        />
-      </div>
-      <div>
-        <div className="eyebrow">{tr("home.history.eyebrow")}</div>
-        <h2 className="text-[36px] sm:text-[44px] font-display font-bold leading-tight tracking-tight mt-4 mb-5">
-          {tr("home.history.h2")}
-        </h2>
-        <p className="text-base sm:text-[17px] leading-[1.7] text-[var(--color-wh-black)] m-0">
-          {tr("home.history.body")}
-        </p>
-        <Link
-          href="/verein"
-          className="inline-flex mt-6 h-12 px-5 items-center gap-2 rounded-[var(--radius-btn)] bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] no-underline font-semibold hover:bg-[var(--color-wh-deep-green-hover)] transition-colors"
-        >
-          {tr("home.history.cta")} <ArrowRight size={18} />
-        </Link>
       </div>
     </div>
   </section>
