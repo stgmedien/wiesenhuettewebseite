@@ -21,7 +21,11 @@ export default async function PublicLayout({
   return (
     <ConsentProvider>
       <Header session={headerSession} locale={locale} />
-      <main className="flex-1">{children}</main>
+      {/* overflow-x-clip verhindert horizontale Page-Sprenge wenn ein
+          Child-Element (z.B. Stepper-Labels, lange E-Mails) die Viewport-
+          Breite ueberschreitet. Wichtig: 'clip' statt 'hidden' damit
+          position:sticky in den Sections weiter funktioniert. */}
+      <main className="flex-1 overflow-x-clip">{children}</main>
       <Footer locale={locale} />
       <CookieBanner />
     </ConsentProvider>

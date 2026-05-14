@@ -96,17 +96,19 @@ export default async function BuchenPage({ searchParams }: Props) {
   const pc = PAGE_COPY[locale];
 
   return (
-    <div className="bg-[var(--color-wh-snow)] min-h-screen px-4 sm:px-8 py-12 sm:py-16">
+    <div className="bg-[var(--color-wh-snow)] min-h-screen px-4 sm:px-8 py-12 sm:py-16 overflow-x-clip">
       <div className="max-w-[1080px] mx-auto">
         <div className="eyebrow">{pc.eyebrow}</div>
-        <h1 className="text-[44px] sm:text-[56px] mt-4 mb-2">{pc.h1}</h1>
-        <p className="text-[var(--color-wh-fg-muted)] text-[18px] max-w-xl mt-4">{pc.lead}</p>
+        <h1 className="text-[36px] sm:text-[56px] mt-4 mb-2 leading-tight">{pc.h1}</h1>
+        <p className="text-[var(--color-wh-fg-muted)] text-[16px] sm:text-[18px] max-w-xl mt-4 leading-relaxed">{pc.lead}</p>
         {prefill.loggedIn && (
-          <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)]/40 px-4 py-2 text-sm">
-            <span className="text-[var(--color-wh-deep-green)]">●</span>
-            {pc.loggedIn} <strong>{prefill.email}</strong>
+          <div className="mt-6 flex flex-wrap items-center gap-2 rounded-2xl sm:rounded-full bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)]/40 px-4 py-2 text-sm max-w-full">
+            <span className="text-[var(--color-wh-deep-green)] shrink-0">●</span>
+            <span className="break-all">
+              {pc.loggedIn} <strong>{prefill.email}</strong>
+            </span>
             {prefill.membershipVerified && (
-              <span className="ml-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs">
+              <span className="ml-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs shrink-0">
                 {pc.member}
               </span>
             )}
