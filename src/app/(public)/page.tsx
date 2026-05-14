@@ -41,7 +41,7 @@ const Hero = ({
   locale,
 }: {
   tr: Tr;
-  trust: TrustData | null;
+  trust: TrustData;
   locale: Locale;
 }) => (
   <section className="relative h-[600px] sm:h-[680px] overflow-hidden">
@@ -100,7 +100,7 @@ const Hero = ({
         >
           {tr("home.hero.cta.more")}
         </Link>
-        {trust && <TrustBadgeButton trust={trust} locale={locale} variant="hero" />}
+        <TrustBadgeButton trust={trust} locale={locale} variant="hero" />
       </div>
     </div>
     <div className="absolute right-6 top-6 sm:right-8 sm:top-8 text-[var(--color-wh-snow)] text-xs uppercase tracking-[0.18em] opacity-90 drop-shadow">
