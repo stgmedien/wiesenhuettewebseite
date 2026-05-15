@@ -136,8 +136,27 @@ const IntroBlock = ({ tr }: { tr: Tr }) => (
 );
 
 const CTABand = ({ tr }: { tr: Tr }) => (
-  <section className="bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] py-16 sm:py-24 px-6 sm:px-8">
-    <div className="max-w-[1080px] mx-auto flex flex-col md:flex-row gap-6 md:gap-8 md:items-end justify-between">
+  <section className="relative overflow-hidden text-[var(--color-wh-snow)] py-16 sm:py-24 px-6 sm:px-8 bg-[linear-gradient(135deg,var(--color-wh-deep-green)_0%,var(--color-wh-deep-green-hover)_100%)]">
+    {/* Leichter, weicher Lichtschein oben links + feines Film-Noise.
+        mix-blend-soft-light haelt das Korn dezent ueber dem Gruen. */}
+    <div
+      aria-hidden
+      className="pointer-events-none absolute inset-0"
+      style={{
+        background:
+          "radial-gradient(120% 80% at 15% 0%, rgba(247,247,242,0.10), rgba(247,247,242,0) 60%)",
+      }}
+    />
+    <div
+      aria-hidden
+      className="pointer-events-none absolute inset-0 opacity-[0.05] mix-blend-soft-light"
+      style={{
+        backgroundImage:
+          "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E\")",
+        backgroundRepeat: "repeat",
+      }}
+    />
+    <div className="relative z-10 max-w-[1080px] mx-auto flex flex-col md:flex-row gap-6 md:gap-8 md:items-end justify-between">
       <div>
         <div className="eyebrow text-[var(--color-wh-snow)]/80">{tr("home.cta.eyebrow")}</div>
         <h2 className="text-[36px] sm:text-[44px] font-display font-bold tracking-tight m-0 mt-3 text-[var(--color-wh-snow)]">
