@@ -77,7 +77,7 @@ export const HUETTENBUCH_COPY: Record<Locale, { eyebrow: string; h2: string; lea
   de: {
     eyebrow: "Aus dem Hüttenbuch",
     h2: "Was Leute hier reingeschrieben haben.",
-    lead: "Im Aufenthaltsraum liegt das Hüttenbuch — Gäste tragen sich ein, der Vorstand liest später nach. Hier eine kleine Auswahl, anonymisiert wo nötig.",
+    lead: "Im Aufenthaltsraum liegt das Hüttenbuch — Gäste tragen sich ein, der Vorstand liest später nach. Hier eine kleine Auswahl, anonymisiert, wo nötig.",
   },
   en: {
     eyebrow: "From the guest book",

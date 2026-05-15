@@ -33,7 +33,7 @@ const BEATS: Beat[] = [
       nl: "Auto uitladen, deur open, hout in de kachel.",
     },
     body: {
-      de: "Die letzten drei Kurven runter, Koffer raus, Schlüssel im Briefkasten. Der erste Schritt rein in das Haus riecht nach altem Holz und nach den, die vorher hier waren. Die Heizung läuft schon — die Hüttenwartin hat morgens hochgedreht.",
+      de: "Die letzten drei Kurven runter, Koffer raus, Schlüssel im Briefkasten. Der erste Schritt rein in das Haus riecht nach altem Holz und nach denen, die vorher hier waren. Die Heizung läuft schon — die Hüttenwartin hat morgens hochgedreht.",
       en: "The last three bends down, bags out, key in the letterbox. The first step inside smells like old wood and like those who were here before. The heating is already on — the warden cranked it up this morning.",
       nl: "De laatste drie bochten omlaag, koffers eruit, sleutel in de brievenbus. De eerste stap naar binnen ruikt naar oud hout en naar de mensen die hier eerder waren. De verwarming staat al aan — de huttenwacht heeft hem 's ochtends opgedraaid.",
     },
@@ -48,7 +48,7 @@ const BEATS: Beat[] = [
       nl: "Uno-rondje, niemand heeft bereik.",
     },
     body: {
-      de: "Das mit dem Empfang ist hier Feature, nicht Bug. Handys aus, Karten gemischt, irgendwer setzt aus, jemand bekommt eine Plus-Vier. Draußen klirrend kalt, drinnen wirds laut.",
+      de: "Das mit dem Empfang ist hier Feature, nicht Bug. Handys aus, Karten gemischt, irgendwer setzt aus, jemand bekommt eine Plus-Vier. Draußen klirrend kalt, drinnen wird's laut.",
       en: "No reception is a feature, not a bug. Phones away, cards shuffled, someone skips a turn, someone gets a plus-four. Bitter cold outside, loud inside.",
       nl: "Geen bereik is een feature, geen bug. Telefoons weg, kaarten geschud, iemand slaat over, iemand krijgt een plus-vier. Bitter koud buiten, luid binnen.",
     },

@@ -47,7 +47,7 @@ export const BENTO_TILES: GalleryTile[] = [
     alt: "Lagerfeuer mit Funkenflug am Abend",
     area: "atmos",
     caption: {
-      de: { lead: "Abendrunde", sub: "Feuer, Funken, alles was sonst nicht passiert" },
+      de: { lead: "Abendrunde", sub: "Feuer, Funken, alles, was sonst nicht passiert" },
       en: { lead: "Evening fire", sub: "Sparks, smoke, all the things that don't happen otherwise" },
       nl: { lead: "Avondvuur", sub: "Vonken, rook, alles wat anders niet gebeurt" },
     },

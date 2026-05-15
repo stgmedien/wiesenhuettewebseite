@@ -31,7 +31,7 @@ export const HISTORY_ENTRIES: HistoryEntry[] = [
       nl: "De oude garde",
     },
     body: {
-      de: "Über Jahrzehnte hat Walter Hiersemann die Hütte geführt — Schlüssel, Holzofen, Hüttenwart-Buch in einer Hand. Was heute steht, hat er mitgehalten.",
+      de: "Über Jahrzehnte hat Walter Hiersemann die Hütte geführt — Schlüssel, Holzofen, Hüttenwart-Buch in einer Hand. Was heute steht, hat er mitgetragen.",
       en: "For decades, Walter Hiersemann ran the place — keys, wood stove, log book in one hand. What stands today was held together by him.",
       nl: "Tientallen jaren leidde Walter Hiersemann de hut — sleutels, houtkachel, logboek in één hand. Wat er vandaag staat, is mede dankzij hem.",
     },
@@ -52,7 +52,7 @@ export const HISTORY_ENTRIES: HistoryEntry[] = [
       nl: "Renovatie",
     },
     body: {
-      de: "Dach, Heizung, Sanitäranlagen. Frischer Zustand — aber bewusst weiter Selbstversorger. Keine Wellness, kein WLAN-Hotspot. Der Charakter bleibt.",
+      de: "Dach, Heizung, Sanitäranlagen. Frischer Zustand — aber bewusst weiterhin Selbstversorgerhütte. Keine Wellness, kein WLAN-Hotspot. Der Charakter bleibt.",
       en: "Roof, heating, plumbing. Refreshed — but deliberately still self-catered. No wellness, no Wi-Fi hotspot. The character stays.",
       nl: "Dak, verwarming, sanitair. Opgeknapt — maar bewust nog steeds zelfvoorzienend. Geen wellness, geen wifi-hotspot. Het karakter blijft.",
     },

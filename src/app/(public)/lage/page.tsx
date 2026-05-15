@@ -31,18 +31,27 @@ export const metadata = {
 
 // =============================================================
 // ECHTE KOORDINATEN + ADDRESS
+// Quelle: OpenStreetMap Nominatim-Geocoding fuer
+// "Bundesstraße 6, 59955 Winterberg-Langewiese" — verifiziert.
 // =============================================================
-const LAT = 51.3017;
-const LNG = 8.5174;
+const LAT = 51.1524045;
+const LNG = 8.4636047;
 const ELEVATION_M = 690;
-const ADDRESS_ENCODED = encodeURIComponent("Bundesstraße 6, 59955 Winterberg-Langewiese");
+const FULL_ADDRESS = "Bundesstraße 6, 59955 Winterberg-Langewiese";
+const ADDRESS_ENCODED = encodeURIComponent(FULL_ADDRESS);
 
-// Universal Navi-Deep-Links (Apple Maps, Google Maps, Waze, OSM)
+// Universal Navi-Deep-Links. Adresse + Koordinaten kombiniert, damit
+// Google/Apple/Waze die Bundesstraße 6 zuverlaessig anfahren (Adresse
+// gewinnt beim Geocoding, Koordinaten als Fallback).
 const NAVI_LINKS = {
-  apple: `https://maps.apple.com/?q=Wiesenhütte&address=${ADDRESS_ENCODED}&ll=${LAT},${LNG}`,
-  google: `https://www.google.com/maps/dir/?api=1&destination=${LAT},${LNG}`,
-  waze: `https://waze.com/ul?ll=${LAT}%2C${LNG}&navigate=yes`,
-  osm: `https://www.openstreetmap.org/?mlat=${LAT}&mlon=${LNG}#map=15/${LAT}/${LNG}`,
+  // Google: destination als Adresse (sauberstes Geocoding) + dest_place
+  google: `https://www.google.com/maps/dir/?api=1&destination=${ADDRESS_ENCODED}`,
+  // Apple: Adresse als address-Param + Koordinaten als ll-Fallback
+  apple: `https://maps.apple.com/?address=${ADDRESS_ENCODED}&ll=${LAT},${LNG}&q=Wiesenh%C3%BCtte`,
+  // Waze: Adress-Query (q) statt nur Koordinaten — robuster
+  waze: `https://waze.com/ul?q=${ADDRESS_ENCODED}&navigate=yes`,
+  // OSM: Marker auf den exakten Koordinaten
+  osm: `https://www.openstreetmap.org/?mlat=${LAT}&mlon=${LNG}#map=16/${LAT}/${LNG}`,
 };
 
 type Copy = {
@@ -88,7 +97,7 @@ type Copy = {
 const COPY: Record<Locale, Copy> = {
   de: {
     hero: {
-      meta: `51° 18' N · 8° 31' O · ${ELEVATION_M} m ü. NHN`,
+      meta: `51° 09' N · 8° 28' O · ${ELEVATION_M} m ü. NHN`,
       h1l1: "Da wo der",
       h1l2: "Wald sich teilt.",
       lead: "Langewiese sitzt auf 690 Metern Höhe — auf einem Plateau zwischen dem Rothaarsteig und dem Hochsauerland. Die Hütte liegt 50 Meter unter der Bundesstraße am Hang. Eine Adresse, drei Wege herauf.",
@@ -233,7 +242,7 @@ const COPY: Record<Locale, Copy> = {
   },
   en: {
     hero: {
-      meta: `51° 18' N · 8° 31' E · ${ELEVATION_M} m above sea level`,
+      meta: `51° 09' N · 8° 28' E · ${ELEVATION_M} m above sea level`,
       h1l1: "Where the",
       h1l2: "forest parts.",
       lead: "Langewiese sits at 690 metres elevation — on a plateau between the Rothaarsteig and the Hochsauerland. The cabin lies 50 metres below the main road on the hillside. One address, three ways up.",
@@ -343,7 +352,7 @@ const COPY: Record<Locale, Copy> = {
   },
   nl: {
     hero: {
-      meta: `51° 18' N · 8° 31' O · ${ELEVATION_M} m boven NAP`,
+      meta: `51° 09' N · 8° 28' O · ${ELEVATION_M} m boven NAP`,
       h1l1: "Waar het bos",
       h1l2: "zich opent.",
       lead: "Langewiese ligt op 690 meter hoogte — op een plateau tussen de Rothaarsteig en het Hochsauerland. De hut ligt 50 meter onder de hoofdweg op de helling. Eén adres, drie manieren omhoog.",
@@ -1295,7 +1304,7 @@ const IllustratedMap = () => (
           HOCHSAUERLAND
         </text>
         <text x="0" y="14" fontSize="9" fontFamily="ui-monospace,monospace" fill="#2F4A35" letterSpacing="2">
-          51° 18′ N · 8° 31′ O
+          51° 09′ N · 8° 28′ O
         </text>
       </g>
     </svg>
