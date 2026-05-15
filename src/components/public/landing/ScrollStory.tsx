@@ -33,9 +33,9 @@ const BEATS: Beat[] = [
       nl: "Auto uitladen, deur open, hout in de kachel.",
     },
     body: {
-      de: "Die letzten drei Kurven runter, Koffer raus, Schlüssel im Briefkasten. Der erste Schritt rein in das Haus riecht nach altem Holz und nach denen, die vorher hier waren. Die Heizung läuft schon — die Hüttenwartin hat morgens hochgedreht.",
-      en: "The last three bends down, bags out, key in the letterbox. The first step inside smells like old wood and like those who were here before. The heating is already on — the warden cranked it up this morning.",
-      nl: "De laatste drie bochten omlaag, koffers eruit, sleutel in de brievenbus. De eerste stap naar binnen ruikt naar oud hout en naar de mensen die hier eerder waren. De verwarming staat al aan — de huttenwacht heeft hem 's ochtends opgedraaid.",
+      de: "Die letzten drei Kurven runter, Koffer raus, Schlüssel aus dem Briefkasten. Der erste Schritt ins Haus: altes Holz, ein Rest Kaminwärme von der Woche davor, kühle Luft, die langsam aufwärmt. Die Hüttenwartin hat morgens schon eingeheizt.",
+      en: "The last three bends down, bags out, key from the letterbox. First step inside: old wood, a trace of last week's fire, cool air slowly warming up. The warden lit the stove this morning.",
+      nl: "De laatste drie bochten omlaag, koffers eruit, sleutel uit de brievenbus. De eerste stap naar binnen: oud hout, een restje haardwarmte van de week ervoor, koele lucht die langzaam opwarmt. De huttenwacht heeft 's ochtends al gestookt.",
     },
   },
   {
@@ -48,9 +48,9 @@ const BEATS: Beat[] = [
       nl: "Uno-rondje, niemand heeft bereik.",
     },
     body: {
-      de: "Das mit dem Empfang ist hier Feature, nicht Bug. Handys aus, Karten gemischt, irgendwer setzt aus, jemand bekommt eine Plus-Vier. Draußen klirrend kalt, drinnen wird's laut.",
-      en: "No reception is a feature, not a bug. Phones away, cards shuffled, someone skips a turn, someone gets a plus-four. Bitter cold outside, loud inside.",
-      nl: "Geen bereik is een feature, geen bug. Telefoons weg, kaarten geschud, iemand slaat over, iemand krijgt een plus-vier. Bitter koud buiten, luid binnen.",
+      de: "Schlechter Empfang ist hier kein Versehen, sondern der Plan. Handys zur Seite, Karten gemischt, irgendwer setzt aus, jemand bekommt eine Plus-Vier. Draußen klirrend kalt, drinnen wird es laut.",
+      en: "Patchy reception here isn't a flaw — it's the point. Phones aside, cards shuffled, someone skips a turn, someone gets a plus-four. Bitter cold outside, loud inside.",
+      nl: "Slecht bereik is hier geen ongeluk, maar de bedoeling. Telefoons opzij, kaarten geschud, iemand slaat over, iemand krijgt een plus-vier. Bitter koud buiten, luid binnen.",
     },
   },
   {

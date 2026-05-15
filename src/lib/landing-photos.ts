@@ -47,9 +47,9 @@ export const BENTO_TILES: GalleryTile[] = [
     alt: "Lagerfeuer mit Funkenflug am Abend",
     area: "atmos",
     caption: {
-      de: { lead: "Abendrunde", sub: "Feuer, Funken, alles, was sonst nicht passiert" },
-      en: { lead: "Evening fire", sub: "Sparks, smoke, all the things that don't happen otherwise" },
-      nl: { lead: "Avondvuur", sub: "Vonken, rook, alles wat anders niet gebeurt" },
+      de: { lead: "Abendrunde", sub: "Feuer, Funken, lange Gespräche" },
+      en: { lead: "Evening fire", sub: "Flames, sparks, long conversations" },
+      nl: { lead: "Avondvuur", sub: "Vuur, vonken, lange gesprekken" },
     },
   },
   {
@@ -57,9 +57,9 @@ export const BENTO_TILES: GalleryTile[] = [
     alt: "Aufenthaltsraum mit Holzvertaefelung",
     area: "wide",
     caption: {
-      de: { lead: "Aufenthaltsraum", sub: "Holz, Tisch, Bank, fertig" },
-      en: { lead: "Lounge", sub: "Wood, table, bench, done" },
-      nl: { lead: "Verblijfsruimte", sub: "Hout, tafel, bank, klaar" },
+      de: { lead: "Aufenthaltsraum", sub: "Holz, langer Tisch, viel Platz" },
+      en: { lead: "Lounge", sub: "Wood, a long table, room to spread out" },
+      nl: { lead: "Verblijfsruimte", sub: "Hout, lange tafel, veel ruimte" },
     },
   },
   {
@@ -67,9 +67,9 @@ export const BENTO_TILES: GalleryTile[] = [
     alt: "Gemeinsames Kochen mit Schulgruppe",
     area: "portrait",
     caption: {
-      de: { lead: "Selbstversorger", sub: "33 Personen, eine Kueche, kein Stress" },
-      en: { lead: "Self-catered", sub: "33 people, one kitchen, no fuss" },
-      nl: { lead: "Zelfvoorzienend", sub: "33 personen, één keuken, geen stress" },
+      de: { lead: "Selbstversorger", sub: "33 Personen, eine Küche, genug Platz" },
+      en: { lead: "Self-catered", sub: "33 people, one kitchen, room enough" },
+      nl: { lead: "Zelfvoorzienend", sub: "33 personen, één keuken, ruimte genoeg" },
     },
   },
   {
@@ -97,9 +97,9 @@ export const BENTO_TILES: GalleryTile[] = [
     alt: "Schueler bauen eine Holzbank im Werkraum",
     area: "small-2",
     caption: {
-      de: { lead: "Klassenfahrt", sub: "Werkraum, Schraubzwingen, Schweiß" },
-      en: { lead: "School trip", sub: "Workshop, clamps, sweat" },
-      nl: { lead: "Schoolreis", sub: "Werkplaats, klemmen, zweet" },
+      de: { lead: "Klassenfahrt", sub: "Werkraum, Schraubzwingen, echte Arbeit" },
+      en: { lead: "School trip", sub: "Workshop, clamps, real work" },
+      nl: { lead: "Schoolreis", sub: "Werkplaats, klemmen, echt werk" },
     },
   },
   {

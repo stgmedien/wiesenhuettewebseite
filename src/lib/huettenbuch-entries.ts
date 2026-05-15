@@ -43,7 +43,7 @@ export const HUETTENBUCH_ENTRIES: HuettenbuchEntry[] = [
   },
   {
     date: "Februar 1976",
-    author: "Schulklasse 8c, ESG (Eintrag DRH, Februar 2023)",
+    author: "Ehemaliger der Klasse 8c, ESG",
     text: {
       de: "Dass ich das nochmal sehe. Mit unserer Schulklasse haben wir hier 1976 unvergessliche Tage verbracht — Skifahren, Lagerfeuer, abends Karten. 47 Jahre später: alles steht noch.",
       en: "I never thought I'd see this again. We spent unforgettable days here with our school class in 1976 — skiing, campfires, cards at night. 47 years later: it's all still here.",
@@ -63,11 +63,11 @@ export const HUETTENBUCH_ENTRIES: HuettenbuchEntry[] = [
   },
   {
     date: "August 2024",
-    author: "Stino & die Bayern",
+    author: "Stefan & die Bayern-Runde",
     text: {
-      de: "Vom Feinsten. Kommen schon mit den Bayern seit über zwanzig Jahren. Was sich nicht ändert: der Kachelofen, der Blick, das Knacken im Holz.",
-      en: "Top notch. Coming up with the Bavarians for over twenty years now. What doesn't change: the tile stove, the view, the creaking wood.",
-      nl: "Van het fijnste. Komen al meer dan twintig jaar met de Beieren. Wat niet verandert: de tegelkachel, het uitzicht, het kraken van het hout.",
+      de: "Vom Feinsten. Wir kommen mit der Gruppe aus Bayern seit über zwanzig Jahren her. Was sich nicht ändert: der Kachelofen, der Blick, das Knacken im Holz.",
+      en: "First class. We've been coming up with the group from Bavaria for over twenty years. What doesn't change: the tile stove, the view, the creaking wood.",
+      nl: "Van het fijnste. We komen al meer dan twintig jaar met de groep uit Beieren. Wat niet verandert: de tegelkachel, het uitzicht, het kraken van het hout.",
     },
     rotationDeg: -2.5,
   },
@@ -76,17 +76,17 @@ export const HUETTENBUCH_ENTRIES: HuettenbuchEntry[] = [
 export const HUETTENBUCH_COPY: Record<Locale, { eyebrow: string; h2: string; lead: string }> = {
   de: {
     eyebrow: "Aus dem Hüttenbuch",
-    h2: "Was Leute hier reingeschrieben haben.",
+    h2: "Was Gäste ins Buch geschrieben haben.",
     lead: "Im Aufenthaltsraum liegt das Hüttenbuch — Gäste tragen sich ein, der Vorstand liest später nach. Hier eine kleine Auswahl, anonymisiert, wo nötig.",
   },
   en: {
     eyebrow: "From the guest book",
-    h2: "What people have written in.",
+    h2: "What guests have written in the book.",
     lead: "The guest book sits in the lounge — guests write in, the board reads later. A small selection here, anonymised where needed.",
   },
   nl: {
     eyebrow: "Uit het gastenboek",
-    h2: "Wat mensen erin hebben geschreven.",
+    h2: "Wat gasten in het boek schreven.",
     lead: "Het gastenboek ligt in de verblijfsruimte — gasten schrijven erin, het bestuur leest later. Een kleine selectie, geanonimiseerd waar nodig.",
   },
 };

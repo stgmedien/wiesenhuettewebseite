@@ -32,7 +32,7 @@ export const HISTORY_ENTRIES: HistoryEntry[] = [
     },
     body: {
       de: "Über Jahrzehnte hat Walter Hiersemann die Hütte geführt — Schlüssel, Holzofen, Hüttenwart-Buch in einer Hand. Was heute steht, hat er mitgetragen.",
-      en: "For decades, Walter Hiersemann ran the place — keys, wood stove, log book in one hand. What stands today was held together by him.",
+      en: "For decades, Walter Hiersemann ran the place — keys, wood stove, log book in one hand. What stands today, he helped carry.",
       nl: "Tientallen jaren leidde Walter Hiersemann de hut — sleutels, houtkachel, logboek in één hand. Wat er vandaag staat, is mede dankzij hem.",
     },
     photo: "/media/historical/walter-hiersemann.jpg",
