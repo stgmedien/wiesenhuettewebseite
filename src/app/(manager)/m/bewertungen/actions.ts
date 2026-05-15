@@ -2,10 +2,11 @@
 
 import { z } from "zod";
 import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { db } from "@/lib/db";
 import { externalReviews, activityLog } from "@/lib/db/schema";
 import { auth } from "@/lib/auth";
+import { TRUST_REVIEWS_TAG } from "@/lib/trust-reviews";
 
 async function requireManager() {
   const session = await auth();
@@ -31,6 +32,7 @@ export async function togglePublishedAction(formData: FormData) {
   });
   revalidatePath("/m/bewertungen");
   revalidatePath("/");
+  revalidateTag(TRUST_REVIEWS_TAG, "max");
 }
 
 export async function toggleHighlightAction(formData: FormData) {
@@ -48,6 +50,7 @@ export async function toggleHighlightAction(formData: FormData) {
   });
   revalidatePath("/m/bewertungen");
   revalidatePath("/");
+  revalidateTag(TRUST_REVIEWS_TAG, "max");
 }
 
 export async function deleteReviewAction(formData: FormData) {
@@ -62,6 +65,7 @@ export async function deleteReviewAction(formData: FormData) {
   });
   revalidatePath("/m/bewertungen");
   revalidatePath("/");
+  revalidateTag(TRUST_REVIEWS_TAG, "max");
 }
 
 const addSchema = z.object({
@@ -110,4 +114,5 @@ export async function addReviewAction(formData: FormData) {
   });
   revalidatePath("/m/bewertungen");
   revalidatePath("/");
+  revalidateTag(TRUST_REVIEWS_TAG, "max");
 }

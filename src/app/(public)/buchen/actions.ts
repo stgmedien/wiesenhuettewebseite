@@ -3,6 +3,8 @@
 import { z } from "zod";
 import { eq, and, gt } from "drizzle-orm";
 import { headers } from "next/headers";
+import { revalidateTag } from "next/cache";
+import { BOOKING_BLOCKS_TAG } from "@/lib/availability";
 import { db } from "@/lib/db";
 import { bookings, customers, payments, activityLog, users, bookingAttempts } from "@/lib/db/schema";
 import { auth } from "@/lib/auth";
@@ -530,6 +532,10 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
     .returning({ id: bookings.id, bookingNumber: bookings.bookingNumber });
 
   const bookingId = inserted[0].id;
+
+  // Neue Buchung (status "angefragt") blockt sofort Kalendertage →
+  // booking-blocks-Cache invalidieren, damit /buchen das Datum direkt sperrt.
+  revalidateTag(BOOKING_BLOCKS_TAG, "max");
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
   let checkoutSession;

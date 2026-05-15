@@ -50,10 +50,15 @@ const Hero = ({
       loop
       muted
       playsInline
+      preload="none"
       poster="/media/video/hero-poster.jpg"
       className="absolute inset-0 w-full h-full object-cover"
       style={{ filter: "saturate(0.95) contrast(1.02)" }}
     >
+      {/* WebM zuerst (kleiner), MP4 als Fallback. preload="none" → das
+          Posterbild paintet sofort, das Video laedt nachgelagert und
+          blockt nicht mehr First Paint / die uebrigen Assets. */}
+      <source src="/media/video/hero.webm" type="video/webm" />
       <source src="/media/video/hero.mp4" type="video/mp4" />
     </video>
     <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-black/10 to-black/65" />

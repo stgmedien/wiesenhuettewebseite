@@ -8,7 +8,8 @@ import { isRangeAvailable } from "@/lib/availability";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { generateBookingNumber } from "@/lib/utils";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { BOOKING_BLOCKS_TAG } from "@/lib/availability";
 
 const schema = z.object({
   arrival: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -151,6 +152,8 @@ export async function createManualBooking(formData: FormData): Promise<{ ok: boo
   revalidatePath("/m/buchungen");
   revalidatePath("/m/dashboard");
   revalidatePath("/m/kalender");
+  // Manuelle Buchung blockt Kalendertage → Verfügbarkeits-Cache leeren.
+  revalidateTag(BOOKING_BLOCKS_TAG, "max");
 
   return { ok: true, redirectTo: `/m/buchungen/${inserted[0].id}` };
 }

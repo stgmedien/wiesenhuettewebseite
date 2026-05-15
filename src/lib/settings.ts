@@ -1,6 +1,11 @@
+import { unstable_cache, revalidateTag } from "next/cache";
 import { db } from "./db";
 import { siteSettings } from "./db/schema";
 import { eq } from "drizzle-orm";
+
+/** Cache-Tag — bei Settings-Mutation invalidiert; auch booking-blocks haengt
+ *  davon ab (cleaningDaysAfterDeparture fliesst in getBookingBlocks ein). */
+export const SITE_SETTINGS_TAG = "site-settings";
 
 export type SiteSettings = {
   cleaningDaysAfterDeparture: number;
@@ -16,10 +21,10 @@ const DEFAULTS: SiteSettings = {
 
 /**
  * Singleton-Row aus site_settings. Falls noch keine existiert (frischer DB),
- * geben wir die Defaults zurück. Kein Caching — Tabelle hat 1 Zeile, Query ist
- * trivial; bei Bedarf später `unstable_cache` davorlegen.
+ * geben wir die Defaults zurück. Gecacht (Data Cache), Invalidierung via
+ * revalidateTag("site-settings") in updateSiteSettings().
  */
-export const getSiteSettings = async (): Promise<SiteSettings> => {
+const getSiteSettingsUncached = async (): Promise<SiteSettings> => {
   try {
     const rows = await db
       .select()
@@ -37,6 +42,12 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
     return DEFAULTS;
   }
 };
+
+export const getSiteSettings = unstable_cache(
+  getSiteSettingsUncached,
+  ["site-settings-v1"],
+  { tags: [SITE_SETTINGS_TAG] }
+);
 
 export const updateSiteSettings = async (
   patch: { cleaningDaysAfterDeparture: number },
@@ -57,4 +68,9 @@ export const updateSiteSettings = async (
         updatedBy,
       },
     });
+  // Settings-Cache leeren — und booking-blocks, da cleaningDaysAfterDeparture
+  // dort einfliesst. ("booking-blocks" als Literal, um Import-Zyklus mit
+  // availability.ts zu vermeiden.)
+  revalidateTag(SITE_SETTINGS_TAG, "max");
+  revalidateTag("booking-blocks", "max");
 };

@@ -7,7 +7,8 @@ import { isRangeAvailable } from "@/lib/availability";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { generateBookingNumber } from "@/lib/utils";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { BOOKING_BLOCKS_TAG } from "@/lib/availability";
 
 async function requireManager() {
   const session = await auth();
@@ -111,6 +112,8 @@ export async function createSperrzeit(formData: FormData) {
   revalidatePath("/m/sperrzeiten");
   revalidatePath("/m/kalender");
   revalidatePath("/m/dashboard");
+  // Neue Wartung/Sperrzeit blockt Kalendertage → Verfügbarkeits-Cache leeren.
+  revalidateTag(BOOKING_BLOCKS_TAG, "max");
 
   return { ok: true };
 }

@@ -5,7 +5,8 @@ import { db } from "@/lib/db";
 import { bookings, customers, payments, activityLog } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { BOOKING_BLOCKS_TAG } from "@/lib/availability";
 import { stripe } from "@/lib/stripe";
 import { sendMail } from "@/lib/mail/send";
 import ManagerMessageEmail from "@/lib/mail/templates/manager-message";
@@ -63,6 +64,9 @@ export async function setBookingStatus(bookingId: string, status: string) {
   revalidatePath(`/m/buchungen/${bookingId}`);
   revalidatePath("/m/buchungen");
   revalidatePath("/m/dashboard");
+  // Status-Wechsel (z.B. storniert/abgelehnt) gibt Tage frei oder blockt sie →
+  // öffentlichen Verfügbarkeits-Cache invalidieren.
+  revalidateTag(BOOKING_BLOCKS_TAG, "max");
 }
 
 // =============================================================

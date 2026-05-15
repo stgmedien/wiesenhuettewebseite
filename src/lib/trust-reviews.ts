@@ -10,9 +10,13 @@
  * automatisch die DB-Daten — der Fallback ist Backstop, kein Ersatz.
  */
 
+import { unstable_cache } from "next/cache";
 import { db } from "@/lib/db";
 import { externalReviews } from "@/lib/db/schema";
 import { eq, desc, and, isNotNull } from "drizzle-orm";
+
+/** Cache-Tag — bei Review-Mutationen via revalidateTag("trust-reviews") invalidieren. */
+export const TRUST_REVIEWS_TAG = "trust-reviews";
 
 export type TrustReviewItem = {
   id: string;
@@ -222,7 +226,7 @@ const STATIC_FALLBACK: TrustData = (() => {
  * Liefert immer TrustData zurück — entweder DB oder Static-Fallback.
  * Der Trust-Badge ist damit garantiert sichtbar.
  */
-export async function loadTrustData(): Promise<TrustData> {
+async function loadTrustDataUncached(): Promise<TrustData> {
   try {
     const rated = await db
       .select({ rating: externalReviews.rating, source: externalReviews.source })
@@ -268,3 +272,16 @@ export async function loadTrustData(): Promise<TrustData> {
     return STATIC_FALLBACK;
   }
 }
+
+/**
+ * Liefert immer TrustData — gecacht (Next Data Cache). Wird bei jedem
+ * Seitenaufruf auf `/` (Hero + PullQuote) gebraucht; der Cache verhindert
+ * doppelte DB-Queries pro Request UND erneute Queries über Requests hinweg.
+ * Invalidierung erfolgt sofort via revalidateTag("trust-reviews") aus den
+ * Manager-Actions, sobald sich Reviews ändern.
+ */
+export const loadTrustData = unstable_cache(
+  loadTrustDataUncached,
+  ["trust-data-v1"],
+  { tags: [TRUST_REVIEWS_TAG] }
+);

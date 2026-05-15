@@ -1,7 +1,12 @@
+import { unstable_cache } from "next/cache";
 import { db } from "./db";
 import { bookings } from "./db/schema";
 import { and, gte, lte, ne, or, eq } from "drizzle-orm";
 import { getSiteSettings } from "./settings";
+
+/** Cache-Tag — bei jeder Buchungs-/Sperrzeit-Mutation via
+ *  revalidateTag("booking-blocks") invalidieren. */
+export const BOOKING_BLOCKS_TAG = "booking-blocks";
 
 export type DateRange = { arrival: Date | string; departure: Date | string };
 
@@ -93,19 +98,20 @@ export type BookingBlocks = {
 };
 
 /**
- * Categorized blocking days between `from` and `to` (inclusive).
- * Used by the public booking calendar to render different shades.
+ * Roh-Variante: liefert serialisierbare Arrays (Sets überleben den
+ * Next-Data-Cache nicht — JSON würde sie zu `{}` machen). Gecacht mit Tag
+ * "booking-blocks"; Cache-Key enthält die Datums-Range (Args) → rollt täglich
+ * automatisch, wird bei Buchungs-Mutationen sofort invalidiert.
  */
-export const getBookingBlocks = async (
-  from: Date | string,
-  to: Date | string
-): Promise<BookingBlocks> => {
-  const fromIso = toIso(from);
-  const toIsoStr = toIso(to);
-  const settings = await getSiteSettings();
-  const cleaningDays = settings.cleaningDaysAfterDeparture;
+const getBookingBlocksRaw = unstable_cache(
+  async (
+    fromIso: string,
+    toIsoStr: string
+  ): Promise<{ booked: string[]; cleaning: string[]; wartung: string[] }> => {
+    const settings = await getSiteSettings();
+    const cleaningDays = settings.cleaningDaysAfterDeparture;
 
-  const rows = await db
+    const rows = await db
     .select({
       arrival: bookings.arrival,
       departure: bookings.departure,
@@ -150,7 +156,31 @@ export const getBookingBlocks = async (
     }
   }
 
-  return { booked, cleaning, wartung };
+    return {
+      booked: Array.from(booked),
+      cleaning: Array.from(cleaning),
+      wartung: Array.from(wartung),
+    };
+  },
+  ["booking-blocks-v1"],
+  { tags: [BOOKING_BLOCKS_TAG] }
+);
+
+/**
+ * Categorized blocking days between `from` and `to` (inclusive).
+ * Used by the public booking calendar to render different shades.
+ * Dünner Wrapper um die gecachte Roh-Variante: rekonstruiert die Sets.
+ */
+export const getBookingBlocks = async (
+  from: Date | string,
+  to: Date | string
+): Promise<BookingBlocks> => {
+  const raw = await getBookingBlocksRaw(toIso(from), toIso(to));
+  return {
+    booked: new Set(raw.booked),
+    cleaning: new Set(raw.cleaning),
+    wartung: new Set(raw.wartung),
+  };
 };
 
 /**

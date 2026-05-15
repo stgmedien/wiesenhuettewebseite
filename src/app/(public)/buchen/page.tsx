@@ -46,8 +46,13 @@ export default async function BuchenPage({ searchParams }: Props) {
   const horizon = new Date(today);
   horizon.setDate(horizon.getDate() + 720); // ~2 years out
 
-  const { booked, cleaning, wartung } = await getBookingBlocks(today, horizon);
-  const prefill = await getBookingPrefill();
+  // Unabhängige Calls parallel — vorher seriell (getBookingBlocks blockte
+  // getBookingPrefill). getBookingBlocks ist zusätzlich gecacht (Tag
+  // "booking-blocks"), Folge-Aufrufe sind damit nahezu sofort.
+  const [{ booked, cleaning, wartung }, prefill] = await Promise.all([
+    getBookingBlocks(today, horizon),
+    getBookingPrefill(),
+  ]);
 
   // Re-Book: gleiche Personenzahl, +1 Jahr Datum
   const sp = await searchParams;

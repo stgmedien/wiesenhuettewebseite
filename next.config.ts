@@ -20,6 +20,11 @@ const nextConfig: NextConfig = {
     "@react-email/components",
   ],
   images: {
+    // AVIF/WebP statt der schweren Originale ausliefern; optimierte Varianten
+    // ein Jahr lang cachen (entscheidend, da die Public-Routen dynamisch sind
+    // — sonst wird jedes Bild bei jedem ersten Treffer neu optimiert).
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 31536000,
     remotePatterns: [
       // Vercel Blob – fuer Cover-Bilder und im Editor hochgeladene Bilder
       { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },
