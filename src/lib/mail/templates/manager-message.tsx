@@ -24,8 +24,10 @@ const container = {
   backgroundColor: "#ffffff",
   margin: "0 auto",
   padding: "32px",
+  width: "100%",
   maxWidth: "600px",
   borderRadius: "20px",
+  boxSizing: "border-box" as const,
 };
 const heading = {
   fontFamily: "Bricolage Grotesque, system-ui, sans-serif",
@@ -51,8 +53,17 @@ const text = {
   color: "#111111",
   margin: "0 0 12px 0",
   whiteSpace: "pre-wrap" as const,
+  overflowWrap: "anywhere" as const,
+  wordBreak: "break-word" as const,
 };
 const muted = { ...text, color: "#5b5b56", fontSize: "14px" };
+const urlText = {
+  ...muted,
+  fontSize: "12px",
+  margin: "12px 0 0",
+  overflowWrap: "anywhere" as const,
+  wordBreak: "break-all" as const,
+};
 const button = {
   backgroundColor: "#2F4A35",
   color: "#F7F7F2",
@@ -103,8 +114,18 @@ export default function ManagerMessageEmail({
                   Jetzt sicher bezahlen
                 </a>
               </Section>
-              <Text style={{ ...muted, fontSize: "12px", margin: "12px 0 0" }}>
-                Falls der Button nicht funktioniert: <a href={paymentLinkUrl}>{paymentLinkUrl}</a>
+              <Text style={urlText}>Falls der Button nicht funktioniert:</Text>
+              <Text style={urlText}>
+                <a
+                  href={paymentLinkUrl}
+                  style={{
+                    color: "#2F4A35",
+                    overflowWrap: "anywhere",
+                    wordBreak: "break-all",
+                  }}
+                >
+                  {paymentLinkUrl}
+                </a>
               </Text>
             </Section>
           ) : null}
