@@ -7,7 +7,6 @@ import {
   Preview,
   Section,
   Text,
-  Button as EmailButton,
 } from "@react-email/components";
 
 type Props = {
@@ -15,8 +14,6 @@ type Props = {
   bookingNumber: string;
   arrival: string;
   departure: string;
-  adultsForKurtaxe: number;
-  kurtaxePortalUrl: string;
 };
 
 const main = { backgroundColor: "#F7F7F2", padding: "40px 0" };
@@ -52,63 +49,41 @@ const text = {
   margin: "0 0 12px 0",
 };
 const muted = { ...text, color: "#5b5b56", fontSize: "14px" };
-const button = {
-  backgroundColor: "#2F4A35",
-  color: "#F7F7F2",
-  fontFamily: "Inter, system-ui, sans-serif",
-  fontSize: "16px",
-  fontWeight: 600,
-  padding: "14px 24px",
-  borderRadius: "14px",
-  textDecoration: "none",
-  display: "inline-block",
-};
 
 export default function KurtaxeInfoEmail({
   guestName,
   bookingNumber,
   arrival,
   departure,
-  adultsForKurtaxe,
-  kurtaxePortalUrl,
 }: Props) {
   return (
     <Html>
       <Head />
-      <Preview>Bitte Kurtaxe Hochsauerland separat anmelden</Preview>
+      <Preview>Zur Kurtaxe melden wir uns separat bei euch</Preview>
       <Body style={main}>
         <Container style={container}>
           <Text style={eyebrow}>Wiesenhütte · Skifreunde Gütersloh e.V.</Text>
-          <Heading style={heading}>Noch ein wichtiger Schritt: Kurtaxe</Heading>
+          <Heading style={heading}>Kurtaxe Hochsauerland</Heading>
 
           <Text style={text}>Hallo {guestName},</Text>
           <Text style={text}>
-            die Kurtaxe Hochsauerland wird seit Mai 2026 nicht mehr über uns abgerechnet, sondern
-            direkt über das offizielle Kurtaxen-Portal Hochsauerland. Bitte registriere Eure
-            Gruppe vor Anreise dort — andernfalls fällt vor Ort eine erhöhte Pauschale an.
+            für Euren Aufenthalt fällt die Kurtaxe (Kurbeitrag) des Hochsauerlandkreises an.
+            Die Abrechnung läuft bei uns aktuell noch nicht automatisiert — deshalb melden wir
+            uns dazu in den nächsten Tagen separat persönlich bei Euch und sagen Euch genau,
+            was zu tun ist.
           </Text>
 
           <Section style={{ backgroundColor: "#EFE6D8", padding: "16px 20px", borderRadius: "12px", margin: "16px 0" }}>
             <Text style={{ ...muted, margin: 0 }}>Buchung</Text>
             <Text style={{ ...text, fontWeight: 600, margin: "4px 0 12px" }}>{bookingNumber}</Text>
             <Text style={{ ...muted, margin: 0 }}>Zeitraum</Text>
-            <Text style={{ ...text, fontWeight: 600, margin: "4px 0 12px" }}>
+            <Text style={{ ...text, fontWeight: 600, margin: "4px 0 0" }}>
               {arrival} bis {departure}
             </Text>
-            <Text style={{ ...muted, margin: 0 }}>Anzumeldende Personen ab 16 Jahren</Text>
-            <Text style={{ ...text, fontWeight: 600, margin: "4px 0 0" }}>{adultsForKurtaxe}</Text>
           </Section>
 
-          <Section style={{ textAlign: "center", margin: "24px 0" }}>
-            <EmailButton href={kurtaxePortalUrl} style={button}>
-              Zum Kurtaxen-Portal Hochsauerland
-            </EmailButton>
-          </Section>
-
-          <Text style={muted}>
-            Falls der Button nicht funktioniert, hier der direkte Link:
-            <br />
-            <a href={kurtaxePortalUrl}>{kurtaxePortalUrl}</a>
+          <Text style={text}>
+            Ihr müsst jetzt nichts weiter veranlassen — wir kommen aktiv auf Euch zu.
           </Text>
 
           <Text style={muted}>

@@ -340,14 +340,14 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       }
     }
 
-    // Kurtaxe-Info — separat über Hochsauerland-Portal
-    const kurtaxePortalUrl = process.env.KURTAXE_PORTAL_URL ?? "https://service.hochsauerlandkreis.de/kurtaxe";
+    // Kurtaxe-Info — Abrechnung läuft noch NICHT automatisiert; der Gast
+    // bekommt nur den Hinweis, dass wir uns separat persönlich melden.
     const adultsForKurtaxe = booking.adults + booking.members + booking.teachers;
     if (adultsForKurtaxe > 0 && !(await wasMailSent(bookingId, "kurtaxe-info"))) {
       try {
         await sendMail({
           to: customer.email,
-          subject: `Kurtaxe Hochsauerland für Buchung ${booking.bookingNumber}`,
+          subject: `Kurtaxe Hochsauerland — wir melden uns bei Euch (Buchung ${booking.bookingNumber})`,
           template: "kurtaxe-info",
           bookingId,
           react: KurtaxeInfoEmail({
@@ -355,8 +355,6 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
             bookingNumber: booking.bookingNumber,
             arrival: formatDateLong(booking.arrival),
             departure: formatDateLong(booking.departure),
-            adultsForKurtaxe,
-            kurtaxePortalUrl,
           }),
         });
       } catch (err) {

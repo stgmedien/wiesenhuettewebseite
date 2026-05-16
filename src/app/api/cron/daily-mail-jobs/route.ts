@@ -14,7 +14,6 @@ import { stripe } from "@/lib/stripe";
 import { sendMail } from "@/lib/mail/send";
 import PaymentReminderEmail from "@/lib/mail/templates/payment-reminder";
 import ArrivalInfoEmail from "@/lib/mail/templates/arrival-info";
-import KeyHandoverEmail from "@/lib/mail/templates/key-handover";
 import FeedbackRequestEmail from "@/lib/mail/templates/feedback-request";
 import BirthdayEmail from "@/lib/mail/templates/birthday";
 import { formatDateLong } from "@/lib/utils";
@@ -41,7 +40,6 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-const KEY_SAFE_CODE = process.env.HUETTE_KEY_SAFE_CODE ?? "0000";
 const BASE_URL =
   process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.xn--wiesenhtte-geb.com";
 
@@ -81,7 +79,6 @@ export async function GET(req: Request) {
   const stats = {
     paymentReminderSent: 0,
     arrivalInfoSent: 0,
-    keyHandoverSent: 0,
     feedbackRequestSent: 0,
     birthdaySent: 0,
     autoChargeSucceeded: 0,
@@ -250,35 +247,8 @@ export async function GET(req: Request) {
   }
 
   // ---------- T-1: Schlüsselübergabe ----------
-  const t1 = isoDayOffset(1);
-  const t1Bookings = await db
-    .select()
-    .from(bookings)
-    .where(and(eq(bookings.arrival, t1), eq(bookings.status, "bezahlt")));
-  for (const b of t1Bookings) {
-    if (await alreadySent(b.id, "key_handover")) continue;
-    const customer = b.customerId
-      ? (await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1))[0]
-      : null;
-    if (!customer) continue;
-    try {
-      await sendMail({
-        to: customer.email,
-        subject: `Schlüssel-Code Wiesenhütte — Buchung ${b.bookingNumber}`,
-        template: "key_handover",
-        bookingId: b.id,
-        react: KeyHandoverEmail({
-          firstName: customer.firstName,
-          bookingNumber: b.bookingNumber,
-          arrival: formatDateLong(b.arrival),
-          keySafeCode: KEY_SAFE_CODE,
-        }),
-      });
-      stats.keyHandoverSent++;
-    } catch (err) {
-      console.error("[cron] key_handover failed:", err);
-    }
-  }
+  // Bewusst ENTFERNT: Die Schlüssel-/Safe-Code-Mail wird nicht mehr
+  // automatisch versendet. Schlüsselübergabe wird anderweitig geregelt.
 
   // ---------- T+2 nach Abreise: Feedback-Anfrage (Token-Mail) ----------
   // Strukturiertes Survey-Feedback unter /feedback/[token]. Antworten landen
