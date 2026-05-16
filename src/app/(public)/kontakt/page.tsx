@@ -123,8 +123,8 @@ export default async function KontaktPage() {
 
         <div className="mt-10 relative aspect-[16/9] sm:aspect-[2/1] rounded-[var(--radius-card)] overflow-hidden">
           <Image
-            src="/media/historical/founders.jpg"
-            alt="Vorstand der Skifreunde Gütersloh"
+            src="/media/historical/neuer_vorstand.jpg"
+            alt="Der Vorstand der Skifreunde Gütersloh"
             fill
             className="object-cover"
             sizes="(min-width: 920px) 920px, 100vw"
