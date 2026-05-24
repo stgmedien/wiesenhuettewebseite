@@ -142,12 +142,15 @@ const inputSchema = z.object({
   firstName: z.string().min(1).max(120),
   lastName: z.string().min(1).max(120),
   email: z.string().email().max(255),
-  phone: z.string().max(60).optional().nullable(),
+  // Phase A: Telefonnummer ist jetzt Pflicht (Frontend min 5 Zeichen).
+  phone: z.string().min(5).max(60),
   company: z.string().max(255).optional().nullable(),
   street: z.string().max(255).optional().nullable(),
   zip: z.string().max(20).optional().nullable(),
   city: z.string().max(120).optional().nullable(),
-  purpose: z.string().max(255).optional().nullable(),
+  // Phase A: Anlass ist jetzt Pflicht. Wird vom Frontend als zusammengesetzter
+  // String geliefert ("Familienurlaub" / "Private Feier — JGA — Grund: ...").
+  purpose: z.string().min(1).max(500),
   customerMessage: z.string().max(2000).optional().nullable(),
   discountCode: z.string().max(30).optional().nullable(),
   acceptedTerms: z.literal(true),

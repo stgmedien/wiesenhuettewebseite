@@ -3,11 +3,37 @@
 import { useMemo, useState, useTransition } from "react";
 import { ArrowRight, ArrowLeft, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { Input, Textarea } from "@/components/ui/Input";
+import { Input, Textarea, Select } from "@/components/ui/Input";
 import { calculatePrice, formatEuro, RULES, type Persons } from "@/lib/pricing";
 import { daysUntil, getCancellationTier, getCancellationTiers } from "@/lib/cancellation";
 import { createBookingAndCheckout, previewDiscountAction } from "./actions";
 import { AvailabilityCalendar } from "./AvailabilityCalendar";
+
+// Anlass-Kategorien + Sub-Auswahl bei "Private Feier".
+// Sind Pflicht beim Buchen. Bei "privat" muss zusätzlich ein freier Grund
+// angegeben werden (Vorstands-Prüfung — siehe interne Notification).
+const PURPOSE_KEYS = ["familie", "klasse", "schul", "verein", "firma", "privat", "sonstiges"] as const;
+type PurposeKey = (typeof PURPOSE_KEYS)[number];
+const PRIVATE_SUB_KEYS = ["jga", "geburtstag", "hochzeit", "sonstiges"] as const;
+type PrivateSubKey = (typeof PRIVATE_SUB_KEYS)[number];
+
+// Erzeugt aus den strukturierten Anlass-Feldern den String fuers DB-Feld
+// `purpose`. Locale-Labels kommen aus dem Booking-Flow-Copy ("tt"), damit
+// der Manager den lesbaren Anlass sieht. Bei "privat" wird der Grund
+// angehaengt — der Vorstand soll das beim Check sehen koennen.
+function composePurpose(
+  category: PurposeKey | "",
+  subtype: PrivateSubKey | "",
+  reason: string,
+  tt: { purposeOpts: Record<PurposeKey, string>; privateSubOpts: Record<PrivateSubKey, string> }
+): string | null {
+  if (!category) return null;
+  const catLabel = tt.purposeOpts[category];
+  if (category !== "privat") return catLabel;
+  const subLabel = subtype ? tt.privateSubOpts[subtype] : "(unbekannt)";
+  const r = reason.trim();
+  return `${catLabel} — ${subLabel}${r ? ` — Grund: ${r}` : ""}`;
+}
 
 type Step = 0 | 1 | 2 | 3;
 
@@ -75,12 +101,32 @@ const BF_COPY = {
     rangeBlocked: "Mindestens ein Tag in diesem Zeitraum ist bereits belegt — bitte einen anderen Zeitraum wählen.",
     arrival: "Anreise",
     departure: "Abreise",
-    purpose: "Anlass (optional)",
-    purposePlaceholder: "z. B. Familienurlaub, Klassenfahrt, Vereinsfahrt",
+    purpose: "Anlass *",
+    purposePlaceholder: "Bitte wählen …",
+    purposeOpts: {
+      familie: "Familienurlaub",
+      klasse: "Klassenfahrt",
+      schul: "Schul-/Studienfahrt",
+      verein: "Vereins-/Gruppenfahrt",
+      firma: "Firmen-/Team-Event",
+      privat: "Private Feier",
+      sonstiges: "Sonstiges",
+    },
+    privateSubLabel: "Art der privaten Feier *",
+    privateSubPlaceholder: "Bitte wählen …",
+    privateSubOpts: {
+      jga: "Junggesell:innen-Abschied (JGA)",
+      geburtstag: "Runder Geburtstag",
+      hochzeit: "Hochzeit / Vorfeier",
+      sonstiges: "Andere private Feier",
+    },
+    privateReasonLabel: "Kurze Beschreibung *",
+    privateReasonPlaceholder: "Worum geht es genau? Wer kommt? Ungefähre Gruppengröße / Programm?",
+    privateReasonHint: "Private Feiern werden vom Vorstand kurz geprüft. Bitte 1–2 Sätze.",
     firstName: "Vorname",
     lastName: "Nachname",
     email: "E-Mail",
-    phone: "Telefon (empfohlen)",
+    phone: "Telefon *",
     company: "Firma / Verein",
     street: "Straße",
     zip: "PLZ",
@@ -93,11 +139,13 @@ const BF_COPY = {
     acceptHausordnung: "Hausordnung",
     acceptEnd: "gelesen und akzeptiere sie.",
     andWord: "und",
-    discountH: "Rabatt-Code (optional)",
+    hausordnungWarnTitle: "Wichtige Nutzungsregeln",
+    hausordnungWarnBody: "Ab 22 Uhr Nachtruhe (auch außen) · keine Tiere · keine Lebensmittel in Schlafräumen · Hausschuhe drinnen · Müll trennen + Restmüll mitnehmen · Hütte besenrein hinterlassen. Verstöße können von der Kaution einbehalten werden.",
+    discountH: "Gutscheincode (optional)",
     discountApply: "Anwenden",
     discountChecking: "Prüfe …",
     discountRemove: "Entfernen",
-    discountPlaceholder: "z.B. WH-A1B2-C3D4",
+    discountPlaceholder: "z. B. WH-A1B2-C3D4",
     discountAppliedPre: "Code",
     discountAppliedPost: "angewendet",
     dueToday: "Heute fällig:",
@@ -186,12 +234,32 @@ const BF_COPY = {
     rangeBlocked: "At least one day in this range is already booked — please pick another range.",
     arrival: "Arrival",
     departure: "Departure",
-    purpose: "Purpose (optional)",
-    purposePlaceholder: "e.g. family holiday, school trip, club outing",
+    purpose: "Purpose *",
+    purposePlaceholder: "Please choose …",
+    purposeOpts: {
+      familie: "Family holiday",
+      klasse: "School class trip",
+      schul: "School / university trip",
+      verein: "Club / group trip",
+      firma: "Company / team event",
+      privat: "Private party",
+      sonstiges: "Other",
+    },
+    privateSubLabel: "Type of private party *",
+    privateSubPlaceholder: "Please choose …",
+    privateSubOpts: {
+      jga: "Bachelor/ette party (JGA)",
+      geburtstag: "Big-number birthday",
+      hochzeit: "Wedding / pre-wedding",
+      sonstiges: "Other private party",
+    },
+    privateReasonLabel: "Short description *",
+    privateReasonPlaceholder: "What is it exactly? Who's coming? Approx. group size / programme?",
+    privateReasonHint: "Private parties are briefly reviewed by the board. Just 1–2 sentences.",
     firstName: "First name",
     lastName: "Last name",
     email: "Email",
-    phone: "Phone (recommended)",
+    phone: "Phone *",
     company: "Company / club",
     street: "Street",
     zip: "ZIP",
@@ -204,7 +272,9 @@ const BF_COPY = {
     acceptHausordnung: "house rules",
     acceptEnd: ".",
     andWord: "and",
-    discountH: "Discount code (optional)",
+    hausordnungWarnTitle: "Important house rules",
+    hausordnungWarnBody: "Quiet hours from 10 PM (also outside) · no pets · no food in bedrooms · indoor shoes only · separate waste + take residual waste with you · leave the cabin broom-clean. Violations may be deducted from the deposit.",
+    discountH: "Voucher code (optional)",
     discountApply: "Apply",
     discountChecking: "Checking …",
     discountRemove: "Remove",
@@ -293,12 +363,32 @@ const BF_COPY = {
     rangeBlocked: "Minstens één dag in deze periode is al geboekt — kies een andere periode.",
     arrival: "Aankomst",
     departure: "Vertrek",
-    purpose: "Aanleiding (optioneel)",
-    purposePlaceholder: "bv. familievakantie, schoolreis, verenigingsreis",
+    purpose: "Aanleiding *",
+    purposePlaceholder: "Maak een keuze …",
+    purposeOpts: {
+      familie: "Familievakantie",
+      klasse: "Schoolreis",
+      schul: "School- / studiereis",
+      verein: "Verenigings- / groepsreis",
+      firma: "Bedrijf / team-event",
+      privat: "Privéfeest",
+      sonstiges: "Anders",
+    },
+    privateSubLabel: "Soort privéfeest *",
+    privateSubPlaceholder: "Maak een keuze …",
+    privateSubOpts: {
+      jga: "Vrijgezellenfeest (JGA)",
+      geburtstag: "Mijlpaal-verjaardag",
+      hochzeit: "Bruiloft / vooravond",
+      sonstiges: "Ander privéfeest",
+    },
+    privateReasonLabel: "Korte beschrijving *",
+    privateReasonPlaceholder: "Waar gaat het precies om? Wie komen er? Groepsgrootte / programma?",
+    privateReasonHint: "Privéfeesten worden kort door het bestuur beoordeeld. 1–2 zinnen volstaan.",
     firstName: "Voornaam",
     lastName: "Achternaam",
     email: "E-mail",
-    phone: "Telefoon (aanbevolen)",
+    phone: "Telefoon *",
     company: "Bedrijf / vereniging",
     street: "Straat",
     zip: "Postcode",
@@ -311,7 +401,9 @@ const BF_COPY = {
     acceptHausordnung: "de huisregels",
     acceptEnd: "gelezen en aanvaard.",
     andWord: "en",
-    discountH: "Kortingscode (optioneel)",
+    hausordnungWarnTitle: "Belangrijke gebruiksregels",
+    hausordnungWarnBody: "Vanaf 22:00 nachtrust (ook buiten) · geen huisdieren · geen voedsel in slaapkamers · binnen pantoffels · afval scheiden + restafval meenemen · hut bezemschoon achterlaten. Overtredingen kunnen op de borg worden ingehouden.",
+    discountH: "Vouchercode (optioneel)",
     discountApply: "Toepassen",
     discountChecking: "Controleren …",
     discountRemove: "Verwijderen",
@@ -420,7 +512,10 @@ export const BookingFlow = ({
       : emptyPersons
   );
   const [soloUse, setSoloUse] = useState(repeatHint?.soloUse ?? false);
-  const [purpose, setPurpose] = useState("");
+  // Anlass — Pflicht-Dropdown. Bei "privat" werden Subtyp + freier Grund erforderlich.
+  const [purposeCategory, setPurposeCategory] = useState<PurposeKey | "">("");
+  const [purposeSubtype, setPurposeSubtype] = useState<PrivateSubKey | "">("");
+  const [purposeReason, setPurposeReason] = useState("");
 
   const [customerType, setCustomerType] = useState<"privat" | "mitglied" | "verein" | "firma">(
     prefill?.customerType ?? "privat"
@@ -492,11 +587,17 @@ export const BookingFlow = ({
   }, [arrival, departure, datesValid, blockedSet]);
 
   const canGoStep1 = datesValid && personsValid && !rangeBlocked;
-  const canGoStep2 = breakdown !== null;
+  // Step 2: Anlass ist Pflicht; bei "privat" zusaetzlich Subtyp + min. 20-Zeichen-Grund.
+  const purposeValid =
+    !!purposeCategory &&
+    (purposeCategory !== "privat" ||
+      (!!purposeSubtype && purposeReason.trim().length >= 20));
+  const canGoStep2 = breakdown !== null && purposeValid;
   const canGoStep3 =
     firstName.trim() &&
     lastName.trim() &&
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) &&
+    phone.trim().length >= 5 &&
     acceptedTerms;
 
   const submit = () => {
@@ -511,12 +612,12 @@ export const BookingFlow = ({
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         email: email.trim().toLowerCase(),
-        phone: phone.trim() || null,
+        phone: phone.trim(),
         company: company.trim() || null,
         street: street.trim() || null,
         zip: zip.trim() || null,
         city: city.trim() || null,
-        purpose: purpose.trim() || null,
+        purpose: composePurpose(purposeCategory, purposeSubtype, purposeReason, tt) ?? "",
         customerMessage: customerMessage.trim() || null,
         discountCode:
           discountState.status === "valid" ? discountState.code : discountCode.trim() || null,
@@ -628,13 +729,47 @@ export const BookingFlow = ({
               body={tt.soloBody}
             />
 
-            <Input
+            <Select
               id="purpose"
               label={tt.purpose}
               placeholder={tt.purposePlaceholder}
-              value={purpose}
-              onChange={(e) => setPurpose(e.target.value)}
+              value={purposeCategory}
+              onChange={(e) => {
+                const v = e.target.value as PurposeKey;
+                setPurposeCategory(v);
+                // Felder leeren wenn nicht mehr "privat"
+                if (v !== "privat") {
+                  setPurposeSubtype("");
+                  setPurposeReason("");
+                }
+              }}
+              required
+              options={PURPOSE_KEYS.map((k) => ({ value: k, label: tt.purposeOpts[k] }))}
             />
+
+            {purposeCategory === "privat" && (
+              <>
+                <Select
+                  id="privateSub"
+                  label={tt.privateSubLabel}
+                  placeholder={tt.privateSubPlaceholder}
+                  value={purposeSubtype}
+                  onChange={(e) => setPurposeSubtype(e.target.value as PrivateSubKey)}
+                  required
+                  options={PRIVATE_SUB_KEYS.map((k) => ({ value: k, label: tt.privateSubOpts[k] }))}
+                />
+                <Textarea
+                  id="privateReason"
+                  label={tt.privateReasonLabel}
+                  placeholder={tt.privateReasonPlaceholder}
+                  hint={tt.privateReasonHint}
+                  value={purposeReason}
+                  onChange={(e) => setPurposeReason(e.target.value)}
+                  required
+                  minLength={20}
+                />
+              </>
+            )}
 
             <div className="flex justify-between gap-3 pt-2">
               <Button
@@ -688,7 +823,7 @@ export const BookingFlow = ({
               <Input id="firstName" label={tt.firstName} value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
               <Input id="lastName" label={tt.lastName} value={lastName} onChange={(e) => setLastName(e.target.value)} required />
               <Input id="email" type="email" label={tt.email} value={email} onChange={(e) => setEmail(e.target.value)} required />
-              <Input id="phone" type="tel" label={tt.phone} value={phone} onChange={(e) => setPhone(e.target.value)} />
+              <Input id="phone" type="tel" label={tt.phone} value={phone} onChange={(e) => setPhone(e.target.value)} required minLength={5} />
               {customerType === "firma" || customerType === "verein" ? (
                 <Input id="company" label={tt.company} value={company} onChange={(e) => setCompany(e.target.value)} />
               ) : null}
@@ -704,6 +839,20 @@ export const BookingFlow = ({
               value={customerMessage}
               onChange={(e) => setCustomerMessage(e.target.value)}
             />
+
+            {/* Prominenter Hinweis auf die Nutzungsregeln — bewusst auffaellig,
+                weil Verstoesse (Nachtruhe etc.) wiederholt zu Konflikten fuehrten. */}
+            <div
+              role="note"
+              className="rounded-[var(--radius-md)] border-l-4 border-[var(--color-wh-sunset)] bg-[var(--color-wh-beige)] px-4 py-3"
+            >
+              <p className="m-0 text-sm font-semibold text-[var(--color-wh-sunset)] uppercase tracking-wider">
+                ⚠ {tt.hausordnungWarnTitle}
+              </p>
+              <p className="m-0 mt-1 text-[14px] leading-relaxed text-[var(--color-wh-black)]">
+                {tt.hausordnungWarnBody}
+              </p>
+            </div>
 
             <label className="flex items-start gap-3 text-sm text-[var(--color-wh-fg-muted)] cursor-pointer">
               <input
