@@ -664,34 +664,25 @@ export const DOC_SECTIONS: DocSection[] = [
               "Anschrift, Anfahrt (Auto + ÖPNV), Packliste. Plus: Off-Session-Charge der Restzahlung wird versucht.",
             ],
             [
-              "T-1",
-              "key-handover",
-              "Großer Code-Block mit Schlüssel-Code (HUETTE_KEY_SAFE_CODE), Anweisungen Schlüsselsafe, Notfall-Nummern",
-            ],
-            [
               "T+5",
               "review-request",
               "Bewertungs-Mail mit Link zur Buchung. Triggert nur, wenn Status='abgereist'",
             ],
           ]}
         />
-        <H>Schlüssel-Code konfigurieren</H>
+        <H>Schlüsselübergabe</H>
         <P>
-          Im Vercel-Dashboard → Project → Settings → Environment Variables:
+          <strong>Die automatische Schlüssel-Code-Mail (T-1) ist entfallen.</strong>{" "}
+          Schlüsselübergabe wird persönlich mit dem Hüttenwart Toni Klauke geregelt
+          — er nimmt die Gäste an der Hütte in Empfang. Die Umgebungsvariable
+          <Code>HUETTE_KEY_SAFE_CODE</Code> wird nicht mehr verwendet und kann
+          aus Vercel entfernt werden.
         </P>
-        <P>
-          <Code>HUETTE_KEY_SAFE_CODE</Code> = <Code>1234</Code>
-        </P>
-        <UL>
-          <li>Default ist „0000" — bitte vor Live-Betrieb echten Code setzen</li>
-          <li>Code wird in der T-1-Mail an alle ausgehenden Buchungen verschickt</li>
-          <li>Bei Code-Änderung: ab dem nächsten Cron-Lauf gilt der neue Code</li>
-        </UL>
         <Tip>
-          Falls Du eine zukünftige Mail manuell auslösen willst (z.B. weil der
-          Code-Mail neu raus muss): den entsprechenden <Code>email_log</Code>
-          -Eintrag löschen → beim nächsten Cron-Lauf wird die Mail erneut
-          versendet.
+          Falls Du eine bereits versendete Mail manuell erneut auslösen willst
+          (z. B. arrival-info weil sich Daten geändert haben): den entsprechenden
+          <Code>email_log</Code>-Eintrag löschen → beim nächsten Cron-Lauf wird
+          die Mail erneut versendet.
         </Tip>
       </>
     ),
@@ -916,10 +907,6 @@ export const DOC_SECTIONS: DocSection[] = [
             [
               "T-7 vor Anreise",
               "Cron sendet Anreise-Info-Mail. Versucht Off-Session-Charge der Restzahlung. Bei Erfolg: Status 'erhalten'. Bei Fehler: Mail mit manuellem Zahlungslink.",
-            ],
-            [
-              "T-1 vor Anreise",
-              "Cron sendet Schlüssel-Code-Mail.",
             ],
             [
               "Bei Abreise",
