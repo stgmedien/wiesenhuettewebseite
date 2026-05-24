@@ -618,6 +618,10 @@ export const BookingFlow = ({
         zip: zip.trim() || null,
         city: city.trim() || null,
         purpose: composePurpose(purposeCategory, purposeSubtype, purposeReason, tt) ?? "",
+        purposeCategory: (purposeCategory || undefined) as PurposeKey | undefined,
+        purposeSubtypeLabel:
+          purposeCategory === "privat" && purposeSubtype ? tt.privateSubOpts[purposeSubtype] : null,
+        purposeReason: purposeCategory === "privat" ? purposeReason.trim() || null : null,
         customerMessage: customerMessage.trim() || null,
         discountCode:
           discountState.status === "valid" ? discountState.code : discountCode.trim() || null,
@@ -628,7 +632,15 @@ export const BookingFlow = ({
         setError(res.error);
         return;
       }
-      window.location.href = res.checkoutUrl;
+      // Phase B: Bei Private Feier landet die Buchung erst in der Vorstands-
+      // Prüfung — kein Stripe-Redirect.
+      if ("requiresReview" in res && res.requiresReview) {
+        window.location.href = `/buchen/pruefung?b=${encodeURIComponent(res.bookingNumber)}`;
+        return;
+      }
+      if ("checkoutUrl" in res && res.checkoutUrl) {
+        window.location.href = res.checkoutUrl;
+      }
     });
   };
 

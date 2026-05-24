@@ -240,7 +240,14 @@ export const bookings = pgTable(
     pupils: integer("pupils").notNull().default(0),         // Schüler bei Schulgruppen
     teachers: integer("teachers").notNull().default(0),     // Lehrkräfte (zählen als Erwachsene Nichtmitglieder)
 
-    purpose: varchar("purpose", { length: 255 }),
+    purpose: varchar("purpose", { length: 500 }),
+    // Vorstands-Pruefung vor Stripe-Checkout (Phase B). Greift, wenn der
+    // Gast als Anlass "Private Feier" gewaehlt hat. Stripe-Session wird
+    // dann erst nach Freigabe erzeugt.
+    requiresReview: boolean("requires_review").notNull().default(false),
+    reviewStatus: varchar("review_status", { length: 20 }), // 'pending' | 'approved' | 'rejected' (null = n/a)
+    reviewDecidedAt: timestamp("review_decided_at"),
+    reviewDecidedBy: varchar("review_decided_by", { length: 255 }),
     persons: integer("persons").notNull(),                  // Summe (cached)
 
     // Pricing snapshot (in cents — alles als integer cents speichern, GoBD-sicher)

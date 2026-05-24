@@ -10,6 +10,7 @@ import { StatusActions } from "./StatusActions";
 import { ManagerMessage } from "./ManagerMessage";
 import { DepositHoldControl } from "./DepositHoldControl";
 import { Kundenakte } from "./Kundenakte";
+import { ReviewActions } from "./ReviewActions";
 
 export const dynamic = "force-dynamic";
 
@@ -73,6 +74,15 @@ export default async function BookingDetail({ params }: Props) {
         </div>
         <StatusActions bookingId={b.id} currentStatus={b.status} />
       </div>
+
+      {/* Phase B: Private-Feier-Pruefung — Approve/Reject UI */}
+      {b.requiresReview && b.reviewStatus === "pending" && (
+        <ReviewActions
+          bookingId={b.id}
+          bookingNumber={b.bookingNumber}
+          purposeRaw={b.purpose}
+        />
+      )}
 
       {customer && (
         <ManagerMessage

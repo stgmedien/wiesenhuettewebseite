@@ -11,6 +11,8 @@ import { auth } from "@/lib/auth";
 import { createMagicLinkToken } from "@/lib/magic-link";
 import { sendMail } from "@/lib/mail/send";
 import WelcomeEmail from "@/lib/mail/templates/welcome";
+import ReviewPendingGuestEmail from "@/lib/mail/templates/review-pending-guest";
+import ReviewPendingInternalEmail from "@/lib/mail/templates/review-pending-internal";
 import {
   validateDiscountCode,
   calculateDiscountCents,
@@ -151,6 +153,14 @@ const inputSchema = z.object({
   // Phase A: Anlass ist jetzt Pflicht. Wird vom Frontend als zusammengesetzter
   // String geliefert ("Familienurlaub" / "Private Feier — JGA — Grund: ...").
   purpose: z.string().min(1).max(500),
+  // Phase B: maschinenlesbare Anlass-Kategorie (optional fuer Abwaerts-Kompat).
+  // Bei "privat" wird der Stripe-Checkout uebersprungen und die Buchung in den
+  // Vorstands-Review-Flow geschickt.
+  purposeCategory: z
+    .enum(["familie", "klasse", "schul", "verein", "firma", "privat", "sonstiges"])
+    .optional(),
+  purposeSubtypeLabel: z.string().max(120).optional().nullable(),
+  purposeReason: z.string().max(2000).optional().nullable(),
   customerMessage: z.string().max(2000).optional().nullable(),
   discountCode: z.string().max(30).optional().nullable(),
   acceptedTerms: z.literal(true),
@@ -161,6 +171,7 @@ export type BookingInput = z.infer<typeof inputSchema>;
 
 export type ActionResult =
   | { ok: true; checkoutUrl: string; bookingNumber: string }
+  | { ok: true; requiresReview: true; bookingNumber: string } // Phase B: Private Feier → Vorstands-Prüfung
   | { ok: false; error: string; issues?: { field: string; message: string }[] };
 
 const BOOKING_RATE_WINDOW_MS = 60 * 60_000; // 1 Stunde
@@ -493,12 +504,17 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
   const effectivePrepayment = Math.round((effectiveSubtotal * 50) / 100);
   const effectiveRemainder = effectiveSubtotal - effectivePrepayment;
 
+  // Phase B: Wenn Anlass "Private Feier" → Vorstands-Pruefung vor Stripe.
+  const isPrivatePartyReview = data.purposeCategory === "privat";
+
   const inserted = await db
     .insert(bookings)
     .values({
       bookingNumber,
       customerId,
       status: "angefragt",
+      requiresReview: isPrivatePartyReview,
+      reviewStatus: isPrivatePartyReview ? "pending" : null,
       arrival: data.arrival,
       departure: data.departure,
       nights: breakdown.nights,
@@ -539,6 +555,72 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
   // Neue Buchung (status "angefragt") blockt sofort Kalendertage →
   // booking-blocks-Cache invalidieren, damit /buchen das Datum direkt sperrt.
   revalidateTag(BOOKING_BLOCKS_TAG, "max");
+
+  // =====================================================================
+  // Phase B: Private-Feier-Review-Pfad
+  // =====================================================================
+  if (isPrivatePartyReview) {
+    const baseUrlReview =
+      process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.xn--wiesenhtte-geb.com";
+    const partyTypeLabel = data.purposeSubtypeLabel?.trim() || "Private Feier";
+    const reasonText = data.purposeReason?.trim() || "(keine Beschreibung angegeben)";
+
+    // 1) Bestätigungs-Mail an den Gast (keine Zahlungsaufforderung!).
+    try {
+      await sendMail({
+        to: effectiveEmail,
+        subject: `Wir prüfen Eure Anfrage — Buchung ${bookingNumber}`,
+        template: "review-pending-guest",
+        bookingId,
+        react: ReviewPendingGuestEmail({
+          firstName: data.firstName,
+          bookingNumber,
+          arrival: data.arrival,
+          departure: data.departure,
+          partyType: partyTypeLabel,
+          reason: reasonText,
+        }),
+      });
+    } catch (err) {
+      console.error("[review-pending-guest] mail failed (non-blocking):", err);
+    }
+
+    // 2) Interne Notification an den Vorstand.
+    const internalTo = process.env.MAIL_INTERNAL_TO;
+    if (internalTo) {
+      try {
+        await sendMail({
+          to: internalTo,
+          subject: `⚠ Private-Feier-Anfrage zur Prüfung — ${bookingNumber}`,
+          template: "review-pending-internal",
+          bookingId,
+          react: ReviewPendingInternalEmail({
+            bookingNumber,
+            managerUrl: `${baseUrlReview}/m/buchungen/${bookingId}`,
+            guestName: `${data.firstName} ${data.lastName}`,
+            guestEmail: effectiveEmail,
+            guestPhone: data.phone ?? null,
+            arrival: data.arrival,
+            departure: data.departure,
+            persons: totalPersons,
+            partyType: partyTypeLabel,
+            reason: reasonText,
+          }),
+        });
+      } catch (err) {
+        console.error("[review-pending-internal] mail failed (non-blocking):", err);
+      }
+    }
+
+    await db.insert(activityLog).values({
+      who: "Portal",
+      what: `Private-Feier-Anfrage ${bookingNumber} eingegangen — wartet auf Vorstands-Freigabe (Subtyp: ${partyTypeLabel}).`,
+      bookingId,
+    });
+
+    return { ok: true, requiresReview: true, bookingNumber };
+  }
+  // =====================================================================
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
   let checkoutSession;
