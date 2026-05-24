@@ -97,7 +97,7 @@ export default async function AGB() {
           <p>
             Anreise nach Absprache mit dem Hüttenwart, frühestens jedoch ab 14:00 Uhr. Abreise
             spätestens bis 12:00 Uhr am Abreisetag. Spätestens 2 Tage vor Anreise meldet der Mieter
-            dem Hüttenwart Werner Klauke (02758 / 2014822, mobil 0151 / 67 44 82 73) telefonisch die
+            dem Hüttenwart Toni Klauke (02758 / 2014822, mobil 0151 / 67 44 82 73) telefonisch die
             genaue Ankunftszeit. Schlüssel und Kurkarten werden persönlich an der Hütte übergeben.
           </p>
         </Block>

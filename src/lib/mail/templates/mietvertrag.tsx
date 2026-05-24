@@ -265,7 +265,7 @@ export default function MietvertragEmail({
           <Text style={text}>
             Die Hausordnung ist Bestandteil dieses Vertrags. Insbesondere gilt: keine Tiere, keine
             Lebensmittel in den Schlafräumen, Mülltrennung, Nachtruhe ab 22:00 Uhr,
-            Schlüsselübergabe durch den Hüttenwart Werner Klauke, Hütte am Abreisetag bis 12:00
+            Schlüsselübergabe durch den Hüttenwart Toni Klauke, Hütte am Abreisetag bis 12:00
             Uhr besenrein verlassen.
           </Text>
           <Text style={muted}>

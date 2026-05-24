@@ -705,7 +705,7 @@ export default async function LagePage() {
               </div>
               <h2
                 className="font-display font-bold text-[var(--color-wh-deep-green)] m-0 leading-[1.02]"
-                style={{ fontSize: "clamp(32px, 5vw, 56px)", letterSpacing: "-0.02em" }}
+                style={{ fontSize: "clamp(44px, 7vw, 96px)", letterSpacing: "-0.025em" }}
               >
                 {c.parking.h2}
               </h2>

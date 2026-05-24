@@ -22,7 +22,7 @@ export default async function HausordnungPage() {
 
         <Block title="Vor Eurer Anreise">
           <p>
-            Bitte teilt spätestens 2 Tage vor Anreise dem Hüttenwart Werner Klauke telefonisch
+            Bitte teilt spätestens 2 Tage vor Anreise dem Hüttenwart Toni Klauke telefonisch
             Eure genaue Ankunftszeit mit. Er nimmt Euch an der Hütte in Empfang und überreicht
             Schlüssel und Kurkarten.
           </p>
@@ -78,7 +78,7 @@ export default async function HausordnungPage() {
               <strong>Hütte bis 12:00 Uhr verlassen.</strong>
             </li>
             <li>
-              Schlüssel beim Hüttenwart Werner Klauke, Vorm Rohrbach 1 (um die Ecke), in den
+              Schlüssel beim Hüttenwart Toni Klauke, Vorm Rohrbach 1 (um die Ecke), in den
               Briefkasten werfen.
             </li>
           </ul>
@@ -103,7 +103,7 @@ const Block = ({ title, children }: { title: string; children: React.ReactNode }
 
 const Address = () => (
   <div className="bg-[var(--color-wh-beige)] rounded-[var(--radius-md)] p-4 mb-2">
-    <strong>Werner Klauke</strong>
+    <strong>Toni Klauke</strong>
     <br />
     Vorm Rohrbach 1
     <br />

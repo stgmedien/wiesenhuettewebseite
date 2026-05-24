@@ -63,13 +63,12 @@ const Hero = ({
     </video>
     <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-black/10 to-black/65" />
     <div className="relative max-w-[1320px] mx-auto px-6 sm:px-8 pt-24 pb-16 flex flex-col items-start gap-6 sm:gap-7 h-full justify-end">
-      {/* Editorial Meta-Issue-Zeile im Magazin-Stil */}
-      <div className="text-[11px] sm:text-[12px] uppercase tracking-[0.3em] font-semibold text-[var(--color-wh-snow)]/85 drop-shadow flex items-center gap-3">
-        <span
-          className="inline-block w-6 h-px bg-[var(--color-wh-snow)]/60"
-          aria-hidden
-        />
-        {tr("home.hero.issue")}
+      {/* Editorial Meta-Issue im Magazin-Stil — zwei Zeilen statt einer
+          (vermeidet hässlichen Wrap des Dash + „Seit 1956" auf schmalen
+          Viewports). */}
+      <div className="text-[11px] sm:text-[12px] uppercase tracking-[0.3em] font-semibold text-[var(--color-wh-snow)]/85 drop-shadow leading-snug">
+        <div>{tr("home.hero.issuePlace")}</div>
+        <div className="mt-1 text-[var(--color-wh-snow)]/70">{tr("home.hero.issueYear")}</div>
       </div>
       <h1
         className="font-display font-extrabold uppercase tracking-tight text-[var(--color-wh-snow)] m-0 drop-shadow-lg"

@@ -129,9 +129,9 @@ export default function ArrivalInfoEmail({
 
           <Hr style={{ borderColor: "#C8CEC4", margin: "32px 0 16px" }} />
           <Text style={muted}>
-            Den Schlüssel-Code für den Schlüsselsafe schicken wir Dir 1 Tag vor Anreise in einer
-            separaten Mail. Notfall-Telefon Hüttenwart Werner Klauke: 01516 7448273. Bei Fragen:
-            hello@wiesenhütte.com.
+            Schlüsselübergabe regeln wir persönlich mit dem Hüttenwart Toni Klauke — er nimmt
+            Euch an der Hütte in Empfang. Notfall-Telefon Toni Klauke: 01516 7448273. Bei
+            Fragen: hello@wiesenhütte.com.
           </Text>
         </Container>
       </Body>

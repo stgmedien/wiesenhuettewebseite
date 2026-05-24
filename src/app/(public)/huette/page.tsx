@@ -15,11 +15,13 @@ type Copy = {
   desc: { eyebrow: string; h2: string; body: string };
   rooms: {
     heading: string;
+    bedNote: string;
     items: Array<{ name: string; floor: string; detail: string }>;
   };
   ausstattung: {
     heading: string;
     eg: { heading: string; items: string[] };
+    og: { heading: string; items: string[] };
     ug: { heading: string; items: string[] };
     aussen: { heading: string; items: string[] };
     heat: { heading: string; items: string[] };
@@ -46,6 +48,7 @@ const COPY: Record<Locale, Copy> = {
     },
     rooms: {
       heading: "Schlafzimmer",
+      bedNote: "Wichtig: Wir stellen NUR Kopfkissen. Bettdecken (mit Bezug) oder Schlafsäcke bitte selbst mitbringen.",
       items: [
         { name: "Naturtraum", floor: "1. Etage", detail: "8 Schlafplätze in 4 Etagenbetten" },
         { name: "Waldblick", floor: "1. Etage", detail: "4 Schlafplätze in 4 Bodenbetten · über Innentreppe verbunden" },
@@ -63,6 +66,11 @@ const COPY: Record<Locale, Copy> = {
           "Esszimmer mit 4 Tischen für mind. 6 Personen",
           "Großküche: 2 Herde, Backofen, Mikrowelle, Spülmaschine, Filter-Kaffeemaschine",
           "Vorratsraum mit großem und kleinem Kühlschrank (mit Gefrierfach)",
+        ],
+      },
+      og: {
+        heading: "Obergeschoss",
+        items: [
           "Aufenthaltsraum mit 4 Tischen",
           "Gästetoilette",
         ],
@@ -119,6 +127,7 @@ const COPY: Record<Locale, Copy> = {
     },
     rooms: {
       heading: "Bedrooms",
+      bedNote: "Important: We provide PILLOWS ONLY. Please bring your own duvet (with cover) or sleeping bag — there are no duvets at the cabin.",
       items: [
         { name: "Naturtraum (\"Nature dream\")", floor: "1st floor", detail: "8 beds in 4 bunk beds" },
         { name: "Waldblick (\"Forest view\")", floor: "1st floor", detail: "4 beds on the floor · connected by internal stairs" },
@@ -136,6 +145,11 @@ const COPY: Record<Locale, Copy> = {
           "Dining room with 4 tables for at least 6 people each",
           "Large kitchen: 2 stoves, oven, microwave, dishwasher, drip coffee maker",
           "Pantry with large and small fridge (with freezer)",
+        ],
+      },
+      og: {
+        heading: "Upper floor",
+        items: [
           "Common room with 4 tables",
           "Guest toilet",
         ],
@@ -192,6 +206,7 @@ const COPY: Record<Locale, Copy> = {
     },
     rooms: {
       heading: "Slaapkamers",
+      bedNote: "Belangrijk: Wij voorzien ALLEEN kopkussens. Dekbedden (met overtrek) of slaapzakken graag zelf meenemen — er zijn geen dekbedden in de hut.",
       items: [
         { name: "Naturtraum (\"Natuurdroom\")", floor: "1e verdieping", detail: "8 slaapplaatsen in 4 stapelbedden" },
         { name: "Waldblick (\"Bosuitzicht\")", floor: "1e verdieping", detail: "4 slaapplaatsen op de vloer · verbonden via interne trap" },
@@ -209,6 +224,11 @@ const COPY: Record<Locale, Copy> = {
           "Eetkamer met 4 tafels voor minimaal 6 personen",
           "Grote keuken: 2 fornuizen, oven, magnetron, vaatwasser, filterkoffieapparaat",
           "Voorraadkamer met grote en kleine koelkast (met vriesvak)",
+        ],
+      },
+      og: {
+        heading: "Eerste verdieping",
+        items: [
           "Verblijfsruimte met 4 tafels",
           "Gastentoilet",
         ],
@@ -273,7 +293,6 @@ const GALLERY = [
   { src: "/media/photos/interior-7649.jpg" },
   { src: "/media/photos/aerial-1.jpg" },
   { src: "/media/photos/nature-1.jpg" },
-  { src: "/media/photos/exterior-front.jpg" },
 ];
 
 export default async function HuettePage() {
@@ -324,6 +343,14 @@ export default async function HuettePage() {
           <p className="text-base sm:text-[17px] leading-relaxed text-[var(--color-wh-black)] mt-4">{c.desc.body}</p>
 
           <h3 className="mt-12 mb-4 text-[22px] sm:text-[26px]">{c.rooms.heading}</h3>
+          {/* Sehr prominenter Hinweis: nur Kopfkissen vorhanden — Bettdecken
+              müssen mitgebracht werden (immer wieder Missverständnis bei Gästen). */}
+          <div
+            role="note"
+            className="mb-5 rounded-[var(--radius-md)] border-l-4 border-[var(--color-wh-sunset)] bg-[var(--color-wh-beige)] px-4 py-3 text-[15px] sm:text-base leading-relaxed text-[var(--color-wh-black)]"
+          >
+            <strong className="text-[var(--color-wh-sunset)]">⚠ {c.rooms.bedNote}</strong>
+          </div>
           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 list-none p-0">
             {c.rooms.items.map((r) => (
               <li
@@ -344,6 +371,7 @@ export default async function HuettePage() {
           <h3 className="mt-12 mb-4 text-[22px] sm:text-[26px]">{c.ausstattung.heading}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 text-base">
             <Block heading={c.ausstattung.eg.heading} items={c.ausstattung.eg.items} />
+            <Block heading={c.ausstattung.og.heading} items={c.ausstattung.og.items} />
             <Block heading={c.ausstattung.ug.heading} items={c.ausstattung.ug.items} />
             <Block heading={c.ausstattung.aussen.heading} items={c.ausstattung.aussen.items} />
             <Block heading={c.ausstattung.heat.heading} items={c.ausstattung.heat.items} />

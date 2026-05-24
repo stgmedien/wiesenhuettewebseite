@@ -119,7 +119,11 @@ export function buildPackliste(input: PackInput): PackCategory[] {
 
   // ----- Schlafen + Hygiene -----
   const schlafen: PackItem[] = [
-    { name: "Bettwäsche-Set (Bezug + Laken + Kissenbezug)", hint: "Wird nicht gestellt — oder Schlafsack mitnehmen" },
+    {
+      name: "Bettdecke + Bezug ODER Schlafsack",
+      hint: "PFLICHT — In der Hütte sind NUR Kopfkissen vorhanden. Bettdecken werden NICHT gestellt!",
+    },
+    { name: "Spannbettlaken + Kopfkissenbezug", hint: "Matratzen und Kopfkissen sind vor Ort — Bezüge mitbringen." },
     { name: "Handtuch (groß)" },
     { name: "Duschhandtuch" },
     { name: "Kulturbeutel (Zahnpasta, Bürste, Shampoo, Deo)" },

@@ -43,8 +43,8 @@ const COPY: Record<Locale, Copy> = {
     notes: {
       h3: "Kurze Hinweise vor Eurer Anreise",
       items: [
-        "Spätestens **2 Tage vor Anreise** meldet Ihr Werner Klauke telefonisch Eure genaue Ankunftszeit.",
-        "Werner empfängt Euch an der Hütte und übergibt Schlüssel und Kurkarten.",
+        "Spätestens **2 Tage vor Anreise** meldet Ihr Toni Klauke telefonisch Eure genaue Ankunftszeit.",
+        "Toni empfängt Euch an der Hütte und übergibt Schlüssel und Kurkarten.",
         "Mängel bitte sofort nach Anreise telefonisch melden — wird gemeinsam protokolliert.",
       ],
     },
@@ -66,8 +66,8 @@ const COPY: Record<Locale, Copy> = {
     notes: {
       h3: "A few notes before your arrival",
       items: [
-        "At the latest **2 days before arrival** call Werner Klauke to tell him your exact arrival time.",
-        "Werner meets you at the cabin and hands over keys and resort cards.",
+        "At the latest **2 days before arrival** call Toni Klauke to tell him your exact arrival time.",
+        "Toni meets you at the cabin and hands over keys and resort cards.",
         "Please report any defects by phone right after arrival — we'll log them together.",
       ],
     },
@@ -89,8 +89,8 @@ const COPY: Record<Locale, Copy> = {
     notes: {
       h3: "Korte aanwijzingen vóór aankomst",
       items: [
-        "Uiterlijk **2 dagen vóór aankomst** bel je Werner Klauke om je precieze aankomsttijd door te geven.",
-        "Werner ontvangt jullie bij de hut en overhandigt sleutels en kurkarten.",
+        "Uiterlijk **2 dagen vóór aankomst** bel je Toni Klauke om je precieze aankomsttijd door te geven.",
+        "Toni ontvangt jullie bij de hut en overhandigt sleutels en kurkarten.",
         "Gebreken graag direct na aankomst telefonisch melden — leggen we samen vast.",
       ],
     },
@@ -151,7 +151,7 @@ export default async function KontaktPage() {
           <Card
             icon={<Phone size={20} strokeWidth={1.6} />}
             label={c.cards.huettenwart.label}
-            primary="Werner Klauke"
+            primary="Toni Klauke"
             secondary={[
               { kind: "info", value: c.cards.huettenwart.address },
               { kind: "phone", value: "02758 / 2014822" },

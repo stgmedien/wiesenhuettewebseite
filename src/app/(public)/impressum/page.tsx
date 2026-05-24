@@ -54,7 +54,7 @@ export default async function Impressum() {
             <strong>Buchungsanfragen:</strong>{" "}
             <a href="mailto:vorstand@skifreunde-gt.de">vorstand@skifreunde-gt.de</a>
             <br />
-            <strong>Hüttenwart vor Ort:</strong> Werner Klauke,{" "}
+            <strong>Hüttenwart vor Ort:</strong> Toni Klauke,{" "}
             <a href="tel:+4927582014822">02758 / 2014822</a> ·{" "}
             <a href="tel:+4915167448273">0151 / 67 44 82 73</a>
           </p>
