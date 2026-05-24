@@ -699,13 +699,16 @@ export default async function LagePage() {
         <div className="max-w-[1280px] mx-auto">
           <ScrollReveal>
             <div className="text-center mb-12 sm:mb-16 max-w-2xl mx-auto">
-              <div className="eyebrow text-[var(--color-wh-deep-green)] mb-3 inline-flex items-center gap-2 justify-center">
-                <ParkingCircle size={14} />
+              <div
+                className="font-display font-bold text-[var(--color-wh-deep-green)] mb-4 inline-flex items-center gap-3 justify-center leading-none"
+                style={{ fontSize: "clamp(44px, 7vw, 96px)", letterSpacing: "-0.025em" }}
+              >
+                <ParkingCircle size={48} strokeWidth={1.6} className="shrink-0" />
                 {c.parking.eyebrow}
               </div>
               <h2
                 className="font-display font-bold text-[var(--color-wh-deep-green)] m-0 leading-[1.02]"
-                style={{ fontSize: "clamp(44px, 7vw, 96px)", letterSpacing: "-0.025em" }}
+                style={{ fontSize: "clamp(32px, 5vw, 56px)", letterSpacing: "-0.02em" }}
               >
                 {c.parking.h2}
               </h2>
