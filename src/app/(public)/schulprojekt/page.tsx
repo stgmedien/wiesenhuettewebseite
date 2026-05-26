@@ -738,7 +738,7 @@ const FAQS = [
   },
   {
     q: "Was kostet eine Hüttenfahrt für ESG-Lerngruppen?",
-    a: "Für ESG-Lerngruppen fallen <strong>keine Übernachtungskosten</strong> an — die Skifreunde Gütersloh stellen die Hütte kostenfrei zur Verfügung. Eltern zahlen lediglich <strong>Anreise und Verpflegung</strong>. Die Verpflegung wird gemeinsam eingekauft und gekocht, was die Kosten zusätzlich niedrig hält. <strong>Eltern, für die selbst das eng ist, wenden sich vertraulich an die Klassenleitung — der Förderverein des ESG hilft.</strong>",
+    a: "Wichtig zur Unterscheidung: <strong>Eine 'Lerngruppe' ist eine ESG-Gruppe, die in der Hütte ein konkretes Projekt umsetzt</strong> (Werkstatt, Forschungswoche, Sozialprojekt etc.). Normale Klassenfahrten fallen NICHT darunter und werden wie jede andere Buchung abgerechnet. Für anerkannte Lerngruppen gilt: Die Skifreunde Gütersloh stellen die <strong>Hütte selbst kostenfrei</strong> zur Verfügung — die Übernachtungskosten entfallen. <strong>Kurtaxe und Energiepauschale werden allerdings auch hier weiter berechnet</strong>, weil sie nicht uns zustehen (Kurbeitrag Hochsauerland) bzw. realen Verbrauch decken (Strom/Heizung). Eltern zahlen also: Kurtaxe + Energiepauschale + Anreise + Verpflegung. Die Verpflegung wird gemeinsam eingekauft und gekocht, was die Gesamtkosten niedrig hält. <strong>Eltern, für die selbst das eng ist, wenden sich vertraulich an die Klassenleitung — der Förderverein des ESG hilft.</strong>",
   },
   {
     q: "Wie sicher ist die Hütte?",
