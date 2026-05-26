@@ -194,7 +194,7 @@ const COPY: Record<Locale, Copy> = {
           distance: "30 m gegenüber",
           hours: "Mo–Sa 6:30–12:30 · Mo–Fr 15:00–18:00",
           phone: "+49 2758 280",
-          detail: "Brötchen, Kuchen, Kaffee. Vorbestellungen für Gruppen sind möglich — einfach abends vorher anrufen.",
+          detail: "Brötchen, Kuchen, Kaffee — und ein kleiner Lebensmittelladen direkt nebenan. Vorbestellungen für Gruppen sind möglich, einfach abends vorher anrufen. Sonntag geschlossen.",
         },
         {
           icon: "catering",
@@ -329,7 +329,7 @@ const COPY: Record<Locale, Copy> = {
       h2: "What you'll find within walking distance.",
       lead: "Langewiese is small but has everything essential within 200 metres.",
       cards: [
-        { icon: "bakery", title: "Bakery Gerke", distance: "30 m across", hours: "Mon–Sat 6:30–12:30 · Mon–Fri 15:00–18:00", phone: "+49 2758 280", detail: "Rolls, cake, coffee. Pre-orders for groups possible — just call the evening before." },
+        { icon: "bakery", title: "Bakery Gerke", distance: "30 m across", hours: "Mon–Sat 6:30–12:30 · Mon–Fri 15:00–18:00", phone: "+49 2758 280", detail: "Rolls, cake, coffee — plus a small grocery shop next door. Pre-orders for groups possible, just call the evening before. Closed Sundays." },
         { icon: "catering", title: "Gasthof Graberhof", distance: "Hoheleye, 4 km", phone: "+49 2758 284", detail: "Catering for groups, Hohenleye 1, Winterberg-Hoheleye. Delivers to the cabin or you drive over — both work. Mobile: +49 160 7622508." },
         { icon: "emergency", title: "St. Franziskus Hospital", distance: "Winterberg, 8 km", phone: "+49 2981 8020", detail: "24/7 ER. For non-acute cases: on-call doctor 116 117. In acute emergencies always dial 112." },
       ],
@@ -439,7 +439,7 @@ const COPY: Record<Locale, Copy> = {
       h2: "Wat je op loopafstand vindt.",
       lead: "Langewiese is klein maar heeft alles wat nodig is binnen 200 meter.",
       cards: [
-        { icon: "bakery", title: "Bakkerij Gerke", distance: "30 m tegenover", hours: "Ma–Za 6:30–12:30 · Ma–Vr 15:00–18:00", phone: "+49 2758 280", detail: "Broodjes, taart, koffie. Vooraf bestellen voor groepen mogelijk — bel even de avond ervoor." },
+        { icon: "bakery", title: "Bakkerij Gerke", distance: "30 m tegenover", hours: "Ma–Za 6:30–12:30 · Ma–Vr 15:00–18:00", phone: "+49 2758 280", detail: "Broodjes, taart, koffie — én een klein levensmiddelenwinkeltje ernaast. Vooraf bestellen voor groepen mogelijk, bel even de avond ervoor. Zondag gesloten." },
         { icon: "catering", title: "Gasthof Graberhof", distance: "Hoheleye, 4 km", phone: "+49 2758 284", detail: "Catering voor groepen, Hohenleye 1, Winterberg-Hoheleye. Levert in de hut of je rijdt erheen — beide kan. Mobiel: +49 160 7622508." },
         { icon: "emergency", title: "St. Franziskus Hospital", distance: "Winterberg, 8 km", phone: "+49 2981 8020", detail: "24/7 spoedhulp. Voor niet-acute gevallen: huisartsenpost 116 117. Bij acuut gevaar altijd 112." },
       ],

@@ -293,7 +293,6 @@ const GALLERY = [
   { src: "/media/photos/interior-7517.jpg" },
   { src: "/media/photos/interior-7547.jpg" },
   { src: "/media/photos/interior-7593.jpg" },
-  { src: "/media/photos/interior-7649.jpg" },
   { src: "/media/photos/aerial-1.jpg" },
   { src: "/media/photos/nature-1.jpg" },
 ];
@@ -386,11 +385,12 @@ export default async function HuettePage() {
         <div className="max-w-[1280px] mx-auto">
           <div className="eyebrow">{c.gallery.eyebrow}</div>
           <h2 className="text-[32px] sm:text-[40px] mt-3 sm:mt-4 mb-10">{c.gallery.h2}</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+          {/* flex+wrap+justify-center → unvollstaendige letzte Zeile wird automatisch zentriert. */}
+          <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
             {GALLERY.map((g) => (
               <div
                 key={g.src}
-                className="relative aspect-[4/3] rounded-[var(--radius-md)] overflow-hidden bg-[var(--color-wh-beige)]"
+                className="relative aspect-[4/3] w-[calc(50%-0.375rem)] md:w-[calc(33.333%-0.667rem)] rounded-[var(--radius-md)] overflow-hidden bg-[var(--color-wh-beige)]"
               >
                 <Image
                   src={g.src}
