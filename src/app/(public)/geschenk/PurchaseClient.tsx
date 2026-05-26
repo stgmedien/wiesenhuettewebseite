@@ -67,7 +67,7 @@ const COPY: Record<Locale, Copy> = {
         : a <= 175
           ? "≈ ein Wochenende für vier bis sechs"
           : a <= 350
-            ? "≈ ein Wochenende für die ganze Familie"
+            ? "≈ ein Wochenende für die ganze Gruppe"
             : "≈ eine kleine Klassenfahrt",
     hint: {
       50: "≈ Frühstück & Glühwein",

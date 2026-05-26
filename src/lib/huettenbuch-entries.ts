@@ -23,7 +23,7 @@ export type HuettenbuchEntry = {
 export const HUETTENBUCH_ENTRIES: HuettenbuchEntry[] = [
   {
     date: "Februar 2025",
-    author: "Familie Krüger, Kinderfreizeit",
+    author: "Krüger, Kinderfreizeit",
     text: {
       de: "Wir waren mit einer Kinderfreizeit hier. Super Lage, schön ruhig und rundherum genug zu erkunden. Das Haus knackt nachts im Holz — die Kinder fanden's gruselig, wir fanden's perfekt.",
       en: "We were here with a children's camp. Great location, peaceful, plenty to explore around. The house creaks in the wood at night — the kids found it spooky, we found it perfect.",

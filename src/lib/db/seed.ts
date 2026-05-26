@@ -188,7 +188,7 @@ async function main() {
     departure: dayIso(-26),
     adults: 6, members: 2, children: 4, pupils: 0, teachers: 0,
     soloUse: false,
-    purpose: "Familienurlaub Frühling",
+    purpose: "Gruppen-Aufenthalt Frühling",
   });
   await ensureBooking({
     bookingNumber: "WH-2026-1002",
@@ -208,7 +208,7 @@ async function main() {
     departure: dayIso(17),
     adults: 4, members: 0, children: 6, pupils: 0, teachers: 0,
     soloUse: false,
-    purpose: "Pfingsten Familie",
+    purpose: "Pfingsten mit Gruppe",
   });
   await ensureBooking({
     bookingNumber: "WH-2026-1004",
@@ -228,7 +228,7 @@ async function main() {
     departure: dayIso(124),
     adults: 8, members: 4, children: 6, pupils: 0, teachers: 0,
     soloUse: false,
-    purpose: "Familienurlaub Sommer",
+    purpose: "Gruppen-Aufenthalt Sommer",
   });
   await ensureBooking({
     bookingNumber: "WH-2026-9001",

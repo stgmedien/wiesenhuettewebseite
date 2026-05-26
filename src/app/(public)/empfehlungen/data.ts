@@ -296,9 +296,9 @@ export const RECOMMENDATIONS: Recommendation[] = [
       nl: "Het dichtstbijzijnde skigebied — onder 5 minuten",
     },
     description: {
-      de: "Wenn die Kids erst mal anfangen sollen, oder wenn man nach einem langen Abend nur eine halbe Stunde Skifahren möchte: Postwiese ist um die Ecke, übersichtlich, gut für Anfänger und Familien. Floodlight-Skiing am Abend.",
-      en: "When the kids are just starting out, or when you want a quick half-hour ski after a long evening: Postwiese is around the corner, manageable, great for beginners and families. Floodlit skiing in the evening.",
-      nl: "Als de kinderen net beginnen, of als je na een lange avond een half uur skiën wilt: Postwiese is om de hoek, overzichtelijk, prima voor beginners en families. Floodlight-skiën 's avonds.",
+      de: "Wenn die Kids erst mal anfangen sollen, oder wenn man nach einem langen Abend nur eine halbe Stunde Skifahren möchte: Postwiese ist um die Ecke, übersichtlich, gut für Anfänger und Gruppen. Floodlight-Skiing am Abend.",
+      en: "When the kids are just starting out, or when you want a quick half-hour ski after a long evening: Postwiese is around the corner, manageable, great for beginners and groups. Floodlit skiing in the evening.",
+      nl: "Als de kinderen net beginnen, of als je na een lange avond een half uur skiën wilt: Postwiese is om de hoek, overzichtelijk, prima voor beginners en groepen. Floodlight-skiën 's avonds.",
     },
     address: "Neuastenberg, 59955 Winterberg",
     distanceMinutesByCar: 5,
@@ -345,9 +345,9 @@ export const RECOMMENDATIONS: Recommendation[] = [
     category: "abenteuer",
     name: "Erlebnisberg Kappe + Sommerrodelbahn",
     tagline: {
-      de: "Sommerrodel, Klettern, Minigolf für Familien",
-      en: "Summer bobsleigh, climbing, mini-golf for families",
-      nl: "Zomerrodelbaan, klimmen, minigolf voor families",
+      de: "Sommerrodel, Klettern, Minigolf für Gruppen",
+      en: "Summer bobsleigh, climbing, mini-golf for groups",
+      nl: "Zomerrodelbaan, klimmen, minigolf voor groepen",
     },
     description: {
       de: "Wenn die Gruppe Kinder dabei hat oder einfach Lust auf einen verspielten Nachmittag: Kappe ist die Antwort. Sommerrodelbahn mit ordentlich Tempo, Kletterpark, Minigolf, Panorama-Erlebnisbrücke mit Glasboden für die Mutigen.",

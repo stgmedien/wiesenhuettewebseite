@@ -123,7 +123,7 @@ async function main() {
     {
       category: "verleih",
       name: "Sport Brockhaus Skiverleih",
-      description: "Skier, Snowboards, Schuhe für die ganze Familie. Reservierung online möglich, perfekt wenn Ihr nicht alles mitschleppen wollt.",
+      description: "Skier, Snowboards, Schuhe für die ganze Gruppe. Reservierung online möglich, perfekt wenn Ihr nicht alles mitschleppen wollt.",
       address: "Hauptstraße 30, Winterberg",
       distanceFromHuetteKm: 8.5,
       seasonalOnly: "winter",

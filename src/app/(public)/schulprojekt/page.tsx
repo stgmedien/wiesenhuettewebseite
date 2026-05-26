@@ -697,7 +697,7 @@ export default async function EsgPage() {
           <p className="text-[17px] leading-relaxed max-w-3xl text-[var(--color-wh-snow)]/90">
             Die Hüttenarbeit am ESG ist getragen von drei Säulen — Verein, Schule und Eltern. Das
             ist keine Selbstverständlichkeit. Sie funktioniert, weil über Jahre ein Vertrauen
-            zwischen Verein, Schule und Familien gewachsen ist.
+            zwischen Verein, Schule und Eltern gewachsen ist.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10">
@@ -734,11 +734,11 @@ export default async function EsgPage() {
 const FAQS = [
   {
     q: "Wann finden die Hüttenfahrten statt?",
-    a: "Wir fahren <strong>immer unter der Woche</strong>, meist drei Tage. Das hält die Fahrt schulalltagstauglich und schont das Wochenende der Familien.",
+    a: "Wir fahren <strong>immer unter der Woche</strong>, meist drei Tage. Das hält die Fahrt schulalltagstauglich und schont das Wochenende der Eltern.",
   },
   {
     q: "Was kostet eine Hüttenfahrt für ESG-Lerngruppen?",
-    a: "Für ESG-Lerngruppen fallen <strong>keine Übernachtungskosten</strong> an — die Skifreunde Gütersloh stellen die Hütte kostenfrei zur Verfügung. Familien zahlen lediglich <strong>Anreise und Verpflegung</strong>. Die Verpflegung wird gemeinsam eingekauft und gekocht, was die Kosten zusätzlich niedrig hält. <strong>Familien, für die selbst das eng ist, wenden sich vertraulich an die Klassenleitung — der Förderverein des ESG hilft.</strong>",
+    a: "Für ESG-Lerngruppen fallen <strong>keine Übernachtungskosten</strong> an — die Skifreunde Gütersloh stellen die Hütte kostenfrei zur Verfügung. Eltern zahlen lediglich <strong>Anreise und Verpflegung</strong>. Die Verpflegung wird gemeinsam eingekauft und gekocht, was die Kosten zusätzlich niedrig hält. <strong>Eltern, für die selbst das eng ist, wenden sich vertraulich an die Klassenleitung — der Förderverein des ESG hilft.</strong>",
   },
   {
     q: "Wie sicher ist die Hütte?",
@@ -766,7 +766,7 @@ const FAQS = [
   },
   {
     q: "Können Eltern die Hütte selbst sehen?",
-    a: "Ja. Bei Tagen der offenen Tür, Eltern-Wanderungen oder bei Familienwochenenden des Vereins ist das möglich. Termine sehen Sie auf dieser Seite und im Schul-Newsletter.",
+    a: "Ja. Bei Tagen der offenen Tür, Eltern-Wanderungen oder bei Eltern-Wochenenden des Vereins ist das möglich. Termine sehen Sie auf dieser Seite und im Schul-Newsletter.",
   },
   {
     q: "An wen kann ich mich mit Fragen wenden?",

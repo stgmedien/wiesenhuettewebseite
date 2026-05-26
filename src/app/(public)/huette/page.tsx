@@ -6,7 +6,7 @@ import type { Locale } from "@/lib/i18n-shared";
 export const metadata = {
   title: "Die Hütte · Wiesenhütte Langewiese",
   description:
-    "33 Schlafplätze in 5 Schlafzimmern, voll ausgestattete Großküche, zwei Aufenthaltsräume, Skikeller, Feuerstelle. Selbstversorgerhütte für Gruppen in Langewiese, Hochsauerland.",
+    "33 Schlafplätze in 5 Schlafzimmern, voll ausgestattete Küche, zwei Aufenthaltsräume, Skikeller, Feuerstelle. Selbstversorgerhütte für Gruppen in Langewiese, Hochsauerland.",
 };
 
 type Copy = {
@@ -64,7 +64,7 @@ const COPY: Record<Locale, Copy> = {
         items: [
           "Windfang mit Garderobe und Schuhregal",
           "Esszimmer mit 4 Tischen für mind. 6 Personen",
-          "Großküche: 2 Herde, Backofen, Mikrowelle, Spülmaschine, Filter-Kaffeemaschine",
+          "Küche: 2 Herde, Backofen, Mikrowelle, Spülmaschine, Filter-Kaffeemaschine",
           "Vorratsraum mit großem und kleinem Kühlschrank (mit Gefrierfach)",
         ],
       },
@@ -143,7 +143,7 @@ const COPY: Record<Locale, Copy> = {
         items: [
           "Entryway with wardrobe and shoe rack",
           "Dining room with 4 tables for at least 6 people each",
-          "Large kitchen: 2 stoves, oven, microwave, dishwasher, drip coffee maker",
+          "Kitchen: 2 stoves, oven, microwave, dishwasher, drip coffee maker",
           "Pantry with large and small fridge (with freezer)",
         ],
       },
@@ -222,7 +222,7 @@ const COPY: Record<Locale, Copy> = {
         items: [
           "Entree met garderobe en schoenenrek",
           "Eetkamer met 4 tafels voor minimaal 6 personen",
-          "Grote keuken: 2 fornuizen, oven, magnetron, vaatwasser, filterkoffieapparaat",
+          "Keuken: 2 fornuizen, oven, magnetron, vaatwasser, filterkoffieapparaat",
           "Voorraadkamer met grote en kleine koelkast (met vriesvak)",
         ],
       },

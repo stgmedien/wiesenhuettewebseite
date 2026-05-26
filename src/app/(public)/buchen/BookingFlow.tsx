@@ -104,7 +104,7 @@ const BF_COPY = {
     purpose: "Anlass *",
     purposePlaceholder: "Bitte wählen …",
     purposeOpts: {
-      familie: "Familienurlaub",
+      familie: "Gruppen-Aufenthalt",
       klasse: "Klassenfahrt",
       schul: "Schul-/Studienfahrt",
       verein: "Vereins-/Gruppenfahrt",
@@ -237,7 +237,7 @@ const BF_COPY = {
     purpose: "Purpose *",
     purposePlaceholder: "Please choose …",
     purposeOpts: {
-      familie: "Family holiday",
+      familie: "Group stay",
       klasse: "School class trip",
       schul: "School / university trip",
       verein: "Club / group trip",
@@ -366,7 +366,7 @@ const BF_COPY = {
     purpose: "Aanleiding *",
     purposePlaceholder: "Maak een keuze …",
     purposeOpts: {
-      familie: "Familievakantie",
+      familie: "Groepsvakantie",
       klasse: "Schoolreis",
       schul: "School- / studiereis",
       verein: "Verenigings- / groepsreis",

@@ -151,7 +151,7 @@ const inputSchema = z.object({
   zip: z.string().max(20).optional().nullable(),
   city: z.string().max(120).optional().nullable(),
   // Phase A: Anlass ist jetzt Pflicht. Wird vom Frontend als zusammengesetzter
-  // String geliefert ("Familienurlaub" / "Private Feier — JGA — Grund: ...").
+  // String geliefert ("Gruppen-Aufenthalt" / "Private Feier — JGA — Grund: ...").
   purpose: z.string().min(1).max(500),
   // Phase B: maschinenlesbare Anlass-Kategorie (optional fuer Abwaerts-Kompat).
   // Bei "privat" wird der Stripe-Checkout uebersprungen und die Buchung in den
