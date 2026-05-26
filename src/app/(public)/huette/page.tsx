@@ -48,13 +48,13 @@ const COPY: Record<Locale, Copy> = {
     },
     rooms: {
       heading: "Schlafzimmer",
-      bedNote: "Wichtig: Wir stellen NUR Kopfkissen. Bettdecken (mit Bezug) oder Schlafsäcke bitte selbst mitbringen.",
+      bedNote: "Wichtig: Wir stellen NUR Kopfkissen (ohne Bezug). Bettdecken mit Bezug oder Schlafsäcke UND Kopfkissenbezüge bitte selbst mitbringen.",
       items: [
         { name: "Naturtraum", floor: "1. Etage", detail: "8 Schlafplätze in 4 Etagenbetten" },
-        { name: "Waldblick", floor: "1. Etage", detail: "4 Schlafplätze in 4 Bodenbetten · über Innentreppe verbunden" },
+        { name: "Waldblick", floor: "Dachgeschoss", detail: "4 Schlafplätze in 4 Bodenbetten · über Innentreppe mit Naturtraum verbunden" },
         { name: "Sonnenplatz", floor: "1. Etage", detail: `4 Schlafplätze in 2 Etagenbetten · Sitzecke mit Tisch („Lehrerzimmer")` },
         { name: "Vogelnest", floor: "Dachgeschoss", detail: "4 Schlafplätze in 4 Bodenbetten" },
-        { name: "Baumkrone", floor: "Dachgeschoss", detail: "13 Schlafplätze (3 + 10) · durch Vorhang abgetrennter Großschlafraum" },
+        { name: "Baumkrone", floor: "Dachgeschoss", detail: "13 Schlafplätze in Bodenbetten" },
       ],
     },
     ausstattung: {
@@ -64,8 +64,9 @@ const COPY: Record<Locale, Copy> = {
         items: [
           "Windfang mit Garderobe und Schuhregal",
           "Esszimmer mit 4 Tischen für mind. 6 Personen",
-          "Küche: 2 Herde, Backofen, Mikrowelle, Spülmaschine, Filter-Kaffeemaschine",
+          "Küche mit 2 Herden, Backofen, Mikrowelle, Spülmaschine, Filter-Kaffeemaschine",
           "Vorratsraum mit großem und kleinem Kühlschrank (mit Gefrierfach)",
+          "Allzweckraum",
         ],
       },
       og: {
@@ -127,13 +128,13 @@ const COPY: Record<Locale, Copy> = {
     },
     rooms: {
       heading: "Bedrooms",
-      bedNote: "Important: We provide PILLOWS ONLY. Please bring your own duvet (with cover) or sleeping bag — there are no duvets at the cabin.",
+      bedNote: "Important: We provide PILLOWS ONLY (no covers). Please bring your own duvet with cover or sleeping bag — plus pillowcases for the pillows we provide.",
       items: [
         { name: "Naturtraum (\"Nature dream\")", floor: "1st floor", detail: "8 beds in 4 bunk beds" },
-        { name: "Waldblick (\"Forest view\")", floor: "1st floor", detail: "4 beds on the floor · connected by internal stairs" },
+        { name: "Waldblick (\"Forest view\")", floor: "Attic", detail: "4 beds on the floor · connected to Naturtraum by an internal staircase" },
         { name: "Sonnenplatz (\"Sunny spot\")", floor: "1st floor", detail: `4 beds in 2 bunk beds · seating corner with table ("teacher's room")` },
         { name: "Vogelnest (\"Bird's nest\")", floor: "Attic", detail: "4 beds on the floor" },
-        { name: "Baumkrone (\"Treetop\")", floor: "Attic", detail: "13 beds (3 + 10) · large dorm separated by curtain" },
+        { name: "Baumkrone (\"Treetop\")", floor: "Attic", detail: "13 beds on the floor" },
       ],
     },
     ausstattung: {
@@ -143,8 +144,9 @@ const COPY: Record<Locale, Copy> = {
         items: [
           "Entryway with wardrobe and shoe rack",
           "Dining room with 4 tables for at least 6 people each",
-          "Kitchen: 2 stoves, oven, microwave, dishwasher, drip coffee maker",
+          "Kitchen with 2 stoves, oven, microwave, dishwasher, drip coffee maker",
           "Pantry with large and small fridge (with freezer)",
+          "Multi-purpose room",
         ],
       },
       og: {
@@ -206,13 +208,13 @@ const COPY: Record<Locale, Copy> = {
     },
     rooms: {
       heading: "Slaapkamers",
-      bedNote: "Belangrijk: Wij voorzien ALLEEN kopkussens. Dekbedden (met overtrek) of slaapzakken graag zelf meenemen — er zijn geen dekbedden in de hut.",
+      bedNote: "Belangrijk: Wij voorzien ALLEEN kopkussens (zonder sloop). Dekbedden met overtrek of slaapzakken graag zelf meenemen — plus kussenslopen voor de kussens die wij leveren.",
       items: [
         { name: "Naturtraum (\"Natuurdroom\")", floor: "1e verdieping", detail: "8 slaapplaatsen in 4 stapelbedden" },
-        { name: "Waldblick (\"Bosuitzicht\")", floor: "1e verdieping", detail: "4 slaapplaatsen op de vloer · verbonden via interne trap" },
+        { name: "Waldblick (\"Bosuitzicht\")", floor: "Zolder", detail: "4 slaapplaatsen op de vloer · via interne trap verbonden met Naturtraum" },
         { name: "Sonnenplatz (\"Zonnige plek\")", floor: "1e verdieping", detail: `4 slaapplaatsen in 2 stapelbedden · zithoek met tafel ("lerarenkamer")` },
         { name: "Vogelnest (\"Vogelnest\")", floor: "Zolder", detail: "4 slaapplaatsen op de vloer" },
-        { name: "Baumkrone (\"Boomkruin\")", floor: "Zolder", detail: "13 slaapplaatsen (3 + 10) · grote slaapzaal gescheiden door gordijn" },
+        { name: "Baumkrone (\"Boomkruin\")", floor: "Zolder", detail: "13 slaapplaatsen op de vloer" },
       ],
     },
     ausstattung: {
@@ -222,8 +224,9 @@ const COPY: Record<Locale, Copy> = {
         items: [
           "Entree met garderobe en schoenenrek",
           "Eetkamer met 4 tafels voor minimaal 6 personen",
-          "Keuken: 2 fornuizen, oven, magnetron, vaatwasser, filterkoffieapparaat",
+          "Keuken met 2 fornuizen, oven, magnetron, vaatwasser, filterkoffieapparaat",
           "Voorraadkamer met grote en kleine koelkast (met vriesvak)",
+          "Multifunctionele ruimte",
         ],
       },
       og: {
