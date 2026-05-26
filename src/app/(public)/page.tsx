@@ -107,7 +107,10 @@ const Hero = ({
         <TrustBadgeButton trust={trust} locale={locale} variant="hero" />
       </div>
     </div>
-    <div className="absolute right-6 top-6 sm:right-8 sm:top-8 text-[var(--color-wh-snow)] text-xs uppercase tracking-[0.18em] opacity-90 drop-shadow">
+    {/* Tagline rechts oben — nur auf >=sm, weil sie auf Mobile mit dem
+        Editorial-Issue unten links (Nº 70 · Langewiese, Hochsauerland · Seit 1956)
+        inhaltlich doppelt und visuell ueberlappt. */}
+    <div className="hidden sm:block absolute right-6 top-6 sm:right-8 sm:top-8 text-[var(--color-wh-snow)] text-xs uppercase tracking-[0.18em] opacity-90 drop-shadow">
       {tr("home.hero.tagline")}
     </div>
   </section>

@@ -52,7 +52,7 @@ const DE: Record<string, string> = {
   // ===== HOME =====
   "home.hero.h1.l1": "Draußen kalt.",
   "home.hero.h1.l2": "Drinnen gemeinsam.",
-  "home.hero.lead": "Die Wiesenhütte der Skifreunde Gütersloh in Langewiese — seit 1956 ein einfacher, naturnaher Aufenthaltsort für Familien, Vereine und Schulklassen im Hochsauerland.",
+  "home.hero.lead": "Die Wiesenhütte der Skifreunde Gütersloh in Langewiese — seit 1956 ein einfacher, naturnaher Aufenthaltsort für Familien, Vereine und Schulklassen im Hochsauerland.",
   "home.hero.cta.book": "Verfügbarkeit prüfen",
   "home.hero.cta.more": "Mehr über die Hütte",
   "home.hero.tagline": "Langewiese · Hochsauerland · Seit 1956",
@@ -216,7 +216,7 @@ const NL: Record<string, string> = {
   // ===== HOME =====
   "home.hero.h1.l1": "Buiten koud.",
   "home.hero.h1.l2": "Binnen samen.",
-  "home.hero.lead": "De Wiesenhütte van Skifreunde Gütersloh in Langewiese — sinds 1956 een eenvoudige, natuurlijke verblijfplaats voor gezinnen, verenigingen en schoolklassen in het Hochsauerland.",
+  "home.hero.lead": "De Wiesenhütte van Skifreunde Gütersloh in Langewiese — sinds 1956 een eenvoudige, natuurlijke verblijfplaats voor gezinnen, verenigingen en schoolklassen in het Hochsauerland.",
   "home.hero.cta.book": "Beschikbaarheid bekijken",
   "home.hero.cta.more": "Meer over de hut",
   "home.hero.tagline": "Langewiese · Hochsauerland · Sinds 1956",
