@@ -666,29 +666,10 @@ export const BookingFlow = ({
               locale={locale}
             />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input
-                id="arrival"
-                label={tt.arrival}
-                type="date"
-                min={todayIso()}
-                value={arrival}
-                onChange={(e) => {
-                  setArrival(e.target.value);
-                  if (departure && new Date(departure) <= new Date(e.target.value)) {
-                    setDeparture(addDaysIso(e.target.value, 2));
-                  }
-                }}
-              />
-              <Input
-                id="departure"
-                label={tt.departure}
-                type="date"
-                min={arrival ? addDaysIso(arrival, RULES.minNights) : todayIso()}
-                value={departure}
-                onChange={(e) => setDeparture(e.target.value)}
-              />
-            </div>
+            {/* Datumsfelder bewusst entfernt — der Kalender oben ist die
+                alleinige Quelle (vermeidet Inkonsistenz zwischen Kalender und
+                Input). Anreise/Abreise sind in der Preisuebersicht rechts
+                sichtbar. */}
             {rangeBlocked && (
               <div className="text-[var(--color-wh-sunset)] text-sm font-semibold">
                 {tt.rangeBlocked}
@@ -734,13 +715,7 @@ export const BookingFlow = ({
               </div>
             </div>
 
-            <ExtraToggle
-              checked={soloUse}
-              onChange={setSoloUse}
-              title={tt.soloTitle}
-              body={tt.soloBody}
-            />
-
+            {/* Allein-/Exklusivnutzung-Option entfernt (Vorstands-Entscheidung). */}
             <Select
               id="purpose"
               label={tt.purpose}
