@@ -154,10 +154,10 @@ const COPY: Record<Locale, Copy> = {
       arrival: {
         number: "03",
         title: "Letztes Stück",
-        body: "Die Einfahrt liegt unterhalb der Bundesstraße — wer das erste Mal kommt, übersieht sie leicht. Achtet auf die Bäckerei Gerke gegenüber, da ist der Wegweiser.",
+        body: "Die Einfahrt geht direkt von der Bundesstraße ab — das Haus selbst liegt rund 50 m weiter unten am Hang. Wer das erste Mal kommt, übersieht die Einfahrt leicht: Der Wegweiser steht an der Bundesstraße, gegenüber der Bäckerei Gerke.",
         details: [
           "Schotterweg, ~50 m bergab",
-          "Im Winter glatt — vorsichtig fahren",
+          "Im Winter super glatt — nicht befahren",
           "Direkt vor der Hütte parken (im Sommer)",
           "Schlüssel-Übergabe vor Ort bei Anreise",
         ],
@@ -295,10 +295,10 @@ const COPY: Record<Locale, Copy> = {
       arrival: {
         number: "03",
         title: "Last metres",
-        body: "The driveway sits below the main road — first-timers easily miss it. Look out for bakery Gerke across the street, that's the marker.",
+        body: "The driveway turns off the main road; the cabin itself is about 50 m further down the hillside. First-timers easily miss the entrance: the signpost stands on the main road, opposite bakery Gerke.",
         details: [
           "Gravel track, ~50 m downhill",
-          "Slippery in winter — drive carefully",
+          "Very slippery in winter — do not drive on it",
           "Park right by the cabin (in summer)",
           "Key handover on site at arrival",
         ],
@@ -405,10 +405,10 @@ const COPY: Record<Locale, Copy> = {
       arrival: {
         number: "03",
         title: "Laatste meters",
-        body: "De oprit ligt onder de hoofdweg — eerste keer wordt hij makkelijk gemist. Let op bakkerij Gerke aan de overkant, dat is het herkenningspunt.",
+        body: "De oprit gaat rechtstreeks vanaf de hoofdweg af — het huis zelf ligt zo'n 50 m lager op de helling. Eerste keer wordt de oprit makkelijk gemist: het wegwijzerbord staat aan de hoofdweg, tegenover bakkerij Gerke.",
         details: [
           "Onverharde weg, ~50 m omlaag",
-          "Glad in de winter — voorzichtig rijden",
+          "Zeer glad in de winter — niet berijden",
           "Direct voor de hut parkeren (in de zomer)",
           "Sleuteloverdracht ter plaatse bij aankomst",
         ],
