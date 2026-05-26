@@ -89,7 +89,7 @@ const COPY: Record<
     h1l1: "Instead of",
     h1l2: "socks again:",
     h1l3: "three days at the cabin.",
-    lead: "Three generations around the tile stove, a forest full of trails, a dormitory full of family joy. You choose the amount — we handle the rest.",
+    lead: "Three generations around the long table, a forest full of trails, a dormitory full of anticipation. You choose the amount — we handle the rest.",
     scrollCta: "Give now",
     anaEyebrow: "What you're giving",
     anaH2: "More than just overnight stays.",
@@ -98,7 +98,7 @@ const COPY: Record<
       {
         emoji: "🔥",
         gradient: "from-amber-400/40 via-orange-400/25 to-rose-400/15",
-        h: "Three generations by the fire",
+        h: "Three generations around the long table",
         body: "The old house creaks in the wood at night. Grandparents tell stories from before, kids climb onto laps. What you give isn't the room — it's that hour.",
       },
       {
@@ -133,7 +133,7 @@ const COPY: Record<
     h1l1: "In plaats van",
     h1l2: "alweer sokken:",
     h1l3: "drie dagen hut.",
-    lead: "Drie generaties bij de kachel, een bos vol paden, een slaapzaal vol voorpret. Jij kiest het bedrag — wij regelen de rest.",
+    lead: "Drie generaties aan de lange tafel, een bos vol paden, een slaapzaal vol voorpret. Jij kiest het bedrag — wij regelen de rest.",
     scrollCta: "Nu cadeau geven",
     anaEyebrow: "Wat je geeft",
     anaH2: "Meer dan alleen overnachtingen.",
@@ -142,7 +142,7 @@ const COPY: Record<
       {
         emoji: "🔥",
         gradient: "from-amber-400/40 via-orange-400/25 to-rose-400/15",
-        h: "Drie generaties bij het vuur",
+        h: "Drie generaties aan de lange tafel",
         body: "Het oude huis kraakt 's nachts in het hout. Grootouders vertellen verhalen van vroeger, kinderen klimmen op schoot. Wat je geeft is niet de kamer — het is dat uur.",
       },
       {
