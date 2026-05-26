@@ -81,13 +81,20 @@ export default async function HausordnungPage() {
         <Block title="Checkliste für Eure Abreise">
           <p className="text-sm text-[var(--color-wh-fg-muted)]">
             Eventuell angerichtete Schäden sind dem Hüttenwart vor der Schlüsselabgabe zu melden
-            und zu protokollieren. Sachschäden werden in Rechnung gestellt.
+            und zu protokollieren. Sachschäden werden in Rechnung gestellt.{" "}
+            <strong>
+              Bei Mehraufwand (Reinigung, Aufräumen, fehlende Müllentsorgung etc.) behalten wir
+              uns vor, einen entsprechenden Anteil der Kaution einzubehalten.
+            </strong>
           </p>
           <ul className="space-y-1.5">
-            <li>Hütte besenrein hinterlassen (sonst Mehraufwand von Kaution einbehalten)</li>
-            <li>Einrichtung an den ursprünglichen Platz zurück (Stühle nicht auf die Tische)</li>
+            <li>Hütte besenrein hinterlassen</li>
+            <li>Einrichtung an den ursprünglichen Platz zurück</li>
+            <li>Stühle bitte nicht auf die Tische hochstellen</li>
             <li>Geschirrspüler inklusive Besteckschublade ausgeräumt</li>
             <li>Geschirr an seinem Platz</li>
+            <li>Kühlschränke leer — und die Türen bitte offen lassen (verhindert Schimmel/Geruch)</li>
+            <li>Alle Heizkörper auf Stufe 1 stellen (Frostschutz)</li>
             <li>Restmüll in die schwarzen Mülltonnen am Parkplatz oben</li>
             <li>Papiermüll und Kartons in die Tonne mit blauem Deckel</li>
             <li>
