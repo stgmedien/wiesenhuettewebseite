@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Locale } from "@/lib/i18n-shared";
+import { toLocalIso } from "@/lib/utils";
 
 const CAL_COPY: Record<Locale, {
   months: readonly string[];
@@ -70,11 +71,7 @@ const CAL_COPY: Record<Locale, {
   },
 };
 
-const todayIso = () => {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d.toISOString().slice(0, 10);
-};
+const todayIso = () => toLocalIso(new Date());
 
 type State =
   | "past"
@@ -146,7 +143,7 @@ export const AvailabilityCalendar = ({
     while (cells.length % 7 !== 0) cells.push(null);
 
     const stateOf = (d: Date): State => {
-      const iso = d.toISOString().slice(0, 10);
+      const iso = toLocalIso(d);
       if (iso < today) return "past";
       if (arrival && iso === arrival) return "selected";
       if (departure && iso === departure) return "selected";
@@ -158,7 +155,7 @@ export const AvailabilityCalendar = ({
     };
 
     const titleOf = (d: Date): string | undefined => {
-      const iso = d.toISOString().slice(0, 10);
+      const iso = toLocalIso(d);
       if (cleaningSet.has(iso)) return c.tipCleaning;
       if (wartungSet.has(iso)) return c.tipWartung;
       if (bookedSet.has(iso)) return c.tipBooked;
@@ -166,7 +163,7 @@ export const AvailabilityCalendar = ({
     };
 
     const handleClick = (d: Date) => {
-      const iso = d.toISOString().slice(0, 10);
+      const iso = toLocalIso(d);
       const state = stateOf(d);
       if (
         state === "past" ||
@@ -187,7 +184,7 @@ export const AvailabilityCalendar = ({
           const end = new Date(iso);
           let hasBlocked = false;
           while (cur < end) {
-            if (blockedSet.has(cur.toISOString().slice(0, 10))) {
+            if (blockedSet.has(toLocalIso(cur))) {
               hasBlocked = true;
               break;
             }

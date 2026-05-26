@@ -22,6 +22,19 @@ export const formatDateLong = (d: Date | string): string => {
   });
 };
 
+/**
+ * ISO-Date-String ("YYYY-MM-DD") aus einer LOKALEN Date-Repräsentation.
+ * Achtung: `d.toISOString().slice(0,10)` ist hier FALSCH, weil es das Datum
+ * in UTC ausgibt — in DE/CEST verschiebt das LOKAL-Mitternacht um -1 oder -2
+ * Stunden in den Vortag (klassischer Off-by-one-Bug im Kalender).
+ */
+export const toLocalIso = (d: Date): string => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+};
+
 export const generateBookingNumber = (): string => {
   const year = new Date().getFullYear();
   const rand = Math.floor(Math.random() * 9000) + 1000;

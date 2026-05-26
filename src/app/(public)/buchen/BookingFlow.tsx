@@ -5,6 +5,7 @@ import { ArrowRight, ArrowLeft, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea, Select } from "@/components/ui/Input";
 import { calculatePrice, formatEuro, RULES, type Persons } from "@/lib/pricing";
+import { toLocalIso } from "@/lib/utils";
 import { daysUntil, getCancellationTier, getCancellationTiers } from "@/lib/cancellation";
 import { createBookingAndCheckout, previewDiscountAction } from "./actions";
 import { AvailabilityCalendar } from "./AvailabilityCalendar";
@@ -45,15 +46,12 @@ const emptyPersons: Persons = {
   teachers: 0,
 };
 
-const todayIso = () => {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d.toISOString().slice(0, 10);
-};
+const todayIso = () => toLocalIso(new Date());
 
 const addDaysIso = (iso: string, days: number) => {
-  const d = new Date(iso);
-  d.setDate(d.getDate() + days);
+  // iso ist "YYYY-MM-DD" → wird als UTC-Mitternacht geparst. Wir addieren Tage in UTC und formatieren wieder als YYYY-MM-DD aus UTC (kein Lokalzeit-Drift).
+  const d = new Date(iso + "T00:00:00Z");
+  d.setUTCDate(d.getUTCDate() + days);
   return d.toISOString().slice(0, 10);
 };
 
@@ -580,7 +578,7 @@ export const BookingFlow = ({
     const cur = new Date(arrival);
     const end = new Date(departure);
     while (cur < end) {
-      if (blockedSet.has(cur.toISOString().slice(0, 10))) return true;
+      if (blockedSet.has(toLocalIso(cur))) return true;
       cur.setDate(cur.getDate() + 1);
     }
     return false;
