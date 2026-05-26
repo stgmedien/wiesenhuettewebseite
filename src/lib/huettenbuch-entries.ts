@@ -65,9 +65,9 @@ export const HUETTENBUCH_ENTRIES: HuettenbuchEntry[] = [
     date: "August 2024",
     author: "Stefan & die Bayern-Runde",
     text: {
-      de: "Vom Feinsten. Wir kommen mit der Gruppe aus Bayern seit über zwanzig Jahren her. Was sich nicht ändert: der Kachelofen, der Blick, das Knacken im Holz.",
-      en: "First class. We've been coming up with the group from Bavaria for over twenty years. What doesn't change: the tile stove, the view, the creaking wood.",
-      nl: "Van het fijnste. We komen al meer dan twintig jaar met de groep uit Beieren. Wat niet verandert: de tegelkachel, het uitzicht, het kraken van het hout.",
+      de: "Vom Feinsten. Wir kommen mit der Gruppe aus Bayern seit über zwanzig Jahren her. Was sich nicht ändert: der Blick, das Knacken im Holz, die Ruhe.",
+      en: "First class. We've been coming up with the group from Bavaria for over twenty years. What doesn't change: the view, the creaking wood, the quiet.",
+      nl: "Van het fijnste. We komen al meer dan twintig jaar met de groep uit Beieren. Wat niet verandert: het uitzicht, het kraken van het hout, de rust.",
     },
     rotationDeg: -2.5,
   },
@@ -75,18 +75,18 @@ export const HUETTENBUCH_ENTRIES: HuettenbuchEntry[] = [
 
 export const HUETTENBUCH_COPY: Record<Locale, { eyebrow: string; h2: string; lead: string }> = {
   de: {
-    eyebrow: "Aus dem Hüttenbuch",
-    h2: "Was Gäste ins Buch geschrieben haben.",
-    lead: "Im Aufenthaltsraum liegt das Hüttenbuch — Gäste tragen sich ein, der Vorstand liest später nach. Hier eine kleine Auswahl, anonymisiert, wo nötig.",
+    eyebrow: "Stimmen unserer Gäste",
+    h2: "Was Gäste über die Wiesenhütte sagen.",
+    lead: "Wir haben kein klassisches Hüttenbuch — Rückmeldungen sammeln wir online: Google-Bewertungen, Mails, Karten von Klassenfahrten. Hier eine kleine Auswahl, anonymisiert, wo nötig.",
   },
   en: {
-    eyebrow: "From the guest book",
-    h2: "What guests have written in the book.",
-    lead: "The guest book sits in the lounge — guests write in, the board reads later. A small selection here, anonymised where needed.",
+    eyebrow: "Voices of our guests",
+    h2: "What guests say about the Wiesenhütte.",
+    lead: "We don't keep a classic guest book — we collect feedback online: Google reviews, emails, postcards from school groups. A small selection here, anonymised where needed.",
   },
   nl: {
-    eyebrow: "Uit het gastenboek",
-    h2: "Wat gasten in het boek schreven.",
-    lead: "Het gastenboek ligt in de verblijfsruimte — gasten schrijven erin, het bestuur leest later. Een kleine selectie, geanonimiseerd waar nodig.",
+    eyebrow: "Stemmen van onze gasten",
+    h2: "Wat gasten over de Wiesenhütte zeggen.",
+    lead: "We hebben geen klassiek gastenboek — feedback verzamelen we online: Google-recensies, e-mails, kaarten van schoolklassen. Een kleine selectie, geanonimiseerd waar nodig.",
   },
 };

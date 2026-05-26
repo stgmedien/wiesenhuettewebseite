@@ -68,9 +68,9 @@ export const HISTORY_ENTRIES: HistoryEntry[] = [
       nl: "Het nieuwe bestuur",
     },
     body: {
-      de: "Heute übernimmt die nächste Generation — gleicher Verein, gleicher Ort. Was bleibt: das Buch im Aufenthaltsraum, der Kachelofen, der Blick aus dem Fenster.",
-      en: "Today the next generation takes over — same club, same place. What stays: the guest book in the lounge, the tile stove, the view from the window.",
-      nl: "Vandaag neemt de volgende generatie het over — dezelfde vereniging, dezelfde plek. Wat blijft: het boek in de woonkamer, de tegelkachel, het uitzicht uit het raam.",
+      de: "Heute übernimmt die nächste Generation — gleicher Verein, gleicher Ort. Was bleibt: der lange Tisch im Aufenthaltsraum, die selbstgebaute Feuerstelle, der Blick aus dem Fenster.",
+      en: "Today the next generation takes over — same club, same place. What stays: the long table in the lounge, the self-built fire pit, the view from the window.",
+      nl: "Vandaag neemt de volgende generatie het over — dezelfde vereniging, dezelfde plek. Wat blijft: de lange tafel in de woonkamer, de zelfgebouwde vuurplaats, het uitzicht uit het raam.",
     },
     photo: "/media/historical/neuer_vorstand.jpg",
     photoAlt: "Der neue Vorstand der Skifreunde Gütersloh",

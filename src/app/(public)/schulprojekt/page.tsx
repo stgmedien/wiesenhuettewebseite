@@ -494,7 +494,7 @@ export default async function EsgPage() {
               <p className="text-[15px] leading-relaxed text-[var(--color-wh-black)] m-0">
                 Die Gruppe übernimmt die Hütte für drei Tage. Frühstück, Mittagessen, Abendbrot
                 — alles wird gemeinsam gekocht. Wer einkauft, wer kocht, wer abspült: das
-                organisiert die Klasse. Holz machen, Feuer in Kachelofen und Lagerfeuerstelle,
+                organisiert die Klasse. Holz machen, Feuer in der Lagerfeuerstelle,
                 aufräumen — auch das gehört dazu. Am Abend: Stockbrot, Lagerfeuer, Reflexion.
               </p>
             </div>

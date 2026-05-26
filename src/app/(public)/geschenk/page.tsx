@@ -45,7 +45,7 @@ const COPY: Record<
     h1l1: "Statt schon",
     h1l2: "wieder Socken:",
     h1l3: "drei Tage Hütte.",
-    lead: "Drei Generationen am Kachelofen, ein Wald voller Pfade, ein Lager voller Vorfreude. Du wählst den Betrag — wir kümmern uns um den Rest.",
+    lead: "Drei Generationen am langen Tisch, ein Wald voller Pfade, ein Lager voller Vorfreude. Du wählst den Betrag — wir kümmern uns um den Rest.",
     scrollCta: "Jetzt verschenken",
     anaEyebrow: "Was Du verschenkst",
     anaH2: "Mehr als nur Übernachtungen.",
@@ -54,7 +54,7 @@ const COPY: Record<
       {
         emoji: "🔥",
         gradient: "from-amber-400/40 via-orange-400/25 to-rose-400/15",
-        h: "Drei Generationen am Kachelofen",
+        h: "Drei Generationen am langen Tisch",
         body: "Das alte Haus knackt nachts im Holz. Großeltern erzählen Geschichten von früher, Kinder klettern auf den Schoß. Was Du verschenkst, ist nicht das Zimmer — es ist diese Stunde.",
       },
       {

@@ -28,14 +28,14 @@ const BEATS: Beat[] = [
     alt: "Ankunft an der Wiesenhütte",
     eyebrow: { de: "Freitag · 16 Uhr", en: "Friday · 4 PM", nl: "Vrijdag · 16:00" },
     title: {
-      de: "Auto auspacken, Tür auf, Holz im Ofen.",
-      en: "Unpack the car, door open, wood in the stove.",
-      nl: "Auto uitladen, deur open, hout in de kachel.",
+      de: "Auto auspacken, Tür auf, willkommen sein.",
+      en: "Unpack the car, door open, welcome home.",
+      nl: "Auto uitladen, deur open, welkom thuis.",
     },
     body: {
-      de: "Die letzten drei Kurven runter, Koffer raus, Schlüssel aus dem Briefkasten. Der erste Schritt ins Haus: altes Holz, ein Rest Kaminwärme von der Woche davor, kühle Luft, die langsam aufwärmt. Die Hüttenwartin hat morgens schon eingeheizt.",
-      en: "The last three bends down, bags out, key from the letterbox. First step inside: old wood, a trace of last week's fire, cool air slowly warming up. The warden lit the stove this morning.",
-      nl: "De laatste drie bochten omlaag, koffers eruit, sleutel uit de brievenbus. De eerste stap naar binnen: oud hout, een restje haardwarmte van de week ervoor, koele lucht die langzaam opwarmt. De huttenwacht heeft 's ochtends al gestookt.",
+      de: "Die letzten drei Kurven runter, Koffer raus, Schlüssel aus dem Briefkasten. Der erste Schritt ins Haus: altes Holz, kühle Luft, die langsam warm wird. Der Hüttenwart hat die Heizung morgens schon angeschmissen.",
+      en: "The last three bends down, bags out, key from the letterbox. First step inside: old wood, cool air slowly warming up. The hut warden already turned the heating on this morning.",
+      nl: "De laatste drie bochten omlaag, koffers eruit, sleutel uit de brievenbus. De eerste stap naar binnen: oud hout, koele lucht die langzaam opwarmt. De huttenwacht heeft de verwarming 's ochtends al aangezet.",
     },
   },
   {
@@ -54,6 +54,21 @@ const BEATS: Beat[] = [
     },
   },
   {
+    photo: "/media/photos/baeckerei_gerke.webp",
+    alt: "Brötchen holen bei der Bäckerei Gerke",
+    eyebrow: { de: "Samstag · 9 Uhr", en: "Saturday · 9 AM", nl: "Zaterdag · 09:00" },
+    title: {
+      de: "Brötchen vom Bäcker, Kaffee, niemand hat es eilig.",
+      en: "Rolls from the baker, coffee, nobody is in a hurry.",
+      nl: "Broodjes van de bakker, koffie, niemand heeft haast.",
+    },
+    body: {
+      de: "Einer ist morgens runter zur Bäckerei Gerke gefahren, hat Brötchen geholt. Auf dem Tisch ist alles: Butter, Marmelade aus dem Laden, die Eier vom Bauern nebenan. Den Tag entscheiden wir spontan — bis dahin macht keiner einen Plan.",
+      en: "Someone drove down to the Bäckerei Gerke in the morning and brought back rolls. Everything's on the table: butter, jam from the shop, eggs from next door. We'll decide the day as we go — until then nobody's making a plan.",
+      nl: "Iemand reed 's ochtends naar bakkerij Gerke en haalde broodjes. Alles staat op tafel: boter, jam van de winkel, eieren van de buren. We bedenken de dag al gaande — tot dan maakt niemand een plan.",
+    },
+  },
+  {
     photo: "/media/photos/landscape.jpg",
     alt: "Wandern auf den Kahler Asten am Samstag",
     eyebrow: { de: "Samstag · 10 Uhr", en: "Saturday · 10 AM", nl: "Zaterdag · 10:00" },
@@ -66,21 +81,6 @@ const BEATS: Beat[] = [
       de: "Eine halbe Stunde vom Haus. Oben der Turm, dahinter die Hochheide. Wenn die Sicht klar ist, reicht der Blick bis ins Bergische Land. Wenn nicht, reicht's bis zur nächsten Bank — auch gut.",
       en: "Half an hour from the house. Tower at the top, high moor behind. On clear days the view stretches into the Bergisches Land. If not, it reaches the next bench — also fine.",
       nl: "Een half uur van het huis. Boven de toren, daarachter het hoogveen. Bij heldere lucht reikt het uitzicht tot in het Bergisches Land. Zo niet, dan tot de volgende bank — ook prima.",
-    },
-  },
-  {
-    photo: "/media/photos/projektfahrten/broetchen_holen.png",
-    alt: "Brötchen holen am Sonntagmorgen",
-    eyebrow: { de: "Sonntag · 11 Uhr", en: "Sunday · 11 AM", nl: "Zondag · 11:00" },
-    title: {
-      de: "Brötchen vom Bäcker, Kaffee, niemand hat es eilig.",
-      en: "Rolls from the baker, coffee, nobody is in a hurry.",
-      nl: "Broodjes van de bakker, koffie, niemand heeft haast.",
-    },
-    body: {
-      de: "Einer ist morgens hochgefahren, hat Brötchen geholt. Auf dem Tisch ist alles: Butter, Marmelade aus dem Hofladen, die Eier vom Bauern nebenan. Die Abreise ist noch um vier — bis dahin macht keiner einen Plan.",
-      en: "Someone drove up in the morning, got the rolls. Everything's on the table: butter, jam from the farm shop, eggs from next door. Check-out is at four — until then nobody's making a plan.",
-      nl: "Iemand reed 's ochtends omhoog, haalde de broodjes. Alles staat op tafel: boter, jam van de boerderijwinkel, eieren van de buren. Vertrek pas om vier uur — tot dan maakt niemand een plan.",
     },
   },
 ];
