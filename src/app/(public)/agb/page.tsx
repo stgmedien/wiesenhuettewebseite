@@ -66,7 +66,7 @@ export default async function AGB() {
           </p>
           <p>
             Die Bezahlung erfolgt in zwei Raten: <strong>50 % Anzahlung</strong> bei Buchung,{" "}
-            <strong>50 % Restzahlung</strong> spätestens 7 Tage vor Anreise. Bei Anzahlung wird
+            <strong>50 % Restzahlung</strong> spätestens 14 Tage vor Anreise (Auto-Einzug per Stripe, separate Zahlungsaufforderung kommt vorher per Mail). Bei Anzahlung wird
             zudem die Kaution mit eingezogen. Zahlungsabwicklung über Stripe (Kreditkarte / SEPA).
           </p>
         </Block>

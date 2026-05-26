@@ -291,7 +291,7 @@ export async function reviewApproveBooking(
               name: `Anzahlung 50 % — Wiesenhuette ${b.arrival} bis ${b.departure}`,
               description: `Buchung ${b.bookingNumber} · ${b.persons} Personen · ${b.nights} Naechte. Restzahlung ${formatEuro(
                 remainderCents
-              )} wird vor Anreise eingezogen.`,
+              )} wird 14 Tage vor Anreise automatisch eingezogen.`,
             },
           },
         },

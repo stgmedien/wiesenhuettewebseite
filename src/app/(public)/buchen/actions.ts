@@ -53,21 +53,21 @@ const CHECKOUT_LINES: Record<Locale, {
   de: {
     depositName: (a, d) => `Anzahlung 50 % — Wiesenhütte ${a} bis ${d}`,
     depositDescription: (p, n, bn, disc, rem) =>
-      `${p} Personen · ${n} Nächte · Buchung ${bn}${disc ? ` · Rabatt ${disc}` : ""} · Restzahlung ${rem} folgt vor Anreise.`,
+      `${p} Personen · ${n} Nächte · Buchung ${bn}${disc ? ` · Rabatt ${disc}` : ""} · Restzahlung ${rem} folgt 14 Tage vor Anreise.`,
     kautionName: "Kaution",
     kautionDescription: "Erstattung innerhalb 14 Tagen nach mangelfreier Abreise.",
   },
   en: {
     depositName: (a, d) => `Deposit 50 % — Wiesenhütte ${a} to ${d}`,
     depositDescription: (p, n, bn, disc, rem) =>
-      `${p} guests · ${n} nights · Booking ${bn}${disc ? ` · Discount ${disc}` : ""} · Remaining ${rem} due before arrival.`,
+      `${p} guests · ${n} nights · Booking ${bn}${disc ? ` · Discount ${disc}` : ""} · Remaining ${rem} due 14 days before arrival.`,
     kautionName: "Damage deposit",
     kautionDescription: "Refunded within 14 days of a clean departure.",
   },
   nl: {
     depositName: (a, d) => `Aanbetaling 50 % — Wiesenhütte ${a} t/m ${d}`,
     depositDescription: (p, n, bn, disc, rem) =>
-      `${p} personen · ${n} nachten · Boeking ${bn}${disc ? ` · Korting ${disc}` : ""} · Restbedrag ${rem} vóór aankomst.`,
+      `${p} personen · ${n} nachten · Boeking ${bn}${disc ? ` · Korting ${disc}` : ""} · Restbedrag ${rem} 14 dagen vóór aankomst.`,
     kautionName: "Borg",
     kautionDescription: "Terugbetaling binnen 14 dagen na schadevrije afreis.",
   },

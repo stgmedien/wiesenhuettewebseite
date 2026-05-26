@@ -85,13 +85,13 @@ export async function GET(req: Request) {
     autoChargeFailed: 0,
   };
 
-  // ---------- T-14: Zahlungserinnerung ----------
-  const t14 = isoDayOffset(14);
-  const t14Bookings = await db
+  // ---------- T-21: Zahlungserinnerung (1 Woche vor Auto-Einzug bei T-14) ----------
+  const t21 = isoDayOffset(21);
+  const t21Bookings = await db
     .select()
     .from(bookings)
-    .where(and(eq(bookings.arrival, t14), eq(bookings.status, "bezahlt")));
-  for (const b of t14Bookings) {
+    .where(and(eq(bookings.arrival, t21), eq(bookings.status, "bezahlt")));
+  for (const b of t21Bookings) {
     if (await alreadySent(b.id, "payment_reminder")) continue;
     const remainder = b.subtotalCents - b.paidCents + 0; // ohne Kaution, paidCents enthielt Anzahlung
     const remainderCents = Math.max(0, b.subtotalCents - Math.min(b.paidCents, b.subtotalCents));
@@ -111,7 +111,7 @@ export async function GET(req: Request) {
           bookingNumber: b.bookingNumber,
           arrival: formatDateLong(b.arrival),
           remainderCents,
-          daysUntilArrival: 14,
+          daysUntilArrival: 21,
           paymentLink: null,
           autoChargePlanned: !!b.stripePaymentIntentId,
         }),
@@ -122,7 +122,87 @@ export async function GET(req: Request) {
     }
   }
 
-  // ---------- T-7: Anreise-Info + Off-Session-Charge der Restzahlung ----------
+  // ---------- T-14: Off-Session-Charge der Restzahlung ----------
+  const t14 = isoDayOffset(14);
+  const t14Bookings = await db
+    .select()
+    .from(bookings)
+    .where(and(eq(bookings.arrival, t14), eq(bookings.status, "bezahlt")));
+  for (const b of t14Bookings) {
+    const remainderCents = Math.max(
+      0,
+      b.subtotalCents - Math.min(b.paidCents, b.subtotalCents)
+    );
+    if (remainderCents > 0 && b.stripePaymentIntentId) {
+      const restPmts = await db
+        .select()
+        .from(payments)
+        .where(and(eq(payments.bookingId, b.id), eq(payments.kind, "restzahlung")));
+      const alreadyPaid = restPmts.some((p) => p.status === "erhalten");
+      const alreadyAttempted = restPmts.some((p) => p.method === "Stripe Off-Session attempt");
+      if (alreadyPaid || alreadyAttempted) continue;
+      try {
+        const originalPi = await stripe.paymentIntents.retrieve(b.stripePaymentIntentId);
+        const stripeCustomer = originalPi.customer as string | null;
+        const stripePaymentMethod = originalPi.payment_method as string | null;
+        if (!stripeCustomer || !stripePaymentMethod) {
+          console.warn(`[cron] keine Customer/PM auf PI ${b.stripePaymentIntentId}`);
+          continue;
+        }
+        const newPi = await stripe.paymentIntents.create({
+          amount: remainderCents,
+          currency: "eur",
+          customer: stripeCustomer,
+          payment_method: stripePaymentMethod,
+          off_session: true,
+          confirm: true,
+          metadata: { bookingId: b.id, bookingNumber: b.bookingNumber, kind: "restzahlung" },
+          description: `Restzahlung Wiesenhütte ${b.bookingNumber}`,
+        });
+        await db.insert(payments).values({
+          bookingId: b.id,
+          kind: "restzahlung",
+          status: newPi.status === "succeeded" ? "erhalten" : "offen",
+          amountCents: remainderCents,
+          method: newPi.status === "succeeded" ? "Stripe Off-Session" : "Stripe Off-Session attempt",
+          stripePaymentIntentId: newPi.id,
+          receivedAt: newPi.status === "succeeded" ? new Date() : null,
+        });
+        if (newPi.status === "succeeded") {
+          await db.update(bookings)
+            .set({ paidCents: b.paidCents + remainderCents, updatedAt: new Date() })
+            .where(eq(bookings.id, b.id));
+          stats.autoChargeSucceeded++;
+        } else {
+          stats.autoChargeFailed++;
+        }
+        await db.insert(activityLog).values({
+          who: "Cron",
+          what: `Restzahlungs-Off-Session-Charge (T-14): ${(remainderCents / 100).toFixed(2)} € — ${newPi.status}`,
+          bookingId: b.id,
+        });
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        console.error(`[cron] off-session charge failed for ${b.bookingNumber}:`, msg);
+        await db.insert(payments).values({
+          bookingId: b.id,
+          kind: "restzahlung",
+          status: "fehlgeschlagen",
+          amountCents: remainderCents,
+          method: "Stripe Off-Session attempt",
+          stripePaymentIntentId: null,
+        });
+        await db.insert(activityLog).values({
+          who: "Cron",
+          what: `Restzahlungs-Off-Session-Charge FEHLGESCHLAGEN (T-14): ${msg.slice(0, 200)}`,
+          bookingId: b.id,
+        });
+        stats.autoChargeFailed++;
+      }
+    }
+  }
+
+  // ---------- T-7: Anreise-Info-Mail ----------
   const t7 = isoDayOffset(7);
   const t7Bookings = await db
     .select()
@@ -134,7 +214,6 @@ export async function GET(req: Request) {
       : null;
     if (!customer) continue;
 
-    // 1) Anreise-Info-Mail
     if (!(await alreadySent(b.id, "arrival_info"))) {
       try {
         await sendMail({
@@ -157,93 +236,6 @@ export async function GET(req: Request) {
       }
     }
 
-    // 2) Off-Session-Charge der Restzahlung
-    const remainderCents = Math.max(
-      0,
-      b.subtotalCents - Math.min(b.paidCents, b.subtotalCents)
-    );
-    if (remainderCents > 0 && b.stripePaymentIntentId) {
-      // Wurde Restzahlung schon erhalten?
-      const restPmts = await db
-        .select()
-        .from(payments)
-        .where(and(eq(payments.bookingId, b.id), eq(payments.kind, "restzahlung")));
-      const alreadyPaid = restPmts.some((p) => p.status === "erhalten");
-      const alreadyAttempted = restPmts.some((p) => p.method === "Stripe Off-Session attempt");
-      if (alreadyPaid || alreadyAttempted) continue;
-
-      try {
-        // Original-PI laden, um Customer + Payment-Method zu kriegen
-        const originalPi = await stripe.paymentIntents.retrieve(b.stripePaymentIntentId);
-        const stripeCustomer = originalPi.customer as string | null;
-        const stripePaymentMethod = originalPi.payment_method as string | null;
-        if (!stripeCustomer || !stripePaymentMethod) {
-          console.warn(`[cron] keine Customer/PM auf PI ${b.stripePaymentIntentId}`);
-          continue;
-        }
-        const newPi = await stripe.paymentIntents.create({
-          amount: remainderCents,
-          currency: "eur",
-          customer: stripeCustomer,
-          payment_method: stripePaymentMethod,
-          off_session: true,
-          confirm: true,
-          metadata: {
-            bookingId: b.id,
-            bookingNumber: b.bookingNumber,
-            kind: "restzahlung",
-          },
-          description: `Restzahlung Wiesenhütte ${b.bookingNumber}`,
-        });
-        await db.insert(payments).values({
-          bookingId: b.id,
-          kind: "restzahlung",
-          status: newPi.status === "succeeded" ? "erhalten" : "offen",
-          amountCents: remainderCents,
-          method:
-            newPi.status === "succeeded"
-              ? "Stripe Off-Session"
-              : "Stripe Off-Session attempt",
-          stripePaymentIntentId: newPi.id,
-          receivedAt: newPi.status === "succeeded" ? new Date() : null,
-        });
-        if (newPi.status === "succeeded") {
-          await db
-            .update(bookings)
-            .set({
-              paidCents: b.paidCents + remainderCents,
-              updatedAt: new Date(),
-            })
-            .where(eq(bookings.id, b.id));
-          stats.autoChargeSucceeded++;
-        } else {
-          stats.autoChargeFailed++;
-        }
-        await db.insert(activityLog).values({
-          who: "Cron",
-          what: `Restzahlungs-Off-Session-Charge: ${(remainderCents / 100).toFixed(2)} € — ${newPi.status}`,
-          bookingId: b.id,
-        });
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        console.error(`[cron] off-session charge failed for ${b.bookingNumber}:`, msg);
-        // payment-row anlegen, damit wir wissen dass wir es probiert haben
-        await db.insert(payments).values({
-          bookingId: b.id,
-          kind: "restzahlung",
-          status: "fehlgeschlagen",
-          amountCents: remainderCents,
-          method: "Stripe Off-Session attempt",
-          stripePaymentIntentId: null,
-        });
-        await db.insert(activityLog).values({
-          who: "Cron",
-          what: `Restzahlungs-Off-Session-Charge FEHLGESCHLAGEN: ${msg.slice(0, 200)}`,
-          bookingId: b.id,
-        });
-        stats.autoChargeFailed++;
-      }
-    }
   }
 
   // ---------- T-1: Schlüsselübergabe ----------

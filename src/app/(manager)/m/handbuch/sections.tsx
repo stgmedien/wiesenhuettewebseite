@@ -901,12 +901,16 @@ export const DOC_SECTIONS: DocSection[] = [
               "checkout.session.completed → Booking auf 'bezahlt'. Bestätigungs-, Mietvertrags-, Kurtaxe-Mails versendet (idempotent). GoBD-Rechnung wird via Postgres-SEQUENCE erzeugt.",
             ],
             [
+              "T-21 vor Anreise",
+              "Cron daily-mail-jobs sendet Zahlungserinnerung mit Hinweis auf den automatischen Einzug bei T-14 (= 14 Tage vor Anreise).",
+            ],
+            [
               "T-14 vor Anreise",
-              "Cron daily-mail-jobs sendet Zahlungserinnerung mit Hinweis auf den automatischen Einzug bei T-7.",
+              "Cron triggert Off-Session-Charge der Restzahlung über Stripe (gleiche Karte wie Anzahlung). Bei Erfolg: payment-row 'erhalten'. Bei Fehler: payment-row 'fehlgeschlagen' + Manager muss manuell nachfassen.",
             ],
             [
               "T-7 vor Anreise",
-              "Cron sendet Anreise-Info-Mail. Versucht Off-Session-Charge der Restzahlung. Bei Erfolg: Status 'erhalten'. Bei Fehler: Mail mit manuellem Zahlungslink.",
+              "Cron sendet Anreise-Info-Mail.",
             ],
             [
               "Bei Abreise",

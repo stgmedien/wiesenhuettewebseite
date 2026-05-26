@@ -103,7 +103,7 @@ export default function PaymentReminderEmail({
               }}
             >
               <Text style={{ ...text, margin: 0 }}>
-                <strong>Automatischer Einzug:</strong> Wir buchen den Betrag automatisch 7 Tage
+                <strong>Automatischer Einzug:</strong> Wir buchen den Betrag automatisch 14 Tage
                 vor Anreise von der Karte ab, mit der Du die Anzahlung gemacht hast. Du musst
                 nichts weiter tun.
               </Text>

@@ -141,7 +141,7 @@ export type PriceBreakdown = {
   subtotalCents: number;       // ohne Kaution
   depositCents: number;        // Kaution (separat)
   prepaymentCents: number;     // 50 % Anzahlung — heute zu zahlen
-  remainderCents: number;      // 50 % Restzahlung — vor Anreise
+  remainderCents: number;      // 50 % Restzahlung — 14 Tage vor Anreise (Auto-Einzug per Cron)
   totalDueCents: number;       // Anzahlung + (vorautorisierte) Kaution = heute fällig
   lines: PriceLine[];
 };

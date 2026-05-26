@@ -223,7 +223,7 @@ export default function MietvertragEmail({
           <Heading as="h3" style={h2}>§ 5 Zahlungen & Kaution</Heading>
           <Text style={text}>
             Die Mietzahlung wird in zwei Raten eingezogen: <strong>50 % Anzahlung</strong> bei
-            Buchung, <strong>50 % Restzahlung</strong> spätestens 7 Tage vor Anreise. Die Kaution
+            Buchung, <strong>50 % Restzahlung</strong> spätestens 14 Tage vor Anreise. Die Kaution
             wird mit der Anzahlung mitvoraussetzt und nach mangelfreier Abreise innerhalb von 14
             Tagen erstattet.
           </Text>

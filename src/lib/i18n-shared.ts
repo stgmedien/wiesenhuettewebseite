@@ -89,7 +89,7 @@ const DE: Record<string, string> = {
   "home.history.cta": "Vereinsgeschichte lesen",
   "home.cta.eyebrow": "Jetzt buchen",
   "home.cta.h2": "Wann wollt Ihr kommen?",
-  "home.cta.body": "Termin auswählen, Personen eintragen, Pauschalen abhaken — und sofort verbindlich buchen. 50 % Anzahlung, Rest vor Anreise.",
+  "home.cta.body": "Termin auswählen, Personen eintragen, Pauschalen abhaken — und sofort verbindlich buchen. 50 % Anzahlung, Rest 14 Tage vor Anreise.",
 
   // ===== COMMON =====
   "common.de_only_banner.title": "Diese Seite ist aktuell nur auf Deutsch verfügbar.",
@@ -171,7 +171,7 @@ const EN: Record<string, string> = {
   "home.history.cta": "Read the club's history",
   "home.cta.eyebrow": "Book now",
   "home.cta.h2": "When are you coming?",
-  "home.cta.body": "Pick dates, enter guests, confirm flat-rates — and book straight away. 50% deposit, the rest before arrival.",
+  "home.cta.body": "Pick dates, enter guests, confirm flat-rates — and book straight away. 50% deposit, the rest 14 days before arrival.",
 
   // ===== COMMON =====
   "common.de_only_banner.title": "This page is currently only available in German.",
@@ -253,7 +253,7 @@ const NL: Record<string, string> = {
   "home.history.cta": "Lees de verenigingsgeschiedenis",
   "home.cta.eyebrow": "Nu boeken",
   "home.cta.h2": "Wanneer wil je komen?",
-  "home.cta.body": "Data kiezen, personen invoeren, opties aanvinken — meteen definitief boeken. 50% aanbetaling, de rest vóór aankomst.",
+  "home.cta.body": "Data kiezen, personen invoeren, opties aanvinken — meteen definitief boeken. 50% aanbetaling, de rest 14 dagen vóór aankomst.",
 
   // ===== COMMON =====
   "common.de_only_banner.title": "Deze pagina is momenteel alleen in het Duits beschikbaar.",
