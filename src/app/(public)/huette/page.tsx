@@ -284,7 +284,7 @@ const FACT_KPIS = [
   { kpi: "33", labelKey: "sleeps" as const },
   { kpi: "5", labelKey: "rooms" as const },
   { kpi: "2", labelKey: "lounges" as const },
-  { kpi: "10–33", labelKey: "occupancy" as const },
+  { kpi: "15–33", labelKey: "occupancy" as const },
 ];
 
 const GALLERY = [

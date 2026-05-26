@@ -44,7 +44,7 @@ export default async function AGB() {
         <Block title="§ 3 Mindestbuchung & Belegung">
           <ul>
             <li>Mindestaufenthalt: <strong>2 Nächte</strong></li>
-            <li>Mindestbelegung: <strong>10 Personen</strong></li>
+            <li>Mindestbelegung: <strong>15 Personen</strong></li>
             <li>Maximalbelegung: <strong>33 Personen</strong></li>
             <li>Bei Unterbelegung kann ein Aufschlag „Allein-/Exklusivnutzung" anfallen.</li>
           </ul>

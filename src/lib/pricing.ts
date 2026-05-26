@@ -98,7 +98,7 @@ export const PRICES = {
 
 export const RULES = {
   minNights: 2,
-  minPersons: 10,
+  minPersons: 15,
   maxPersons: 33,
   prepaymentPercent: 50,        // Anzahlung-Anteil bei Buchung in %
   // Hinweis: cleaningDaysAfterDeparture ist jetzt eine Manager-Einstellung

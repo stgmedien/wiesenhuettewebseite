@@ -121,6 +121,8 @@ const BF_COPY = {
     privateReasonLabel: "Kurze Beschreibung *",
     privateReasonPlaceholder: "Worum geht es genau? Wer kommt? Ungefähre Gruppengröße / Programm?",
     privateReasonHint: "Private Feiern werden vom Vorstand kurz geprüft. Bitte 1–2 Sätze.",
+    purposeReasonHintNonPrivate: "Bitte 1–2 Sätze zur Gruppe / dem Anlass — hilft uns, die Buchung richtig einzuordnen.",
+    eventLocationWarn: "Keine Event-Location, keine Party-Location. Bitte KEINE private Feier oder JGA angeben — solche Buchungen werden vom Vorstand individuell geprüft und können abgelehnt werden.",
     firstName: "Vorname",
     lastName: "Nachname",
     email: "E-Mail",
@@ -254,6 +256,8 @@ const BF_COPY = {
     privateReasonLabel: "Short description *",
     privateReasonPlaceholder: "What is it exactly? Who's coming? Approx. group size / programme?",
     privateReasonHint: "Private parties are briefly reviewed by the board. Just 1–2 sentences.",
+    purposeReasonHintNonPrivate: "Just 1–2 sentences about the group / occasion — helps us put the booking in context.",
+    eventLocationWarn: "Not an event venue, not a party venue. Please do NOT enter private party or stag/hen — such bookings are individually reviewed by the board and may be declined.",
     firstName: "First name",
     lastName: "Last name",
     email: "Email",
@@ -383,6 +387,8 @@ const BF_COPY = {
     privateReasonLabel: "Korte beschrijving *",
     privateReasonPlaceholder: "Waar gaat het precies om? Wie komen er? Groepsgrootte / programma?",
     privateReasonHint: "Privéfeesten worden kort door het bestuur beoordeeld. 1–2 zinnen volstaan.",
+    purposeReasonHintNonPrivate: "1–2 zinnen over de groep / aanleiding — helpt ons de boeking in context te plaatsen.",
+    eventLocationWarn: "Geen evenementenlocatie, geen feestlocatie. Geef AUB GEEN privéfeest of vrijgezellenfeest op — dergelijke boekingen worden individueel door het bestuur beoordeeld en kunnen worden afgewezen.",
     firstName: "Voornaam",
     lastName: "Achternaam",
     email: "E-mail",
@@ -585,11 +591,13 @@ export const BookingFlow = ({
   }, [arrival, departure, datesValid, blockedSet]);
 
   const canGoStep1 = datesValid && personsValid && !rangeBlocked;
-  // Step 2: Anlass ist Pflicht; bei "privat" zusaetzlich Subtyp + min. 20-Zeichen-Grund.
-  const purposeValid =
-    !!purposeCategory &&
-    (purposeCategory !== "privat" ||
-      (!!purposeSubtype && purposeReason.trim().length >= 20));
+  // Step 2: Anlass ist Pflicht. Bei "privat" zusaetzlich Subtyp. Grund-Pflichtfeld
+  // (min. 20 Z.) fuer ALLE Anlaesse AUSSER Klassenfahrt — gibt dem Vorstand Kontext
+  // und schreckt missbraeuchliche Anmeldungen ab.
+  const reasonRequired = !!purposeCategory && purposeCategory !== "klasse";
+  const subtypeValid = purposeCategory !== "privat" || !!purposeSubtype;
+  const reasonValid = !reasonRequired || purposeReason.trim().length >= 20;
+  const purposeValid = !!purposeCategory && subtypeValid && reasonValid;
   const canGoStep2 = breakdown !== null && purposeValid;
   const canGoStep3 =
     firstName.trim() &&
@@ -619,7 +627,7 @@ export const BookingFlow = ({
         purposeCategory: (purposeCategory || undefined) as PurposeKey | undefined,
         purposeSubtypeLabel:
           purposeCategory === "privat" && purposeSubtype ? tt.privateSubOpts[purposeSubtype] : null,
-        purposeReason: purposeCategory === "privat" ? purposeReason.trim() || null : null,
+        purposeReason: purposeCategory && purposeCategory !== "klasse" ? purposeReason.trim() || null : null,
         customerMessage: customerMessage.trim() || null,
         discountCode:
           discountState.status === "valid" ? discountState.code : discountCode.trim() || null,
@@ -733,28 +741,38 @@ export const BookingFlow = ({
             />
 
             {purposeCategory === "privat" && (
-              <>
-                <Select
-                  id="privateSub"
-                  label={tt.privateSubLabel}
-                  placeholder={tt.privateSubPlaceholder}
-                  value={purposeSubtype}
-                  onChange={(e) => setPurposeSubtype(e.target.value as PrivateSubKey)}
-                  required
-                  options={PRIVATE_SUB_KEYS.map((k) => ({ value: k, label: tt.privateSubOpts[k] }))}
-                />
-                <Textarea
-                  id="privateReason"
-                  label={tt.privateReasonLabel}
-                  placeholder={tt.privateReasonPlaceholder}
-                  hint={tt.privateReasonHint}
-                  value={purposeReason}
-                  onChange={(e) => setPurposeReason(e.target.value)}
-                  required
-                  minLength={20}
-                />
-              </>
+              <Select
+                id="privateSub"
+                label={tt.privateSubLabel}
+                placeholder={tt.privateSubPlaceholder}
+                value={purposeSubtype}
+                onChange={(e) => setPurposeSubtype(e.target.value as PrivateSubKey)}
+                required
+                options={PRIVATE_SUB_KEYS.map((k) => ({ value: k, label: tt.privateSubOpts[k] }))}
+              />
             )}
+
+            {purposeCategory && purposeCategory !== "klasse" && (
+              <Textarea
+                id="purposeReason"
+                label={tt.privateReasonLabel}
+                placeholder={tt.privateReasonPlaceholder}
+                hint={
+                  purposeCategory === "privat"
+                    ? tt.privateReasonHint
+                    : tt.purposeReasonHintNonPrivate
+                }
+                value={purposeReason}
+                onChange={(e) => setPurposeReason(e.target.value)}
+                required
+                minLength={20}
+              />
+            )}
+
+            {/* Rote Warn-Zeile direkt darunter — Hütte ist KEINE Event-/Partylocation. */}
+            <p className="text-[13px] sm:text-sm font-semibold text-[var(--color-wh-sunset)] leading-relaxed -mt-1">
+              ⚠ {tt.eventLocationWarn}
+            </p>
 
             <div className="flex justify-between gap-3 pt-2">
               <Button
