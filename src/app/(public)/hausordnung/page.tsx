@@ -20,6 +20,21 @@ export default async function HausordnungPage() {
           der Buchungsbestätigung als Bestandteil des Mietvertrags übermittelt.
         </p>
 
+        <Block title="Charakter der Hütte">
+          <div className="rounded-[var(--radius-md)] border-l-4 border-[var(--color-wh-sunset)] bg-[var(--color-wh-beige)] px-4 py-3">
+            <p className="m-0">
+              Die Wiesenhütte ist eine{" "}
+              <strong>Selbstversorgerhütte für Vereins-, Schul-, Klassen- und Gruppenfahrten</strong> —
+              bewusst einfach, naturnah und getragen vom Verein Skifreunde Gütersloh e.V. Sie ist{" "}
+              <strong>keine Eventlocation und kein Partyort</strong>: übermäßiger Alkoholkonsum,
+              laute Feiern und Verhalten, das andere im Ort stört oder die Hütte schädigt, sind
+              ausdrücklich nicht gewünscht und können zum Verweis und zur Einbehaltung der Kaution
+              führen. Buchungen mit privatem Feier-Anlass (JGA, runder Geburtstag etc.) werden vom
+              Vorstand vorab individuell geprüft und können abgelehnt werden.
+            </p>
+          </div>
+        </Block>
+
         <Block title="Vor Eurer Anreise">
           <p>
             Bitte teilt spätestens 2 Tage vor Anreise dem Hüttenwart Toni Klauke telefonisch
@@ -39,6 +54,11 @@ export default async function HausordnungPage() {
 
         <Block title="Während Eures Aufenthalts">
           <ul>
+            <li>
+              <strong>Kein Partyort:</strong> übermäßiger Alkoholkonsum und laute private Feiern
+              sind nicht erlaubt — die Hütte ist eine ruhige Gruppenunterkunft im Dorf, mit
+              Nachbarn ringsum.
+            </li>
             <li>Tiere aller Art sind zu keiner Zeit erlaubt.</li>
             <li>Alle Räume bitte nur mit Hausschuhen begehen.</li>
             <li>Mit Skischuhen ausschließlich den Kellereingang benutzen.</li>
