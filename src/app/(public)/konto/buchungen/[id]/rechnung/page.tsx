@@ -231,7 +231,7 @@ export default async function QuittungPage({ params }: Props) {
         {/* Hinweise */}
         <section className="text-xs text-[#555] border-t border-[#ddd] pt-4">
           <p className="mb-2">
-            <strong>Hinweis Kurtaxe:</strong> Die Kurtaxe Hochsauerland wird seit Mai 2026 nicht
+            <strong>Hinweis Kurtaxe:</strong> Die Kurtaxe Hochsauerland (Langewiese ab 01.07.2026: 2,70 € pro Person und Nacht, Kinder bis 15 Jahre frei) wird seit Mai 2026 nicht
             mehr über die Wiesenhütte abgerechnet. Du erhältst nach Buchung eine separate E-Mail
             mit dem Link zum offiziellen Kurtaxen-Portal.
           </p>

@@ -77,8 +77,12 @@ export default function KurtaxeInfoEmail({
             <Text style={{ ...muted, margin: 0 }}>Buchung</Text>
             <Text style={{ ...text, fontWeight: 600, margin: "4px 0 12px" }}>{bookingNumber}</Text>
             <Text style={{ ...muted, margin: 0 }}>Zeitraum</Text>
-            <Text style={{ ...text, fontWeight: 600, margin: "4px 0 0" }}>
+            <Text style={{ ...text, fontWeight: 600, margin: "4px 0 12px" }}>
               {arrival} bis {departure}
+            </Text>
+            <Text style={{ ...muted, margin: 0 }}>Aktueller Tarif Langewiese (ab 01.07.2026)</Text>
+            <Text style={{ ...text, fontWeight: 600, margin: "4px 0 0" }}>
+              2,70 € pro Person und Nacht · Kinder bis 15 Jahre frei
             </Text>
           </Section>
 

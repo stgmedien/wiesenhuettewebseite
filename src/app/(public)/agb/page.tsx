@@ -62,7 +62,9 @@ export default async function AGB() {
           <p>
             Die jeweils gültigen Tarife werden im Buchungsvorgang transparent angezeigt. Die
             Kurtaxe Hochsauerland ist nicht im Mietpreis enthalten und wird vom Mieter direkt über
-            das offizielle Kurtaxen-Portal des Hochsauerlandkreises angemeldet und entrichtet.
+            das offizielle Kurtaxen-Portal des Hochsauerlandkreises angemeldet und entrichtet. Aktueller
+            Tarif Langewiese ab 01.07.2026: <strong>2,70 € pro Person und Nacht</strong>; Kinder bis 15
+            Jahre sind beitragsfrei.
           </p>
           <p>
             Die Bezahlung erfolgt in zwei Raten: <strong>50 % Anzahlung</strong> bei Buchung,{" "}
