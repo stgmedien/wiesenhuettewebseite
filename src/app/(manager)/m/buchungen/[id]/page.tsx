@@ -147,6 +147,27 @@ export default async function BookingDetail({ params }: Props) {
             <dl className="grid grid-cols-2 gap-y-3 text-sm">
               <Dt>Anlass</Dt>
               <Dd>{b.purpose ?? "—"}</Dd>
+              {b.institution && (
+                <>
+                  <Dt>Institution</Dt>
+                  <Dd>{b.institution}</Dd>
+                </>
+              )}
+              {b.paymentMode === "school_deferred" && (
+                <>
+                  <Dt>Zahlung</Dt>
+                  <Dd>
+                    <span className="inline-flex items-center rounded-full bg-[var(--color-wh-green)]/15 text-[var(--color-wh-deep-green)] px-2.5 py-0.5 text-xs font-semibold">
+                      Schul-Zahlungsaufschub
+                    </span>
+                    <span className="block text-xs text-[var(--color-wh-fg-muted)] mt-1">
+                      {b.status === "angefragt"
+                        ? "Anzahlung offen — wird 30 Tage vor Anreise per Link fällig (Auto-Storno 16 Tage vor Anreise bei Nichtzahlung)."
+                        : "Anzahlung wurde geleistet — läuft als normale Buchung weiter."}
+                    </span>
+                  </Dd>
+                </>
+              )}
               <Dt>Personen</Dt>
               <Dd>
                 {b.persons} (

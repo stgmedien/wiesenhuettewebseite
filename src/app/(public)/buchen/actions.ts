@@ -13,6 +13,12 @@ import { sendMail } from "@/lib/mail/send";
 import WelcomeEmail from "@/lib/mail/templates/welcome";
 import ReviewPendingGuestEmail from "@/lib/mail/templates/review-pending-guest";
 import ReviewPendingInternalEmail from "@/lib/mail/templates/review-pending-internal";
+import SchoolBookingReceivedEmail from "@/lib/mail/templates/school-booking-received";
+import {
+  isSchoolDeferredPurpose,
+  schoolPrepaymentCents,
+  SCHOOL_DEPOSIT_DUE_DAYS,
+} from "@/lib/school-deposit";
 import {
   validateDiscountCode,
   calculateDiscountCents,
@@ -28,7 +34,7 @@ import {
 } from "@/lib/pricing";
 import { isRangeAvailable } from "@/lib/availability";
 import { stripe } from "@/lib/stripe";
-import { generateBookingNumber } from "@/lib/utils";
+import { generateBookingNumber, formatDateLong } from "@/lib/utils";
 import { CURRENT_HAUSORDNUNG_VERSION } from "@/lib/hausordnung";
 import type { Locale } from "@/lib/i18n-shared";
 
@@ -147,6 +153,9 @@ const inputSchema = z.object({
   // Phase A: Telefonnummer ist jetzt Pflicht (Frontend min 5 Zeichen).
   phone: z.string().min(5).max(60),
   company: z.string().max(255).optional().nullable(),
+  // Institution / Einrichtung (Schule, Verein, Firma). Frontend macht es bei
+  // den Anlaessen klasse/schul/verein/firma zur Pflicht.
+  institution: z.string().max(255).optional().nullable(),
   street: z.string().max(255).optional().nullable(),
   zip: z.string().max(20).optional().nullable(),
   city: z.string().max(120).optional().nullable(),
@@ -172,6 +181,7 @@ export type BookingInput = z.infer<typeof inputSchema>;
 export type ActionResult =
   | { ok: true; checkoutUrl: string; bookingNumber: string }
   | { ok: true; requiresReview: true; bookingNumber: string } // Phase B: Private Feier → Vorstands-Prüfung
+  | { ok: true; schoolDeferred: true; bookingNumber: string } // Schulgruppe → Anzahlung erst 30 Tage vor Anreise
   | { ok: false; error: string; issues?: { field: string; message: string }[] };
 
 const BOOKING_RATE_WINDOW_MS = 60 * 60_000; // 1 Stunde
@@ -507,6 +517,10 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
   // Phase B: Wenn Anlass "Private Feier" → Vorstands-Pruefung vor Stripe.
   const isPrivatePartyReview = data.purposeCategory === "privat";
 
+  // Schulgruppen (Klassenfahrt / Schul-/Studienfahrt) → Zahlungsaufschub:
+  // KEIN Sofort-Checkout, Anzahlung wird per Cron 30 Tage vor Anreise faellig.
+  const isSchoolDeferred = isSchoolDeferredPurpose(data.purposeCategory);
+
   const inserted = await db
     .insert(bookings)
     .values({
@@ -515,6 +529,8 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
       status: "angefragt",
       requiresReview: isPrivatePartyReview,
       reviewStatus: isPrivatePartyReview ? "pending" : null,
+      paymentMode: isSchoolDeferred ? "school_deferred" : "standard",
+      institution: data.institution?.trim() || null,
       arrival: data.arrival,
       departure: data.departure,
       nights: breakdown.nights,
@@ -552,6 +568,19 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
     .returning({ id: bookings.id, bookingNumber: bookings.bookingNumber });
 
   const bookingId = inserted[0].id;
+
+  // Institution in den Kunden-Datensatz spiegeln (company), damit Rechnung /
+  // Mietvertrag die Organisation zeigen. Nur wenn angegeben.
+  if (data.institution?.trim()) {
+    try {
+      await db
+        .update(customers)
+        .set({ company: data.institution.trim() })
+        .where(eq(customers.id, customerId));
+    } catch (err) {
+      console.error("[booking] institution→customer.company mirror failed (non-blocking):", err);
+    }
+  }
 
   // Neue Buchung (status "angefragt") blockt sofort Kalendertage →
   // booking-blocks-Cache invalidieren, damit /buchen das Datum direkt sperrt.
@@ -620,6 +649,82 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
     });
 
     return { ok: true, requiresReview: true, bookingNumber };
+  }
+  // =====================================================================
+
+  // =====================================================================
+  // Schulgruppen-Zahlungsaufschub: KEIN Sofort-Checkout. Die Anzahlung wird
+  // per Cron 30 Tage vor Anreise faellig (Zahlungslink-Mail). Bis dahin ist
+  // die Buchung in "angefragt" + payment_mode "school_deferred" und blockt
+  // die Tage. Sobald die Anzahlung bezahlt ist, laeuft alles wie eine
+  // normale Buchung weiter (Webhook → "bezahlt", Restzahlung T-14).
+  // =====================================================================
+  if (isSchoolDeferred) {
+    const prepaymentLabel = formatEuro(schoolPrepaymentCents(effectiveSubtotal), locale);
+
+    // Faelligkeitsdatum der Anzahlung (Anreise minus 30 Tage), formatiert.
+    const dueDate = new Date(`${data.arrival}T00:00:00Z`);
+    dueDate.setUTCDate(dueDate.getUTCDate() - SCHOOL_DEPOSIT_DUE_DAYS);
+    const depositDueIso = dueDate.toISOString().slice(0, 10);
+
+    try {
+      await sendMail({
+        to: effectiveEmail,
+        subject: `Eure Hüttenfahrt ist reserviert — Buchung ${bookingNumber}`,
+        template: "school-booking-received",
+        bookingId,
+        react: SchoolBookingReceivedEmail({
+          firstName: data.firstName,
+          bookingNumber,
+          institution: data.institution?.trim() || "Eure Gruppe",
+          arrival: formatDateLong(data.arrival),
+          departure: formatDateLong(data.departure),
+          persons: totalPersons,
+          nights: breakdown.nights,
+          prepaymentEuroLabel: prepaymentLabel,
+          depositDueDateLabel: formatDateLong(depositDueIso),
+        }),
+      });
+    } catch (err) {
+      console.error("[school-booking-received] mail failed (non-blocking):", err);
+    }
+
+    // Interne Notification an den Vorstand (optional, non-blocking).
+    const internalToSchool = process.env.MAIL_INTERNAL_TO;
+    if (internalToSchool) {
+      const baseUrlSchool =
+        process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.xn--wiesenhtte-geb.com";
+      try {
+        await sendMail({
+          to: internalToSchool,
+          subject: `Schulgruppen-Buchung (Zahlungsaufschub) — ${bookingNumber}`,
+          template: "review-pending-internal",
+          bookingId,
+          react: ReviewPendingInternalEmail({
+            bookingNumber,
+            managerUrl: `${baseUrlSchool}/m/buchungen/${bookingId}`,
+            guestName: `${data.firstName} ${data.lastName}`,
+            guestEmail: effectiveEmail,
+            guestPhone: data.phone ?? null,
+            arrival: data.arrival,
+            departure: data.departure,
+            persons: totalPersons,
+            partyType: `Schulgruppe · ${data.institution?.trim() || "—"}`,
+            reason: `Zahlungsaufschub: Anzahlung ${prepaymentLabel} wird ${formatDateLong(depositDueIso)} (30 Tage vor Anreise) per Link fällig.`,
+          }),
+        });
+      } catch (err) {
+        console.error("[school-internal-notify] mail failed (non-blocking):", err);
+      }
+    }
+
+    await db.insert(activityLog).values({
+      who: "Portal",
+      what: `Schulgruppen-Buchung ${bookingNumber} eingegangen (Zahlungsaufschub) — Anzahlung ${prepaymentLabel} wird ${formatDateLong(depositDueIso)} fällig.`,
+      bookingId,
+    });
+
+    return { ok: true, schoolDeferred: true, bookingNumber };
   }
   // =====================================================================
 

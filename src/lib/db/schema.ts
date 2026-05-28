@@ -241,6 +241,18 @@ export const bookings = pgTable(
     teachers: integer("teachers").notNull().default(0),     // Lehrkräfte (zählen als Erwachsene Nichtmitglieder)
 
     purpose: varchar("purpose", { length: 500 }),
+    // Institution / Einrichtung (Schule, Verein, Firma) — Pflicht bei den
+    // Anlaessen klasse/schul/verein/firma. Wird zusaetzlich in customer.company
+    // gespiegelt, damit Rechnung/Mietvertrag die Organisation zeigen.
+    institution: varchar("institution", { length: 255 }),
+    // Zahlungsmodus:
+    //  - "standard"        → 50 % Anzahlung + Kaution sofort beim Buchen (Stripe).
+    //  - "school_deferred" → Schulgruppen (Klassenfahrt / Schul-/Studienfahrt):
+    //    KEIN Sofort-Checkout. Anzahlung wird per Cron 30 Tage vor Anreise
+    //    faellig (Zahlungslink-Mail), Warnungen bei T-23/T-18, Auto-Storno bei
+    //    T-16 wenn unbezahlt. Nach Zahlung laeuft die normale Restzahlungs-
+    //    Pipeline (T-14 Off-Session) wie gehabt.
+    paymentMode: varchar("payment_mode", { length: 20 }).notNull().default("standard"),
     // Vorstands-Pruefung vor Stripe-Checkout (Phase B). Greift, wenn der
     // Gast als Anlass "Private Feier" gewaehlt hat. Stripe-Session wird
     // dann erst nach Freigabe erzeugt.

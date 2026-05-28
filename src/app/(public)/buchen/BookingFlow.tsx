@@ -128,6 +128,12 @@ const BF_COPY = {
     email: "E-Mail",
     phone: "Telefon *",
     company: "Firma / Verein",
+    institution: "Institution / Einrichtung",
+    institutionHint: "Name der Schule, des Vereins oder der Firma",
+    schoolPayTitle: "Anzahlung erst später — Schulgruppen-Aufschub",
+    schoolPayBody:
+      "Ihr müsst jetzt nichts zahlen. Wir reservieren den Zeitraum verbindlich. Die Anzahlung (50 %) wird automatisch rund 30 Tage vor Anreise per E-Mail mit Zahlungslink fällig, die Restzahlung 14 Tage vor Anreise. Wird die Anzahlung nicht fristgerecht (innerhalb von 14 Tagen) beglichen, fällt eine Stornogebühr an und die Buchung wird storniert.",
+    schoolSubmit: "Reservierung verbindlich anfragen",
     street: "Straße",
     zip: "PLZ",
     city: "Ort",
@@ -266,6 +272,12 @@ const BF_COPY = {
     email: "Email",
     phone: "Phone *",
     company: "Company / club",
+    institution: "Institution / organisation",
+    institutionHint: "Name of the school, club or company",
+    schoolPayTitle: "Deposit due later — school-group deferral",
+    schoolPayBody:
+      "You don't need to pay anything now. We hold the dates for you. The deposit (50 %) automatically becomes due about 30 days before arrival via an email payment link; the remainder 14 days before arrival. If the deposit isn't paid on time (within 14 days), a cancellation fee applies and the booking is cancelled.",
+    schoolSubmit: "Request reservation (binding)",
     street: "Street",
     zip: "ZIP",
     city: "City",
@@ -400,6 +412,12 @@ const BF_COPY = {
     email: "E-mail",
     phone: "Telefoon *",
     company: "Bedrijf / vereniging",
+    institution: "Instelling / organisatie",
+    institutionHint: "Naam van de school, vereniging of het bedrijf",
+    schoolPayTitle: "Aanbetaling later — uitstel voor schoolgroepen",
+    schoolPayBody:
+      "Jullie hoeven nu niets te betalen. We reserveren de periode vast. De aanbetaling (50 %) wordt automatisch ongeveer 30 dagen voor aankomst verschuldigd via een betaallink per e-mail; de restbetaling 14 dagen voor aankomst. Wordt de aanbetaling niet op tijd (binnen 14 dagen) voldaan, dan volgt een annuleringskost en wordt de boeking geannuleerd.",
+    schoolSubmit: "Reservering bindend aanvragen",
     street: "Straat",
     zip: "Postcode",
     city: "Plaats",
@@ -538,6 +556,7 @@ export const BookingFlow = ({
   const [email, setEmail] = useState(prefill?.email ?? "");
   const [phone, setPhone] = useState(prefill?.phone ?? "");
   const [company, setCompany] = useState("");
+  const [institution, setInstitution] = useState("");
   const [street, setStreet] = useState(prefill?.street ?? "");
   const [zip, setZip] = useState(prefill?.zip ?? "");
   const [city, setCity] = useState(prefill?.city ?? "");
@@ -608,11 +627,25 @@ export const BookingFlow = ({
   const reasonValid = !reasonRequired || purposeReason.trim().length >= 20;
   const purposeValid = !!purposeCategory && subtypeValid && reasonValid;
   const canGoStep2 = breakdown !== null && purposeValid;
+
+  // Institutions-Feld: Pflicht bei Schul-/Gruppen-/Firmen-Anlaessen.
+  const institutionRequired =
+    purposeCategory === "klasse" ||
+    purposeCategory === "schul" ||
+    purposeCategory === "verein" ||
+    purposeCategory === "firma";
+  const institutionValid = !institutionRequired || institution.trim().length >= 2;
+
+  // Schulgruppen (Klassenfahrt / Schul-/Studienfahrt): KEIN Sofort-Checkout,
+  // Anzahlung wird erst ~30 Tage vor Anreise faellig.
+  const isSchoolDeferred = purposeCategory === "klasse" || purposeCategory === "schul";
+
   const canGoStep3 =
     firstName.trim() &&
     lastName.trim() &&
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) &&
     phone.trim().length >= 5 &&
+    institutionValid &&
     acceptedTerms;
 
   const submit = () => {
@@ -629,6 +662,7 @@ export const BookingFlow = ({
         email: email.trim().toLowerCase(),
         phone: phone.trim(),
         company: company.trim() || null,
+        institution: institution.trim() || null,
         street: street.trim() || null,
         zip: zip.trim() || null,
         city: city.trim() || null,
@@ -651,6 +685,11 @@ export const BookingFlow = ({
       // Prüfung — kein Stripe-Redirect.
       if ("requiresReview" in res && res.requiresReview) {
         window.location.href = `/buchen/pruefung?b=${encodeURIComponent(res.bookingNumber)}`;
+        return;
+      }
+      // Schulgruppe: kein Sofort-Checkout — Anzahlung wird später per Mail fällig.
+      if ("schoolDeferred" in res && res.schoolDeferred) {
+        window.location.href = `/buchen/schul-anfrage?b=${encodeURIComponent(res.bookingNumber)}`;
         return;
       }
       if ("checkoutUrl" in res && res.checkoutUrl) {
@@ -842,7 +881,16 @@ export const BookingFlow = ({
               <Input id="lastName" label={tt.lastName} value={lastName} onChange={(e) => setLastName(e.target.value)} required />
               <Input id="email" type="email" label={tt.email} value={email} onChange={(e) => setEmail(e.target.value)} required />
               <Input id="phone" type="tel" label={tt.phone} value={phone} onChange={(e) => setPhone(e.target.value)} required minLength={5} />
-              {customerType === "firma" || customerType === "verein" ? (
+              {institutionRequired ? (
+                <Input
+                  id="institution"
+                  label={tt.institution}
+                  hint={tt.institutionHint}
+                  value={institution}
+                  onChange={(e) => setInstitution(e.target.value)}
+                  required
+                />
+              ) : customerType === "firma" || customerType === "verein" ? (
                 <Input id="company" label={tt.company} value={company} onChange={(e) => setCompany(e.target.value)} />
               ) : null}
               <Input id="street" label={tt.street} value={street} onChange={(e) => setStreet(e.target.value)} />
@@ -994,31 +1042,41 @@ export const BookingFlow = ({
               )}
             </div>
 
-            {(() => {
-              const off =
-                discountState.status === "valid" ? discountState.discountCents : 0;
-              const subAfter = breakdown.subtotalCents - off;
-              const prepayAfter = Math.round((subAfter * 50) / 100);
-              const remainAfter = subAfter - prepayAfter;
-              const totalDueAfter = prepayAfter + breakdown.depositCents;
-              return (
-                <div className="bg-[var(--color-wh-beige)] rounded-[var(--radius-card)] p-5 text-sm text-[var(--color-wh-black)]">
-                  <p className="m-0 font-semibold mb-2">{tt.dueToday}</p>
-                  <p className="m-0">
-                    <strong>{formatEuro(prepayAfter, locale)}</strong> {tt.deposit} ({tt.bookingTotalAfter}
-                    {off > 0 ? ` ${tt.afterDiscount}` : ""}) +{" "}
-                    <strong>{formatEuro(breakdown.depositCents, locale)}</strong> {tt.kaution} ={" "}
-                    <strong>{formatEuro(totalDueAfter, locale)}</strong>
-                  </p>
-                  <p className="m-0 mt-3">
-                    {tt.restzahlung} <strong>{formatEuro(remainAfter, locale)}</strong> {tt.restzahlungBody}
-                  </p>
-                  <p className="m-0 mt-3 text-[var(--color-wh-fg-muted)]">
-                    {tt.kurtaxeNote}
-                  </p>
-                </div>
-              );
-            })()}
+            {isSchoolDeferred ? (
+              /* Schulgruppen: keine Sofortzahlung — Anzahlung wird ~30 Tage
+                 vor Anreise per Mail fällig. */
+              <div className="bg-[var(--color-wh-beige)] rounded-[var(--radius-card)] border-l-4 border-[var(--color-wh-green)] p-5 text-sm text-[var(--color-wh-black)]">
+                <p className="m-0 font-semibold mb-2">{tt.schoolPayTitle}</p>
+                <p className="m-0">{tt.schoolPayBody}</p>
+                <p className="m-0 mt-3 text-[var(--color-wh-fg-muted)]">{tt.kurtaxeNote}</p>
+              </div>
+            ) : (
+              (() => {
+                const off =
+                  discountState.status === "valid" ? discountState.discountCents : 0;
+                const subAfter = breakdown.subtotalCents - off;
+                const prepayAfter = Math.round((subAfter * 50) / 100);
+                const remainAfter = subAfter - prepayAfter;
+                const totalDueAfter = prepayAfter + breakdown.depositCents;
+                return (
+                  <div className="bg-[var(--color-wh-beige)] rounded-[var(--radius-card)] p-5 text-sm text-[var(--color-wh-black)]">
+                    <p className="m-0 font-semibold mb-2">{tt.dueToday}</p>
+                    <p className="m-0">
+                      <strong>{formatEuro(prepayAfter, locale)}</strong> {tt.deposit} ({tt.bookingTotalAfter}
+                      {off > 0 ? ` ${tt.afterDiscount}` : ""}) +{" "}
+                      <strong>{formatEuro(breakdown.depositCents, locale)}</strong> {tt.kaution} ={" "}
+                      <strong>{formatEuro(totalDueAfter, locale)}</strong>
+                    </p>
+                    <p className="m-0 mt-3">
+                      {tt.restzahlung} <strong>{formatEuro(remainAfter, locale)}</strong> {tt.restzahlungBody}
+                    </p>
+                    <p className="m-0 mt-3 text-[var(--color-wh-fg-muted)]">
+                      {tt.kurtaxeNote}
+                    </p>
+                  </div>
+                );
+              })()
+            )}
 
             {/* Storno-Regelwerk klar im UI */}
             <CancellationPolicyBox arrival={arrival} tt={tt} locale={locale} />
@@ -1044,14 +1102,15 @@ export const BookingFlow = ({
                 }
               >
                 {(() => {
+                  if (submitting) return tt.redirecting;
+                  // Schulgruppen: kein Betrag heute — nur Reservierungs-Anfrage.
+                  if (isSchoolDeferred) return tt.schoolSubmit;
                   const off =
                     discountState.status === "valid" ? discountState.discountCents : 0;
                   const subAfter = breakdown.subtotalCents - off;
                   const totalDueAfter =
                     Math.round((subAfter * 50) / 100) + breakdown.depositCents;
-                  return submitting
-                    ? tt.redirecting
-                    : `${tt.payNow} — ${formatEuro(totalDueAfter, locale)}`;
+                  return `${tt.payNow} — ${formatEuro(totalDueAfter, locale)}`;
                 })()}
               </Button>
             </div>

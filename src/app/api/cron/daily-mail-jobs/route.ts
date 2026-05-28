@@ -16,6 +16,19 @@ import PaymentReminderEmail from "@/lib/mail/templates/payment-reminder";
 import ArrivalInfoEmail from "@/lib/mail/templates/arrival-info";
 import FeedbackRequestEmail from "@/lib/mail/templates/feedback-request";
 import BirthdayEmail from "@/lib/mail/templates/birthday";
+import SchoolDepositDueEmail from "@/lib/mail/templates/school-deposit-due";
+import SchoolDepositWarningEmail from "@/lib/mail/templates/school-deposit-warning";
+import SchoolBookingCancelledEmail from "@/lib/mail/templates/school-booking-cancelled";
+import {
+  getOrCreateDepositCheckout,
+  SCHOOL_DEPOSIT_DUE_DAYS,
+  SCHOOL_WARNING_1_DAYS,
+  SCHOOL_WARNING_2_DAYS,
+  SCHOOL_CANCEL_DAYS,
+} from "@/lib/school-deposit";
+import { cancellationFee, formatEuro } from "@/lib/pricing";
+import { revalidateTag } from "next/cache";
+import { BOOKING_BLOCKS_TAG } from "@/lib/availability";
 import { formatDateLong } from "@/lib/utils";
 import {
   generateFeedbackToken,
@@ -47,6 +60,13 @@ const isoDayOffset = (offset: number): string => {
   const d = new Date();
   d.setHours(0, 0, 0, 0);
   d.setDate(d.getDate() + offset);
+  return d.toISOString().slice(0, 10);
+};
+
+// Zieht `days` Tage von einem ISO-Datum ab (UTC-stabil) → YYYY-MM-DD.
+const minusDaysIso = (iso: string, days: number): string => {
+  const d = new Date(`${iso}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - days);
   return d.toISOString().slice(0, 10);
 };
 
@@ -83,6 +103,9 @@ export async function GET(req: Request) {
     birthdaySent: 0,
     autoChargeSucceeded: 0,
     autoChargeFailed: 0,
+    schoolDepositDueSent: 0,
+    schoolWarningSent: 0,
+    schoolCancelled: 0,
   };
 
   // ---------- T-21: Zahlungserinnerung (1 Woche vor Auto-Einzug bei T-14) ----------
@@ -236,6 +259,187 @@ export async function GET(req: Request) {
       }
     }
 
+  }
+
+  // =====================================================================
+  // Schulgruppen-Zahlungsaufschub (payment_mode = "school_deferred")
+  //
+  // Nur Buchungen, die noch NICHT bezahlt sind (status "angefragt"). Sobald
+  // die Anzahlung bezahlt ist, setzt der Webhook den Status auf "bezahlt" und
+  // die Buchung verlaesst diese Sequenz (Restzahlung laeuft dann ueber die
+  // normale T-14-Pipeline oben).
+  // =====================================================================
+
+  // ---------- A-30: Anzahlung wird faellig (Zahlungslink) ----------
+  // Fenster statt exaktem Tag, damit auch spaet (innerhalb 30 Tagen) gebuchte
+  // Schulgruppen beim naechsten Cron-Lauf ihre Zahlungsaufforderung erhalten.
+  const schoolDueFrom = isoDayOffset(SCHOOL_CANCEL_DAYS + 1); // bis hier muss noch Zeit bis zum Auto-Storno sein
+  const schoolDueTo = isoDayOffset(SCHOOL_DEPOSIT_DUE_DAYS);
+  const schoolDueBookings = await db
+    .select()
+    .from(bookings)
+    .where(
+      and(
+        eq(bookings.paymentMode, "school_deferred"),
+        eq(bookings.status, "angefragt"),
+        gte(bookings.arrival, schoolDueFrom),
+        lte(bookings.arrival, schoolDueTo)
+      )
+    );
+  for (const b of schoolDueBookings) {
+    if (await alreadySent(b.id, "school_deposit_due")) continue;
+    const customer = b.customerId
+      ? (await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1))[0]
+      : null;
+    if (!customer) continue;
+    const checkout = await getOrCreateDepositCheckout(b, customer.email);
+    if (!checkout) {
+      await db.insert(activityLog).values({
+        who: "Cron",
+        what: `Schul-Anzahlungslink konnte NICHT erzeugt werden — Buchung ${b.bookingNumber}`,
+        bookingId: b.id,
+      });
+      continue;
+    }
+    const deadlineIso = minusDaysIso(b.arrival, SCHOOL_CANCEL_DAYS);
+    try {
+      await sendMail({
+        to: customer.email,
+        subject: `Anzahlung fällig — Buchung ${b.bookingNumber}`,
+        template: "school_deposit_due",
+        bookingId: b.id,
+        react: SchoolDepositDueEmail({
+          firstName: customer.firstName,
+          bookingNumber: b.bookingNumber,
+          institution: b.institution ?? "Eure Gruppe",
+          arrival: formatDateLong(b.arrival),
+          departure: formatDateLong(b.departure),
+          prepaymentEuroLabel: formatEuro(checkout.prepaymentCents),
+          checkoutUrl: checkout.url,
+          deadlineLabel: formatDateLong(deadlineIso),
+        }),
+      });
+      await db.insert(activityLog).values({
+        who: "Cron",
+        what: `Schul-Anzahlung fällig gestellt (A-30): ${formatEuro(checkout.prepaymentCents)} — Frist ${formatDateLong(deadlineIso)}`,
+        bookingId: b.id,
+      });
+      stats.schoolDepositDueSent++;
+    } catch (err) {
+      console.error("[cron] school_deposit_due failed:", err);
+    }
+  }
+
+  // ---------- A-23 / A-18: Warnungen bei weiterhin offener Anzahlung ----------
+  const schoolWarnings: Array<{ days: number; template: string; isFinal: boolean }> = [
+    { days: SCHOOL_WARNING_1_DAYS, template: "school_deposit_warning_1", isFinal: false },
+    { days: SCHOOL_WARNING_2_DAYS, template: "school_deposit_warning_2", isFinal: true },
+  ];
+  for (const w of schoolWarnings) {
+    const day = isoDayOffset(w.days);
+    const warnBookings = await db
+      .select()
+      .from(bookings)
+      .where(
+        and(
+          eq(bookings.paymentMode, "school_deferred"),
+          eq(bookings.status, "angefragt"),
+          eq(bookings.arrival, day)
+        )
+      );
+    for (const b of warnBookings) {
+      // Nur warnen, wenn die Anzahlung ueberhaupt schon angefordert wurde.
+      if (!(await alreadySent(b.id, "school_deposit_due"))) continue;
+      if (await alreadySent(b.id, w.template)) continue;
+      const customer = b.customerId
+        ? (await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1))[0]
+        : null;
+      if (!customer) continue;
+      const checkout = await getOrCreateDepositCheckout(b, customer.email);
+      if (!checkout) continue;
+      const deadlineIso = minusDaysIso(b.arrival, SCHOOL_CANCEL_DAYS);
+      const fee = cancellationFee(b.subtotalCents, b.arrival);
+      try {
+        await sendMail({
+          to: customer.email,
+          subject: w.isFinal
+            ? `Letzte Erinnerung: Anzahlung offen — Buchung ${b.bookingNumber}`
+            : `Erinnerung: Anzahlung offen — Buchung ${b.bookingNumber}`,
+          template: w.template,
+          bookingId: b.id,
+          react: SchoolDepositWarningEmail({
+            firstName: customer.firstName,
+            bookingNumber: b.bookingNumber,
+            institution: b.institution ?? "Eure Gruppe",
+            arrival: formatDateLong(b.arrival),
+            prepaymentEuroLabel: formatEuro(checkout.prepaymentCents),
+            checkoutUrl: checkout.url,
+            deadlineLabel: formatDateLong(deadlineIso),
+            stornoFeeLabel: formatEuro(fee.feeCents),
+            isFinal: w.isFinal,
+          }),
+        });
+        stats.schoolWarningSent++;
+      } catch (err) {
+        console.error(`[cron] ${w.template} failed:`, err);
+      }
+    }
+  }
+
+  // ---------- A-16: Auto-Storno bei weiterhin offener Anzahlung ----------
+  const schoolCancelDay = isoDayOffset(SCHOOL_CANCEL_DAYS);
+  const schoolCancelBookings = await db
+    .select()
+    .from(bookings)
+    .where(
+      and(
+        eq(bookings.paymentMode, "school_deferred"),
+        eq(bookings.status, "angefragt"),
+        eq(bookings.arrival, schoolCancelDay)
+      )
+    );
+  for (const b of schoolCancelBookings) {
+    // Sicherheitsnetz: nur stornieren, wenn wir tatsaechlich zur Zahlung
+    // aufgefordert haben (sonst nie ohne Vorwarnung stornieren).
+    if (!(await alreadySent(b.id, "school_deposit_due"))) continue;
+    if (await alreadySent(b.id, "school_cancelled")) continue;
+    const fee = cancellationFee(b.subtotalCents, b.arrival);
+    await db
+      .update(bookings)
+      .set({ status: "storniert", updatedAt: new Date() })
+      .where(eq(bookings.id, b.id));
+    // Tage wieder freigeben → oeffentlicher Verfuegbarkeits-Cache invalidieren.
+    revalidateTag(BOOKING_BLOCKS_TAG, "max");
+    const customer = b.customerId
+      ? (await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1))[0]
+      : null;
+    if (customer) {
+      try {
+        await sendMail({
+          to: customer.email,
+          subject: `Buchung storniert — ${b.bookingNumber}`,
+          template: "school_cancelled",
+          bookingId: b.id,
+          react: SchoolBookingCancelledEmail({
+            firstName: customer.firstName,
+            bookingNumber: b.bookingNumber,
+            institution: b.institution ?? "Eure Gruppe",
+            arrival: formatDateLong(b.arrival),
+            departure: formatDateLong(b.departure),
+            feePercent: fee.percent,
+            feeCents: fee.feeCents,
+          }),
+        });
+      } catch (err) {
+        console.error("[cron] school_cancelled mail failed:", err);
+      }
+    }
+    await db.insert(activityLog).values({
+      who: "Cron",
+      what: `Schul-Buchung ${b.bookingNumber} AUTO-STORNIERT (A-16, Anzahlung nicht eingegangen). Fällige Stornogebühr ${fee.percent}% = ${formatEuro(fee.feeCents)}.`,
+      bookingId: b.id,
+    });
+    stats.schoolCancelled++;
   }
 
   // ---------- T-1: Schlüsselübergabe ----------
