@@ -39,8 +39,10 @@ type Copy = {
   active: {
     eyebrow: string;
     h2: string;
+    gymHeading: string;
     gymH3: string;
     gymBody: string;
+    eventsHeading: string;
     adventH3: string;
     adventBody: string;
     walkH3: string;
@@ -95,8 +97,10 @@ const COPY: Record<Locale, Copy> = {
     active: {
       eyebrow: "Aktive Vereinszeit",
       h2: "Bewegung & Veranstaltungen.",
+      gymHeading: "Gymnastikkurse",
       gymH3: "Skigymnastik mit Alexandra Lütgert",
       gymBody: "Kraft, Beweglichkeit, Koordination und Kondition — ideal für alle, die aktiv bleiben möchten. Dienstags 18:30 Uhr und donnerstags 20:00 Uhr, Schnupperstunde jederzeit möglich.",
+      eventsHeading: "Veranstaltungen",
       adventH3: "Adventskaffeetrinken",
       adventBody: "Im Spexarder Bauernhaus, organisiert von Karin Lütgert. Mitglieder aller Generationen kommen zusammen.",
       walkH3: "Grünkohlwanderung & Jahreshauptversammlung",
@@ -154,8 +158,10 @@ const COPY: Record<Locale, Copy> = {
     active: {
       eyebrow: "Active club life",
       h2: "Movement & events.",
+      gymHeading: "Gymnastics classes",
       gymH3: "Ski gymnastics with Alexandra Lütgert",
       gymBody: "Strength, flexibility, coordination and stamina — ideal for everyone who wants to stay active. Tuesdays 18:30 and Thursdays 20:00, trial sessions possible at any time.",
+      eventsHeading: "Events",
       adventH3: "Advent coffee",
       adventBody: "At the Spexarder Bauernhaus, organised by Karin Lütgert. Members of all generations come together.",
       walkH3: "Kale hike & annual general meeting",
@@ -213,8 +219,10 @@ const COPY: Record<Locale, Copy> = {
     active: {
       eyebrow: "Actieve verenigingstijd",
       h2: "Beweging & evenementen.",
+      gymHeading: "Gymnastieklessen",
       gymH3: "Skigymnastiek met Alexandra Lütgert",
       gymBody: "Kracht, lenigheid, coördinatie en conditie — ideaal voor wie actief wil blijven. Dinsdag 18:30 en donderdag 20:00, proefles altijd mogelijk.",
+      eventsHeading: "Evenementen",
       adventH3: "Adventkoffie",
       adventBody: "In het Spexarder Bauernhaus, georganiseerd door Karin Lütgert. Leden van alle generaties komen samen.",
       walkH3: "Grünkohl-wandeling & jaarvergadering",
@@ -376,12 +384,23 @@ export default async function VereinPage() {
         <div className="max-w-[1080px] mx-auto grid grid-cols-1 md:grid-cols-[1.2fr_1fr] gap-10 md:gap-16 items-center">
           <div>
             <div className="eyebrow">{c.active.eyebrow}</div>
-            <h2 className="text-[32px] sm:text-[40px] mt-3 mb-5">{c.active.h2}</h2>
+            <h2 className="text-[32px] sm:text-[40px] mt-3 mb-6">{c.active.h2}</h2>
 
-            <h3 className="text-[20px] mt-6 mb-2">{c.active.gymH3}</h3>
+            {/* Gymnastikkurse — eigener Sub-Heading, klar getrennt */}
+            <div className="eyebrow text-[var(--color-wh-green)] mt-2">
+              {c.active.gymHeading}
+            </div>
+            <h3 className="text-[20px] mt-2 mb-2">{c.active.gymH3}</h3>
             <p className="text-[var(--color-wh-fg-muted)] m-0">{c.active.gymBody}</p>
 
-            <h3 className="text-[20px] mt-6 mb-2">{c.active.adventH3}</h3>
+            {/* Sichtbare Trennung */}
+            <div className="my-8 h-px bg-[var(--color-wh-winter-grey)]/60" />
+
+            {/* Veranstaltungen — eigener Sub-Heading */}
+            <div className="eyebrow text-[var(--color-wh-green)]">
+              {c.active.eventsHeading}
+            </div>
+            <h3 className="text-[20px] mt-2 mb-2">{c.active.adventH3}</h3>
             <p className="text-[var(--color-wh-fg-muted)] m-0">{c.active.adventBody}</p>
 
             <h3 className="text-[20px] mt-6 mb-2">{c.active.walkH3}</h3>
