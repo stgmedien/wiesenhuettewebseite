@@ -51,8 +51,10 @@ type Props = {
     roomsLabel: string;
     /** „Etage auswählen" — Aria-Label für Sidebar */
     selectAriaLabel: string;
-    /** Suffix für Schlafplatz-Anzeige: 4 ➜ "4 Schlafplätze" */
-    sleepingSuffix: (n: number) => string;
+    /** Schlafplatz-Wort Singular (n === 1), z. B. „Schlafplatz". */
+    sleepingWordOne: string;
+    /** Schlafplatz-Wort Plural, z. B. „Schlafplätze". */
+    sleepingWordOther: string;
     /** Kein-Schlafplatz-Label, z. B. „Gemeinschaft & Service" */
     nonSleepingLabel: string;
   };
@@ -273,7 +275,7 @@ export function FloorPlanExplorer({ floors, texts }: Props) {
                       {active.sleeps}
                     </div>
                     <div className="text-xs uppercase tracking-wider text-[var(--color-wh-snow)]/65 mt-1.5">
-                      {texts.sleepingSuffix(active.sleeps)}
+                      {active.sleeps === 1 ? texts.sleepingWordOne : texts.sleepingWordOther}
                     </div>
                   </>
                 ) : (

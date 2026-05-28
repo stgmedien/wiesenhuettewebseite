@@ -32,7 +32,8 @@ type Copy = {
     h2: string;
     lead: string;
     sleepingLabel: string;
-    sleepingSuffix: (n: number) => string;
+    sleepingWordOne: string;
+    sleepingWordOther: string;
     nonSleepingLabel: string;
     roomsLabel: string;
     selectAriaLabel: string;
@@ -120,7 +121,8 @@ const COPY: Record<Locale, Copy> = {
       h2: "Vier Geschosse, ein Haus.",
       lead: "Klick Dich durch die vier Etagen — Untergeschoss, Erdgeschoss, Obergeschoss, Dachgeschoss. Jede Etage hat ihre eigene Funktion, ihren eigenen Charakter. Über das interne Treppenhaus sind alle verbunden.",
       sleepingLabel: "Schlafplätze",
-      sleepingSuffix: (n) => (n === 1 ? "Schlafplatz" : "Schlafplätze"),
+      sleepingWordOne: "Schlafplatz",
+      sleepingWordOther: "Schlafplätze",
       nonSleepingLabel: "Gemeinschaft & Versorgung",
       roomsLabel: "Auf dieser Etage",
       selectAriaLabel: "Etage auswählen",
@@ -251,7 +253,8 @@ const COPY: Record<Locale, Copy> = {
       h2: "Four floors, one house.",
       lead: "Step through all four floors — basement, ground floor, upper floor, attic. Each level has its own purpose and character, all connected by the internal staircase.",
       sleepingLabel: "Beds",
-      sleepingSuffix: (n) => (n === 1 ? "bed" : "beds"),
+      sleepingWordOne: "bed",
+      sleepingWordOther: "beds",
       nonSleepingLabel: "Common areas & services",
       roomsLabel: "On this floor",
       selectAriaLabel: "Select floor",
@@ -382,7 +385,8 @@ const COPY: Record<Locale, Copy> = {
       h2: "Vier verdiepingen, één huis.",
       lead: "Klik door alle vier de verdiepingen — kelder, begane grond, eerste verdieping, zolder. Elke verdieping heeft zijn eigen functie en karakter; ze zijn verbonden via het interne trappenhuis.",
       sleepingLabel: "Slaapplaatsen",
-      sleepingSuffix: (n) => (n === 1 ? "slaapplaats" : "slaapplaatsen"),
+      sleepingWordOne: "slaapplaats",
+      sleepingWordOther: "slaapplaatsen",
       nonSleepingLabel: "Gemeenschap & service",
       roomsLabel: "Op deze verdieping",
       selectAriaLabel: "Verdieping kiezen",
@@ -595,7 +599,8 @@ export default async function HuettePage() {
           h2: c.floorPlans.h2,
           lead: c.floorPlans.lead,
           sleepingLabel: c.floorPlans.sleepingLabel,
-          sleepingSuffix: c.floorPlans.sleepingSuffix,
+          sleepingWordOne: c.floorPlans.sleepingWordOne,
+          sleepingWordOther: c.floorPlans.sleepingWordOther,
           nonSleepingLabel: c.floorPlans.nonSleepingLabel,
           roomsLabel: c.floorPlans.roomsLabel,
           selectAriaLabel: c.floorPlans.selectAriaLabel,
