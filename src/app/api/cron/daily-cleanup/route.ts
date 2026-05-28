@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { users, customers, magicLinkTokens, activityLog } from "@/lib/db/schema";
+import { users, customers, magicLinkTokens, activityLog, bookings, payments } from "@/lib/db/schema";
 import { eq, and, lt, isNotNull } from "drizzle-orm";
+import { revalidateTag } from "next/cache";
+import { BOOKING_BLOCKS_TAG } from "@/lib/availability";
 import { cleanupExpiredMagicLinkTokens } from "@/lib/magic-link";
 
 export const dynamic = "force-dynamic";
@@ -9,6 +11,10 @@ export const maxDuration = 60;
 
 const SOFT_DELETE_DAYS = 30;
 const ANON_PREFIX = "[Anonymisiert nach DSGVO-Antrag]";
+// Safety-Net: verwaiste, unbezahlte Standard-Buchungen (Checkout nie
+// abgeschlossen) nach dieser Frist freigeben. Der checkout.session.expired-
+// Webhook erledigt das i.d.R. schon nach ~1 h; dies fängt verpasste Events ab.
+const STALE_BOOKING_HOURS = 3;
 
 /**
  * Vercel-Cron: laeuft taeglich.
@@ -37,7 +43,43 @@ export async function GET(req: Request) {
     magicLinksDeleted: 0,
     usersAnonymized: 0,
     customersAnonymized: 0,
+    staleBookingsReleased: 0,
   };
+
+  // 0) Verwaiste, unbezahlte Standard-Buchungen freigeben (Checkout nie
+  //    abgeschlossen). Schul-Aufschub + Vorstands-Review bleiben unberührt.
+  const staleCutoff = new Date(Date.now() - STALE_BOOKING_HOURS * 60 * 60 * 1000);
+  const staleBookings = await db
+    .select()
+    .from(bookings)
+    .where(
+      and(
+        eq(bookings.status, "angefragt"),
+        eq(bookings.paymentMode, "standard"),
+        eq(bookings.requiresReview, false),
+        eq(bookings.paidCents, 0),
+        lt(bookings.createdAt, staleCutoff)
+      )
+    );
+  for (const b of staleBookings) {
+    await db
+      .update(bookings)
+      .set({ status: "storniert", updatedAt: new Date() })
+      .where(eq(bookings.id, b.id));
+    await db
+      .update(payments)
+      .set({ status: "fehlgeschlagen" })
+      .where(and(eq(payments.bookingId, b.id), eq(payments.status, "offen")));
+    await db.insert(activityLog).values({
+      who: "System (Cron)",
+      what: `Verwaiste unbezahlte Buchung ${b.bookingNumber} automatisch storniert (Checkout nicht abgeschlossen, > ${STALE_BOOKING_HOURS} h alt) — Tage wieder frei.`,
+      bookingId: b.id,
+    });
+    stats.staleBookingsReleased++;
+  }
+  if (stats.staleBookingsReleased > 0) {
+    revalidateTag(BOOKING_BLOCKS_TAG, "max");
+  }
 
   // 1) Magic-Link-Tokens aufraeumen
   await cleanupExpiredMagicLinkTokens();

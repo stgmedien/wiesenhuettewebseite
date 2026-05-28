@@ -11,6 +11,8 @@ import {
   vouchers,
 } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
+import { revalidateTag } from "next/cache";
+import { BOOKING_BLOCKS_TAG } from "@/lib/availability";
 import { sendMail } from "@/lib/mail/send";
 import BookingConfirmedEmail from "@/lib/mail/templates/booking-confirmed";
 import BookingInternalEmail from "@/lib/mail/templates/booking-internal";
@@ -91,6 +93,13 @@ export async function POST(req: NextRequest) {
       case "checkout.session.async_payment_failed": {
         const session = event.data.object as Stripe.Checkout.Session;
         await handleCheckoutFailed(session);
+        break;
+      }
+      case "checkout.session.expired": {
+        // Checkout abgelaufen/abgebrochen → verwaiste "angefragt"-Buchung
+        // freigeben, damit die Tage nicht dauerblockiert bleiben.
+        const session = event.data.object as Stripe.Checkout.Session;
+        await handleCheckoutExpired(session);
         break;
       }
       case "charge.refunded": {
@@ -406,6 +415,50 @@ async function handleCheckoutFailed(session: Stripe.Checkout.Session) {
     what: `Zahlung fehlgeschlagen — Buchung bleibt im Status „angefragt"`,
     bookingId,
   });
+}
+
+// =============================================================
+// checkout.session.expired — Checkout abgelaufen/abgebrochen.
+// Gibt eine verwaiste Standard-Buchung wieder frei (storniert), damit die
+// Tage nicht dauerhaft blockiert bleiben. Greift NUR bei normalen, noch
+// unbezahlten Buchungen — Schul-Zahlungsaufschub (payment_mode
+// "school_deferred") und Vorstands-Review (requiresReview) haben einen
+// eigenen Lebenszyklus und werden NICHT angefasst.
+// =============================================================
+async function handleCheckoutExpired(session: Stripe.Checkout.Session) {
+  const bookingId = session.metadata?.bookingId;
+  if (!bookingId) return;
+  const found = await db
+    .select()
+    .from(bookings)
+    .where(eq(bookings.id, bookingId))
+    .limit(1);
+  const booking = found[0];
+  if (!booking) return;
+  if (
+    booking.status !== "angefragt" ||
+    booking.paidCents > 0 ||
+    booking.paymentMode !== "standard" ||
+    booking.requiresReview
+  ) {
+    return; // nichts freizugeben
+  }
+  await db
+    .update(bookings)
+    .set({ status: "storniert", updatedAt: new Date() })
+    .where(eq(bookings.id, bookingId));
+  // offene Zahlungs-Zeilen als fehlgeschlagen markieren (Aufräumen)
+  await db
+    .update(payments)
+    .set({ status: "fehlgeschlagen" })
+    .where(and(eq(payments.bookingId, bookingId), eq(payments.status, "offen")));
+  await db.insert(activityLog).values({
+    who: "Stripe",
+    what: `Checkout abgelaufen/abgebrochen — Buchung ${booking.bookingNumber} automatisch storniert, Tage wieder frei.`,
+    bookingId,
+  });
+  // Öffentlichen Verfügbarkeits-Cache invalidieren → Tage sofort wieder buchbar.
+  revalidateTag(BOOKING_BLOCKS_TAG, "max");
 }
 
 // =============================================================

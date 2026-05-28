@@ -768,6 +768,11 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
       locale: STRIPE_LOCALE[locale],
       customer_email: effectiveEmail,
       billing_address_collection: "auto",
+      // Session läuft nach 60 Min ab. Die Buchung blockt die Tage als
+      // "angefragt"; bei Ablauf/Abbruch wird sie über den
+      // checkout.session.expired-Webhook (+ Cron-Safety-Net) wieder
+      // freigegeben, damit verwaiste Buchungen keine Termine dauerblockieren.
+      expires_at: Math.floor(Date.now() / 1000) + 60 * 60,
       line_items: [
         {
           quantity: 1,
