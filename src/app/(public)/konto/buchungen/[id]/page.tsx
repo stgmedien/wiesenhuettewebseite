@@ -105,6 +105,9 @@ export default async function BuchungDetailPage({ params }: Props) {
           {booking.soloSurchargeCents > 0 && (
             <Row label="Aufschlag Allein-/Exklusivnutzung" value={booking.soloSurchargeCents} />
           )}
+          {booking.minOccupancySurchargeCents > 0 && (
+            <Row label="Aufschlag Mindestbelegung (15 Personen)" value={booking.minOccupancySurchargeCents} />
+          )}
           {booking.extrasCents > 0 && <Row label="Extras" value={booking.extrasCents} />}
           <div className="border-t border-[var(--color-wh-winter-grey)]/30 pt-2 mt-2">
             <Row label="Zwischensumme" value={booking.subtotalCents} bold />

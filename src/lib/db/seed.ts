@@ -106,6 +106,7 @@ async function ensureBooking(opts: {
       energyFlatCents: breakdown.energyFlatCents,
       cleaningCents: breakdown.cleaningCents,
       soloSurchargeCents: breakdown.soloSurchargeCents,
+      minOccupancySurchargeCents: breakdown.minOccupancySurchargeCents,
       extrasCents: breakdown.extrasCents,
       subtotalCents: breakdown.subtotalCents,
       depositCents: breakdown.depositCents,

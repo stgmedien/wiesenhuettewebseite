@@ -42,6 +42,7 @@ type Props = {
     energyFlatCents: number;
     cleaningCents: number;
     soloSurchargeCents: number;
+    minOccupancySurchargeCents: number;
     subtotalCents: number;
     depositCents: number;
     prepaymentCents: number;
@@ -211,6 +212,12 @@ export default function MietvertragEmail({
               <Row>
                 <Column><Text style={tableLabel}>Aufschlag Allein-/Exklusivnutzung</Text></Column>
                 <Column><Text style={tableValue}>{formatEuro(pricing.soloSurchargeCents)}</Text></Column>
+              </Row>
+            )}
+            {pricing.minOccupancySurchargeCents > 0 && (
+              <Row>
+                <Column><Text style={tableLabel}>Aufschlag Mindestbelegung (15 Personen)</Text></Column>
+                <Column><Text style={tableValue}>{formatEuro(pricing.minOccupancySurchargeCents)}</Text></Column>
               </Row>
             )}
             <Hr style={{ borderColor: "#C8CEC4", margin: "8px 0" }} />

@@ -95,6 +95,7 @@ const jobs: { name: string; subject: string; react: React.ReactElement }[] = [
         energyFlatCents: 15000,
         cleaningCents: 8000,
         soloSurchargeCents: 0,
+        minOccupancySurchargeCents: 0,
         subtotalCents: 115000,
         depositCents: 30000,
         prepaymentCents: 57500,

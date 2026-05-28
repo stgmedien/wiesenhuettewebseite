@@ -44,9 +44,13 @@ export default async function AGB() {
         <Block title="§ 3 Mindestbuchung & Belegung">
           <ul>
             <li>Mindestaufenthalt: <strong>2 Nächte</strong></li>
-            <li>Mindestbelegung: <strong>15 Personen</strong></li>
+            <li>Abrechnungs-Mindestbelegung: <strong>15 Personen</strong></li>
             <li>Maximalbelegung: <strong>33 Personen</strong></li>
-            <li>Bei Unterbelegung kann ein Aufschlag „Allein-/Exklusivnutzung" anfallen.</li>
+            <li>
+              Buchungen unter 15 Personen sind möglich. Die Übernachtungen werden in diesem Fall
+              jedoch zum Preisniveau von 15 Personen abgerechnet (pro-rata-Aufschlag aus dem
+              tatsächlichen Personen-Mix; in der Preisübersicht transparent ausgewiesen).
+            </li>
           </ul>
         </Block>
 

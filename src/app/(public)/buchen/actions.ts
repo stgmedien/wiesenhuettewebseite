@@ -530,6 +530,7 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
       energyFlatCents: breakdown.energyFlatCents,
       cleaningCents: breakdown.cleaningCents,
       soloSurchargeCents: breakdown.soloSurchargeCents,
+      minOccupancySurchargeCents: breakdown.minOccupancySurchargeCents,
       extrasCents: breakdown.extrasCents,
       discountCents,
       discountCode: appliedDiscountCode,

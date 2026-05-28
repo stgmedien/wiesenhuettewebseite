@@ -20,6 +20,8 @@ const PRICING_LABELS: Record<Locale, {
   energyFlat: string;
   cleaning: string;
   soloSurcharge: string;
+  minOccupancySurcharge: string;
+  minOccupancyDetail: (missing: number, nights: number) => string;
   nights: string;
   detailNXN: (q: number, n: number) => string;
   detailNightsAt: (n: number, perNight: string) => string;
@@ -37,11 +39,14 @@ const PRICING_LABELS: Record<Locale, {
     energyFlat: "Energiepauschale",
     cleaning: "Endreinigung (Pflicht)",
     soloSurcharge: "Aufschlag Allein-/Exklusivnutzung",
+    minOccupancySurcharge: "Aufschlag Mindestbelegung (15)",
+    minOccupancyDetail: (missing, nights) =>
+      `${missing} fehlende Personen × ${nights} Nächte (Durchschnittstarif)`,
     nights: "Nächte",
     detailNXN: (q, n) => `${q} × ${n} Nächte`,
     detailNightsAt: (n, perNight) => `${n} Nächte × ${perNight}`,
     validMinNights: (n) => `Mindestaufenthalt ${n} Nächte.`,
-    validMinPersons: (n) => `Mindestbelegung ${n} Personen.`,
+    validMinPersons: (n) => `Mindestens ${n} Person.`,
     validMaxPersons: (n) => `Maximalbelegung ${n} Personen.`,
     validDepartureAfter: "Abreise muss nach Anreise liegen.",
     validArrivalNotPast: "Anreise darf nicht in der Vergangenheit liegen.",
@@ -54,11 +59,14 @@ const PRICING_LABELS: Record<Locale, {
     energyFlat: "Energy flat-rate",
     cleaning: "Final cleaning (mandatory)",
     soloSurcharge: "Exclusive-use surcharge",
+    minOccupancySurcharge: "Minimum-occupancy surcharge (15)",
+    minOccupancyDetail: (missing, nights) =>
+      `${missing} missing guests × ${nights} nights (average rate)`,
     nights: "nights",
     detailNXN: (q, n) => `${q} × ${n} nights`,
     detailNightsAt: (n, perNight) => `${n} nights × ${perNight}`,
     validMinNights: (n) => `Minimum stay ${n} nights.`,
-    validMinPersons: (n) => `Minimum ${n} guests.`,
+    validMinPersons: (n) => `Minimum ${n} guest.`,
     validMaxPersons: (n) => `Maximum ${n} guests.`,
     validDepartureAfter: "Departure must be after arrival.",
     validArrivalNotPast: "Arrival cannot be in the past.",
@@ -71,11 +79,14 @@ const PRICING_LABELS: Record<Locale, {
     energyFlat: "Energiepakket",
     cleaning: "Eindschoonmaak (verplicht)",
     soloSurcharge: "Toeslag exclusief gebruik",
+    minOccupancySurcharge: "Toeslag minimale bezetting (15)",
+    minOccupancyDetail: (missing, nights) =>
+      `${missing} ontbrekende personen × ${nights} nachten (gemiddeld tarief)`,
     nights: "nachten",
     detailNXN: (q, n) => `${q} × ${n} nachten`,
     detailNightsAt: (n, perNight) => `${n} nachten × ${perNight}`,
     validMinNights: (n) => `Minimaal ${n} nachten.`,
-    validMinPersons: (n) => `Minimaal ${n} personen.`,
+    validMinPersons: (n) => `Minimaal ${n} persoon.`,
     validMaxPersons: (n) => `Maximaal ${n} personen.`,
     validDepartureAfter: "Vertrek moet na aankomst liggen.",
     validArrivalNotPast: "Aankomst mag niet in het verleden liggen.",
@@ -98,7 +109,14 @@ export const PRICES = {
 
 export const RULES = {
   minNights: 2,
-  minPersons: 15,
+  // Absolute Untergrenze für Personenzahl (mindestens 1 Gast). Echte
+  // Mindestabrechnungs-Grenze ist `minOccupancyFloor` — bei Unterschreitung
+  // fällt ein Aufschlag an, die Buchung ist aber NICHT blockiert.
+  minPersons: 1,
+  // Mindestbelegung für die Preisberechnung. Buchungen mit weniger Personen
+  // werden so abgerechnet, als wären `minOccupancyFloor` Gäste gebucht
+  // (Pro-rata-Aufschlag aus dem tatsächlichen Personen-Mix).
+  minOccupancyFloor: 15,
   maxPersons: 33,
   prepaymentPercent: 50,        // Anzahlung-Anteil bei Buchung in %
   // Hinweis: cleaningDaysAfterDeparture ist jetzt eine Manager-Einstellung
@@ -137,6 +155,8 @@ export type PriceBreakdown = {
   energyFlatCents: number;
   cleaningCents: number;
   soloSurchargeCents: number;
+  /** Aufschlag bei Unterschreitung der Mindestbelegung (15 Personen). */
+  minOccupancySurchargeCents: number;
   extrasCents: number;
   subtotalCents: number;       // ohne Kaution
   depositCents: number;        // Kaution (separat)
@@ -244,11 +264,33 @@ export const calculatePrice = (input: PriceInput): PriceBreakdown => {
   const soloSurchargeCents = input.soloUse ? PRICES.soloSurchargeCents : 0;
   const extrasCents = (input.extras ?? []).reduce((acc, e) => acc + e.totalCents, 0);
 
+  // Mindestbelegungs-Aufschlag (15-Personen-Floor).
+  // Wenn die tatsächliche Personenzahl < minOccupancyFloor liegt, rechnen
+  // wir die fehlenden Personen zum DURCHSCHNITTSTARIF des tatsächlichen
+  // Mixes hinzu. So zahlt eine Gruppe mit 10 Vereinsmitgliedern weniger
+  // Aufschlag als 10 Nichtmitglieder, aber jede Buchung erreicht
+  // mindestens das 15-Personen-Preisniveau.
+  const totalPersonsActual = sumPersons(p);
+  let minOccupancySurchargeCents = 0;
+  if (
+    totalPersonsActual > 0 &&
+    totalPersonsActual < RULES.minOccupancyFloor &&
+    nights > 0
+  ) {
+    const missing = RULES.minOccupancyFloor - totalPersonsActual;
+    // Durchschnittstarif je Person & Nacht (ganzzahlig in Cents).
+    const avgPerPersonPerNight = Math.round(
+      accommodationCents / (totalPersonsActual * nights)
+    );
+    minOccupancySurchargeCents = missing * avgPerPersonPerNight * nights;
+  }
+
   const subtotalCents =
     accommodationCents +
     energyFlatCents +
     cleaningCents +
     soloSurchargeCents +
+    minOccupancySurchargeCents +
     extrasCents;
 
   const depositCents = PRICES.depositCents;
@@ -321,6 +363,16 @@ export const calculatePrice = (input: PriceInput): PriceBreakdown => {
       totalCents: soloSurchargeCents,
     });
   }
+  if (minOccupancySurchargeCents > 0) {
+    const missing = RULES.minOccupancyFloor - totalPersonsActual;
+    lines.push({
+      label: L.minOccupancySurcharge,
+      detail: L.minOccupancyDetail(missing, nights),
+      qty: 1,
+      unitCents: minOccupancySurchargeCents,
+      totalCents: minOccupancySurchargeCents,
+    });
+  }
   for (const e of input.extras ?? []) {
     lines.push({
       label: e.label,
@@ -338,6 +390,7 @@ export const calculatePrice = (input: PriceInput): PriceBreakdown => {
     energyFlatCents,
     cleaningCents,
     soloSurchargeCents,
+    minOccupancySurchargeCents,
     extrasCents,
     subtotalCents,
     depositCents,

@@ -256,6 +256,10 @@ export const bookings = pgTable(
     energyFlatCents: integer("energy_flat_cents").notNull().default(0),
     cleaningCents: integer("cleaning_cents").notNull().default(0),
     soloSurchargeCents: integer("solo_surcharge_cents").notNull().default(0),
+    // Aufschlag bei Unterschreitung der 15-Personen-Mindestbelegung
+    // (pro-rata zum tatsächlichen Personen-Mix). Persons-Spalten oben
+    // bleiben dabei UNVERÄNDERT — wichtig fürs Kurkarten-Reporting.
+    minOccupancySurchargeCents: integer("min_occupancy_surcharge_cents").notNull().default(0),
     extrasCents: integer("extras_cents").notNull().default(0),
     discountCents: integer("discount_cents").notNull().default(0), // eingeloester Rabatt
     discountCode: varchar("discount_code", { length: 30 }),

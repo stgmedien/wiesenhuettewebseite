@@ -228,6 +228,12 @@ export default async function BookingDetail({ params }: Props) {
                   <Dd className="text-right">{formatEuro(b.soloSurchargeCents)}</Dd>
                 </>
               )}
+              {b.minOccupancySurchargeCents > 0 && (
+                <>
+                  <Dt>Aufschlag Mindestbelegung (15)</Dt>
+                  <Dd className="text-right">{formatEuro(b.minOccupancySurchargeCents)}</Dd>
+                </>
+              )}
               {b.kurtaxeCents > 0 && (
                 <>
                   <Dt>Kurtaxe (Altbestand)</Dt>

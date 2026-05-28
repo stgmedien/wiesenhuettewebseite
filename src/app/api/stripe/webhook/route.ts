@@ -322,6 +322,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
             energyFlatCents: booking.energyFlatCents,
             cleaningCents: booking.cleaningCents,
             soloSurchargeCents: booking.soloSurchargeCents,
+            minOccupancySurchargeCents: booking.minOccupancySurchargeCents,
             subtotalCents: subtotal,
             depositCents: booking.depositCents,
             prepaymentCents: prepayment,

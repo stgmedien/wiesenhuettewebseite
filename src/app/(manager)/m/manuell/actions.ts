@@ -131,6 +131,7 @@ export async function createManualBooking(formData: FormData): Promise<{ ok: boo
       energyFlatCents: breakdown.energyFlatCents,
       cleaningCents: breakdown.cleaningCents,
       soloSurchargeCents: breakdown.soloSurchargeCents,
+      minOccupancySurchargeCents: breakdown.minOccupancySurchargeCents,
       extrasCents: breakdown.extrasCents,
       subtotalCents: breakdown.subtotalCents,
       depositCents: breakdown.depositCents,

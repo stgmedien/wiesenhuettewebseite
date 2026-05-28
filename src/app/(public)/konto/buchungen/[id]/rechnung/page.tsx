@@ -151,6 +151,9 @@ export default async function QuittungPage({ params }: Props) {
             {booking.soloSurchargeCents > 0 && (
               <Line label="Aufschlag Allein-/Exklusivnutzung" cents={booking.soloSurchargeCents} />
             )}
+            {booking.minOccupancySurchargeCents > 0 && (
+              <Line label="Aufschlag Mindestbelegung (15 Personen)" cents={booking.minOccupancySurchargeCents} />
+            )}
             {booking.extrasCents > 0 && <Line label="Extras" cents={booking.extrasCents} />}
             <tr className="border-t-2 border-[#111] font-bold">
               <td className="py-3">Zwischensumme</td>

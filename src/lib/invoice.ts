@@ -82,6 +82,14 @@ export const createInvoiceForBooking = async (
       totalCents: booking.soloSurchargeCents,
     });
   }
+  if (booking.minOccupancySurchargeCents > 0) {
+    lineItems.push({
+      label: "Aufschlag Mindestbelegung (15 Personen)",
+      qty: 1,
+      unitCents: booking.minOccupancySurchargeCents,
+      totalCents: booking.minOccupancySurchargeCents,
+    });
+  }
   if (booking.extrasCents > 0) {
     lineItems.push({
       label: "Extras",

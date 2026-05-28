@@ -169,7 +169,10 @@ const BF_COPY = {
     payNow: "Jetzt zahlen",
     redirecting: "Leite weiter ...",
     // Persons / pricing
-    personsRange: (n: number, min: number, max: number) => `${n} von ${min}–${max} Personen.`,
+    personsRange: (n: number, max: number) => `${n} Personen · Maximalbelegung ${max}.`,
+    minOccupancyNoteTitle: "Aufschlag Mindestbelegung",
+    minOccupancyNoteBody:
+      "Buchungen mit weniger als 15 Personen werden zum Preisniveau von 15 Personen abgerechnet — der pro-rata-Aufschlag erscheint live in der Preisübersicht.",
     endreinigungTitle: "Endreinigung — 190,00 € (Pflicht)",
     endreinigungBody: "Die finale Reinigung wird von uns durchgeführt und ist in jeder Buchung enthalten.",
     soloTitle: "Allein-/Exklusivnutzung — 50,00 €",
@@ -303,7 +306,10 @@ const BF_COPY = {
     overview: "Summary",
     payNow: "Pay now",
     redirecting: "Redirecting ...",
-    personsRange: (n: number, min: number, max: number) => `${n} of ${min}–${max} guests.`,
+    personsRange: (n: number, max: number) => `${n} guests · maximum ${max}.`,
+    minOccupancyNoteTitle: "Minimum-occupancy surcharge",
+    minOccupancyNoteBody:
+      "Bookings below 15 guests are charged at the 15-guest price level — the pro-rata surcharge appears live in the price summary.",
     endreinigungTitle: "Final cleaning — 190.00 € (mandatory)",
     endreinigungBody: "We carry out the final cleaning ourselves — it is included in every booking.",
     soloTitle: "Exclusive use — 50.00 €",
@@ -434,7 +440,10 @@ const BF_COPY = {
     overview: "Overzicht",
     payNow: "Nu betalen",
     redirecting: "Doorsturen ...",
-    personsRange: (n: number, min: number, max: number) => `${n} van ${min}–${max} personen.`,
+    personsRange: (n: number, max: number) => `${n} personen · maximaal ${max}.`,
+    minOccupancyNoteTitle: "Toeslag minimale bezetting",
+    minOccupancyNoteBody:
+      "Boekingen onder 15 personen worden afgerekend op het prijsniveau van 15 personen — de pro-rata-toeslag verschijnt live in het prijsoverzicht.",
     endreinigungTitle: "Eindschoonmaak — € 190,00 (verplicht)",
     endreinigungBody: "De eindschoonmaak doen wij zelf — die zit in elke boeking inbegrepen.",
     soloTitle: "Exclusief gebruik — € 50,00",
@@ -694,8 +703,14 @@ export const BookingFlow = ({
                 personsValid ? "text-[var(--color-wh-fg-muted)]" : "text-[var(--color-wh-sunset)]"
               }`}
             >
-              {tt.personsRange(totalPersons, RULES.minPersons, RULES.maxPersons)}
+              {tt.personsRange(totalPersons, RULES.maxPersons)}
             </div>
+            {totalPersons > 0 && totalPersons < RULES.minOccupancyFloor && (
+              <div className="rounded-[var(--radius-card)] bg-[var(--color-wh-sand)] border border-[var(--color-wh-winter-grey)] p-4 text-sm">
+                <div className="font-semibold mb-1">{tt.minOccupancyNoteTitle}</div>
+                <div className="text-[var(--color-wh-fg-muted)]">{tt.minOccupancyNoteBody}</div>
+              </div>
+            )}
 
             <div className="flex justify-end pt-2">
               <Button
