@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { getServerLocale } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n-shared";
+import { FloorPlanExplorer, type Floor } from "@/components/public/huette/FloorPlanExplorer";
 
 export const metadata = {
   title: "Die Hütte · Wiesenhütte Langewiese",
@@ -25,6 +26,22 @@ type Copy = {
     ug: { heading: string; items: string[] };
     aussen: { heading: string; items: string[] };
     heat: { heading: string; items: string[] };
+  };
+  floorPlans: {
+    eyebrow: string;
+    h2: string;
+    lead: string;
+    sleepingLabel: string;
+    sleepingSuffix: (n: number) => string;
+    nonSleepingLabel: string;
+    roomsLabel: string;
+    selectAriaLabel: string;
+    floors: {
+      ug: { label: string; tag: string; highlights: string[] };
+      eg: { label: string; tag: string; highlights: string[] };
+      og: { label: string; tag: string; highlights: string[] };
+      dg: { label: string; tag: string; highlights: string[] };
+    };
   };
   gallery: { eyebrow: string; h2: string };
   hub: {
@@ -96,6 +113,57 @@ const COPY: Record<Locale, Copy> = {
           "Bäckerei Gerke direkt gegenüber",
           "Catering für Gruppen nach Absprache — Gasthof Graberhof, Hohenleye 1, Winterberg-Hoheleye (Tel. 02758 / 284, mobil 0160 7622508)",
         ],
+      },
+    },
+    floorPlans: {
+      eyebrow: "Grundrisse",
+      h2: "Vier Geschosse, ein Haus.",
+      lead: "Klick Dich durch die vier Etagen — Untergeschoss, Erdgeschoss, Obergeschoss, Dachgeschoss. Jede Etage hat ihre eigene Funktion, ihren eigenen Charakter. Über das interne Treppenhaus sind alle verbunden.",
+      sleepingLabel: "Schlafplätze",
+      sleepingSuffix: (n) => (n === 1 ? "Schlafplatz" : "Schlafplätze"),
+      nonSleepingLabel: "Gemeinschaft & Versorgung",
+      roomsLabel: "Auf dieser Etage",
+      selectAriaLabel: "Etage auswählen",
+      floors: {
+        ug: {
+          label: "Untergeschoss",
+          tag: "UG",
+          highlights: [
+            "Eingang & Schlüsselübergabe",
+            "Rad- und Skikeller",
+            "Sanitärräume mit Duschen, WCs, Waschbecken",
+          ],
+        },
+        eg: {
+          label: "Erdgeschoss",
+          tag: "EG",
+          highlights: [
+            "Esszimmer mit 4 Tischen",
+            "Voll ausgestattete Küche",
+            "Vorratsraum mit Kühl- und Gefrierfach",
+            "Garderobe & Freisitz nach draußen",
+          ],
+        },
+        og: {
+          label: "Obergeschoss",
+          tag: "OG",
+          highlights: [
+            "Naturtraum — 8 Schlafplätze",
+            "Sonnenplatz — 4 Schlafplätze",
+            "Aufenthaltsraum mit 4 Tischen",
+            "Gästetoilette",
+          ],
+        },
+        dg: {
+          label: "Dachgeschoss",
+          tag: "DG",
+          highlights: [
+            "Baumkrone — 10 Schlafplätze",
+            "Waldblick — 4 Schlafplätze",
+            "Vogelnest — 4 Schlafplätze",
+            "Eigene Dach-Toilette",
+          ],
+        },
       },
     },
     gallery: { eyebrow: "Galerie", h2: "Innen, außen, Natur." },
@@ -178,6 +246,57 @@ const COPY: Record<Locale, Copy> = {
         ],
       },
     },
+    floorPlans: {
+      eyebrow: "Floor plans",
+      h2: "Four floors, one house.",
+      lead: "Step through all four floors — basement, ground floor, upper floor, attic. Each level has its own purpose and character, all connected by the internal staircase.",
+      sleepingLabel: "Beds",
+      sleepingSuffix: (n) => (n === 1 ? "bed" : "beds"),
+      nonSleepingLabel: "Common areas & services",
+      roomsLabel: "On this floor",
+      selectAriaLabel: "Select floor",
+      floors: {
+        ug: {
+          label: "Basement",
+          tag: "B",
+          highlights: [
+            "Entrance & key handover",
+            "Bike and ski cellar",
+            "Bathrooms with showers, toilets, sinks",
+          ],
+        },
+        eg: {
+          label: "Ground floor",
+          tag: "GF",
+          highlights: [
+            "Dining room with 4 tables",
+            "Fully equipped kitchen",
+            "Pantry with fridge and freezer",
+            "Wardrobe & outdoor patio",
+          ],
+        },
+        og: {
+          label: "Upper floor",
+          tag: "UF",
+          highlights: [
+            "Naturtraum — 8 beds",
+            "Sonnenplatz — 4 beds",
+            "Common room with 4 tables",
+            "Guest toilet",
+          ],
+        },
+        dg: {
+          label: "Attic",
+          tag: "A",
+          highlights: [
+            "Baumkrone — 10 beds",
+            "Waldblick — 4 beds",
+            "Vogelnest — 4 beds",
+            "Own attic toilet",
+          ],
+        },
+      },
+    },
     gallery: { eyebrow: "Gallery", h2: "Inside, outside, nature." },
     hub: {
       eyebrow: "For your stay",
@@ -258,6 +377,57 @@ const COPY: Record<Locale, Copy> = {
         ],
       },
     },
+    floorPlans: {
+      eyebrow: "Plattegronden",
+      h2: "Vier verdiepingen, één huis.",
+      lead: "Klik door alle vier de verdiepingen — kelder, begane grond, eerste verdieping, zolder. Elke verdieping heeft zijn eigen functie en karakter; ze zijn verbonden via het interne trappenhuis.",
+      sleepingLabel: "Slaapplaatsen",
+      sleepingSuffix: (n) => (n === 1 ? "slaapplaats" : "slaapplaatsen"),
+      nonSleepingLabel: "Gemeenschap & service",
+      roomsLabel: "Op deze verdieping",
+      selectAriaLabel: "Verdieping kiezen",
+      floors: {
+        ug: {
+          label: "Kelder",
+          tag: "KL",
+          highlights: [
+            "Ingang & sleuteloverdracht",
+            "Fietsen- en skikelder",
+            "Sanitair met douches, wc's, wasbakken",
+          ],
+        },
+        eg: {
+          label: "Begane grond",
+          tag: "BG",
+          highlights: [
+            "Eetkamer met 4 tafels",
+            "Volledig ingerichte keuken",
+            "Voorraadkast met koel- en vriesvak",
+            "Garderobe & buitenterras",
+          ],
+        },
+        og: {
+          label: "Eerste verdieping",
+          tag: "1e",
+          highlights: [
+            "Naturtraum — 8 slaapplaatsen",
+            "Sonnenplatz — 4 slaapplaatsen",
+            "Verblijfsruimte met 4 tafels",
+            "Gastentoilet",
+          ],
+        },
+        dg: {
+          label: "Zolder",
+          tag: "ZL",
+          highlights: [
+            "Baumkrone — 10 slaapplaatsen",
+            "Waldblick — 4 slaapplaatsen",
+            "Vogelnest — 4 slaapplaatsen",
+            "Eigen zoldertoilet",
+          ],
+        },
+      },
+    },
     gallery: { eyebrow: "Galerij", h2: "Binnen, buiten, natuur." },
     hub: {
       eyebrow: "Voor je verblijf",
@@ -300,6 +470,43 @@ const GALLERY = [
 export default async function HuettePage() {
   const locale = await getServerLocale();
   const c = COPY[locale];
+
+  // Floor-Plan-Daten zentral, damit der Client-Component keinen Locale-Branch
+  // braucht — wir füllen die Anzeige-Texte aus c.floorPlans.floors[key].
+  const FLOORS: Floor[] = [
+    {
+      key: "ug",
+      label: c.floorPlans.floors.ug.label,
+      tag: c.floorPlans.floors.ug.tag,
+      src: "/media/photos/grundrisse/untergeschoss.png",
+      sleeps: 0,
+      highlights: c.floorPlans.floors.ug.highlights,
+    },
+    {
+      key: "eg",
+      label: c.floorPlans.floors.eg.label,
+      tag: c.floorPlans.floors.eg.tag,
+      src: "/media/photos/grundrisse/erdgeschoss.png",
+      sleeps: 0,
+      highlights: c.floorPlans.floors.eg.highlights,
+    },
+    {
+      key: "og",
+      label: c.floorPlans.floors.og.label,
+      tag: c.floorPlans.floors.og.tag,
+      src: "/media/photos/grundrisse/obergeschoss.png",
+      sleeps: 12,
+      highlights: c.floorPlans.floors.og.highlights,
+    },
+    {
+      key: "dg",
+      label: c.floorPlans.floors.dg.label,
+      tag: c.floorPlans.floors.dg.tag,
+      src: "/media/photos/grundrisse/dachgeschoss.png",
+      sleeps: 21,
+      highlights: c.floorPlans.floors.dg.highlights,
+    },
+  ];
 
   return (
     <div>
@@ -380,6 +587,20 @@ export default async function HuettePage() {
           </div>
         </div>
       </section>
+
+      <FloorPlanExplorer
+        floors={FLOORS}
+        texts={{
+          eyebrow: c.floorPlans.eyebrow,
+          h2: c.floorPlans.h2,
+          lead: c.floorPlans.lead,
+          sleepingLabel: c.floorPlans.sleepingLabel,
+          sleepingSuffix: c.floorPlans.sleepingSuffix,
+          nonSleepingLabel: c.floorPlans.nonSleepingLabel,
+          roomsLabel: c.floorPlans.roomsLabel,
+          selectAriaLabel: c.floorPlans.selectAriaLabel,
+        }}
+      />
 
       <section className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24">
         <div className="max-w-[1280px] mx-auto">
