@@ -223,6 +223,9 @@ const BF_COPY = {
     todayToPay: "Heute zu zahlen",
     remainderBefore: "Restzahlung (14 Tage vor Anreise)",
     kurtaxeShort: "Kurtaxe wird separat über das Hochsauerland-Portal abgerechnet.",
+    depositDueLater: "Anzahlung (~30 Tage vor Anreise)",
+    schoolSummaryNote:
+      "Du zahlst heute nichts. Anzahlung + Kaution werden rund 30 Tage vor Anreise per Zahlungslink fällig, die Restzahlung 14 Tage vor Anreise.",
     // ReviewBlock
     zeitraum: "Zeitraum",
     bucher: "Bucher",
@@ -364,6 +367,9 @@ const BF_COPY = {
     todayToPay: "Due today",
     remainderBefore: "Remaining amount (14 days before arrival)",
     kurtaxeShort: "Tourist tax is settled separately via the Hochsauerland portal.",
+    depositDueLater: "Deposit (~30 days before arrival)",
+    schoolSummaryNote:
+      "You pay nothing today. Deposit + damage deposit fall due about 30 days before arrival via a payment link; the remainder 14 days before arrival.",
     zeitraum: "Period",
     bucher: "Booker",
     totalSuffix: "total",
@@ -504,6 +510,9 @@ const BF_COPY = {
     todayToPay: "Vandaag te betalen",
     remainderBefore: "Restbedrag (14 dagen vóór aankomst)",
     kurtaxeShort: "Toeristenbelasting wordt apart afgerekend via het Hochsauerland-portaal.",
+    depositDueLater: "Aanbetaling (~30 dagen vóór aankomst)",
+    schoolSummaryNote:
+      "Je betaalt vandaag niets. Aanbetaling + borg worden ongeveer 30 dagen vóór aankomst via een betaallink verschuldigd; de restbetaling 14 dagen vóór aankomst.",
     zeitraum: "Periode",
     bucher: "Boeker",
     totalSuffix: "totaal",
@@ -1124,6 +1133,7 @@ export const BookingFlow = ({
           arrival={arrival}
           departure={departure}
           totalPersons={totalPersons}
+          isSchoolDeferred={isSchoolDeferred}
           tt={tt}
           locale={locale}
         />
@@ -1345,6 +1355,7 @@ const PriceSummary = ({
   arrival,
   departure,
   totalPersons,
+  isSchoolDeferred = false,
   tt,
   locale,
 }: {
@@ -1352,6 +1363,7 @@ const PriceSummary = ({
   arrival: string;
   departure: string;
   totalPersons: number;
+  isSchoolDeferred?: boolean;
   tt: BfCopy;
   locale: "de" | "en" | "nl";
 }) => {
@@ -1391,33 +1403,66 @@ const PriceSummary = ({
         </div>
       </div>
 
-      <div className="border-t border-[var(--color-wh-winter-grey)] mt-4 pt-4 space-y-2 text-sm">
-        <div className="text-xs uppercase tracking-wider text-[var(--color-wh-fg-muted)] mb-2">
-          {tt.dueTodayShort}
-        </div>
-        <div className="flex justify-between">
-          <span>{tt.prepayment50}</span>
-          <span className="font-semibold">{formatEuro(breakdown.prepaymentCents, locale)}</span>
-        </div>
-        <div className="flex justify-between">
-          <span>{tt.plusKaution}</span>
-          <span className="font-semibold">{formatEuro(breakdown.depositCents, locale)}</span>
-        </div>
-        <div className="flex justify-between text-base pt-2 border-t border-[var(--color-wh-winter-grey)]">
-          <span className="font-bold">{tt.todayToPay}</span>
-          <span className="font-bold text-[var(--color-wh-deep-green)]">
-            {formatEuro(breakdown.totalDueCents, locale)}
-          </span>
-        </div>
-      </div>
+      {isSchoolDeferred ? (
+        /* Schulgruppen: heute fällt nichts an. Anzahlung + Kaution werden
+           ~30 Tage vor Anreise per Link fällig, Restzahlung 14 Tage vorher. */
+        <>
+          <div className="border-t border-[var(--color-wh-winter-grey)] mt-4 pt-4 space-y-2 text-sm">
+            <div className="flex justify-between text-base">
+              <span className="font-bold">{tt.todayToPay}</span>
+              <span className="font-bold text-[var(--color-wh-deep-green)]">
+                {formatEuro(0, locale)}
+              </span>
+            </div>
+          </div>
+          <div className="border-t border-[var(--color-wh-winter-grey)] mt-4 pt-4 space-y-2 text-xs text-[var(--color-wh-fg-muted)]">
+            <div className="flex justify-between">
+              <span>{tt.depositDueLater}</span>
+              <span>{formatEuro(breakdown.prepaymentCents, locale)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>{tt.plusKaution}</span>
+              <span>{formatEuro(breakdown.depositCents, locale)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>{tt.remainderBefore}</span>
+              <span>{formatEuro(breakdown.remainderCents, locale)}</span>
+            </div>
+            <div className="pt-1">{tt.schoolSummaryNote}</div>
+            <div>{tt.kurtaxeShort}</div>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="border-t border-[var(--color-wh-winter-grey)] mt-4 pt-4 space-y-2 text-sm">
+            <div className="text-xs uppercase tracking-wider text-[var(--color-wh-fg-muted)] mb-2">
+              {tt.dueTodayShort}
+            </div>
+            <div className="flex justify-between">
+              <span>{tt.prepayment50}</span>
+              <span className="font-semibold">{formatEuro(breakdown.prepaymentCents, locale)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>{tt.plusKaution}</span>
+              <span className="font-semibold">{formatEuro(breakdown.depositCents, locale)}</span>
+            </div>
+            <div className="flex justify-between text-base pt-2 border-t border-[var(--color-wh-winter-grey)]">
+              <span className="font-bold">{tt.todayToPay}</span>
+              <span className="font-bold text-[var(--color-wh-deep-green)]">
+                {formatEuro(breakdown.totalDueCents, locale)}
+              </span>
+            </div>
+          </div>
 
-      <div className="border-t border-[var(--color-wh-winter-grey)] mt-4 pt-4 space-y-1 text-xs text-[var(--color-wh-fg-muted)]">
-        <div className="flex justify-between">
-          <span>{tt.remainderBefore}</span>
-          <span>{formatEuro(breakdown.remainderCents, locale)}</span>
-        </div>
-        <div>{tt.kurtaxeShort}</div>
-      </div>
+          <div className="border-t border-[var(--color-wh-winter-grey)] mt-4 pt-4 space-y-1 text-xs text-[var(--color-wh-fg-muted)]">
+            <div className="flex justify-between">
+              <span>{tt.remainderBefore}</span>
+              <span>{formatEuro(breakdown.remainderCents, locale)}</span>
+            </div>
+            <div>{tt.kurtaxeShort}</div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

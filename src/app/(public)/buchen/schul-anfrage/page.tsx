@@ -50,6 +50,25 @@ export default async function SchoolRequestPage({ searchParams }: Props) {
   return (
     <div className="bg-[var(--color-wh-snow)] min-h-screen px-6 sm:px-8 py-16 sm:py-24">
       <div className="max-w-[760px] mx-auto">
+        {/* Success-Badge — grünes Häkchen, macht die Bestätigung sofort lesbar */}
+        <div
+          aria-hidden
+          className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-wh-green)]/15"
+        >
+          <svg
+            width="34"
+            height="34"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="var(--color-wh-deep-green)"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+        </div>
+
         <div className="eyebrow text-[var(--color-wh-green)]">{c.eyebrow}</div>
         <h1 className="text-[36px] sm:text-[56px] mt-4 mb-6 leading-tight">{c.h1}</h1>
 
