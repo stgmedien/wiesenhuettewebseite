@@ -40,3 +40,15 @@ export const generateBookingNumber = (): string => {
   const rand = Math.floor(Math.random() * 9000) + 1000;
   return `WH-${year}-${rand}`;
 };
+
+// Ganze Tage von heute (lokale Mitternacht) bis zum gegebenen ISO-Datum
+// ("YYYY-MM-DD"). Lokale Datums-Komponenten vermeiden den UTC-Off-by-one.
+// Wird sowohl client- als auch serverseitig genutzt (z. B. Schul-Aufschub).
+export const daysUntilLocalDate = (iso: string): number => {
+  const [y, m, d] = iso.split("-").map(Number);
+  if (!y || !m || !d) return 0;
+  const target = new Date(y, m - 1, d);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return Math.round((target.getTime() - today.getTime()) / 86_400_000);
+};

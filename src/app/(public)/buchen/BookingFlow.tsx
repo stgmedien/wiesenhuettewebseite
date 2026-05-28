@@ -5,7 +5,7 @@ import { ArrowRight, ArrowLeft, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea, Select } from "@/components/ui/Input";
 import { calculatePrice, formatEuro, RULES, type Persons } from "@/lib/pricing";
-import { toLocalIso } from "@/lib/utils";
+import { toLocalIso, daysUntilLocalDate } from "@/lib/utils";
 import { daysUntil, getCancellationTier, getCancellationTiers } from "@/lib/cancellation";
 import { createBookingAndCheckout, previewDiscountAction } from "./actions";
 import { AvailabilityCalendar } from "./AvailabilityCalendar";
@@ -134,6 +134,8 @@ const BF_COPY = {
     schoolPayBody:
       "Ihr müsst jetzt nichts zahlen. Wir reservieren den Zeitraum verbindlich. Die Anzahlung (50 %) wird automatisch rund 30 Tage vor Anreise per E-Mail mit Zahlungslink fällig, die Restzahlung 14 Tage vor Anreise. Wird die Anzahlung nicht fristgerecht (innerhalb von 14 Tagen) beglichen, fällt eine Stornogebühr an und die Buchung wird storniert.",
     schoolSubmit: "Reservierung verbindlich anfragen",
+    schoolImmediateNote:
+      "Da Eure Anreise weniger als 30 Tage entfernt ist, ist die Anzahlung sofort online zu leisten — ein Zahlungsaufschub ist so kurzfristig nicht möglich.",
     street: "Straße",
     zip: "PLZ",
     city: "Ort",
@@ -281,6 +283,8 @@ const BF_COPY = {
     schoolPayBody:
       "You don't need to pay anything now. We hold the dates for you. The deposit (50 %) automatically becomes due about 30 days before arrival via an email payment link; the remainder 14 days before arrival. If the deposit isn't paid on time (within 14 days), a cancellation fee applies and the booking is cancelled.",
     schoolSubmit: "Request reservation (binding)",
+    schoolImmediateNote:
+      "As your arrival is less than 30 days away, the deposit must be paid online now — deferred payment isn't possible at such short notice.",
     street: "Street",
     zip: "ZIP",
     city: "City",
@@ -424,6 +428,8 @@ const BF_COPY = {
     schoolPayBody:
       "Jullie hoeven nu niets te betalen. We reserveren de periode vast. De aanbetaling (50 %) wordt automatisch ongeveer 30 dagen voor aankomst verschuldigd via een betaallink per e-mail; de restbetaling 14 dagen voor aankomst. Wordt de aanbetaling niet op tijd (binnen 14 dagen) voldaan, dan volgt een annuleringskost en wordt de boeking geannuleerd.",
     schoolSubmit: "Reservering bindend aanvragen",
+    schoolImmediateNote:
+      "Omdat jullie aankomst minder dan 30 dagen weg is, moet de aanbetaling nu online gebeuren — uitstel is op zo'n korte termijn niet mogelijk.",
     street: "Straat",
     zip: "Postcode",
     city: "Plaats",
@@ -645,9 +651,15 @@ export const BookingFlow = ({
     purposeCategory === "firma";
   const institutionValid = !institutionRequired || institution.trim().length >= 2;
 
-  // Schulgruppen (Klassenfahrt / Schul-/Studienfahrt): KEIN Sofort-Checkout,
-  // Anzahlung wird erst ~30 Tage vor Anreise faellig.
-  const isSchoolDeferred = purposeCategory === "klasse" || purposeCategory === "schul";
+  // Schulgruppen (Klassenfahrt / Schul-/Studienfahrt): Zahlungsaufschub greift
+  // NUR, wenn die Anreise mehr als 30 Tage in der Zukunft liegt — sonst bliebe
+  // keine Zeit fuer die Anzahlungs-Frist und es muss sofort online gezahlt
+  // werden (30 muss mit SCHOOL_DEPOSIT_DUE_DAYS im Backend uebereinstimmen).
+  const isSchoolPurpose = purposeCategory === "klasse" || purposeCategory === "schul";
+  const isSchoolDeferred =
+    isSchoolPurpose && !!arrival && daysUntilLocalDate(arrival) > 30;
+  // Schul-Anlass, aber Anreise <= 30 Tage → sofort zahlen (Hinweis im UI).
+  const isSchoolImmediate = isSchoolPurpose && !isSchoolDeferred;
 
   const canGoStep3 =
     firstName.trim() &&
@@ -1050,6 +1062,13 @@ export const BookingFlow = ({
                 <p className="text-sm text-red-700 mt-2 m-0">{discountState.error}</p>
               )}
             </div>
+
+            {isSchoolImmediate && (
+              /* Schul-Anlass, aber Anreise <= 30 Tage → sofort zahlen. */
+              <div className="rounded-[var(--radius-md)] border-l-4 border-[var(--color-wh-sunset)] bg-[var(--color-wh-beige)] px-4 py-3 text-sm text-[var(--color-wh-black)]">
+                {tt.schoolImmediateNote}
+              </div>
+            )}
 
             {isSchoolDeferred ? (
               /* Schulgruppen: keine Sofortzahlung — Anzahlung wird ~30 Tage

@@ -34,7 +34,7 @@ import {
 } from "@/lib/pricing";
 import { isRangeAvailable } from "@/lib/availability";
 import { stripe } from "@/lib/stripe";
-import { generateBookingNumber, formatDateLong } from "@/lib/utils";
+import { generateBookingNumber, formatDateLong, daysUntilLocalDate } from "@/lib/utils";
 import { CURRENT_HAUSORDNUNG_VERSION } from "@/lib/hausordnung";
 import type { Locale } from "@/lib/i18n-shared";
 
@@ -519,7 +519,12 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
 
   // Schulgruppen (Klassenfahrt / Schul-/Studienfahrt) → Zahlungsaufschub:
   // KEIN Sofort-Checkout, Anzahlung wird per Cron 30 Tage vor Anreise faellig.
-  const isSchoolDeferred = isSchoolDeferredPurpose(data.purposeCategory);
+  // ABER nur, wenn die Anreise mehr als 30 Tage in der Zukunft liegt — sonst
+  // bliebe keine Zeit fuer die Anzahlungs-Frist. Bei <= 30 Tagen (erst recht
+  // <= 14) muss sofort online gezahlt werden (normaler Stripe-Checkout unten).
+  const isSchoolDeferred =
+    isSchoolDeferredPurpose(data.purposeCategory) &&
+    daysUntilLocalDate(data.arrival) > SCHOOL_DEPOSIT_DUE_DAYS;
 
   const inserted = await db
     .insert(bookings)
