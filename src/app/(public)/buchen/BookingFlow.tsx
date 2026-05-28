@@ -136,6 +136,9 @@ const BF_COPY = {
     schoolSubmit: "Reservierung verbindlich anfragen",
     schoolImmediateNote:
       "Da Eure Anreise weniger als 30 Tage entfernt ist, ist die Anzahlung sofort online zu leisten — ein Zahlungsaufschub ist so kurzfristig nicht möglich.",
+    fullPaymentNote:
+      "Da die Anreise in weniger als 14 Tagen ist, wird der gesamte Betrag (Miete + Kaution) jetzt sofort fällig.",
+    fullAmountLabel: "Mietpreis (komplett)",
     street: "Straße",
     zip: "PLZ",
     city: "Ort",
@@ -285,6 +288,9 @@ const BF_COPY = {
     schoolSubmit: "Request reservation (binding)",
     schoolImmediateNote:
       "As your arrival is less than 30 days away, the deposit must be paid online now — deferred payment isn't possible at such short notice.",
+    fullPaymentNote:
+      "As arrival is less than 14 days away, the full amount (rent + damage deposit) is due now.",
+    fullAmountLabel: "Full rental price",
     street: "Street",
     zip: "ZIP",
     city: "City",
@@ -430,6 +436,9 @@ const BF_COPY = {
     schoolSubmit: "Reservering bindend aanvragen",
     schoolImmediateNote:
       "Omdat jullie aankomst minder dan 30 dagen weg is, moet de aanbetaling nu online gebeuren — uitstel is op zo'n korte termijn niet mogelijk.",
+    fullPaymentNote:
+      "Omdat de aankomst binnen 14 dagen is, is het volledige bedrag (huur + borg) nu direct verschuldigd.",
+    fullAmountLabel: "Volledige huurprijs",
     street: "Straat",
     zip: "Postcode",
     city: "Plaats",
@@ -660,6 +669,12 @@ export const BookingFlow = ({
     isSchoolPurpose && !!arrival && daysUntilLocalDate(arrival) > 30;
   // Schul-Anlass, aber Anreise <= 30 Tage → sofort zahlen (Hinweis im UI).
   const isSchoolImmediate = isSchoolPurpose && !isSchoolDeferred;
+
+  // Komplettzahlung: bei JEDER Buchung mit Anreise < 14 Tagen wird der gesamte
+  // Betrag sofort fällig (keine 50/50-Aufteilung mehr). Muss mit dem Backend
+  // übereinstimmen. Greift nicht im Schul-Aufschub (der ist immer > 30 Tage).
+  const fullPaymentRequired =
+    !isSchoolDeferred && !!arrival && daysUntilLocalDate(arrival) < 14;
 
   const canGoStep3 =
     firstName.trim() &&
@@ -1063,12 +1078,17 @@ export const BookingFlow = ({
               )}
             </div>
 
-            {isSchoolImmediate && (
-              /* Schul-Anlass, aber Anreise <= 30 Tage → sofort zahlen. */
+            {fullPaymentRequired ? (
+              /* Anreise < 14 Tage → kompletter Betrag sofort fällig. */
+              <div className="rounded-[var(--radius-md)] border-l-4 border-[var(--color-wh-sunset)] bg-[var(--color-wh-beige)] px-4 py-3 text-sm text-[var(--color-wh-black)]">
+                {tt.fullPaymentNote}
+              </div>
+            ) : isSchoolImmediate ? (
+              /* Schul-Anlass, aber Anreise <= 30 Tage → 50 % Anzahlung sofort. */
               <div className="rounded-[var(--radius-md)] border-l-4 border-[var(--color-wh-sunset)] bg-[var(--color-wh-beige)] px-4 py-3 text-sm text-[var(--color-wh-black)]">
                 {tt.schoolImmediateNote}
               </div>
-            )}
+            ) : null}
 
             {isSchoolDeferred ? (
               /* Schulgruppen: keine Sofortzahlung — Anzahlung wird ~30 Tage
@@ -1083,21 +1103,28 @@ export const BookingFlow = ({
                 const off =
                   discountState.status === "valid" ? discountState.discountCents : 0;
                 const subAfter = breakdown.subtotalCents - off;
-                const prepayAfter = Math.round((subAfter * 50) / 100);
+                // Komplettzahlung (< 14 Tage) → 100 %, sonst 50 %.
+                const prepayAfter = fullPaymentRequired
+                  ? subAfter
+                  : Math.round((subAfter * 50) / 100);
                 const remainAfter = subAfter - prepayAfter;
                 const totalDueAfter = prepayAfter + breakdown.depositCents;
                 return (
                   <div className="bg-[var(--color-wh-beige)] rounded-[var(--radius-card)] p-5 text-sm text-[var(--color-wh-black)]">
                     <p className="m-0 font-semibold mb-2">{tt.dueToday}</p>
                     <p className="m-0">
-                      <strong>{formatEuro(prepayAfter, locale)}</strong> {tt.deposit} ({tt.bookingTotalAfter}
+                      <strong>{formatEuro(prepayAfter, locale)}</strong>{" "}
+                      {fullPaymentRequired ? tt.fullAmountLabel : tt.deposit} (
+                      {fullPaymentRequired ? tt.bookingSum : tt.bookingTotalAfter}
                       {off > 0 ? ` ${tt.afterDiscount}` : ""}) +{" "}
                       <strong>{formatEuro(breakdown.depositCents, locale)}</strong> {tt.kaution} ={" "}
                       <strong>{formatEuro(totalDueAfter, locale)}</strong>
                     </p>
-                    <p className="m-0 mt-3">
-                      {tt.restzahlung} <strong>{formatEuro(remainAfter, locale)}</strong> {tt.restzahlungBody}
-                    </p>
+                    {remainAfter > 0 && (
+                      <p className="m-0 mt-3">
+                        {tt.restzahlung} <strong>{formatEuro(remainAfter, locale)}</strong> {tt.restzahlungBody}
+                      </p>
+                    )}
                     <p className="m-0 mt-3 text-[var(--color-wh-fg-muted)]">
                       {tt.kurtaxeNote}
                     </p>
@@ -1136,8 +1163,10 @@ export const BookingFlow = ({
                   const off =
                     discountState.status === "valid" ? discountState.discountCents : 0;
                   const subAfter = breakdown.subtotalCents - off;
-                  const totalDueAfter =
-                    Math.round((subAfter * 50) / 100) + breakdown.depositCents;
+                  const prepayAfter = fullPaymentRequired
+                    ? subAfter
+                    : Math.round((subAfter * 50) / 100);
+                  const totalDueAfter = prepayAfter + breakdown.depositCents;
                   return `${tt.payNow} — ${formatEuro(totalDueAfter, locale)}`;
                 })()}
               </Button>
@@ -1153,6 +1182,7 @@ export const BookingFlow = ({
           departure={departure}
           totalPersons={totalPersons}
           isSchoolDeferred={isSchoolDeferred}
+          fullPayment={fullPaymentRequired}
           tt={tt}
           locale={locale}
         />
@@ -1375,6 +1405,7 @@ const PriceSummary = ({
   departure,
   totalPersons,
   isSchoolDeferred = false,
+  fullPayment = false,
   tt,
   locale,
 }: {
@@ -1383,6 +1414,7 @@ const PriceSummary = ({
   departure: string;
   totalPersons: number;
   isSchoolDeferred?: boolean;
+  fullPayment?: boolean;
   tt: BfCopy;
   locale: "de" | "en" | "nl";
 }) => {
@@ -1448,6 +1480,33 @@ const PriceSummary = ({
               <span>{formatEuro(breakdown.remainderCents, locale)}</span>
             </div>
             <div className="pt-1">{tt.schoolSummaryNote}</div>
+            <div>{tt.kurtaxeShort}</div>
+          </div>
+        </>
+      ) : fullPayment ? (
+        /* Anreise < 14 Tage: kompletter Mietpreis + Kaution sofort fällig. */
+        <>
+          <div className="border-t border-[var(--color-wh-winter-grey)] mt-4 pt-4 space-y-2 text-sm">
+            <div className="text-xs uppercase tracking-wider text-[var(--color-wh-fg-muted)] mb-2">
+              {tt.dueTodayShort}
+            </div>
+            <div className="flex justify-between">
+              <span>{tt.fullAmountLabel}</span>
+              <span className="font-semibold">{formatEuro(breakdown.subtotalCents, locale)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>{tt.plusKaution}</span>
+              <span className="font-semibold">{formatEuro(breakdown.depositCents, locale)}</span>
+            </div>
+            <div className="flex justify-between text-base pt-2 border-t border-[var(--color-wh-winter-grey)]">
+              <span className="font-bold">{tt.todayToPay}</span>
+              <span className="font-bold text-[var(--color-wh-deep-green)]">
+                {formatEuro(breakdown.subtotalCents + breakdown.depositCents, locale)}
+              </span>
+            </div>
+          </div>
+          <div className="border-t border-[var(--color-wh-winter-grey)] mt-4 pt-4 space-y-1 text-xs text-[var(--color-wh-fg-muted)]">
+            <div>{tt.fullPaymentNote}</div>
             <div>{tt.kurtaxeShort}</div>
           </div>
         </>

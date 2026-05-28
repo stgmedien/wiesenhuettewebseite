@@ -53,6 +53,14 @@ const CHECKOUT_LINES: Record<Locale, {
     discount: string | null,
     remainder: string
   ) => string;
+  // Komplettzahlung (Anreise < 14 Tage): gesamter Mietpreis sofort.
+  fullName: (arrival: string, departure: string) => string;
+  fullDescription: (
+    persons: number,
+    nights: number,
+    bookingNumber: string,
+    discount: string | null
+  ) => string;
   kautionName: string;
   kautionDescription: string;
 }> = {
@@ -60,6 +68,9 @@ const CHECKOUT_LINES: Record<Locale, {
     depositName: (a, d) => `Anzahlung 50 % — Wiesenhütte ${a} bis ${d}`,
     depositDescription: (p, n, bn, disc, rem) =>
       `${p} Personen · ${n} Nächte · Buchung ${bn}${disc ? ` · Rabatt ${disc}` : ""} · Restzahlung ${rem} folgt 14 Tage vor Anreise.`,
+    fullName: (a, d) => `Gesamtbetrag — Wiesenhütte ${a} bis ${d}`,
+    fullDescription: (p, n, bn, disc) =>
+      `${p} Personen · ${n} Nächte · Buchung ${bn}${disc ? ` · Rabatt ${disc}` : ""} · Komplettzahlung, da Anreise in weniger als 14 Tagen.`,
     kautionName: "Kaution",
     kautionDescription: "Erstattung innerhalb 14 Tagen nach mangelfreier Abreise.",
   },
@@ -67,6 +78,9 @@ const CHECKOUT_LINES: Record<Locale, {
     depositName: (a, d) => `Deposit 50 % — Wiesenhütte ${a} to ${d}`,
     depositDescription: (p, n, bn, disc, rem) =>
       `${p} guests · ${n} nights · Booking ${bn}${disc ? ` · Discount ${disc}` : ""} · Remaining ${rem} due 14 days before arrival.`,
+    fullName: (a, d) => `Full amount — Wiesenhütte ${a} to ${d}`,
+    fullDescription: (p, n, bn, disc) =>
+      `${p} guests · ${n} nights · Booking ${bn}${disc ? ` · Discount ${disc}` : ""} · Paid in full because arrival is less than 14 days away.`,
     kautionName: "Damage deposit",
     kautionDescription: "Refunded within 14 days of a clean departure.",
   },
@@ -74,6 +88,9 @@ const CHECKOUT_LINES: Record<Locale, {
     depositName: (a, d) => `Aanbetaling 50 % — Wiesenhütte ${a} t/m ${d}`,
     depositDescription: (p, n, bn, disc, rem) =>
       `${p} personen · ${n} nachten · Boeking ${bn}${disc ? ` · Korting ${disc}` : ""} · Restbedrag ${rem} 14 dagen vóór aankomst.`,
+    fullName: (a, d) => `Totaalbedrag — Wiesenhütte ${a} t/m ${d}`,
+    fullDescription: (p, n, bn, disc) =>
+      `${p} personen · ${n} nachten · Boeking ${bn}${disc ? ` · Korting ${disc}` : ""} · Volledige betaling, want aankomst is binnen 14 dagen.`,
     kautionName: "Borg",
     kautionDescription: "Terugbetaling binnen 14 dagen na schadevrije afreis.",
   },
@@ -511,7 +528,12 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
 
   // Effektive Werte nach Rabatt
   const effectiveSubtotal = breakdown.subtotalCents - discountCents;
-  const effectivePrepayment = Math.round((effectiveSubtotal * 50) / 100);
+  // Komplettzahlung erzwingen, wenn die Anreise in weniger als 14 Tagen ist —
+  // dann bliebe fuer die normale T-14-Restzahlung keine Zeit. Sonst 50 %.
+  const fullPaymentRequired = daysUntilLocalDate(data.arrival) < 14;
+  const effectivePrepayment = fullPaymentRequired
+    ? effectiveSubtotal
+    : Math.round((effectiveSubtotal * 50) / 100);
   const effectiveRemainder = effectiveSubtotal - effectivePrepayment;
 
   // Phase B: Wenn Anlass "Private Feier" → Vorstands-Pruefung vor Stripe.
@@ -753,14 +775,18 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
             currency: "eur",
             unit_amount: effectivePrepayment,
             product_data: {
-              name: CL.depositName(data.arrival, data.departure),
-              description: CL.depositDescription(
-                totalPersons,
-                breakdown.nights,
-                bookingNumber,
-                discountSnippet,
-                formatEuro(effectiveRemainder, locale)
-              ),
+              name: fullPaymentRequired
+                ? CL.fullName(data.arrival, data.departure)
+                : CL.depositName(data.arrival, data.departure),
+              description: fullPaymentRequired
+                ? CL.fullDescription(totalPersons, breakdown.nights, bookingNumber, discountSnippet)
+                : CL.depositDescription(
+                    totalPersons,
+                    breakdown.nights,
+                    bookingNumber,
+                    discountSnippet,
+                    formatEuro(effectiveRemainder, locale)
+                  ),
             },
           },
         },
@@ -827,11 +853,13 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
     .set({ stripeSessionId: checkoutSession.id, updatedAt: new Date() })
     .where(eq(bookings.id, bookingId));
 
-  // Open payment rows: Anzahlung + Kaution (jetzt fällig), Restzahlung (offen)
+  // Open payment rows: (Voll- bzw. An-)Zahlung + Kaution jetzt fällig.
+  // Restzahlung-Zeile nur, wenn es überhaupt eine gibt (entfällt bei
+  // Komplettzahlung < 14 Tage vor Anreise).
   await db.insert(payments).values([
     {
       bookingId,
-      kind: "anzahlung",
+      kind: fullPaymentRequired ? "vollzahlung" : "anzahlung",
       status: "offen",
       amountCents: effectivePrepayment,
       method: "Stripe Checkout",
@@ -843,13 +871,17 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
       amountCents: breakdown.depositCents,
       method: "Stripe Checkout",
     },
-    {
-      bookingId,
-      kind: "restzahlung",
-      status: "offen",
-      amountCents: effectiveRemainder,
-      method: "Stripe Off-Session (auto T-7)",
-    },
+    ...(effectiveRemainder > 0
+      ? [
+          {
+            bookingId,
+            kind: "restzahlung" as const,
+            status: "offen" as const,
+            amountCents: effectiveRemainder,
+            method: "Stripe Off-Session (auto T-14)",
+          },
+        ]
+      : []),
   ]);
 
   // Discount-Code als eingeloest markieren
@@ -859,7 +891,11 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
 
   await db.insert(activityLog).values({
     who: "Portal",
-    what: `Neue Buchung ${bookingNumber} angelegt — Anzahlung ${formatEuro(effectivePrepayment)} + Kaution ${formatEuro(breakdown.depositCents)} via Stripe; Restzahlung ${formatEuro(effectiveRemainder)} offen${
+    what: `Neue Buchung ${bookingNumber} angelegt — ${
+      fullPaymentRequired
+        ? `Komplettzahlung ${formatEuro(effectivePrepayment)} (Anreise < 14 Tage)`
+        : `Anzahlung ${formatEuro(effectivePrepayment)}; Restzahlung ${formatEuro(effectiveRemainder)} offen`
+    } + Kaution ${formatEuro(breakdown.depositCents)} via Stripe${
       discountCents > 0 ? ` · Rabatt ${formatEuro(discountCents)} (${appliedDiscountCode})` : ""
     }${isNewAccount ? " (Konto automatisch angelegt)" : ""}`,
     bookingId,
