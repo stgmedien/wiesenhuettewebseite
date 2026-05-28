@@ -97,6 +97,26 @@ export default async function BuchenPage({ searchParams }: Props) {
     }
   }
 
+  // Re-Book-Guard: Wenn die +1-Jahr-Daten (teilweise) belegt sind, NICHT
+  // vorbefüllen (nur Personen übernehmen) — sonst startet der Gast mit einer
+  // bereits gesperrten Auswahl.
+  if (repeatHint && repeatHint.arrival && repeatHint.departure) {
+    const blockedAll = new Set<string>([...booked, ...cleaning, ...wartung]);
+    let anyBlocked = false;
+    const cur = new Date(`${repeatHint.arrival}T00:00:00Z`);
+    const end = new Date(`${repeatHint.departure}T00:00:00Z`);
+    while (cur < end) {
+      if (blockedAll.has(cur.toISOString().slice(0, 10))) {
+        anyBlocked = true;
+        break;
+      }
+      cur.setUTCDate(cur.getUTCDate() + 1);
+    }
+    if (anyBlocked) {
+      repeatHint = { ...repeatHint, arrival: "", departure: "" };
+    }
+  }
+
   const locale = await getServerLocale();
   const pc = PAGE_COPY[locale];
 

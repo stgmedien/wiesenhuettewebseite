@@ -11,6 +11,10 @@ const CAL_COPY: Record<Locale, {
   prevMonth: string;
   nextMonth: string;
   availability: string;
+  selectMonth: string;
+  selectYear: string;
+  pastLabel: string;
+  rangeResetBlocked: string;
   tipCleaning: string;
   tipWartung: string;
   tipBooked: string;
@@ -27,6 +31,11 @@ const CAL_COPY: Record<Locale, {
     prevMonth: "Vorheriger Monat",
     nextMonth: "Nächster Monat",
     availability: "Verfügbarkeit",
+    selectMonth: "Monat wählen",
+    selectYear: "Jahr wählen",
+    pastLabel: "vergangen",
+    rangeResetBlocked:
+      "In diesem Zeitraum liegt ein belegter Tag — die Auswahl wurde zurückgesetzt. Bitte einen durchgehend freien Zeitraum wählen.",
     tipCleaning: "Reinigungstag — nicht buchbar",
     tipWartung: "Wartung",
     tipBooked: "Belegt",
@@ -43,6 +52,11 @@ const CAL_COPY: Record<Locale, {
     prevMonth: "Previous month",
     nextMonth: "Next month",
     availability: "Availability",
+    selectMonth: "Select month",
+    selectYear: "Select year",
+    pastLabel: "past",
+    rangeResetBlocked:
+      "There's a booked day within that range — the selection was reset. Please choose a fully free range.",
     tipCleaning: "Cleaning day — not bookable",
     tipWartung: "Maintenance",
     tipBooked: "Booked",
@@ -59,6 +73,11 @@ const CAL_COPY: Record<Locale, {
     prevMonth: "Vorige maand",
     nextMonth: "Volgende maand",
     availability: "Beschikbaarheid",
+    selectMonth: "Maand kiezen",
+    selectYear: "Jaar kiezen",
+    pastLabel: "verleden",
+    rangeResetBlocked:
+      "In die periode zit een geboekte dag — de selectie is gewist. Kies een volledig vrije periode.",
     tipCleaning: "Schoonmaakdag — niet boekbaar",
     tipWartung: "Onderhoud",
     tipBooked: "Geboekt",
@@ -105,6 +124,11 @@ export const AvailabilityCalendar = ({
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [monthIdx, setMonthIdx] = useState(now.getMonth());
+  // Kurzer Hinweis, wenn eine Range zurückgesetzt wurde, weil ein belegter
+  // Tag dazwischen lag.
+  const [resetHint, setResetHint] = useState(false);
+  // Jahre für den Schnellsprung: aktuelles Jahr + 2 (Buchungshorizont ~720 Tage).
+  const yearOptions = [now.getFullYear(), now.getFullYear() + 1, now.getFullYear() + 2];
 
   const bookedSet = useMemo(() => new Set(bookedDates), [bookedDates]);
   const cleaningSet = useMemo(() => new Set(cleaningDates), [cleaningDates]);
@@ -174,9 +198,11 @@ export const AvailabilityCalendar = ({
         return;
       // first click sets arrival, second sets departure (must be after arrival)
       if (!arrival || (arrival && departure)) {
+        setResetHint(false);
         onSelect(iso, "");
       } else if (arrival && !departure) {
         if (iso <= arrival) {
+          setResetHint(false);
           onSelect(iso, "");
         } else {
           // check no blocked day in between [arrival, iso)
@@ -191,12 +217,35 @@ export const AvailabilityCalendar = ({
             cur.setDate(cur.getDate() + 1);
           }
           if (hasBlocked) {
+            // Belegter Tag in der Spanne → Auswahl auf neuen Anreisetag
+            // zurücksetzen und Nutzer kurz darüber informieren.
+            setResetHint(true);
             onSelect(iso, "");
           } else {
+            setResetHint(false);
             onSelect(arrival, iso);
           }
         }
       }
+    };
+
+    // Beschreibendes aria-label: Datum + Status (für Screenreader).
+    const ariaLabelOf = (d: Date): string => {
+      const human = `${d.getDate()}. ${c.months[mi]} ${yr}`;
+      const s = stateOf(d);
+      const stateText =
+        s === "past"
+          ? c.pastLabel
+          : s === "booked"
+          ? c.legendBooked
+          : s === "cleaning"
+          ? c.legendCleaning
+          : s === "wartung"
+          ? c.legendWartung
+          : s === "selected" || s === "in-range"
+          ? c.legendSelected
+          : c.legendFree;
+      return `${human} — ${stateText}`;
     };
 
     const cls: Record<State, string> = {
@@ -232,6 +281,7 @@ export const AvailabilityCalendar = ({
           }
           onClick={() => handleClick(d)}
           title={titleOf(d)}
+          aria-label={ariaLabelOf(d)}
           className={`${base} ${cls[state]}`}
           style={
             isCleaning
@@ -253,22 +303,46 @@ export const AvailabilityCalendar = ({
 
   return (
     <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-4 sm:p-6">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between gap-2 mb-4">
         <button
           type="button"
           onClick={goPrev}
-          className="w-9 h-9 inline-flex items-center justify-center rounded-full border border-[var(--color-wh-winter-grey)] text-[var(--color-wh-deep-green)] hover:bg-[var(--color-wh-green-soft)] cursor-pointer"
+          className="w-9 h-9 shrink-0 inline-flex items-center justify-center rounded-full border border-[var(--color-wh-winter-grey)] text-[var(--color-wh-deep-green)] hover:bg-[var(--color-wh-green-soft)] cursor-pointer"
           aria-label={c.prevMonth}
         >
           <ChevronLeft size={18} />
         </button>
-        <div className="text-sm font-semibold text-[var(--color-wh-deep-green)]">
-          {c.availability}
+        {/* Schnellsprung: Monat + Jahr direkt wählbar (2-Jahres-Horizont). */}
+        <div className="flex items-center gap-2">
+          <select
+            value={monthIdx}
+            onChange={(e) => setMonthIdx(Number(e.target.value))}
+            aria-label={c.selectMonth}
+            className="rounded-md border border-[var(--color-wh-winter-grey)] bg-white px-2 py-1.5 text-sm font-semibold text-[var(--color-wh-deep-green)] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--color-wh-green)]"
+          >
+            {c.months.map((m, i) => (
+              <option key={m} value={i}>
+                {m}
+              </option>
+            ))}
+          </select>
+          <select
+            value={year}
+            onChange={(e) => setYear(Number(e.target.value))}
+            aria-label={c.selectYear}
+            className="rounded-md border border-[var(--color-wh-winter-grey)] bg-white px-2 py-1.5 text-sm font-semibold text-[var(--color-wh-deep-green)] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--color-wh-green)]"
+          >
+            {yearOptions.map((y) => (
+              <option key={y} value={y}>
+                {y}
+              </option>
+            ))}
+          </select>
         </div>
         <button
           type="button"
           onClick={goNext}
-          className="w-9 h-9 inline-flex items-center justify-center rounded-full border border-[var(--color-wh-winter-grey)] text-[var(--color-wh-deep-green)] hover:bg-[var(--color-wh-green-soft)] cursor-pointer"
+          className="w-9 h-9 shrink-0 inline-flex items-center justify-center rounded-full border border-[var(--color-wh-winter-grey)] text-[var(--color-wh-deep-green)] hover:bg-[var(--color-wh-green-soft)] cursor-pointer"
           aria-label={c.nextMonth}
         >
           <ChevronRight size={18} />
@@ -303,6 +377,15 @@ export const AvailabilityCalendar = ({
         <Legend swatch="bg-[var(--color-wh-green-soft)]" label={c.legendSelected} />
         <Legend swatch="bg-[var(--color-wh-deep-green)]" label={c.legendArrivalDeparture} />
       </div>
+
+      {resetHint && (
+        <div
+          role="status"
+          className="mt-4 rounded-[var(--radius-md)] border-l-4 border-[var(--color-wh-sunset)] bg-[var(--color-wh-sunset)]/10 px-4 py-2.5 text-sm text-[var(--color-wh-sunset)]"
+        >
+          {c.rangeResetBlocked}
+        </div>
+      )}
     </div>
   );
 };

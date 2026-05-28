@@ -90,7 +90,7 @@ type BookingFlowProps = {
 
 const BF_COPY = {
   de: {
-    steps: ["Zeitraum", "Personen & Pauschalen", "Kontakt", "Übersicht"],
+    steps: ["Zeitraum & Personen", "Anlass & Pauschalen", "Kontakt", "Übersicht"],
     s0H: "Wann?",
     s1H: "Wer kommt?",
     s1Pauschalen: "Pauschalen",
@@ -181,6 +181,15 @@ const BF_COPY = {
     redirecting: "Leite weiter ...",
     // Persons / pricing
     personsRange: (n: number, max: number) => `${n} Personen · Maximalbelegung ${max}.`,
+    valDepartureMissing: "Bitte auch den Abreisetag im Kalender wählen.",
+    valMinNights: "Mindestaufenthalt: 2 Nächte — bitte einen späteren Abreisetag wählen.",
+    valPersonsMin: "Bitte mindestens eine Person angeben.",
+    valStep2Hint: "Bitte fülle die rot markierten Felder aus, um fortzufahren.",
+    valRequired: "Pflichtfeld.",
+    valEmail: "Bitte eine gültige E-Mail-Adresse eingeben.",
+    valPhone: "Bitte eine gültige Telefonnummer eingeben.",
+    valInstitution: "Bitte die Institution / Einrichtung angeben.",
+    valTerms: "Bitte stimme den Bedingungen zu, um fortzufahren.",
     minOccupancyNoteTitle: "Aufschlag Mindestbelegung",
     minOccupancyNoteBody:
       "Buchungen mit weniger als 15 Personen werden zum Preisniveau von 15 Personen abgerechnet — der pro-rata-Aufschlag erscheint live in der Preisübersicht.",
@@ -242,7 +251,7 @@ const BF_COPY = {
     teachersShort: "Lehrer",
   },
   en: {
-    steps: ["Dates", "Guests & options", "Contact", "Summary"],
+    steps: ["Dates & guests", "Purpose & extras", "Contact", "Summary"],
     s0H: "When?",
     s1H: "Who's coming?",
     s1Pauschalen: "Flat-rates",
@@ -332,6 +341,15 @@ const BF_COPY = {
     payNow: "Pay now",
     redirecting: "Redirecting ...",
     personsRange: (n: number, max: number) => `${n} guests · maximum ${max}.`,
+    valDepartureMissing: "Please also pick the departure day in the calendar.",
+    valMinNights: "Minimum stay: 2 nights — please pick a later departure day.",
+    valPersonsMin: "Please add at least one guest.",
+    valStep2Hint: "Please complete the fields marked in red to continue.",
+    valRequired: "Required.",
+    valEmail: "Please enter a valid email address.",
+    valPhone: "Please enter a valid phone number.",
+    valInstitution: "Please enter the institution / organisation.",
+    valTerms: "Please accept the terms to continue.",
     minOccupancyNoteTitle: "Minimum-occupancy surcharge",
     minOccupancyNoteBody:
       "Bookings below 15 guests are charged at the 15-guest price level — the pro-rata surcharge appears live in the price summary.",
@@ -390,7 +408,7 @@ const BF_COPY = {
     teachersShort: "teachers",
   },
   nl: {
-    steps: ["Periode", "Personen & opties", "Contact", "Overzicht"],
+    steps: ["Periode & personen", "Aanleiding & pakketten", "Contact", "Overzicht"],
     s0H: "Wanneer?",
     s1H: "Wie komt er?",
     s1Pauschalen: "Pakketten",
@@ -480,6 +498,15 @@ const BF_COPY = {
     payNow: "Nu betalen",
     redirecting: "Doorsturen ...",
     personsRange: (n: number, max: number) => `${n} personen · maximaal ${max}.`,
+    valDepartureMissing: "Kies ook de vertrekdag in de kalender.",
+    valMinNights: "Minimaal 2 nachten — kies een latere vertrekdag.",
+    valPersonsMin: "Voeg minstens één persoon toe.",
+    valStep2Hint: "Vul de rood gemarkeerde velden in om door te gaan.",
+    valRequired: "Verplicht veld.",
+    valEmail: "Voer een geldig e-mailadres in.",
+    valPhone: "Voer een geldig telefoonnummer in.",
+    valInstitution: "Vul de instelling / organisatie in.",
+    valTerms: "Ga akkoord met de voorwaarden om door te gaan.",
     minOccupancyNoteTitle: "Toeslag minimale bezetting",
     minOccupancyNoteBody:
       "Boekingen onder 15 personen worden afgerekend op het prijsniveau van 15 personen — de pro-rata-toeslag verschijnt live in het prijsoverzicht.",
@@ -566,7 +593,10 @@ export const BookingFlow = ({
         }
       : emptyPersons
   );
-  const [soloUse, setSoloUse] = useState(repeatHint?.soloUse ?? false);
+  // Allein-/Exklusivnutzung-Option wurde aus dem Flow entfernt (Vorstands-
+  // Entscheidung). soloUse bleibt fix auf false, damit kein Aufschlag entsteht
+  // und der Wert für Pricing/Action-Kompatibilität vorhanden ist.
+  const soloUse = false;
   // Anlass — Pflicht-Dropdown. Bei "privat" werden Subtyp + freier Grund erforderlich.
   const [purposeCategory, setPurposeCategory] = useState<PurposeKey | "">("");
   const [purposeSubtype, setPurposeSubtype] = useState<PrivateSubKey | "">("");
@@ -586,6 +616,9 @@ export const BookingFlow = ({
   const [city, setCity] = useState(prefill?.city ?? "");
   const [customerMessage, setCustomerMessage] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  // Wurde in Schritt 2 schon ein "Weiter"-Versuch gemacht? Steuert, ob
+  // Feld-Fehler angezeigt werden (nicht naggy beim ersten Anschauen).
+  const [step2Tried, setStep2Tried] = useState(false);
 
   // Discount-Code (Loyalty / Manager / Promo)
   const [discountCode, setDiscountCode] = useState("");
@@ -676,13 +709,14 @@ export const BookingFlow = ({
   const fullPaymentRequired =
     !isSchoolDeferred && !!arrival && daysUntilLocalDate(arrival) < 14;
 
+  // Feld-Validität (für Inline-Fehler in Schritt 2).
+  const firstNameValid = firstName.trim().length > 0;
+  const lastNameValid = lastName.trim().length > 0;
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const phoneValid = phone.trim().length >= 5;
+  const termsValid = acceptedTerms;
   const canGoStep3 =
-    firstName.trim() &&
-    lastName.trim() &&
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) &&
-    phone.trim().length >= 5 &&
-    institutionValid &&
-    acceptedTerms;
+    firstNameValid && lastNameValid && emailValid && phoneValid && institutionValid && termsValid;
 
   const submit = () => {
     setError(null);
@@ -737,7 +771,7 @@ export const BookingFlow = ({
   return (
     <div className="grid lg:grid-cols-[1fr_380px] gap-6 lg:gap-8 max-w-full min-w-0">
       <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-3 sm:p-6 lg:p-8 min-w-0 overflow-hidden">
-        <Stepper step={step} labels={tt.steps} />
+        <Stepper step={step} labels={tt.steps} onJump={(s) => setStep(s)} />
 
         {step === 0 && (
           <div className="mt-8 space-y-6">
@@ -765,6 +799,17 @@ export const BookingFlow = ({
                 {tt.rangeBlocked}
               </div>
             )}
+            {/* Kontextuelle Datums-Hinweise statt nur ausgegrautem Button. */}
+            {!rangeBlocked && arrival && !departure && (
+              <div className="text-[var(--color-wh-fg-muted)] text-sm">
+                {tt.valDepartureMissing}
+              </div>
+            )}
+            {!rangeBlocked && arrival && departure && !datesValid && (
+              <div className="text-[var(--color-wh-sunset)] text-sm font-semibold">
+                {tt.valMinNights}
+              </div>
+            )}
 
             <h3 className="text-[22px] sm:text-[24px] mt-12 mb-0">{tt.s1H}</h3>
             <PersonsEditor
@@ -780,6 +825,11 @@ export const BookingFlow = ({
             >
               {tt.personsRange(totalPersons, RULES.maxPersons)}
             </div>
+            {totalPersons === 0 && (
+              <div className="text-[var(--color-wh-sunset)] text-sm font-semibold">
+                {tt.valPersonsMin}
+              </div>
+            )}
             {totalPersons > 0 && totalPersons < RULES.minOccupancyFloor && (
               <div className="rounded-[var(--radius-card)] bg-[var(--color-wh-sand)] border border-[var(--color-wh-winter-grey)] p-4 text-sm">
                 <div className="font-semibold mb-1">{tt.minOccupancyNoteTitle}</div>
@@ -913,10 +963,14 @@ export const BookingFlow = ({
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input id="firstName" label={tt.firstName} value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
-              <Input id="lastName" label={tt.lastName} value={lastName} onChange={(e) => setLastName(e.target.value)} required />
-              <Input id="email" type="email" label={tt.email} value={email} onChange={(e) => setEmail(e.target.value)} required />
-              <Input id="phone" type="tel" label={tt.phone} value={phone} onChange={(e) => setPhone(e.target.value)} required minLength={5} />
+              <Input id="firstName" label={tt.firstName} value={firstName} onChange={(e) => setFirstName(e.target.value)} required
+                error={step2Tried && !firstNameValid ? tt.valRequired : undefined} />
+              <Input id="lastName" label={tt.lastName} value={lastName} onChange={(e) => setLastName(e.target.value)} required
+                error={step2Tried && !lastNameValid ? tt.valRequired : undefined} />
+              <Input id="email" type="email" label={tt.email} value={email} onChange={(e) => setEmail(e.target.value)} required
+                error={step2Tried && !emailValid ? tt.valEmail : undefined} />
+              <Input id="phone" type="tel" label={tt.phone} value={phone} onChange={(e) => setPhone(e.target.value)} required minLength={5}
+                error={step2Tried && !phoneValid ? tt.valPhone : undefined} />
               {institutionRequired ? (
                 <Input
                   id="institution"
@@ -925,6 +979,7 @@ export const BookingFlow = ({
                   value={institution}
                   onChange={(e) => setInstitution(e.target.value)}
                   required
+                  error={step2Tried && !institutionValid ? tt.valInstitution : undefined}
                 />
               ) : customerType === "firma" || customerType === "verein" ? (
                 <Input id="company" label={tt.company} value={company} onChange={(e) => setCompany(e.target.value)} />
@@ -979,6 +1034,16 @@ export const BookingFlow = ({
                 {tt.acceptEnd}
               </span>
             </label>
+            {step2Tried && !termsValid && (
+              <p className="-mt-3 text-xs text-[var(--color-wh-sunset)]">{tt.valTerms}</p>
+            )}
+
+            {/* Sammel-Hinweis, wenn der Übersicht-Versuch fehlschlug. */}
+            {step2Tried && !canGoStep3 && (
+              <div className="rounded-[var(--radius-md)] border-l-4 border-[var(--color-wh-sunset)] bg-[var(--color-wh-sunset)]/10 px-4 py-3 text-sm font-medium text-[var(--color-wh-sunset)]">
+                {tt.valStep2Hint}
+              </div>
+            )}
 
             <div className="flex justify-between gap-3 pt-2">
               <Button
@@ -989,8 +1054,10 @@ export const BookingFlow = ({
                 {tt.back}
               </Button>
               <Button
-                disabled={!canGoStep3}
-                onClick={() => setStep(3)}
+                onClick={() => {
+                  if (canGoStep3) setStep(3);
+                  else setStep2Tried(true);
+                }}
                 iconRight={<ArrowRight size={18} />}
               >
                 {tt.overview}
@@ -1191,32 +1258,57 @@ export const BookingFlow = ({
   );
 };
 
-const Stepper = ({ step, labels }: { step: Step; labels: readonly string[] }) => {
+const Stepper = ({
+  step,
+  labels,
+  onJump,
+}: {
+  step: Step;
+  labels: readonly string[];
+  onJump: (s: Step) => void;
+}) => {
   return (
     <div className="flex items-center gap-2 text-xs sm:text-sm overflow-x-auto pb-2">
-      {labels.map((l, i) => (
-        <div key={l} className="flex items-center gap-2 sm:gap-3 shrink-0">
-          <span
-            className={`inline-flex items-center justify-center w-7 h-7 rounded-full font-semibold ${
-              i <= step
-                ? "bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)]"
-                : "bg-[var(--color-wh-winter-grey)] text-[var(--color-wh-fg-muted)]"
-            }`}
-          >
-            {i < step ? <Check size={14} /> : i + 1}
-          </span>
-          <span
-            className={`whitespace-nowrap ${
-              i <= step ? "font-semibold text-[var(--color-wh-deep-green)]" : "text-[var(--color-wh-fg-muted)]"
-            }`}
-          >
-            {l}
-          </span>
-          {i < labels.length - 1 && (
-            <span className="hidden sm:inline-block w-6 h-px bg-[var(--color-wh-winter-grey)]" />
-          )}
-        </div>
-      ))}
+      {labels.map((l, i) => {
+        // Bereits erledigte Schritte sind anklickbar (zurückspringen). Vorwärts
+        // geht nur über die Weiter-Buttons (Validierung).
+        const canJump = i < step;
+        return (
+          <div key={l} className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <button
+              type="button"
+              disabled={!canJump}
+              onClick={() => canJump && onJump(i as Step)}
+              className={`flex items-center gap-2 sm:gap-3 ${
+                canJump ? "cursor-pointer" : "cursor-default"
+              }`}
+              aria-current={i === step ? "step" : undefined}
+            >
+              <span
+                className={`inline-flex items-center justify-center w-7 h-7 rounded-full font-semibold ${
+                  i <= step
+                    ? "bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)]"
+                    : "bg-[var(--color-wh-winter-grey)] text-[var(--color-wh-fg-muted)]"
+                }`}
+              >
+                {i < step ? <Check size={14} /> : i + 1}
+              </span>
+              <span
+                className={`whitespace-nowrap ${
+                  i <= step
+                    ? "font-semibold text-[var(--color-wh-deep-green)]"
+                    : "text-[var(--color-wh-fg-muted)]"
+                } ${canJump ? "hover:underline" : ""}`}
+              >
+                {l}
+              </span>
+            </button>
+            {i < labels.length - 1 && (
+              <span className="hidden sm:inline-block w-6 h-px bg-[var(--color-wh-winter-grey)]" />
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };
@@ -1246,16 +1338,29 @@ const PersonRow = ({
         type="button"
         className="w-9 h-9 rounded-full border border-[var(--color-wh-winter-grey)] text-[var(--color-wh-deep-green)] hover:bg-[var(--color-wh-green-soft)] cursor-pointer text-lg font-semibold"
         onClick={() => onChange(Math.max(0, value - 1))}
-        aria-label={ariaLess}
+        aria-label={`${ariaLess}: ${label}`}
       >
         −
       </button>
-      <span className="w-8 text-center font-semibold">{value}</span>
+      {/* Direktes Tippen (für große Gruppen) — clamp 0..max. */}
+      <input
+        type="text"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        value={value}
+        aria-label={label}
+        onChange={(e) => {
+          const digits = e.target.value.replace(/[^0-9]/g, "");
+          const n = digits === "" ? 0 : parseInt(digits, 10);
+          onChange(Math.max(0, Math.min(RULES.maxPersons, n)));
+        }}
+        className="w-12 h-9 text-center font-semibold rounded-md border border-[var(--color-wh-winter-grey)] text-[var(--color-wh-deep-green)] focus:outline-none focus:ring-2 focus:ring-[var(--color-wh-green)]"
+      />
       <button
         type="button"
         className="w-9 h-9 rounded-full border border-[var(--color-wh-winter-grey)] text-[var(--color-wh-deep-green)] hover:bg-[var(--color-wh-green-soft)] cursor-pointer text-lg font-semibold"
-        onClick={() => onChange(value + 1)}
-        aria-label={ariaMore}
+        onClick={() => onChange(Math.min(RULES.maxPersons, value + 1))}
+        aria-label={`${ariaMore}: ${label}`}
       >
         +
       </button>
