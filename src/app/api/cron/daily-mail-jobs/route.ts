@@ -19,6 +19,7 @@ import BirthdayEmail from "@/lib/mail/templates/birthday";
 import SchoolDepositDueEmail from "@/lib/mail/templates/school-deposit-due";
 import SchoolDepositWarningEmail from "@/lib/mail/templates/school-deposit-warning";
 import SchoolBookingCancelledEmail from "@/lib/mail/templates/school-booking-cancelled";
+import HuettenwartNoticeEmail from "@/lib/mail/templates/huettenwart-notice";
 import {
   getOrCreateDepositCheckout,
   SCHOOL_DEPOSIT_DUE_DAYS,
@@ -55,6 +56,10 @@ export const maxDuration = 60;
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.xn--wiesenhtte-geb.com";
+
+// Hüttenwart (Toni Klauke) — bekommt 7 Tage vor Anreise eine Notiz mit
+// Portal-Link, um die Buchung anzusehen und die Übergabe/Abnahme zu machen.
+const HUTTENWART_EMAIL = "allegro.m@gmx.de";
 
 const isoDayOffset = (offset: number): string => {
   const d = new Date();
@@ -99,6 +104,7 @@ export async function GET(req: Request) {
   const stats = {
     paymentReminderSent: 0,
     arrivalInfoSent: 0,
+    huettenwartNoticeSent: 0,
     feedbackRequestSent: 0,
     birthdaySent: 0,
     autoChargeSucceeded: 0,
@@ -259,6 +265,32 @@ export async function GET(req: Request) {
       }
     }
 
+    // Hüttenwart-Benachrichtigung (Toni): gleiche T-7-Logik, eigene
+    // Idempotenz. Enthält Portal-Link zur Buchung für Ansicht + Abnahme.
+    if (!(await alreadySent(b.id, "huettenwart_notice"))) {
+      try {
+        await sendMail({
+          to: HUTTENWART_EMAIL,
+          subject: `In 7 Tagen: Gruppe an der Wiesenhütte — ${b.bookingNumber}`,
+          template: "huettenwart_notice",
+          bookingId: b.id,
+          react: HuettenwartNoticeEmail({
+            bookingNumber: b.bookingNumber,
+            guestName: `${customer.firstName} ${customer.lastName}`.trim(),
+            guestPhone: customer.phone,
+            arrival: formatDateLong(b.arrival),
+            departure: formatDateLong(b.departure),
+            persons: b.persons,
+            nights: b.nights,
+            purpose: b.purpose,
+            managerUrl: `${BASE_URL}/m/buchungen/${b.id}`,
+          }),
+        });
+        stats.huettenwartNoticeSent++;
+      } catch (err) {
+        console.error("[cron] huettenwart_notice failed:", err);
+      }
+    }
   }
 
   // =====================================================================
