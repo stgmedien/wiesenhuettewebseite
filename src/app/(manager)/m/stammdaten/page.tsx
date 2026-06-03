@@ -271,7 +271,20 @@ export default async function StammdatenPage() {
                   key={t.id}
                   className="border-b border-[var(--color-wh-winter-grey)]/30"
                 >
-                  <td className="py-3 font-mono text-xs uppercase">{t.category}</td>
+                  <td className="py-3">
+                    <div className="font-mono text-xs uppercase">{t.category}</div>
+                    <div className="text-[11px] text-[var(--color-wh-fg-muted)]">
+                      {(
+                        {
+                          nichtmitglied: "Erwachsene",
+                          mitglied: "Erwachsene · Mitglied (−50 %)",
+                          kind: "Kinder/Schüler bis 16",
+                          schueler: "Kinder/Schüler bis 16 · Mitglied (−50 %)",
+                          lehrer: "Lehrkräfte",
+                        } as Record<string, string>
+                      )[t.category] ?? ""}
+                    </div>
+                  </td>
                   <td className="py-3">
                     <form
                       action={async (fd) => {

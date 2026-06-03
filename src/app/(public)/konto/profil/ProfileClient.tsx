@@ -339,8 +339,8 @@ function MembershipSection({ customer }: { customer: Customer | null }) {
                 <br />
               </>
             )}
-            Du erhältst beim Buchen automatisch den Mitglieds-Tarif (7,50 € statt 18 € pro
-            Person und Nacht).
+            Du erhältst beim Buchen automatisch den Mitglieds-Tarif (−50 %: 11,00 € statt 22,00 €
+            pro Erwachsenem und Nacht).
           </p>
         </div>
       </Section>

@@ -114,10 +114,10 @@ export default function MietvertragEmail({
   contractDate,
 }: Props) {
   const personComponents = [
-    persons.adults > 0 && `${persons.adults} Erwachsene (Nichtmitglieder)`,
-    persons.members > 0 && `${persons.members} Vereinsmitglieder`,
-    persons.children > 0 && `${persons.children} Kinder (4–15 J.)`,
-    persons.pupils > 0 && `${persons.pupils} Schüler`,
+    persons.adults > 0 && `${persons.adults} Erwachsene`,
+    persons.members > 0 && `${persons.members} Erwachsene · Mitglied (−50 %)`,
+    persons.children > 0 && `${persons.children} Kinder/Schüler bis 16 J.`,
+    persons.pupils > 0 && `${persons.pupils} Kinder/Schüler bis 16 J. · Mitglied (−50 %)`,
     persons.teachers > 0 && `${persons.teachers} Lehrkräfte`,
   ].filter(Boolean) as string[];
 

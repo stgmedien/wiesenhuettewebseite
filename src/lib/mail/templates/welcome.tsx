@@ -92,7 +92,7 @@ export default function WelcomeEmail({ firstName, email, membershipPending, logi
               <Text style={text}>
                 <strong>Deine Mitgliedschaft prüfen wir manuell.</strong> Sobald wir Deinen Status
                 im Vereinsverzeichnis bestätigt haben, gelten für Dich automatisch die
-                Mitglieds-Tarife (7,50 € statt 18 € pro Person & Nacht). Wir geben Bescheid.
+                Mitglieds-Tarife (−50 %: 11,00 € statt 22,00 € pro Erwachsenem & Nacht). Wir geben Bescheid.
               </Text>
             </Section>
           )}

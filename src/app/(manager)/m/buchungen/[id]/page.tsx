@@ -173,9 +173,9 @@ export default async function BookingDetail({ params }: Props) {
                 {b.persons} (
                 {[
                   b.adults && `${b.adults} Erw.`,
-                  b.members && `${b.members} Mitgl.`,
-                  b.children && `${b.children} Kinder`,
-                  b.pupils && `${b.pupils} Schüler`,
+                  b.members && `${b.members} Erw./Mitgl.`,
+                  b.children && `${b.children} Kinder/Schüler`,
+                  b.pupils && `${b.pupils} Kinder/Schüler (Mitgl.)`,
                   b.teachers && `${b.teachers} Lehrer`,
                 ]
                   .filter(Boolean)

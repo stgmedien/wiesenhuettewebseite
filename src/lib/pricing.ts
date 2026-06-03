@@ -32,10 +32,10 @@ const PRICING_LABELS: Record<Locale, {
   validArrivalNotPast: string;
 }> = {
   de: {
-    adultsNonMember: "Erwachsene (Nichtmitglieder)",
-    members: "Erwachsene Vereinsmitglieder",
-    children: "Kinder (4–15 Jahre)",
-    pupils: "Schüler (Schulgruppe)",
+    adultsNonMember: "Erwachsene",
+    members: "Erwachsene · Mitglied (−50 %)",
+    children: "Kinder/Schüler bis 16 Jahre",
+    pupils: "Kinder/Schüler bis 16 · Mitglied (−50 %)",
     energyFlat: "Energiepauschale",
     cleaning: "Endreinigung (Pflicht)",
     soloSurcharge: "Aufschlag Allein-/Exklusivnutzung",
@@ -52,10 +52,10 @@ const PRICING_LABELS: Record<Locale, {
     validArrivalNotPast: "Anreise darf nicht in der Vergangenheit liegen.",
   },
   en: {
-    adultsNonMember: "Adults (non-members)",
-    members: "Adult club members",
-    children: "Children (4–15 years)",
-    pupils: "Pupils (school group)",
+    adultsNonMember: "Adults",
+    members: "Adults · member (−50%)",
+    children: "Children/pupils up to 16",
+    pupils: "Children/pupils up to 16 · member (−50%)",
     energyFlat: "Energy flat-rate",
     cleaning: "Final cleaning (mandatory)",
     soloSurcharge: "Exclusive-use surcharge",
@@ -72,10 +72,10 @@ const PRICING_LABELS: Record<Locale, {
     validArrivalNotPast: "Arrival cannot be in the past.",
   },
   nl: {
-    adultsNonMember: "Volwassenen (geen lid)",
-    members: "Volwassen verenigingsleden",
-    children: "Kinderen (4–15 jaar)",
-    pupils: "Leerlingen (schoolgroep)",
+    adultsNonMember: "Volwassenen",
+    members: "Volwassenen · lid (−50%)",
+    children: "Kinderen/leerlingen tot 16",
+    pupils: "Kinderen/leerlingen tot 16 · lid (−50%)",
     energyFlat: "Energiepakket",
     cleaning: "Eindschoonmaak (verplicht)",
     soloSurcharge: "Toeslag exclusief gebruik",
@@ -94,11 +94,11 @@ const PRICING_LABELS: Record<Locale, {
 };
 
 export const PRICES = {
-  // pro Person & Nacht
-  adultNonMemberCents: 1800,   // 18,00 € — Erwachsene Nichtmitglieder ab 16 (inkl. Lehrkräfte)
-  adultMemberCents: 750,       // 7,50 € — Erwachsene Vereinsmitglieder
-  childCents: 1000,            // 10,00 € — Kinder 4–15 J.
-  pupilCents: 750,             // 7,50 € — Schüler bei Schulgruppen
+  // pro Person & Nacht — Preisliste Stand 2026 (Mitglieder −50 %).
+  adultNonMemberCents: 2200,   // 22,00 € — Erwachsene (ab 16 J., inkl. Lehrkräfte)
+  adultMemberCents: 1100,      // 11,00 € — Erwachsene · Vereinsmitglied (−50 %)
+  childCents: 1200,            // 12,00 € — Kinder/Schüler bis 16 J.
+  pupilCents: 600,             // 6,00 € — Kinder/Schüler bis 16 J. · Vereinsmitglied (−50 %)
 
   // Pauschalen
   energyFlatPerNightCents: 2200,      // 22,00 € pro Nacht (gesamt)

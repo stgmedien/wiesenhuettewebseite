@@ -85,7 +85,7 @@ export default function MembershipRequestedEmail({ firstName, memberId }: Props)
           </Section>
           <Text style={text}>
             Bis zur Bestätigung gelten für Buchungen die regulären Nichtmitglieds-Tarife
-            (18 € pro Person und Nacht).
+            (22 € pro Erwachsenem und Nacht; Mitglieder erhalten 50 % Nachlass).
           </Text>
           <Hr style={{ borderColor: "#C8CEC4", margin: "32px 0 16px" }} />
           <Text style={muted}>

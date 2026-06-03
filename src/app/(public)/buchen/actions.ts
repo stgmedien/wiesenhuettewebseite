@@ -261,7 +261,7 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
 
   // ---------------------------------------------------------------
   // Member-Discount-Gate: nur verifizierte Vereinsmitglieder duerfen
-  // den Mitglieds-Tarif (7,50 €/Nacht) buchen.
+  // die Mitglieds-Tarife (−50 %) buchen.
   // ---------------------------------------------------------------
   const session = await auth();
   const sessionUserId = (session?.user as { id?: string } | undefined)?.id;

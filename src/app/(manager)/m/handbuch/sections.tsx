@@ -442,7 +442,7 @@ export const DOC_SECTIONS: DocSection[] = [
           ihm aus der Buchungs-Detail-Seite eine Mail mit Zahlungslink.
         </Tip>
         <Warn>
-          Mitglieds-Tarife (7,50 €/Nacht) lassen sich auch manuell nur eintragen,
+          Mitglieds-Tarife (−50 %, z. B. 11,00 €/Nacht für Erwachsene) lassen sich auch manuell nur eintragen,
           wenn der Customer als verifiziertes Mitglied im System hinterlegt ist —
           sonst zählt er als Nichtmitglied.
         </Warn>
@@ -732,11 +732,11 @@ export const DOC_SECTIONS: DocSection[] = [
         <Table
           head={["Kategorie", "Default-Preis", "Wann angewendet"]}
           rows={[
-            ["mitglied", "7,50 €/Nacht", "Verifizierte Vereinsmitglieder"],
-            ["nichtmitglied", "18,00 €/Nacht", "Erwachsene ohne Mitgliedschaft"],
-            ["kind", "10,00 €/Nacht", "4-15 Jahre"],
-            ["schueler", "7,50 €/Nacht", "Schulgruppen"],
-            ["lehrer", "18,00 €/Nacht", "Lehrkräfte (= Nichtmitglieder)"],
+            ["nichtmitglied", "22,00 €/Nacht", "Erwachsene"],
+            ["mitglied", "11,00 €/Nacht", "Erwachsene · Vereinsmitglied (−50 %)"],
+            ["kind", "12,00 €/Nacht", "Kinder/Schüler bis 16 Jahre"],
+            ["schueler", "6,00 €/Nacht", "Kinder/Schüler bis 16 · Vereinsmitglied (−50 %)"],
+            ["lehrer", "22,00 €/Nacht", "Lehrkräfte (= Erwachsene)"],
           ]}
         />
         <Tip>

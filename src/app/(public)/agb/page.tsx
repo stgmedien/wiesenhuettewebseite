@@ -64,11 +64,11 @@ export default async function AGB() {
             <li>Kaution (separat, bei Anreise zu hinterlegen, Erstattung 14 Tage nach mangelfreier Abreise)</li>
           </ul>
           <p>
-            Die jeweils gültigen Tarife werden im Buchungsvorgang transparent angezeigt. Die
-            Kurtaxe Hochsauerland ist nicht im Mietpreis enthalten und wird vom Mieter direkt über
+            Die jeweils gültigen Tarife werden im Buchungsvorgang transparent angezeigt
+            (Mitglieder der Skifreunde Gütersloh erhalten 50 % Nachlass auf die Übernachtungspreise).
+            Die Kurtaxe Hochsauerland ist nicht im Mietpreis enthalten und wird vom Mieter direkt über
             das offizielle Kurtaxen-Portal des Hochsauerlandkreises angemeldet und entrichtet. Aktueller
-            Tarif Langewiese ab 01.07.2026: <strong>2,70 € pro Person und Nacht</strong>; Kinder bis 15
-            Jahre sind beitragsfrei.
+            Tarif Langewiese: <strong>2,20 € pro Person und Nacht</strong>.
           </p>
           <p>
             Die Bezahlung erfolgt in zwei Raten: <strong>50 % Anzahlung</strong> bei Buchung,{" "}

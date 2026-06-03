@@ -166,7 +166,7 @@ const BF_COPY = {
     kaution: "Kaution",
     restzahlung: "Restzahlung von",
     restzahlungBody: "wird 14 Tage vor Anreise automatisch eingezogen — separate Zahlungsaufforderung kommt vorher per Mail. Die Kaution wird innerhalb von 14 Tagen nach mangelfreier Abreise zurückerstattet.",
-    kurtaxeNote: "Hinweis: Die Kurtaxe Hochsauerland wird separat abgerechnet — wir melden uns nach der Buchung dazu. Aktueller Tarif Langewiese (ab 01.07.2026): 2,70 € pro Person und Nacht. Kinder bis 15 Jahre sind frei.",
+    kurtaxeNote: "Hinweis: Die Kurtaxe Hochsauerland wird separat abgerechnet — wir melden uns nach der Buchung dazu. Aktueller Tarif Langewiese: 2,20 € pro Person und Nacht.",
     stornoH: "Stornierungs-Regelwerk",
     stornoToday: (d: number, p: number) => `Bei Storno heute (${d} Tage vor Anreise): ${p}% Rückerstattung`,
     stornoTodayNoDays: (p: number) => `Bei Storno heute: ${p}% Rückerstattung`,
@@ -206,17 +206,17 @@ const BF_COPY = {
     loginHintLink: "Hier einloggen",
     loginHint2: "— oder weiter buchen, wir legen automatisch ein Konto für Dich an.",
     // PersonsEditor
-    adultsLabel: "Erwachsene (Nichtmitglieder)",
-    adultsHint: "ab 16 Jahren · 18,00 € / Nacht",
-    membersLabel: "Erwachsene Vereinsmitglieder",
-    membersHint: "7,50 € / Nacht",
-    childrenLabel: "Kinder (4–15 Jahre)",
-    childrenHint: "10,00 € / Nacht",
-    pupilsLabel: "Schüler (Schulgruppen)",
-    pupilsHint: "7,50 € / Nacht",
+    adultsLabel: "Erwachsene",
+    adultsHint: "ab 16 Jahren · 22,00 € / Nacht",
+    membersLabel: "Erwachsene · Mitglied",
+    membersHint: "−50 % · 11,00 € / Nacht",
+    childrenLabel: "Kinder/Schüler bis 16 Jahre",
+    childrenHint: "12,00 € / Nacht",
+    pupilsLabel: "Kinder/Schüler bis 16 · Mitglied",
+    pupilsHint: "−50 % · 6,00 € / Nacht",
     teachersLabel: "Lehrkräfte",
-    teachersHint: "bei Schulgruppen · zählen wie Erwachsene",
-    memberLockedLabel: "Erwachsene Vereinsmitglieder",
+    teachersHint: "bei Schulgruppen · zählen wie Erwachsene (22,00 €)",
+    memberLockedLabel: "Mitglieder-Tarife (−50 %)",
     memberLockedHintPre: "Nur für verifizierte Skifreunde-Mitglieder.",
     memberLockedLogin: "Login",
     memberLockedOr: "oder im",
@@ -245,9 +245,9 @@ const BF_COPY = {
     bucher: "Bucher",
     totalSuffix: "gesamt",
     adultsShort: "Erw.",
-    membersShort: "Mitgl.",
-    childrenShort: "Kinder",
-    pupilsShort: "Schüler",
+    membersShort: "Erw./Mitgl.",
+    childrenShort: "Kinder/Schüler",
+    pupilsShort: "Kinder/Schüler (Mitgl.)",
     teachersShort: "Lehrer",
   },
   en: {
@@ -327,7 +327,7 @@ const BF_COPY = {
     kaution: "Damage deposit",
     restzahlung: "Remaining amount of",
     restzahlungBody: "is charged automatically 14 days before arrival — a separate payment notice is emailed beforehand. The damage deposit is refunded within 14 days of a clean departure.",
-    kurtaxeNote: "Note: The Hochsauerland tourist tax is settled separately — we'll be in touch after your booking. Current rate for Langewiese (from 01 Jul 2026): €2.70 per person per night. Children up to 15 are free.",
+    kurtaxeNote: "Note: The Hochsauerland tourist tax is settled separately — we'll be in touch after your booking. Current rate for Langewiese: €2.20 per person per night.",
     stornoH: "Cancellation policy",
     stornoToday: (d: number, p: number) => `If cancelled today (${d} days before arrival): ${p}% refund`,
     stornoTodayNoDays: (p: number) => `If cancelled today: ${p}% refund`,
@@ -365,17 +365,17 @@ const BF_COPY = {
     loginHint1: "💡 Already have an account?",
     loginHintLink: "Log in here",
     loginHint2: "— or continue booking; we'll create an account for you automatically.",
-    adultsLabel: "Adults (non-members)",
-    adultsHint: "16+ · 18.00 € / night",
-    membersLabel: "Adult club members",
-    membersHint: "7.50 € / night",
-    childrenLabel: "Children (4–15 years)",
-    childrenHint: "10.00 € / night",
-    pupilsLabel: "Pupils (school groups)",
-    pupilsHint: "7.50 € / night",
+    adultsLabel: "Adults",
+    adultsHint: "16+ · 22.00 € / night",
+    membersLabel: "Adults · member",
+    membersHint: "−50% · 11.00 € / night",
+    childrenLabel: "Children/pupils up to 16",
+    childrenHint: "12.00 € / night",
+    pupilsLabel: "Children/pupils up to 16 · member",
+    pupilsHint: "−50% · 6.00 € / night",
     teachersLabel: "Teachers",
-    teachersHint: "for school groups · counted as adults",
-    memberLockedLabel: "Adult club members",
+    teachersHint: "for school groups · counted as adults (22.00 €)",
+    memberLockedLabel: "Member rates (−50%)",
     memberLockedHintPre: "Only for verified Skifreunde members.",
     memberLockedLogin: "Log in",
     memberLockedOr: "or apply for membership in your",
@@ -402,9 +402,9 @@ const BF_COPY = {
     bucher: "Booker",
     totalSuffix: "total",
     adultsShort: "adults",
-    membersShort: "members",
-    childrenShort: "children",
-    pupilsShort: "pupils",
+    membersShort: "adults/member",
+    childrenShort: "children/pupils",
+    pupilsShort: "children/pupils (member)",
     teachersShort: "teachers",
   },
   nl: {
@@ -484,7 +484,7 @@ const BF_COPY = {
     kaution: "Borg",
     restzahlung: "Restbedrag van",
     restzahlungBody: "wordt 14 dagen vóór aankomst automatisch geïncasseerd — een apart betaalverzoek volgt vooraf per e-mail. De borg wordt binnen 14 dagen na schadevrije afreis terugbetaald.",
-    kurtaxeNote: "Let op: De toeristenbelasting Hochsauerland wordt apart afgerekend — we nemen na de boeking contact op. Actueel tarief Langewiese (vanaf 01-07-2026): € 2,70 per persoon per nacht. Kinderen tot 15 jaar zijn vrij.",
+    kurtaxeNote: "Let op: De toeristenbelasting Hochsauerland wordt apart afgerekend — we nemen na de boeking contact op. Actueel tarief Langewiese: € 2,20 per persoon per nacht.",
     stornoH: "Annuleringsregeling",
     stornoToday: (d: number, p: number) => `Bij annulering vandaag (${d} dagen vóór aankomst): ${p}% terugbetaling`,
     stornoTodayNoDays: (p: number) => `Bij annulering vandaag: ${p}% terugbetaling`,
@@ -522,17 +522,17 @@ const BF_COPY = {
     loginHint1: "💡 Heb je al een account?",
     loginHintLink: "Hier inloggen",
     loginHint2: "— of ga door met boeken, we maken automatisch een account voor je aan.",
-    adultsLabel: "Volwassenen (geen lid)",
-    adultsHint: "vanaf 16 jaar · € 18,00 / nacht",
-    membersLabel: "Volwassen verenigingsleden",
-    membersHint: "€ 7,50 / nacht",
-    childrenLabel: "Kinderen (4–15 jaar)",
-    childrenHint: "€ 10,00 / nacht",
-    pupilsLabel: "Leerlingen (schoolgroepen)",
-    pupilsHint: "€ 7,50 / nacht",
+    adultsLabel: "Volwassenen",
+    adultsHint: "vanaf 16 jaar · € 22,00 / nacht",
+    membersLabel: "Volwassenen · lid",
+    membersHint: "−50% · € 11,00 / nacht",
+    childrenLabel: "Kinderen/leerlingen tot 16 jaar",
+    childrenHint: "€ 12,00 / nacht",
+    pupilsLabel: "Kinderen/leerlingen tot 16 · lid",
+    pupilsHint: "−50% · € 6,00 / nacht",
     teachersLabel: "Docenten",
-    teachersHint: "bij schoolgroepen · tellen als volwassenen",
-    memberLockedLabel: "Volwassen verenigingsleden",
+    teachersHint: "bij schoolgroepen · tellen als volwassenen (€ 22,00)",
+    memberLockedLabel: "Ledentarieven (−50%)",
     memberLockedHintPre: "Alleen voor geverifieerde Skifreunde-leden.",
     memberLockedLogin: "Inloggen",
     memberLockedOr: "of vraag lidmaatschap aan in je",
@@ -1388,7 +1388,8 @@ const PersonsEditor = ({
       ariaLess={tt.ariaLess}
       ariaMore={tt.ariaMore}
     />
-    {memberAllowed ? (
+    {/* Erwachsene · Mitglied (−50 %) — nur für verifizierte Mitglieder */}
+    {memberAllowed && (
       <PersonRow
         label={tt.membersLabel}
         hint={tt.membersHint}
@@ -1397,8 +1398,37 @@ const PersonsEditor = ({
         ariaLess={tt.ariaLess}
         ariaMore={tt.ariaMore}
       />
-    ) : (
-      <div className="border-b border-[var(--color-wh-winter-grey)]/50 py-3 flex items-center justify-between gap-4 text-sm">
+    )}
+    <PersonRow
+      label={tt.childrenLabel}
+      hint={tt.childrenHint}
+      value={persons.children}
+      onChange={(v) => onChange({ ...persons, children: v })}
+      ariaLess={tt.ariaLess}
+      ariaMore={tt.ariaMore}
+    />
+    {/* Kinder/Schüler bis 16 · Mitglied (−50 %) — nur für verifizierte Mitglieder */}
+    {memberAllowed && (
+      <PersonRow
+        label={tt.pupilsLabel}
+        hint={tt.pupilsHint}
+        value={persons.pupils}
+        onChange={(v) => onChange({ ...persons, pupils: v })}
+        ariaLess={tt.ariaLess}
+        ariaMore={tt.ariaMore}
+      />
+    )}
+    <PersonRow
+      label={tt.teachersLabel}
+      hint={tt.teachersHint}
+      value={persons.teachers}
+      onChange={(v) => onChange({ ...persons, teachers: v })}
+      ariaLess={tt.ariaLess}
+      ariaMore={tt.ariaMore}
+    />
+    {/* Hinweis auf die Mitglieder-Tarife (−50 %), wenn nicht eingeloggtes Mitglied */}
+    {!memberAllowed && (
+      <div className="border-t border-[var(--color-wh-winter-grey)]/50 mt-1 pt-3 flex items-center justify-between gap-4 text-sm">
         <div>
           <div className="font-medium text-[var(--color-wh-fg-muted)]">
             {tt.memberLockedLabel}
@@ -1418,30 +1448,6 @@ const PersonsEditor = ({
         <div className="text-[var(--color-wh-fg-muted)]/60 text-sm shrink-0">{tt.memberLockedState}</div>
       </div>
     )}
-    <PersonRow
-      label={tt.childrenLabel}
-      hint={tt.childrenHint}
-      value={persons.children}
-      onChange={(v) => onChange({ ...persons, children: v })}
-      ariaLess={tt.ariaLess}
-      ariaMore={tt.ariaMore}
-    />
-    <PersonRow
-      label={tt.pupilsLabel}
-      hint={tt.pupilsHint}
-      value={persons.pupils}
-      onChange={(v) => onChange({ ...persons, pupils: v })}
-      ariaLess={tt.ariaLess}
-      ariaMore={tt.ariaMore}
-    />
-    <PersonRow
-      label={tt.teachersLabel}
-      hint={tt.teachersHint}
-      value={persons.teachers}
-      onChange={(v) => onChange({ ...persons, teachers: v })}
-      ariaLess={tt.ariaLess}
-      ariaMore={tt.ariaMore}
-    />
   </div>
 );
 
