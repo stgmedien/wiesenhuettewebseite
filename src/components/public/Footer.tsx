@@ -65,6 +65,9 @@ export const Footer = ({ locale }: { locale: Locale }) => (
         <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/kontakt">
           {t("footer.verein.kontakt", locale)}
         </Link>
+        <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/downloads">
+          {t("footer.downloads", locale)}
+        </Link>
       </nav>
     </div>
 
