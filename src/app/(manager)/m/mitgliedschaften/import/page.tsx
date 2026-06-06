@@ -12,7 +12,7 @@ export default async function MitgliederImportPage() {
   if (role !== "manager" && role !== "admin") redirect("/m/dashboard");
 
   return (
-    <div className="px-8 py-10 max-w-[1100px]">
+    <div className="px-4 sm:px-8 py-8 sm:py-10 max-w-[1100px]">
       <Link
         href="/m/mitgliedschaften"
         className="text-sm text-[var(--color-wh-deep-green)] hover:underline mb-4 inline-block"

@@ -18,7 +18,7 @@ export default async function MailTemplatesPage() {
   const all = await db.select().from(mailTemplates).orderBy(asc(mailTemplates.key));
 
   return (
-    <div className="px-8 py-10 max-w-[1100px]">
+    <div className="px-4 sm:px-8 py-8 sm:py-10 max-w-[1100px]">
       <div className="eyebrow">Manager · Kommunikation</div>
       <h1 className="text-[36px] mt-2 mb-1">Mail-Templates.</h1>
       <p className="text-[var(--color-wh-fg-muted)] m-0 mb-8">

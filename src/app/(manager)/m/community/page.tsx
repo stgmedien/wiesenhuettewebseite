@@ -43,7 +43,7 @@ export default async function CommunityModerationPage({
   ).length;
 
   return (
-    <div className="px-8 py-10 max-w-[1100px]">
+    <div className="px-4 sm:px-8 py-8 sm:py-10 max-w-[1100px]">
       <div className="eyebrow">Manager · Community</div>
       <h1 className="text-[36px] mt-2 mb-1">Gästebuch & Schulprojekt.</h1>
       <p className="text-[var(--color-wh-fg-muted)] m-0 mb-6">

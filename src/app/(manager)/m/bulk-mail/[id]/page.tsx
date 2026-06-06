@@ -38,7 +38,7 @@ export default async function CampaignDetailPage({
   const previewHtml = markdownToHtml(c.body);
 
   return (
-    <div className="px-8 py-10 max-w-[900px]">
+    <div className="px-4 sm:px-8 py-8 sm:py-10 max-w-[900px]">
       <Link
         href="/m/bulk-mail"
         className="text-sm text-[var(--color-wh-deep-green)] hover:underline mb-4 inline-block"

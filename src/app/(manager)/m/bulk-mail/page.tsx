@@ -39,7 +39,7 @@ export default async function BulkMailPage() {
     .limit(100);
 
   return (
-    <div className="px-8 py-10 max-w-[1100px]">
+    <div className="px-4 sm:px-8 py-8 sm:py-10 max-w-[1100px]">
       <div className="eyebrow">Manager · Bulk-Mail</div>
       <h1 className="text-[36px] mt-2 mb-1">Newsletter & Mass-Mailings.</h1>
       <p className="text-[var(--color-wh-fg-muted)] m-0 mb-8 max-w-2xl">

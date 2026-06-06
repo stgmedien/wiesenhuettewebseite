@@ -54,7 +54,7 @@ export default async function BookingDetail({ params }: Props) {
     .orderBy(asc(mailTemplates.name));
 
   return (
-    <div className="px-8 py-10 max-w-[1200px]">
+    <div className="px-4 sm:px-8 py-8 sm:py-10 max-w-[1200px]">
       <Link
         href="/m/buchungen"
         className="text-sm text-[var(--color-wh-fg-muted)] no-underline"

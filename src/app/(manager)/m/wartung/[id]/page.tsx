@@ -32,7 +32,7 @@ export default async function TicketDetailPage({
     : null;
 
   return (
-    <div className="px-8 py-10 max-w-[900px]">
+    <div className="px-4 sm:px-8 py-8 sm:py-10 max-w-[900px]">
       <Link
         href="/m/wartung"
         className="text-sm text-[var(--color-wh-deep-green)] hover:underline mb-4 inline-block"

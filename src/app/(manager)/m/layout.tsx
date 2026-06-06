@@ -1,4 +1,4 @@
-import { Sidebar } from "@/components/manager/Sidebar";
+import { ManagerShell } from "@/components/manager/ManagerShell";
 import { auth } from "@/lib/auth";
 
 export default async function ManagerLayout({
@@ -15,16 +15,15 @@ export default async function ManagerLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-wh-snow)] grid grid-cols-[260px_1fr]">
-      <Sidebar
-        user={{
-          name: session.user?.name ?? "Manager",
-          email: session.user?.email ?? "",
-          role:
-            (session.user as { role?: string } | undefined)?.role ?? "manager",
-        }}
-      />
-      <main className="overflow-auto">{children}</main>
-    </div>
+    <ManagerShell
+      user={{
+        name: session.user?.name ?? "Manager",
+        email: session.user?.email ?? "",
+        role:
+          (session.user as { role?: string } | undefined)?.role ?? "manager",
+      }}
+    >
+      {children}
+    </ManagerShell>
   );
 }

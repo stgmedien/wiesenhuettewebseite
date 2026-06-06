@@ -167,14 +167,14 @@ export default async function Dashboard() {
   }
 
   return (
-    <div className="px-8 py-10 max-w-[1400px]">
+    <div className="px-4 sm:px-8 py-8 sm:py-10 max-w-[1400px]">
       <div className="eyebrow">Dashboard</div>
-      <h1 className="text-[40px] mt-2 mb-1">Heute auf der Wiesenhütte.</h1>
+      <h1 className="text-[28px] sm:text-[40px] mt-2 mb-1">Heute auf der Wiesenhütte.</h1>
       <p className="text-[var(--color-wh-fg-muted)] m-0">
         {formatDateLong(today)}
       </p>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-10">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-8 sm:mt-10">
         <Kpi
           icon={<CalendarClock />}
           label="Heute An/Ab"
@@ -357,7 +357,7 @@ const Kpi = ({
   tone?: "default" | "warm";
 }) => (
   <div
-    className={`rounded-[var(--radius-card)] border border-[var(--color-wh-winter-grey)] bg-white p-5 flex flex-col gap-3 ${
+    className={`rounded-[var(--radius-card)] border border-[var(--color-wh-winter-grey)] bg-white p-4 sm:p-5 flex flex-col gap-2.5 sm:gap-3 ${
       tone === "warm" ? "bg-[var(--color-wh-beige)]" : ""
     }`}
   >
@@ -365,7 +365,7 @@ const Kpi = ({
       <span className="opacity-80">{icon}</span>
     </div>
     <div>
-      <div className="font-display text-[40px] leading-none font-bold text-[var(--color-wh-deep-green)]">
+      <div className="font-display text-[30px] sm:text-[40px] leading-none font-bold text-[var(--color-wh-deep-green)] break-words">
         {value}
       </div>
       <div className="text-sm text-[var(--color-wh-fg-muted)] mt-2">{label}</div>

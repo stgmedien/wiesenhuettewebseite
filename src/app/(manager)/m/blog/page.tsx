@@ -28,7 +28,7 @@ export default async function BlogListPage() {
   const archived = rows.filter((r) => r.status === "archived");
 
   return (
-    <div className="px-8 py-10 max-w-[1280px]">
+    <div className="px-4 sm:px-8 py-8 sm:py-10 max-w-[1280px]">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
           <div className="eyebrow">Blog</div>

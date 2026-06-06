@@ -77,7 +77,7 @@ export default async function AuditPage({ searchParams }: Props) {
   };
 
   return (
-    <div className="px-8 py-10 max-w-[1280px]">
+    <div className="px-4 sm:px-8 py-8 sm:py-10 max-w-[1280px]">
       <div className="eyebrow">Sicherheit</div>
       <h1 className="text-[40px] mt-2 mb-1">Audit-Log</h1>
       <p className="text-[var(--color-wh-fg-muted)] m-0 mt-2 max-w-2xl">

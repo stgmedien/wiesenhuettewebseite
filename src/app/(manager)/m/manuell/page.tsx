@@ -4,7 +4,7 @@ export const metadata = { title: "Manuelle Buchung · Wiesenhütte Manager" };
 
 export default function ManuellPage() {
   return (
-    <div className="px-8 py-10 max-w-[820px]">
+    <div className="px-4 sm:px-8 py-8 sm:py-10 max-w-[820px]">
       <div className="eyebrow">Manuelle Buchung</div>
       <h1 className="text-[40px] mt-2 mb-1">Buchung anlegen</h1>
       <p className="text-[var(--color-wh-fg-muted)] m-0">

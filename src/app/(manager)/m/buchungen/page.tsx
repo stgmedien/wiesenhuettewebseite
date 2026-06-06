@@ -31,23 +31,24 @@ export default async function BookingsListPage() {
     .orderBy(desc(bookings.arrival));
 
   return (
-    <div className="px-8 py-10 max-w-[1400px]">
-      <div className="flex items-center justify-between gap-4">
+    <div className="px-4 sm:px-8 py-8 sm:py-10 max-w-[1400px]">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="eyebrow">Buchungen</div>
-          <h1 className="text-[40px] mt-2 mb-0">Alle Buchungen</h1>
+          <h1 className="text-[28px] sm:text-[40px] mt-2 mb-0">Alle Buchungen</h1>
           <p className="text-[var(--color-wh-fg-muted)] m-0 mt-2">{rows.length} insgesamt</p>
         </div>
         <Link
           href="/m/manuell"
-          className="inline-flex h-11 px-5 items-center rounded-[var(--radius-btn)] bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] no-underline font-semibold"
+          className="inline-flex h-11 px-5 items-center justify-center rounded-[var(--radius-btn)] bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] no-underline font-semibold shrink-0"
         >
           + Manuelle Buchung
         </Link>
       </div>
 
       <div className="mt-8 bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] overflow-hidden">
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[720px] text-sm">
           <thead className="bg-[var(--color-wh-snow)] border-b border-[var(--color-wh-winter-grey)]">
             <tr className="text-left">
               <Th>Nr.</Th>
@@ -109,6 +110,7 @@ export default async function BookingsListPage() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

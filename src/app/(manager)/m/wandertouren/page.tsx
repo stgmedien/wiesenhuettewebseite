@@ -30,7 +30,7 @@ export default async function WandertourenManagerPage() {
     .orderBy(asc(hikingRoutes.sortOrder), asc(hikingRoutes.name));
 
   return (
-    <div className="px-8 py-10 max-w-[1200px]">
+    <div className="px-4 sm:px-8 py-8 sm:py-10 max-w-[1200px]">
       <div className="eyebrow">Manager · Wandertouren</div>
       <h1 className="text-[36px] mt-2 mb-1">Routen rund um Langewiese.</h1>
       <p className="text-[var(--color-wh-fg-muted)] m-0 mb-8">

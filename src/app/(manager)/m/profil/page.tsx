@@ -25,7 +25,7 @@ export default async function ProfilePage({ searchParams }: Props) {
     !me.twoFactorEnabled && (me.role === "admin" || me.mustEnable2FA);
 
   return (
-    <div className="px-8 py-10 max-w-[840px]">
+    <div className="px-4 sm:px-8 py-8 sm:py-10 max-w-[840px]">
       <div className="eyebrow">Profil</div>
       <h1 className="text-[40px] mt-2 mb-1">Mein Konto</h1>
       <p className="text-[var(--color-wh-fg-muted)] m-0 mt-2">

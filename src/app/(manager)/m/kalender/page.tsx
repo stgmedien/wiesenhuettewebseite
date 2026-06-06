@@ -62,7 +62,7 @@ export default async function CalendarPage({ searchParams }: Props) {
   }
 
   return (
-    <div className="px-8 py-10 max-w-[1400px]">
+    <div className="px-4 sm:px-8 py-8 sm:py-10 max-w-[1400px]">
       <div className="eyebrow">Kalender</div>
       <h1 className="text-[40px] mt-2 mb-0">Belegung</h1>
       <CalendarGrid
