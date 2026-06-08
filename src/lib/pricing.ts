@@ -259,7 +259,9 @@ export const calculatePrice = (input: PriceInput): PriceBreakdown => {
     p.children * childCents * nights +
     p.pupils * pupilCents * nights;
 
-  const energyFlatCents = PRICES.energyFlatPerNightCents * nights;
+  // Energie ist seit 2026 in den Übernachtungspreisen enthalten — keine separate
+  // Pauschale mehr. Feld bleibt (=0) für persistierte Bestandsbuchungen erhalten.
+  const energyFlatCents = 0;
   const cleaningCents = PRICES.cleaningCents; // Pflicht
   const soloSurchargeCents = input.soloUse ? PRICES.soloSurchargeCents : 0;
   const extrasCents = (input.extras ?? []).reduce((acc, e) => acc + e.totalCents, 0);
@@ -287,7 +289,6 @@ export const calculatePrice = (input: PriceInput): PriceBreakdown => {
 
   const subtotalCents =
     accommodationCents +
-    energyFlatCents +
     cleaningCents +
     soloSurchargeCents +
     minOccupancySurchargeCents +
@@ -342,13 +343,6 @@ export const calculatePrice = (input: PriceInput): PriceBreakdown => {
       totalCents: p.pupils * pupilCents * nights,
     });
   }
-  lines.push({
-    label: L.energyFlat,
-    detail: L.detailNightsAt(nights, formatEuro(PRICES.energyFlatPerNightCents, input.locale)),
-    qty: nights,
-    unitCents: PRICES.energyFlatPerNightCents,
-    totalCents: energyFlatCents,
-  });
   lines.push({
     label: L.cleaning,
     qty: 1,

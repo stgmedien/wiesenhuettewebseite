@@ -90,10 +90,10 @@ type BookingFlowProps = {
 
 const BF_COPY = {
   de: {
-    steps: ["Zeitraum & Personen", "Anlass & Pauschalen", "Kontakt", "Übersicht"],
+    steps: ["Zeitraum & Personen", "Anlass", "Kontakt", "Übersicht"],
     s0H: "Wann?",
     s1H: "Wer kommt?",
-    s1Pauschalen: "Pauschalen",
+    s1AnlassH: "Anlass",
     s2H: "Eure Daten",
     s3H: "Übersicht",
     rangeBlocked: "Mindestens ein Tag in diesem Zeitraum ist bereits belegt — bitte einen anderen Zeitraum wählen.",
@@ -251,10 +251,10 @@ const BF_COPY = {
     teachersShort: "Lehrer",
   },
   en: {
-    steps: ["Dates & guests", "Purpose & extras", "Contact", "Summary"],
+    steps: ["Dates & guests", "Purpose", "Contact", "Summary"],
     s0H: "When?",
     s1H: "Who's coming?",
-    s1Pauschalen: "Flat-rates",
+    s1AnlassH: "Purpose",
     s2H: "Your details",
     s3H: "Summary",
     rangeBlocked: "At least one day in this range is already booked — please pick another range.",
@@ -408,10 +408,10 @@ const BF_COPY = {
     teachersShort: "teachers",
   },
   nl: {
-    steps: ["Periode & personen", "Aanleiding & pakketten", "Contact", "Overzicht"],
+    steps: ["Periode & personen", "Aanleiding", "Contact", "Overzicht"],
     s0H: "Wanneer?",
     s1H: "Wie komt er?",
-    s1Pauschalen: "Pakketten",
+    s1AnlassH: "Aanleiding",
     s2H: "Jullie gegevens",
     s3H: "Overzicht",
     rangeBlocked: "Minstens één dag in deze periode is al geboekt — kies een andere periode.",
@@ -851,17 +851,8 @@ export const BookingFlow = ({
 
         {step === 1 && (
           <div className="mt-8 space-y-6">
-            <h3 className="text-[22px] sm:text-[24px] m-0">{tt.s1Pauschalen}</h3>
-            <div className="bg-[var(--color-wh-green-soft)] border border-[var(--color-wh-green)]/30 rounded-[var(--radius-card)] p-5">
-              <div className="font-semibold text-[var(--color-wh-deep-green)]">
-                {tt.endreinigungTitle}
-              </div>
-              <div className="text-sm text-[var(--color-wh-fg-muted)] mt-1">
-                {tt.endreinigungBody}
-              </div>
-            </div>
+            <h3 className="text-[22px] sm:text-[24px] m-0">{tt.s1AnlassH}</h3>
 
-            {/* Allein-/Exklusivnutzung-Option entfernt (Vorstands-Entscheidung). */}
             <Select
               id="purpose"
               label={tt.purpose}

@@ -146,7 +146,9 @@ export default async function QuittungPage({ params }: Props) {
           </thead>
           <tbody>
             <Line label="Übernachtung" cents={booking.accommodationCents} />
-            <Line label="Energiepauschale" cents={booking.energyFlatCents} />
+            {booking.energyFlatCents > 0 && (
+              <Line label="Energiepauschale" cents={booking.energyFlatCents} />
+            )}
             <Line label="Endreinigung (Pflicht)" cents={booking.cleaningCents} />
             {booking.soloSurchargeCents > 0 && (
               <Line label="Aufschlag Allein-/Exklusivnutzung" cents={booking.soloSurchargeCents} />

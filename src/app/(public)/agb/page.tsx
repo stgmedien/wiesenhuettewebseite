@@ -57,8 +57,7 @@ export default async function AGB() {
         <Block title="§ 4 Mietpreis & Zahlungsmodalitäten">
           <p>Der Mietpreis setzt sich zusammen aus:</p>
           <ul>
-            <li>Übernachtungspreis je Person und Nacht (gestaffelt nach Personentyp)</li>
-            <li>Energiepauschale je Nacht</li>
+            <li>Übernachtungspreis je Person und Nacht (gestaffelt nach Personentyp, inkl. Energie-/Verbrauchskosten)</li>
             <li>Endreinigung (Pflicht, einmalig)</li>
             <li>Ggf. Aufschlag Allein-/Exklusivnutzung</li>
             <li>Kaution (separat, bei Anreise zu hinterlegen, Erstattung 14 Tage nach mangelfreier Abreise)</li>

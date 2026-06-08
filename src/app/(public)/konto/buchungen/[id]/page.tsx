@@ -100,7 +100,9 @@ export default async function BuchungDetailPage({ params }: Props) {
         </h2>
         <dl className="space-y-2 text-sm">
           <Row label="Übernachtung" value={booking.accommodationCents} />
-          <Row label="Energiepauschale" value={booking.energyFlatCents} />
+          {booking.energyFlatCents > 0 && (
+            <Row label="Energiepauschale" value={booking.energyFlatCents} />
+          )}
           <Row label="Endreinigung (Pflicht)" value={booking.cleaningCents} />
           {booking.soloSurchargeCents > 0 && (
             <Row label="Aufschlag Allein-/Exklusivnutzung" value={booking.soloSurchargeCents} />

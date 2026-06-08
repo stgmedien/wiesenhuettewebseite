@@ -33,9 +33,9 @@ const BEATS: Beat[] = [
       nl: "Auto uitladen, deur open, welkom thuis.",
     },
     body: {
-      de: "Die letzten drei Kurven runter, Koffer raus, Schlüssel aus dem Briefkasten. Der erste Schritt ins Haus: altes Holz, kühle Luft, die langsam warm wird. Der Hüttenwart hat die Heizung morgens schon angeschmissen.",
-      en: "The last three bends down, bags out, key from the letterbox. First step inside: old wood, cool air slowly warming up. The hut warden already turned the heating on this morning.",
-      nl: "De laatste drie bochten omlaag, koffers eruit, sleutel uit de brievenbus. De eerste stap naar binnen: oud hout, koele lucht die langzaam opwarmt. De huttenwacht heeft de verwarming 's ochtends al aangezet.",
+      de: "Die letzte Kurve runter, Koffer raus, Schlüssel aus dem Kasten. Der erste Schritt ins Haus: altes Holz, kühle Luft, die langsam warm wird. Der Hüttenwart hat die Heizung morgens schon angeschmissen.",
+      en: "The last bend down, bags out, key from the key box. First step inside: old wood, cool air slowly warming up. The hut warden already turned the heating on this morning.",
+      nl: "De laatste bocht omlaag, koffers eruit, sleutel uit het sleutelkastje. De eerste stap naar binnen: oud hout, koele lucht die langzaam opwarmt. De huttenwacht heeft de verwarming 's ochtends al aangezet.",
     },
   },
   {
@@ -63,9 +63,9 @@ const BEATS: Beat[] = [
       nl: "Broodjes van de bakker, koffie, niemand heeft haast.",
     },
     body: {
-      de: "Einer ist morgens runter zur Bäckerei Gerke gefahren, hat Brötchen geholt. Auf dem Tisch ist alles: Butter, Marmelade aus dem Laden, die Eier vom Bauern nebenan. Den Tag entscheiden wir spontan — bis dahin macht keiner einen Plan.",
-      en: "Someone drove down to the Bäckerei Gerke in the morning and brought back rolls. Everything's on the table: butter, jam from the shop, eggs from next door. We'll decide the day as we go — until then nobody's making a plan.",
-      nl: "Iemand reed 's ochtends naar bakkerij Gerke en haalde broodjes. Alles staat op tafel: boter, jam van de winkel, eieren van de buren. We bedenken de dag al gaande — tot dan maakt niemand een plan.",
+      de: "Einer ist morgens hoch zur Bäckerei Gerke gelaufen, hat Brötchen geholt. Auf dem Tisch ist alles: Butter, Marmelade aus dem Laden, die Eier vom Bauern nebenan. Den Tag entscheiden wir spontan — bis dahin macht keiner einen Plan.",
+      en: "Someone walked up to the Bäckerei Gerke in the morning and brought back rolls. Everything's on the table: butter, jam from the shop, eggs from next door. We'll decide the day as we go — until then nobody's making a plan.",
+      nl: "Iemand liep 's ochtends omhoog naar bakkerij Gerke en haalde broodjes. Alles staat op tafel: boter, jam van de winkel, eieren van de buren. We bedenken de dag al gaande — tot dan maakt niemand een plan.",
     },
   },
   {

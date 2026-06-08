@@ -319,7 +319,7 @@ export const DOC_SECTIONS: DocSection[] = [
         <UL>
           <li>Kunden-Daten + Mitgliedsstatus</li>
           <li>An-/Abreise + Belegung (gewichtete Personen-Anzahl)</li>
-          <li>Komplette Preis-Aufschlüsselung (Übernachtung, Energie, Reinigung, Solo, Extras)</li>
+          <li>Komplette Preis-Aufschlüsselung (Übernachtung, Reinigung, Solo, Extras)</li>
           <li>Zahlungs-Tabelle (erhalten/offen/erstattet) + Saldo</li>
           <li>Status-Dropdown zum manuellen Ändern</li>
           <li>Buttons: Mail an Bucher, Anreise-Übergabe, Abreise-Übernahme, PDF-Rechnung</li>

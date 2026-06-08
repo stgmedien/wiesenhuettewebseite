@@ -200,10 +200,12 @@ export default function MietvertragEmail({
               <Column><Text style={tableLabel}>Übernachtung</Text></Column>
               <Column><Text style={tableValue}>{formatEuro(pricing.accommodationCents)}</Text></Column>
             </Row>
-            <Row>
-              <Column><Text style={tableLabel}>Energiepauschale</Text></Column>
-              <Column><Text style={tableValue}>{formatEuro(pricing.energyFlatCents)}</Text></Column>
-            </Row>
+            {pricing.energyFlatCents > 0 && (
+              <Row>
+                <Column><Text style={tableLabel}>Energiepauschale</Text></Column>
+                <Column><Text style={tableValue}>{formatEuro(pricing.energyFlatCents)}</Text></Column>
+              </Row>
+            )}
             <Row>
               <Column><Text style={tableLabel}>Endreinigung (Pflicht)</Text></Column>
               <Column><Text style={tableValue}>{formatEuro(pricing.cleaningCents)}</Text></Column>

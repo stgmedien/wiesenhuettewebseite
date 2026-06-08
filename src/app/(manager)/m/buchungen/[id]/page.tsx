@@ -239,8 +239,12 @@ export default async function BookingDetail({ params }: Props) {
             <dl className="grid grid-cols-[1fr_auto] gap-y-2 text-sm">
               <Dt>Übernachtung</Dt>
               <Dd className="text-right">{formatEuro(b.accommodationCents)}</Dd>
-              <Dt>Energiepauschale</Dt>
-              <Dd className="text-right">{formatEuro(b.energyFlatCents)}</Dd>
+              {b.energyFlatCents > 0 && (
+                <>
+                  <Dt>Energiepauschale</Dt>
+                  <Dd className="text-right">{formatEuro(b.energyFlatCents)}</Dd>
+                </>
+              )}
               <Dt>Endreinigung</Dt>
               <Dd className="text-right">{formatEuro(b.cleaningCents)}</Dd>
               {b.soloSurchargeCents > 0 && (
