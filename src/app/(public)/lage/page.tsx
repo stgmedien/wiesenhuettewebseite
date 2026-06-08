@@ -229,7 +229,7 @@ const COPY: Record<Locale, Copy> = {
         {
           icon: "backpack",
           title: "Selbstversorger",
-          body: "Vor der Anreise einkaufen — der nächste Supermarkt (EDEKA Löffler) ist in Winterberg, donnerstags geschlossen. Brötchen morgens beim Gerke gegenüber.",
+          body: "Vor der Anreise einkaufen — der nächste große Supermarkt (EDEKA Löffler) ist in Winterberg, donnerstags geschlossen. Lebensmittel und Brötchen bekommt Ihr aber auch direkt gegenüber bei Gerke.",
         },
       ],
     },
@@ -340,7 +340,7 @@ const COPY: Record<Locale, Copy> = {
       items: [
         { icon: "mountain", title: "690 metres up", body: "Langewiese is one of NRW's highest villages. Nights get cool even in summer — bring a jacket. In winter, snow often lies until April." },
         { icon: "alert", title: "Last filling station", body: "The nearest 24h station is in Winterberg (8 km). Late-evening arrivals: refuel beforehand." },
-        { icon: "backpack", title: "Self-catered", body: "Shop before arriving — the nearest supermarket (EDEKA Löffler) is in Winterberg, closed Thursdays. Morning rolls at Gerke across the street." },
+        { icon: "backpack", title: "Self-catered", body: "Shop before arriving — the nearest large supermarket (EDEKA Löffler) is in Winterberg, closed Thursdays. You can also get groceries and rolls right across the street at Gerke." },
       ],
     },
     cta: {
@@ -450,7 +450,7 @@ const COPY: Record<Locale, Copy> = {
       items: [
         { icon: "mountain", title: "690 meter hoogte", body: "Langewiese is een van NRW's hoogste dorpen. Ook in de zomer wordt het 's nachts koel — neem een jas mee. In de winter ligt vaak sneeuw tot april." },
         { icon: "alert", title: "Laatste tankstation", body: "Het dichtstbijzijnde 24-uurs tankstation is in Winterberg (8 km). Late aankomers: vooraf tanken." },
-        { icon: "backpack", title: "Zelfvoorzienend", body: "Vóór aankomst boodschappen doen — de dichtstbijzijnde supermarkt (EDEKA Löffler) ligt in Winterberg, donderdag dicht. 's Ochtends broodjes bij Gerke tegenover." },
+        { icon: "backpack", title: "Zelfvoorzienend", body: "Vóór aankomst boodschappen doen — de dichtstbijzijnde grote supermarkt (EDEKA Löffler) ligt in Winterberg, donderdag dicht. Levensmiddelen en broodjes krijg je ook direct tegenover bij Gerke." },
       ],
     },
     cta: {

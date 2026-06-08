@@ -1,4 +1,4 @@
-import { Mail, Phone, Home } from "lucide-react";
+import { Mail, Phone, CalendarCheck } from "lucide-react";
 import Image from "next/image";
 import { getServerLocale } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n-shared";
@@ -15,9 +15,9 @@ type Copy = {
   lead: string;
   vorstand: { eyebrow: string; line: string };
   cards: {
-    booking: { label: string; secondaryInfo: string };
+    booking: { label: string; info: string; cta: string };
+    fragen: { label: string; info: string };
     huettenwart: { label: string; address: string; info: string };
-    general: { label: string };
   };
   notes: {
     h3: string;
@@ -29,16 +29,23 @@ const COPY: Record<Locale, Copy> = {
   de: {
     eyebrow: "Kontakt",
     h1: "So erreicht Ihr uns.",
-    lead: "Für Buchungen nutzt am besten direkt unser Buchungstool. Für Fragen, Sonderwünsche oder Großgruppenanfragen erreicht Ihr uns hier.",
+    lead: "Alle Buchungen laufen direkt über unser Online-Buchungstool. Für konkrete Fragen oder Sonderwünsche meldet Ihr Euch bei Tanja Milse vom Vorstand.",
     vorstand: { eyebrow: "Vorstand", line: "Skifreunde Gütersloh e.V. — die Menschen hinter dem Verein." },
     cards: {
-      booking: { label: "Buchungsmanagement", secondaryInfo: "Buchungsanfragen & Vertragsabwicklung" },
+      booking: {
+        label: "Buchungen",
+        info: "Alle Buchungen laufen direkt über unser Online-Buchungstool — Buchungsanfragen oder Verträge per E-Mail sind nicht nötig.",
+        cta: "Zum Buchungstool",
+      },
+      fragen: {
+        label: "Fragen & Sonderwünsche",
+        info: "Bei konkreten Fragen rund um Eure Hüttenfahrt meldet Ihr Euch direkt bei Tanja Milse vom Vorstand.",
+      },
       huettenwart: {
         label: "Hüttenwart vor Ort",
         address: "Vorm Rohrbach 1, 59955 Winterberg-Langewiese",
         info: "Schlüsselübergabe, Fragen vor Ort, Mängelmeldung",
       },
-      general: { label: "Allgemein" },
     },
     notes: {
       h3: "Kurze Hinweise vor Eurer Anreise",
@@ -52,16 +59,23 @@ const COPY: Record<Locale, Copy> = {
   en: {
     eyebrow: "Contact",
     h1: "How to reach us.",
-    lead: "For bookings, please use our booking tool directly. For questions, special requests or large-group inquiries, you can reach us here.",
+    lead: "All bookings go directly through our online booking tool. For specific questions or special requests, get in touch with Tanja Milse from the board.",
     vorstand: { eyebrow: "Board", line: "Skifreunde Gütersloh e.V. — the people behind the club." },
     cards: {
-      booking: { label: "Booking management", secondaryInfo: "Booking inquiries & contract handling" },
+      booking: {
+        label: "Bookings",
+        info: "All bookings go directly through our online booking tool — no booking inquiries or contracts by email needed.",
+        cta: "Go to booking tool",
+      },
+      fragen: {
+        label: "Questions & special requests",
+        info: "For specific questions about your stay, get in touch with Tanja Milse from the board.",
+      },
       huettenwart: {
         label: "On-site cabin keeper",
         address: "Vorm Rohrbach 1, 59955 Winterberg-Langewiese, Germany",
         info: "Key handover, questions on site, reporting defects",
       },
-      general: { label: "General" },
     },
     notes: {
       h3: "A few notes before your arrival",
@@ -75,16 +89,23 @@ const COPY: Record<Locale, Copy> = {
   nl: {
     eyebrow: "Contact",
     h1: "Zo bereik je ons.",
-    lead: "Voor boekingen gebruik je het beste rechtstreeks onze boekingstool. Voor vragen, bijzondere wensen of grote groepen kun je ons hier bereiken.",
+    lead: "Alle boekingen verlopen direct via onze online boekingstool. Voor concrete vragen of bijzondere wensen neem je contact op met Tanja Milse van het bestuur.",
     vorstand: { eyebrow: "Bestuur", line: "Skifreunde Gütersloh e.V. — de mensen achter de vereniging." },
     cards: {
-      booking: { label: "Boekingsbeheer", secondaryInfo: "Boekingsaanvragen & contractafhandeling" },
+      booking: {
+        label: "Boekingen",
+        info: "Alle boekingen verlopen direct via onze online boekingstool — boekingsaanvragen of contracten per e-mail zijn niet nodig.",
+        cta: "Naar de boekingstool",
+      },
+      fragen: {
+        label: "Vragen & bijzondere wensen",
+        info: "Voor concrete vragen over jullie verblijf neem je direct contact op met Tanja Milse van het bestuur.",
+      },
       huettenwart: {
         label: "Hutwacht ter plaatse",
         address: "Vorm Rohrbach 1, 59955 Winterberg-Langewiese, Duitsland",
         info: "Sleutel­overdracht, vragen ter plaatse, gebreken melden",
       },
-      general: { label: "Algemeen" },
     },
     notes: {
       h3: "Korte aanwijzingen vóór aankomst",
@@ -140,12 +161,21 @@ export default async function KontaktPage() {
 
         <div className="mt-12 grid gap-4 md:grid-cols-2">
           <Card
-            icon={<Home size={20} strokeWidth={1.6} />}
+            icon={<CalendarCheck size={20} strokeWidth={1.6} />}
             label={c.cards.booking.label}
+            primary="Online-Buchungstool"
+            secondary={[
+              { kind: "link", value: c.cards.booking.cta, href: "/buchen" },
+              { kind: "info", value: c.cards.booking.info },
+            ]}
+          />
+          <Card
+            icon={<Mail size={20} strokeWidth={1.6} />}
+            label={c.cards.fragen.label}
             primary="Tanja Milse"
             secondary={[
               { kind: "mail", value: "vorstand@skifreunde-gt.de" },
-              { kind: "info", value: c.cards.booking.secondaryInfo },
+              { kind: "info", value: c.cards.fragen.info },
             ]}
           />
           <Card
@@ -157,15 +187,6 @@ export default async function KontaktPage() {
               { kind: "phone", value: "02758 / 2014822" },
               { kind: "phone", value: "0151 / 67 44 82 73" },
               { kind: "info", value: c.cards.huettenwart.info },
-            ]}
-          />
-          <Card
-            icon={<Mail size={20} strokeWidth={1.6} />}
-            label={c.cards.general.label}
-            primary="Skifreunde Gütersloh e.V."
-            secondary={[
-              { kind: "info", value: "Postfach 2819, 33258 Gütersloh" },
-              { kind: "mail", value: "info@skifreunde-gt.de" },
             ]}
           />
         </div>
@@ -186,7 +207,8 @@ export default async function KontaktPage() {
 type Item =
   | { kind: "mail"; value: string }
   | { kind: "phone"; value: string }
-  | { kind: "info"; value: string };
+  | { kind: "info"; value: string }
+  | { kind: "link"; value: string; href: string };
 
 const Card = ({
   icon,
@@ -211,6 +233,11 @@ const Card = ({
           {s.kind === "mail" && <a href={`mailto:${s.value}`}>{s.value}</a>}
           {s.kind === "phone" && <a href={`tel:${s.value.replace(/[^0-9+]/g, "")}`}>{s.value}</a>}
           {s.kind === "info" && s.value}
+          {s.kind === "link" && (
+            <a href={s.href} className="font-semibold text-[var(--color-wh-deep-green)] underline">
+              {s.value} →
+            </a>
+          )}
         </li>
       ))}
     </ul>

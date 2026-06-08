@@ -29,8 +29,7 @@ export default async function HausordnungPage() {
               <strong>keine Eventlocation und kein Partyort</strong>: übermäßiger Alkoholkonsum,
               laute Feiern und Verhalten, das andere im Ort stört oder die Hütte schädigt, sind
               ausdrücklich nicht gewünscht und können zum Verweis und zur Einbehaltung der Kaution
-              führen. Buchungen mit privatem Feier-Anlass (JGA, runder Geburtstag etc.) werden vom
-              Vorstand vorab individuell geprüft und können abgelehnt werden.
+              führen. Reine Partygruppen können wir nicht aufnehmen.
             </p>
           </div>
         </Block>
