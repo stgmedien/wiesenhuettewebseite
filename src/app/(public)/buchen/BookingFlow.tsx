@@ -15,6 +15,11 @@ import { AvailabilityCalendar } from "./AvailabilityCalendar";
 // angegeben werden (Vorstands-Prüfung — siehe interne Notification).
 const PURPOSE_KEYS = ["familie", "klasse", "schul", "verein", "firma", "privat", "sonstiges"] as const;
 type PurposeKey = (typeof PURPOSE_KEYS)[number];
+// Im Anlass-Dropdown auswählbar sind ausschließlich diese vier (Reihenfolge wie
+// gewünscht): Vereins-, Schul-, Klassen- und Gruppenfahrt. 'familie' fungiert als
+// generische „Gruppenfahrt" (Standard-Checkout, keine Institutionspflicht). Die
+// übrigen Keys bleiben nur für Bestandsbuchungen/Backend-Kompatibilität im Typ.
+const SELECTABLE_PURPOSE_KEYS = ["verein", "schul", "klasse", "familie"] as const;
 const PRIVATE_SUB_KEYS = ["jga", "geburtstag", "hochzeit", "sonstiges"] as const;
 type PrivateSubKey = (typeof PRIVATE_SUB_KEYS)[number];
 
@@ -102,10 +107,10 @@ const BF_COPY = {
     purpose: "Anlass *",
     purposePlaceholder: "Bitte wählen …",
     purposeOpts: {
-      familie: "Gruppen-Aufenthalt",
+      familie: "Gruppenfahrt",
       klasse: "Klassenfahrt",
-      schul: "Schul-/Studienfahrt",
-      verein: "Vereins-/Gruppenfahrt",
+      schul: "Schulfahrt",
+      verein: "Vereinsfahrt",
       firma: "Firmen-/Team-Event",
       privat: "Private Feier",
       sonstiges: "Sonstiges",
@@ -263,10 +268,10 @@ const BF_COPY = {
     purpose: "Purpose *",
     purposePlaceholder: "Please choose …",
     purposeOpts: {
-      familie: "Group stay",
-      klasse: "School class trip",
-      schul: "School / university trip",
-      verein: "Club / group trip",
+      familie: "Group trip",
+      klasse: "Class trip",
+      schul: "School trip",
+      verein: "Club trip",
       firma: "Company / team event",
       privat: "Private party",
       sonstiges: "Other",
@@ -420,10 +425,10 @@ const BF_COPY = {
     purpose: "Aanleiding *",
     purposePlaceholder: "Maak een keuze …",
     purposeOpts: {
-      familie: "Groepsvakantie",
-      klasse: "Schoolreis",
-      schul: "School- / studiereis",
-      verein: "Verenigings- / groepsreis",
+      familie: "Groepsreis",
+      klasse: "Klassenreis",
+      schul: "Schoolreis",
+      verein: "Verenigingsreis",
       firma: "Bedrijf / team-event",
       privat: "Privéfeest",
       sonstiges: "Anders",
@@ -868,7 +873,7 @@ export const BookingFlow = ({
                 }
               }}
               required
-              options={PURPOSE_KEYS.map((k) => ({ value: k, label: tt.purposeOpts[k] }))}
+              options={SELECTABLE_PURPOSE_KEYS.map((k) => ({ value: k, label: tt.purposeOpts[k] }))}
             />
 
             {purposeCategory === "privat" && (
