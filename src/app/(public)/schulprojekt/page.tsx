@@ -602,7 +602,7 @@ export default async function EsgPage() {
               points={[
                 "Reflexionsstunde in der Klasse",
                 "Anschluss an den Unterricht",
-                "Bericht an Förderverein & Schulgemeinschaft",
+                "Bericht an die Schulgemeinschaft",
                 "Bei Bedarf: individuelle Nachgespräche",
               ]}
             />
@@ -683,15 +683,15 @@ export default async function EsgPage() {
             Wer trägt die Hüttenarbeit
           </div>
           <h2 className="text-[32px] sm:text-[44px] mt-3 mb-6 leading-tight text-[var(--color-wh-snow)]">
-            Ein Dreiergespann.
+            Ein starkes Gespann.
           </h2>
           <p className="text-[17px] leading-relaxed max-w-3xl text-[var(--color-wh-snow)]/90">
-            Die Hüttenarbeit am ESG ist getragen von drei Säulen — Verein, Schule und Eltern. Das
+            Die Hüttenarbeit am ESG ist getragen von zwei Säulen — Verein und Schule. Das
             ist keine Selbstverständlichkeit. Sie funktioniert, weil über Jahre ein Vertrauen
             zwischen Verein, Schule und Eltern gewachsen ist.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-10">
             <PillarCard
               num="1"
               title="Skifreunde Gütersloh e.V."
@@ -701,11 +701,6 @@ export default async function EsgPage() {
               num="2"
               title="Lehrkräfte des ESG"
               body="Tragen die pädagogische Konzeption, planen, begleiten und reflektieren die Fahrten."
-            />
-            <PillarCard
-              num="3"
-              title="Förderverein des ESG"
-              body="Ein wichtiger Partner der Hüttenarbeit — unterstützt finanziell, ideell und mit dem Auge der Eltern."
             />
           </div>
 
