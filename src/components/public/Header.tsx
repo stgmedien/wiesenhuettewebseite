@@ -202,10 +202,15 @@ export const Header = ({
                 {t("nav.login", locale)}
               </Link>
             )}
-            {/* Mitglied-werden-CTA — oben rechts, dezent neben dem Buchen-Button */}
+            {/* Mitglied-werden-CTA — oben rechts, dezent neben dem Buchen-Button.
+                Nur ab xl (darunter überläuft der volle Header) und NICHT im
+                gemorphten Pill-Zustand (980px-Pill hat dafür keinen Platz). */}
             <Link
               href="/registrieren"
-              className="hidden lg:inline-flex h-9 px-4 items-center rounded-full border border-[var(--color-wh-snow)]/40 text-[var(--color-wh-snow)]/90 text-sm font-semibold no-underline hover:bg-white/12 transition-colors whitespace-nowrap"
+              className={cn(
+                "h-9 px-4 items-center rounded-full border border-[var(--color-wh-snow)]/40 text-[var(--color-wh-snow)]/90 text-sm font-semibold no-underline hover:bg-white/12 transition-colors whitespace-nowrap",
+                morph ? "hidden" : "hidden xl:inline-flex"
+              )}
             >
               {hc.member}
             </Link>
