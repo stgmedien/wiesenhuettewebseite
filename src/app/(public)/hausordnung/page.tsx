@@ -38,7 +38,7 @@ export default async function HausordnungPage() {
           <p>
             Bitte teilt spätestens 2 Tage vor Anreise dem Hüttenwart Toni Klauke telefonisch
             Eure genaue Ankunftszeit mit. Er nimmt Euch an der Hütte in Empfang und überreicht
-            Schlüssel und Kurkarten.
+            die Schlüssel. Eure Kurkarten erhaltet Ihr vorab automatisch per E-Mail.
           </p>
           <Address />
           <ul>

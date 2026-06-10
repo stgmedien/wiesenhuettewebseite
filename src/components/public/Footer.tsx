@@ -35,6 +35,9 @@ export const Footer = ({ locale }: { locale: Locale }) => (
         <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/wandertouren">
           {t("footer.huette.wandertouren", locale)}
         </Link>
+        <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/radtouren">
+          {t("footer.huette.radtouren", locale)}
+        </Link>
         <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/empfehlungen">
           {t("footer.huette.empfehlungen", locale)}
         </Link>

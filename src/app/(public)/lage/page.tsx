@@ -4,6 +4,7 @@ import {
   Compass,
   Car,
   TrainFront,
+  Bike,
   Bus,
   ParkingCircle,
   Sun,
@@ -71,6 +72,7 @@ type Copy = {
     lead: string;
     car: { number: string; title: string; body: string; details: string[] };
     train: { number: string; title: string; body: string; steps: string[] };
+    bike: { number: string; title: string; body: string; details: string[] };
     arrival: { number: string; title: string; body: string; details: string[] };
   };
   parking: {
@@ -100,11 +102,11 @@ const COPY: Record<Locale, Copy> = {
       meta: `51° 09' N · 8° 28' O · ${ELEVATION_M} m ü. NHN`,
       h1l1: "Da wo der",
       h1l2: "Wald sich teilt.",
-      lead: "Langewiese sitzt auf 690 Metern Höhe — auf einem Plateau zwischen dem Rothaarsteig und dem Hochsauerland. Die Hütte liegt 50 Meter unter der Bundesstraße am Hang. Eine Adresse, drei Wege herauf.",
+      lead: "Langewiese sitzt auf 690 Metern Höhe — auf einem Plateau zwischen dem Rothaarsteig und dem Hochsauerland. Die Hütte liegt 50 Meter unter der Bundesstraße am Hang. Eine Adresse, vier Wege herauf.",
     },
     address: {
       eyebrow: "Adresse",
-      statement: { l1: "Bundesstraße 6", l2: "59955 Winterberg-Langewiese", l3: "Hochsauerland · Deutschland" },
+      statement: { l1: "Bundesstraße 6", l2: "59955 Winterberg-Langewiese", l3: "Hochsauerland · Deutschland" },
       metaLines: {
         coords: "Koordinaten",
         elevation: "Höhe",
@@ -125,8 +127,8 @@ const COPY: Record<Locale, Copy> = {
       ],
     },
     routes: {
-      eyebrow: "Drei Wege herauf",
-      h2: "Mit Auto, Bahn — oder zu Fuß.",
+      eyebrow: "Vier Wege herauf",
+      h2: "Mit Auto, Bahn, Rad — oder zu Fuß.",
       lead: "Egal wie Ihr kommt, das Höhendorf ist erreichbar. Im Winter empfehlen wir Schnee-Reifen, im Sommer reicht jedes Auto.",
       car: {
         number: "01",
@@ -151,8 +153,19 @@ const COPY: Record<Locale, Copy> = {
           "Direkt gegenüber: Einfahrt zur Wiesenhütte",
         ],
       },
-      arrival: {
+      bike: {
         number: "03",
+        title: "Mit dem Rad",
+        body: "Die Hütte wird häufig als Basislager für Radtouren genutzt — das Hochsauerland rund um Langewiese ist ein lohnendes Revier, von der Panorama-Runde bis zur knackigen Anstiegs-Etappe.",
+        details: [
+          "Von Winterberg rund 8 km — stetig bergauf, sportlich lohnend",
+          "Räder stehen sicher im abschließbaren Rad- und Skikeller (Zugang von außen)",
+          "Hochheide, Kahler Asten und Rothaarsteig-Panoramen direkt vor der Tür",
+          "Gemeinsame Rad-Wochenenden ab 8 Personen — über unser Radtouren-Matching",
+        ],
+      },
+      arrival: {
+        number: "04",
         title: "Letztes Stück",
         body: "Die Einfahrt geht direkt von der Bundesstraße ab — das Haus selbst liegt rund 50 m weiter unten am Hang. Wer das erste Mal kommt, übersieht die Einfahrt leicht: Der Wegweiser steht an der Bundesstraße, gegenüber der Bäckerei Gerke.",
         details: [
@@ -245,11 +258,11 @@ const COPY: Record<Locale, Copy> = {
       meta: `51° 09' N · 8° 28' E · ${ELEVATION_M} m above sea level`,
       h1l1: "Where the",
       h1l2: "forest parts.",
-      lead: "Langewiese sits at 690 metres elevation — on a plateau between the Rothaarsteig and the Hochsauerland. The cabin lies 50 metres below the main road on the hillside. One address, three ways up.",
+      lead: "Langewiese sits at 690 metres elevation — on a plateau between the Rothaarsteig and the Hochsauerland. The cabin lies 50 metres below the main road on the hillside. One address, four ways up.",
     },
     address: {
       eyebrow: "Address",
-      statement: { l1: "Bundesstraße 6", l2: "59955 Winterberg-Langewiese", l3: "Hochsauerland · Germany" },
+      statement: { l1: "Bundesstraße 6", l2: "59955 Winterberg-Langewiese", l3: "Hochsauerland · Germany" },
       metaLines: { coords: "Coordinates", elevation: "Elevation", from: "Reach by" },
       ctaApple: "Apple Maps",
       ctaGoogle: "Google Maps",
@@ -266,8 +279,8 @@ const COPY: Record<Locale, Copy> = {
       ],
     },
     routes: {
-      eyebrow: "Three ways up",
-      h2: "By car, train — or on foot.",
+      eyebrow: "Four ways up",
+      h2: "By car, train, bike — or on foot.",
       lead: "Whichever way you come, the highland village is reachable. We recommend winter tyres in snow; any car works in summer.",
       car: {
         number: "01",
@@ -292,8 +305,19 @@ const COPY: Record<Locale, Copy> = {
           "Directly opposite: driveway to the Wiesenhütte",
         ],
       },
-      arrival: {
+      bike: {
         number: "03",
+        title: "By bike",
+        body: "The cabin is a popular base camp for cycling tours — the Hochsauerland around Langewiese is rewarding terrain, from panoramic loops to punchy climbs.",
+        details: [
+          "From Winterberg about 8 km — a steady, rewarding climb",
+          "Bikes are stored safely in the lockable bike and ski cellar (outside access)",
+          "High moor, Kahler Asten and Rothaarsteig panoramas right outside the door",
+          "Group bike weekends from 8 people — via our bike-tour matching",
+        ],
+      },
+      arrival: {
+        number: "04",
         title: "Last metres",
         body: "The driveway turns off the main road; the cabin itself is about 50 m further down the hillside. First-timers easily miss the entrance: the signpost stands on the main road, opposite bakery Gerke.",
         details: [
@@ -355,11 +379,11 @@ const COPY: Record<Locale, Copy> = {
       meta: `51° 09' N · 8° 28' O · ${ELEVATION_M} m boven NAP`,
       h1l1: "Waar het bos",
       h1l2: "zich opent.",
-      lead: "Langewiese ligt op 690 meter hoogte — op een plateau tussen de Rothaarsteig en het Hochsauerland. De hut ligt 50 meter onder de hoofdweg op de helling. Eén adres, drie manieren omhoog.",
+      lead: "Langewiese ligt op 690 meter hoogte — op een plateau tussen de Rothaarsteig en het Hochsauerland. De hut ligt 50 meter onder de hoofdweg op de helling. Eén adres, vier manieren omhoog.",
     },
     address: {
       eyebrow: "Adres",
-      statement: { l1: "Bundesstraße 6", l2: "59955 Winterberg-Langewiese", l3: "Hochsauerland · Duitsland" },
+      statement: { l1: "Bundesstraße 6", l2: "59955 Winterberg-Langewiese", l3: "Hochsauerland · Duitsland" },
       metaLines: { coords: "Coördinaten", elevation: "Hoogte", from: "Bereikbaar in" },
       ctaApple: "Apple Maps",
       ctaGoogle: "Google Maps",
@@ -376,8 +400,8 @@ const COPY: Record<Locale, Copy> = {
       ],
     },
     routes: {
-      eyebrow: "Drie wegen omhoog",
-      h2: "Met auto, trein — of te voet.",
+      eyebrow: "Vier wegen omhoog",
+      h2: "Met auto, trein, fiets — of te voet.",
       lead: "Hoe je ook komt, het hooggelegen dorp is bereikbaar. Met sneeuw raden we winterbanden aan; in de zomer volstaat elke auto.",
       car: {
         number: "01",
@@ -402,8 +426,19 @@ const COPY: Record<Locale, Copy> = {
           "Direct tegenover: oprit naar de Wiesenhütte",
         ],
       },
-      arrival: {
+      bike: {
         number: "03",
+        title: "Met de fiets",
+        body: "De hut wordt vaak gebruikt als basiskamp voor fietstochten — het Hochsauerland rond Langewiese is een dankbaar gebied, van panoramarondjes tot pittige klimmetjes.",
+        details: [
+          "Vanaf Winterberg zo'n 8 km — gestaag bergop, sportief de moeite waard",
+          "Fietsen staan veilig in de afsluitbare fietsen- en skikelder (toegang van buiten)",
+          "Hoogveen, Kahler Asten en Rothaarsteig-panorama's voor de deur",
+          "Gezamenlijke fietsweekenden vanaf 8 personen — via onze fietstocht-matching",
+        ],
+      },
+      arrival: {
+        number: "04",
         title: "Laatste meters",
         body: "De oprit gaat rechtstreeks vanaf de hoofdweg af — het huis zelf ligt zo'n 50 m lager op de helling. Eerste keer wordt de oprit makkelijk gemist: het wegwijzerbord staat aan de hoofdweg, tegenover bakkerij Gerke.",
         details: [
@@ -549,7 +584,7 @@ export default async function LagePage() {
                   className="font-display font-bold text-[var(--color-wh-deep-green)] m-0 leading-[0.96] uppercase"
                   style={{ fontSize: "clamp(32px, 5.5vw, 76px)", letterSpacing: "-0.025em" }}
                 >
-                  {c.address.statement.l1}
+                  <span className="whitespace-nowrap">{c.address.statement.l1}</span>
                   <br />
                   {c.address.statement.l2}
                 </h2>
@@ -680,6 +715,27 @@ export default async function LagePage() {
 
             <ScrollReveal as="article">
               <RouteRow
+                number={c.routes.bike.number}
+                icon={<Bike size={28} strokeWidth={1.6} />}
+                title={c.routes.bike.title}
+                body={c.routes.bike.body}
+                details={c.routes.bike.details}
+                imgSrc="/media/photos/nature-1.jpg"
+                imgAlt="Radrevier Hochsauerland rund um Langewiese"
+                imgRight={false}
+                ctaHref="/radtouren"
+                ctaLabel={
+                  locale === "de"
+                    ? "Zum Radtouren-Matching"
+                    : locale === "nl"
+                      ? "Naar de fietstocht-matching"
+                      : "To bike-tour matching"
+                }
+              />
+            </ScrollReveal>
+
+            <ScrollReveal as="article">
+              <RouteRow
                 number={c.routes.arrival.number}
                 icon={<MapPin size={28} strokeWidth={1.6} />}
                 title={c.routes.arrival.title}
@@ -687,7 +743,7 @@ export default async function LagePage() {
                 details={c.routes.arrival.details}
                 imgSrc="/media/photos/ankunft_an_der_huette.png"
                 imgAlt="Ankunft an der Wiesenhütte"
-                imgRight={false}
+                imgRight={true}
               />
             </ScrollReveal>
           </div>
@@ -993,6 +1049,8 @@ const RouteRow = ({
   imgAlt,
   imgRight,
   imgAttribution,
+  ctaHref,
+  ctaLabel,
 }: {
   number: string;
   icon: React.ReactNode;
@@ -1004,6 +1062,8 @@ const RouteRow = ({
   imgAlt: string;
   imgRight: boolean;
   imgAttribution?: string;
+  ctaHref?: string;
+  ctaLabel?: string;
 }) => (
   <div
     className={`grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10 items-center ${
@@ -1069,6 +1129,14 @@ const RouteRow = ({
             </li>
           ))}
         </ol>
+      )}
+      {ctaHref && ctaLabel && (
+        <a
+          href={ctaHref}
+          className="inline-flex items-center gap-1.5 mt-6 h-11 px-5 rounded-[var(--radius-btn)] bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] no-underline text-sm font-semibold hover:bg-[var(--color-wh-green)] transition-colors"
+        >
+          {ctaLabel} →
+        </a>
       )}
     </div>
   </div>

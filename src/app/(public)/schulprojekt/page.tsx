@@ -111,9 +111,11 @@ export default async function EsgPage() {
         <div className="max-w-[1080px] mx-auto">
           <p className="text-base sm:text-[18px] leading-relaxed text-[var(--color-wh-black)] max-w-2xl">
             Die Wiesenhütte in Langewiese ist keine Klassenfahrt-Adresse. Sie ist ein
-            außerschulischer Lernort des Evangelisch Stiftischen Gymnasiums Gütersloh —
-            getragen seit Generationen vom Verein Skifreunde Gütersloh, geöffnet seit einigen
-            Jahren auch für die pädagogische Arbeit des ESG.
+            außerschulischer Lernort des Evangelisch Stiftischen Gymnasiums, einer
+            Gütersloher Schule — seit Generationen im Besitz des Vereins Skifreunde
+            Gütersloh und seit einigen Jahren auch für die pädagogische Arbeit des ESG
+            geöffnet. Exklusiv ist hier nichts: Vereine, Familien und andere Gruppen
+            buchen die Hütte genauso.
           </p>
           <p className="text-base sm:text-[18px] leading-relaxed text-[var(--color-wh-black)] max-w-2xl mt-4">
             Hier gilt eine einfache Beobachtung: <strong>Manches lernt man nur dort, wo das
@@ -155,10 +157,27 @@ export default async function EsgPage() {
           <h2 className="text-[32px] sm:text-[44px] mt-3 mb-4 leading-tight">
             Reportagen aus der Wiesenhütte.
           </h2>
-          <p className="text-[var(--color-wh-fg-muted)] text-[16px] max-w-2xl mb-12">
-            Diese Reportagen zeigen, was an der Hütte konkret entsteht. Wer den pädagogischen
-            Hintergrund vertiefen möchte, findet weiter unten die Konzept-Abschnitte.
-          </p>
+          <div className="max-w-2xl mb-12">
+            <p className="text-[17px] leading-relaxed text-[var(--color-wh-black)]">
+              In Langewiese wird gebaut, geschraubt, gestrichen und ab und zu auch wieder
+              abgerissen. Was hier entsteht, hat einen Zweck und bleibt stehen: Eine
+              Feuerstelle wärmt, eine Baumbank trägt. Das verändert das Lernen. Es gibt
+              keine Noten — dafür Wetter, Materialkosten und Mitschüler:innen, auf die man
+              sich verlassen muss. Wer mitmacht, merkt meist von selbst, dass sich Kopf und
+              Hand hier nicht trennen lassen und dass ein Projekt nur so gut wird wie die
+              Gruppe, die es trägt.
+            </p>
+            <p className="text-[17px] leading-relaxed text-[var(--color-wh-black)] mt-4">
+              Nicht jede Klasse kommt zum Bauen. Manche verbringen erlebnispädagogische
+              Tage, bei denen zählt, was zwischen den Beteiligten passiert: Aufgaben, die
+              sich nur gemeinsam lösen lassen oder über die eigenen Grenzen gehen.
+            </p>
+            <p className="text-[var(--color-wh-fg-muted)] text-[15px] mt-4">
+              Diese Reportagen zeigen, was an der Hütte konkret entsteht. Wer den
+              pädagogischen Hintergrund vertiefen möchte, findet weiter unten die
+              Konzept-Abschnitte.
+            </p>
+          </div>
 
           {/* Eintrag 1: Feuerstelle der Klasse 9e */}
           <article className="mb-20">
@@ -224,26 +243,22 @@ export default async function EsgPage() {
                 <h4 className="font-semibold text-[18px] text-[var(--color-wh-deep-green)] mb-2">
                   Was wurde dabei gelernt?
                 </h4>
-                <ul className="prose-block list-none p-0 space-y-3">
+                <ul className="prose-block list-disc pl-5 space-y-3">
                   <li>
-                    <strong className="text-[var(--color-wh-deep-green)]">Hand:</strong> Wie viele
-                    Steine es braucht, bis eine Feuerstelle steht. Wie schwer eine Schubkarre voll
-                    Sand ist. Wie genau eine Wasserwaage sein muss.
+                    Wie viele Steine es braucht, bis eine Feuerstelle steht. Wie schwer eine
+                    Schubkarre voll Sand ist. Wie genau eine Wasserwaage sein muss.
                   </li>
                   <li>
-                    <strong className="text-[var(--color-wh-deep-green)]">Kopf:</strong>{" "}
                     Projektmanagement im Kleinen: Phasenplanung, Zuständigkeiten, Pufferzeiten,
                     Umgang mit dem Wetter.
                   </li>
                   <li>
-                    <strong className="text-[var(--color-wh-deep-green)]">Herz:</strong> Wie sich
-                    ein Erfolg anfühlt, der nicht in einer Note endet. Wer in einer Krise
-                    einspringt, wenn jemand keine Lust mehr hat.
+                    Wie sich ein Erfolg anfühlt, der nicht in einer Note endet. Und wer in
+                    einer Krise einspringt, wenn jemand keine Lust mehr hat.
                   </li>
                   <li>
-                    <strong className="text-[var(--color-wh-deep-green)]">Fuß:</strong> Eine Woche
-                    körperliche Arbeit, in der Schüler:innen, die im Klassenraum oft eher still
-                    sind, plötzlich Schlüsselrollen übernommen haben.
+                    Eine Woche körperliche Arbeit, in der Schüler:innen, die im Klassenraum
+                    oft eher still sind, plötzlich Schlüsselrollen übernommen haben.
                   </li>
                 </ul>
 
@@ -400,53 +415,7 @@ export default async function EsgPage() {
                 in einem realen Setting erfahrbar machen.</strong> Wald, Wiese, Schlafsaal, eigene
                 Küche — das ist die Bühne, auf der eine Klasse für ein paar Tage so etwas wie ein
                 eigener kleiner Haushalt wird. Und genau das nehmen die Schülerinnen und Schüler
-                mit nach Hause.
-              </p>
-            </div>
-          </article>
-
-          {/* Eintrag 3: Renovierung */}
-          <article className="mb-16 border-t border-[var(--color-wh-winter-grey)] pt-12">
-            <div className="text-xs uppercase tracking-wider text-[var(--color-wh-deep-green)] font-semibold mb-2">
-              Eintrag 3
-            </div>
-            <h3 className="text-[24px] sm:text-[28px] mt-0 mb-4 leading-tight">
-              Renovierung eines Schlafraums.
-            </h3>
-            <div className="prose-block">
-              <p>
-                Eine Klasse hat einen Schlafraum der Hütte gründlich gereinigt, gestrichen und neu
-                gestaltet. Aus einem benutzten, aber nicht mehr einladenden Raum wurde ein
-                gemütlicher Schlafraum. Die Klasse hat über die Farbwahl abgestimmt, das Material
-                gemeinsam mit dem Hüttenwart bestellt, und an einem Wochenende selbst gestrichen.
-              </p>
-              <p>
-                <strong>Lernanlass:</strong> Verantwortung für gemeinsame Räume. Die Erfahrung,
-                dass eine Klasse einen Raum ihrer Schule (und ihres Vereins) verändert — nicht
-                durch Vorschlag, sondern durch eigene Hand.
-              </p>
-            </div>
-          </article>
-
-          {/* Eintrag 4: Naturerkundung */}
-          <article className="mb-12 border-t border-[var(--color-wh-winter-grey)] pt-12">
-            <div className="text-xs uppercase tracking-wider text-[var(--color-wh-deep-green)] font-semibold mb-2">
-              Eintrag 4
-            </div>
-            <h3 className="text-[24px] sm:text-[28px] mt-0 mb-4 leading-tight">
-              Naturerkundung rund um Langewiese.
-            </h3>
-            <div className="prose-block">
-              <p>
-                Eine Doppeljahrgangsstufe hat eine zweitägige Naturerkundung gemacht: Bestimmen
-                von Pflanzen und Spuren, Vermessen einer Geländeformation, Kartierung eines
-                Bachlaufs. Begleitend: ein Lese- und Reflexionsabend zu Hartmut Rosas
-                Resonanzbegriff — was heißt es, einer Landschaft wirklich zu begegnen, statt sie
-                nur zu fotografieren?
-              </p>
-              <p>
-                <strong>Lernanlass:</strong> Genaues Hinsehen. Die Erfahrung, dass eine Wiese mehr
-                Pflanzenarten enthält, als man denkt — wenn man sich Zeit nimmt.
+                — und die Lehrkräfte — mit nach Hause.
               </p>
             </div>
           </article>
@@ -677,6 +646,28 @@ export default async function EsgPage() {
               </details>
             ))}
           </div>
+
+          {/* Eltern-Teaser: Mitgliedschaft = Gestaltungsraum */}
+          <div className="mt-10 bg-[var(--color-wh-green-soft)] border border-[var(--color-wh-green)]/30 rounded-[var(--radius-card)] p-6 sm:p-7">
+            <div className="text-xs uppercase tracking-wider text-[var(--color-wh-deep-green)] font-semibold mb-2">
+              Für Eltern
+            </div>
+            <h3 className="font-display font-bold text-[20px] sm:text-[22px] text-[var(--color-wh-deep-green)] mt-0 mb-2">
+              Mitgestalten statt nur zuschauen.
+            </h3>
+            <p className="text-[15px] leading-relaxed text-[var(--color-wh-black)] m-0 mb-4">
+              Als Mitglied der Skifreunde Gütersloh bekommt Ihr echten Gestaltungsraum: bei
+              der Hütte, bei den Projekten Eurer Kinder und in einer Vereinsgemeinschaft,
+              die diesen Ort seit über 70 Jahren trägt. Dazu nutzt Ihr die Hütte zu
+              reduzierten Konditionen — die Skigymnastik ist inklusive.
+            </p>
+            <a
+              href="/registrieren"
+              className="inline-flex items-center h-11 px-5 rounded-[var(--radius-btn)] bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] no-underline font-semibold text-sm hover:bg-[var(--color-wh-green)] transition-colors"
+            >
+              Mitglied werden →
+            </a>
+          </div>
         </div>
       </section>
 
@@ -714,7 +705,7 @@ export default async function EsgPage() {
             <PillarCard
               num="3"
               title="Förderverein des ESG"
-              body="Unterstützt — finanziell, ideell und mit dem Auge der Eltern. Zentraler Topf für soziale Härtefälle."
+              body="Ein wichtiger Partner der Hüttenarbeit — unterstützt finanziell, ideell und mit dem Auge der Eltern."
             />
           </div>
 
@@ -738,11 +729,7 @@ const FAQS = [
   },
   {
     q: "Was kostet eine Hüttenfahrt für ESG-Lerngruppen?",
-    a: "Wichtig zur Unterscheidung: <strong>Eine 'Lerngruppe' ist eine ESG-Gruppe, die in der Hütte ein konkretes Projekt umsetzt</strong> (Werkstatt, Forschungswoche, Sozialprojekt etc.). Normale Klassenfahrten fallen NICHT darunter und werden wie jede andere Buchung abgerechnet. Für anerkannte Lerngruppen gilt: Die Skifreunde Gütersloh stellen die <strong>Hütte selbst kostenfrei</strong> zur Verfügung — die Übernachtungskosten entfallen. <strong>Kurtaxe und Energiepauschale werden allerdings auch hier weiter berechnet</strong>, weil sie nicht uns zustehen (Kurbeitrag Hochsauerland) bzw. realen Verbrauch decken (Strom/Heizung). Eltern zahlen also: Kurtaxe + Energiepauschale + Anreise + Verpflegung. Die Verpflegung wird gemeinsam eingekauft und gekocht, was die Gesamtkosten niedrig hält. <strong>Eltern, für die selbst das eng ist, wenden sich vertraulich an die Klassenleitung — der Förderverein des ESG hilft.</strong>",
-  },
-  {
-    q: "Wie sicher ist die Hütte?",
-    a: "Sehr sicher, mit Routine: zwei Lehrkräfte mit Erste-Hilfe-Schein, Notfallplan, Hüttenwart vor Ort, Erreichbarkeit der Klassenleitung 24/7 für Eltern. Wir senden vor jeder Fahrt einen Elternbrief mit allen Notfallnummern.",
+    a: "Wichtig zur Unterscheidung: <strong>Eine 'Lerngruppe' ist eine ESG-Gruppe, die in der Hütte ein konkretes Projekt umsetzt</strong> (Werkstatt, Forschungswoche, Sozialprojekt etc.). Normale Klassenfahrten fallen NICHT darunter und werden wie jede andere Buchung abgerechnet. Für anerkannte Lerngruppen gilt: Die Skifreunde Gütersloh stellen die <strong>Hütte selbst kostenfrei</strong> zur Verfügung — die Übernachtungskosten entfallen. <strong>Kurtaxe und Energiepauschale werden allerdings auch hier weiter berechnet</strong>, weil sie nicht uns zustehen (Kurbeitrag Hochsauerland) bzw. realen Verbrauch decken (Strom/Heizung). Eltern zahlen also: Kurtaxe + Energiepauschale + Anreise + Verpflegung. Die Verpflegung wird gemeinsam eingekauft und gekocht, was die Gesamtkosten niedrig hält. <strong>Eltern, für die selbst das eng ist, wenden sich vertraulich an die Klassenleitung.</strong>",
   },
   {
     q: "Mein Kind hat eine Allergie / besondere Ernährung — geht das?",
@@ -758,15 +745,11 @@ const FAQS = [
   },
   {
     q: "Wie passt das zum Schulprogramm des ESG?",
-    a: "Das ESG ist ein evangelisches, humanistisches Gymnasium mit einem Profil, das Persönlichkeitsbildung, Verantwortung und Gemeinschaft ernst nimmt. Die Hüttenarbeit ist eine konkrete Übersetzung dieses Profils. Sie ist nicht zusätzlich zum Schulprogramm — sie ist Teil davon.",
+    a: "Das ESG ist ein evangelisches, humanistisches Gymnasium — eine Gütersloher Schule mit einem Profil, das Persönlichkeitsbildung, Verantwortung und Gemeinschaft ernst nimmt. Die Hüttenarbeit ist eine konkrete Übersetzung dieses Profils. Sie ist nicht zusätzlich zum Schulprogramm — sie ist Teil davon.",
   },
   {
     q: "Wer trägt die Hütte?",
     a: "Die Wiesenhütte gehört dem Verein <strong>Skifreunde Gütersloh e.V.</strong>, gegründet 1949, der die Hütte seit 1956 betreibt. Das ESG nutzt die Hütte in Kooperation mit den Skifreunden — die jahrzehntelange Pflege durch den Verein ist die Grundlage dafür, dass die Hütte heute steht und genutzt werden kann.",
-  },
-  {
-    q: "Können Eltern die Hütte selbst sehen?",
-    a: "Ja. Bei Tagen der offenen Tür, Eltern-Wanderungen oder bei Eltern-Wochenenden des Vereins ist das möglich. Termine sehen Sie auf dieser Seite und im Schul-Newsletter.",
   },
   {
     q: "An wen kann ich mich mit Fragen wenden?",

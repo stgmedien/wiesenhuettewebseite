@@ -158,6 +158,12 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     return;
   }
 
+  // Spenden (z. B. Beachvolleyballplatz): kein Folgeprozess nötig —
+  // Stripe selbst ist hier die Buchhaltung. Bewusst still erledigen.
+  if (kind === "donation") {
+    return;
+  }
+
   const bookingId = session.metadata?.bookingId;
   if (!bookingId) {
     console.warn("[webhook] checkout.session.completed without bookingId");

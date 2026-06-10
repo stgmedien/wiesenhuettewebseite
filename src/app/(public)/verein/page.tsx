@@ -42,6 +42,7 @@ type Copy = {
     gymHeading: string;
     gymH3: string;
     gymBody: string;
+    gymOrt: string;
     eventsHeading: string;
     adventH3: string;
     adventBody: string;
@@ -51,6 +52,9 @@ type Copy = {
   member: {
     eyebrow: string;
     h2: string;
+    whyH: string;
+    why: string;
+    steps: string;
     lead: string;
     tiers: Array<[string, string]>;
     ctaBox: {
@@ -100,15 +104,19 @@ const COPY: Record<Locale, Copy> = {
       gymHeading: "Gymnastikkurse",
       gymH3: "Skigymnastik mit Alexandra Lütgert",
       gymBody: "Kraft, Beweglichkeit, Koordination und Kondition — ideal für alle, die aktiv bleiben möchten. Dienstags 18:30 Uhr und donnerstags 20:00 Uhr, Schnupperstunde jederzeit möglich.",
+      gymOrt: "Ort: Sporthalle in Gütersloh — den genauen Hallen-Standort und alles zur Anmeldung erfahrt Ihr unter info@skifreunde-gt.de.",
       eventsHeading: "Veranstaltungen",
       adventH3: "Adventskaffeetrinken",
-      adventBody: "Im Spexarder Bauernhaus, organisiert von Karin Lütgert. Mitglieder aller Generationen kommen zusammen.",
-      walkH3: "Grünkohlwanderung & Jahreshauptversammlung",
-      walkBody: "Traditionelle Winterwanderung mit gemeinsamem Essen, jährlicher Austausch über Vereinsentwicklung, Renovierungswochenenden, Hüttenfahrten.",
+      adventBody: "Vorweihnachtliches Beisammensein im Spexarder Bauernhaus, organisiert von Karin Lütgert. Mitglieder aller Generationen kommen zusammen, alle tragen etwas bei — und lecker ist es traditionell auch. Für 2026 ist das Bauernhaus bereits gebucht.",
+      walkH3: "Grünkohlwanderung",
+      walkBody: "Die traditionelle Winterwanderung mit gemeinsamem Essen: Jahr für Jahr geht es zum Gasthof Hesse nach Versmold — munteres Beisammensein, gute Stimmung und beim Grünkohl gute Gespräche.",
     },
     member: {
       eyebrow: "Mitgliedschaft",
       h2: "Mitglied werden.",
+      whyH: "Warum Mitglied werden?",
+      why: "Als Mitglied der Skifreunde Gütersloh nutzt Du die Wiesenhütte zu reduzierten Konditionen. Die Skigymnastik dienstags und donnerstags ist inklusive. Dazu kommen Vereinsveranstaltungen durchs Jahr: Grünkohlwanderung, Adventskaffee, Vereinsfeste und -fahrten — und eine Gemeinschaft, die die Hütte seit über 70 Jahren trägt.",
+      steps: "Mitglied werden in drei Schritten: Konto anlegen → Antrag stellen → der Vorstand bestätigt nach Sichtung. Der Beitrag läuft dann automatisch.",
       lead: "Die Skifreunde freuen sich über neue Mitglieder aller Generationen. Jährliche Beiträge:",
       tiers: [
         ["Erwachsene", "45 €"],
@@ -161,15 +169,19 @@ const COPY: Record<Locale, Copy> = {
       gymHeading: "Gymnastics classes",
       gymH3: "Ski gymnastics with Alexandra Lütgert",
       gymBody: "Strength, flexibility, coordination and stamina — ideal for everyone who wants to stay active. Tuesdays 18:30 and Thursdays 20:00, trial sessions possible at any time.",
+      gymOrt: "Location: sports hall in Gütersloh — details and sign-up via info@skifreunde-gt.de.",
       eventsHeading: "Events",
       adventH3: "Advent coffee",
-      adventBody: "At the Spexarder Bauernhaus, organised by Karin Lütgert. Members of all generations come together.",
-      walkH3: "Kale hike & annual general meeting",
-      walkBody: "Traditional winter hike with a shared meal, annual exchange on club development, renovation weekends, cabin trips.",
+      adventBody: "A pre-Christmas get-together at the Spexarder Bauernhaus, organised by Karin Lütgert. Members of all generations come together, everyone contributes — and it is traditionally delicious. The venue is already booked for 2026.",
+      walkH3: "Kale hike",
+      walkBody: "The traditional winter hike with a shared meal: year after year the route leads to Gasthof Hesse in Versmold — great company, good spirits and good conversations over dinner.",
     },
     member: {
       eyebrow: "Membership",
       h2: "Become a member.",
+      whyH: "Why become a member?",
+      why: "As a member of the Skifreunde Gütersloh you use the Wiesenhütte at reduced rates. Ski gymnastics on Tuesdays and Thursdays is included. Add club events throughout the year — kale hike, advent coffee, club parties and trips — and a community that has carried the cabin for over 70 years.",
+      steps: "Becoming a member in three steps: create an account → submit your application → the board confirms after review. Your fee then runs automatically.",
       lead: "The Skifreunde welcome new members of all generations. Annual fees:",
       tiers: [
         ["Adults", "€45"],
@@ -222,15 +234,19 @@ const COPY: Record<Locale, Copy> = {
       gymHeading: "Gymnastieklessen",
       gymH3: "Skigymnastiek met Alexandra Lütgert",
       gymBody: "Kracht, lenigheid, coördinatie en conditie — ideaal voor wie actief wil blijven. Dinsdag 18:30 en donderdag 20:00, proefles altijd mogelijk.",
+      gymOrt: "Locatie: sporthal in Gütersloh — details en aanmelding via info@skifreunde-gt.de.",
       eventsHeading: "Evenementen",
       adventH3: "Adventkoffie",
-      adventBody: "In het Spexarder Bauernhaus, georganiseerd door Karin Lütgert. Leden van alle generaties komen samen.",
-      walkH3: "Grünkohl-wandeling & jaarvergadering",
-      walkBody: "Traditionele winterwandeling met gezamenlijke maaltijd, jaarlijkse uitwisseling over verenigingsontwikkeling, renovatieweekenden, huttenreizen.",
+      adventBody: "Voorkerstmis-samenzijn in het Spexarder Bauernhaus, georganiseerd door Karin Lütgert. Leden van alle generaties komen samen, iedereen draagt bij — en lekker is het traditioneel ook. Voor 2026 is de locatie al geboekt.",
+      walkH3: "Grünkohl-wandeling",
+      walkBody: "De traditionele winterwandeling met gezamenlijke maaltijd: jaar na jaar gaat het naar Gasthof Hesse in Versmold — gezellig samenzijn, goede sfeer en goede gesprekken aan tafel.",
     },
     member: {
       eyebrow: "Lidmaatschap",
       h2: "Lid worden.",
+      whyH: "Waarom lid worden?",
+      why: "Als lid van de Skifreunde Gütersloh gebruik je de Wiesenhütte tegen gereduceerde tarieven. De skigymnastiek op dinsdag en donderdag is inbegrepen. Daarbij komen verenigingsevenementen door het jaar heen — Grünkohl-wandeling, adventkoffie, feesten en reizen — en een gemeenschap die de hut al ruim 70 jaar draagt.",
+      steps: "Lid worden in drie stappen: account aanmaken → aanvraag indienen → het bestuur bevestigt na beoordeling. De contributie loopt daarna automatisch.",
       lead: "De Skifreunde verwelkomen nieuwe leden van alle generaties. Jaarlijkse contributies:",
       tiers: [
         ["Volwassenen", "€ 45"],
@@ -386,25 +402,30 @@ export default async function VereinPage() {
             <div className="eyebrow">{c.active.eyebrow}</div>
             <h2 className="text-[32px] sm:text-[40px] mt-3 mb-6">{c.active.h2}</h2>
 
-            {/* Gymnastikkurse — eigener Sub-Heading, klar getrennt */}
-            <div className="eyebrow text-[var(--color-wh-green)] mt-2">
-              {c.active.gymHeading}
+            {/* Gymnastikkurse — eigene Karte, klar getrennt von den Veranstaltungen */}
+            <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 mt-2">
+              <div className="eyebrow text-[var(--color-wh-green)]">
+                {c.active.gymHeading}
+              </div>
+              <h3 className="text-[20px] mt-2 mb-2">{c.active.gymH3}</h3>
+              <p className="text-[var(--color-wh-fg-muted)] m-0">{c.active.gymBody}</p>
+              <p className="text-sm text-[var(--color-wh-deep-green)] font-medium mt-3 mb-0">
+                {c.active.gymOrt}
+              </p>
+              {/* Foto-Slot Sportstunde: folgt, sobald Aufnahmen vorliegen (D1) */}
             </div>
-            <h3 className="text-[20px] mt-2 mb-2">{c.active.gymH3}</h3>
-            <p className="text-[var(--color-wh-fg-muted)] m-0">{c.active.gymBody}</p>
 
-            {/* Sichtbare Trennung */}
-            <div className="my-8 h-px bg-[var(--color-wh-winter-grey)]/60" />
+            {/* Veranstaltungen — eigene Karte */}
+            <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 mt-5">
+              <div className="eyebrow text-[var(--color-wh-green)]">
+                {c.active.eventsHeading}
+              </div>
+              <h3 className="text-[20px] mt-2 mb-2">{c.active.adventH3}</h3>
+              <p className="text-[var(--color-wh-fg-muted)] m-0">{c.active.adventBody}</p>
 
-            {/* Veranstaltungen — eigener Sub-Heading */}
-            <div className="eyebrow text-[var(--color-wh-green)]">
-              {c.active.eventsHeading}
+              <h3 className="text-[20px] mt-6 mb-2">{c.active.walkH3}</h3>
+              <p className="text-[var(--color-wh-fg-muted)] m-0">{c.active.walkBody}</p>
             </div>
-            <h3 className="text-[20px] mt-2 mb-2">{c.active.adventH3}</h3>
-            <p className="text-[var(--color-wh-fg-muted)] m-0">{c.active.adventBody}</p>
-
-            <h3 className="text-[20px] mt-6 mb-2">{c.active.walkH3}</h3>
-            <p className="text-[var(--color-wh-fg-muted)] m-0">{c.active.walkBody}</p>
           </div>
 
           <ImageCarousel images={VEREINSAKTIVITAETEN_BILDER} aspectClass="aspect-[4/3]" />
@@ -417,6 +438,15 @@ export default async function VereinPage() {
           <h2 className="text-[var(--color-wh-snow)] text-[32px] sm:text-[40px] mt-3 mb-6">
             {c.member.h2}
           </h2>
+          {/* Warum Mitglied werden? — Mehrwert vor den Preisen */}
+          <div className="bg-[var(--color-wh-snow)]/10 border border-[var(--color-wh-snow)]/20 rounded-[var(--radius-card)] p-6 sm:p-7 mb-8 max-w-3xl">
+            <h3 className="text-[var(--color-wh-snow)] text-[20px] m-0 mb-3 font-display font-bold">
+              {c.member.whyH}
+            </h3>
+            <p className="text-[var(--color-wh-snow)]/90 m-0 leading-relaxed">{c.member.why}</p>
+            <p className="text-[var(--color-wh-snow)]/75 mt-4 mb-0 text-sm">{c.member.steps}</p>
+          </div>
+
           <p className="text-[var(--color-wh-snow)]/85 m-0 mb-8 max-w-2xl">{c.member.lead}</p>
 
           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 list-none p-0">

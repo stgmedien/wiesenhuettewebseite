@@ -11,7 +11,7 @@ import type { Locale } from "@/lib/i18n-shared";
 const PAGE_COPY: Record<Locale, { eyebrow: string; h1: string; lead: string; loggedIn: string; member: string }> = {
   de: {
     eyebrow: "Buchen",
-    h1: "Wann kommt Ihr?",
+    h1: "Wann kommt ihr?",
     lead: "Mindestaufenthalt 2 Nächte, maximal 33 Personen. Buchungen unter 15 Personen werden zum Preisniveau von 15 Personen abgerechnet. Preise und Pauschalen werden live berechnet.",
     loggedIn: "Eingeloggt als",
     member: "Mitglied",

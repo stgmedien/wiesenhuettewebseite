@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { DonationSection } from "@/components/public/huette/DonationSection";
 import { getServerLocale } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n-shared";
 import { FloorPlanExplorer, type Floor } from "@/components/public/huette/FloorPlanExplorer";
@@ -52,12 +53,13 @@ type Copy = {
     routes: { eye: string; title: string; body: string; cta: string };
     list: { eye: string; title: string; body: string; cta: string };
   };
+  spenden: import("@/components/public/huette/DonationSection").DonationCopy;
   cta: { eyebrow: string; h2: string; button: string };
 };
 
 const COPY: Record<Locale, Copy> = {
   de: {
-    hero: { eyebrow: "Die Hütte", h1l1: "Echte Holzhütte.", h1l2: "Selbstversorgung." },
+    hero: { eyebrow: "Die Hütte", h1l1: "Echtes Hüttenleben.", h1l2: "Selbstversorgung." },
     facts: { sleeps: "Schlafplätze", rooms: "Schlafzimmer", lounges: "Aufenthaltsräume", occupancy: "Personen Belegung" },
     desc: {
       eyebrow: "Beschreibung",
@@ -186,10 +188,21 @@ const COPY: Record<Locale, Copy> = {
         cta: "Packliste erstellen →",
       },
     },
+    spenden: {
+      eyebrow: "Mitmachen · Crowdfunding",
+      h2: "Spendet für den Beachvolleyballplatz.",
+      body: "Direkt neben der Hütte soll ein Beachvolleyballplatz entstehen — Sand, Netz, Einfassung. Gebaut wird er, wie an der Wiese alles entsteht: gemeinsam, mit vielen helfenden Händen und vielen kleinen Beiträgen. Jede Spende bringt den Platz ein Stück näher; über den Baufortschritt halten wir Euch hier auf dem Laufenden.",
+      amountLabel: "Betrag wählen",
+      customLabel: "Eigener Betrag in €",
+      cta: "Jetzt spenden",
+      secure: "Sichere Zahlung über Stripe · Empfänger: Skifreunde Gütersloh e.V. · Zweck: Beachvolleyballplatz",
+      thanks: "Danke für Deine Spende — der Beachvolleyballplatz rückt ein Stück näher!",
+      error: "Bitte wähle einen Betrag zwischen 2 € und 5.000 €.",
+    },
     cta: { eyebrow: "Bereit?", h2: "Termin auswählen, Personen eintragen, buchen.", button: "Verfügbarkeit prüfen" },
   },
   en: {
-    hero: { eyebrow: "The Cabin", h1l1: "A real wooden cabin.", h1l2: "Self-catering." },
+    hero: { eyebrow: "The Cabin", h1l1: "Real cabin life.", h1l2: "Self-catering." },
     facts: { sleeps: "Sleeping spots", rooms: "Bedrooms", lounges: "Common rooms", occupancy: "Guest capacity" },
     desc: {
       eyebrow: "Description",
@@ -318,10 +331,21 @@ const COPY: Record<Locale, Copy> = {
         cta: "Create packing list →",
       },
     },
+    spenden: {
+      eyebrow: "Join in · Crowdfunding",
+      h2: "Donate for the beach volleyball court.",
+      body: "Right next to the cabin, we want to build a beach volleyball court — sand, net, framing. It will come together the way everything here does: as a group, with many helping hands and many small contributions. Every donation brings the court a step closer; we'll keep you posted on the progress here.",
+      amountLabel: "Choose an amount",
+      customLabel: "Custom amount in €",
+      cta: "Donate now",
+      secure: "Secure payment via Stripe · Recipient: Skifreunde Gütersloh e.V. · Purpose: beach volleyball court",
+      thanks: "Thank you for your donation — the court just moved a step closer!",
+      error: "Please choose an amount between €2 and €5,000.",
+    },
     cta: { eyebrow: "Ready?", h2: "Pick dates, enter guests, book.", button: "Check availability" },
   },
   nl: {
-    hero: { eyebrow: "De hut", h1l1: "Echte houten hut.", h1l2: "Zelfvoorzienend." },
+    hero: { eyebrow: "De hut", h1l1: "Echt huttenleven.", h1l2: "Zelfvoorzienend." },
     facts: { sleeps: "Slaapplaatsen", rooms: "Slaapkamers", lounges: "Verblijfsruimtes", occupancy: "Personen capaciteit" },
     desc: {
       eyebrow: "Beschrijving",
@@ -450,6 +474,17 @@ const COPY: Record<Locale, Copy> = {
         cta: "Paklijst maken →",
       },
     },
+    spenden: {
+      eyebrow: "Doe mee · Crowdfunding",
+      h2: "Doneer voor het beachvolleybalveld.",
+      body: "Direct naast de hut moet een beachvolleybalveld komen — zand, net, omranding. Het wordt gebouwd zoals alles hier ontstaat: samen, met veel helpende handen en veel kleine bijdragen. Elke donatie brengt het veld een stap dichterbij; over de voortgang houden we jullie hier op de hoogte.",
+      amountLabel: "Kies een bedrag",
+      customLabel: "Eigen bedrag in €",
+      cta: "Nu doneren",
+      secure: "Veilig betalen via Stripe · Ontvanger: Skifreunde Gütersloh e.V. · Doel: beachvolleybalveld",
+      thanks: "Bedankt voor je donatie — het veld komt een stap dichterbij!",
+      error: "Kies een bedrag tussen € 2 en € 5.000.",
+    },
     cta: { eyebrow: "Klaar?", h2: "Datum kiezen, personen invoeren, boeken.", button: "Beschikbaarheid bekijken" },
   },
 };
@@ -471,9 +506,16 @@ const GALLERY = [
   { src: "/media/photos/nature-1.jpg" },
 ];
 
-export default async function HuettePage() {
+export default async function HuettePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ spende?: string }>;
+}) {
   const locale = await getServerLocale();
   const c = COPY[locale];
+  const sp = await searchParams;
+  const spendeStatus =
+    sp.spende === "danke" ? ("danke" as const) : sp.spende === "fehler" ? ("fehler" as const) : null;
 
   // Floor-Plan-Daten zentral, damit der Client-Component keinen Locale-Branch
   // braucht — wir füllen die Anzeige-Texte aus c.floorPlans.floors[key].
@@ -693,7 +735,10 @@ export default async function HuettePage() {
         </div>
       </section>
 
-      <section className="bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-20">
+      {/* Crowdfunding: Beachvolleyballplatz */}
+      <DonationSection copy={c.spenden} status={spendeStatus} />
+
+      <section className="bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-20 border-t border-[var(--color-wh-snow)]/15">
         <div className="max-w-[820px] mx-auto text-center">
           <div className="eyebrow text-[var(--color-wh-snow)]/80">{c.cta.eyebrow}</div>
           <h2 className="text-[var(--color-wh-snow)] text-[32px] sm:text-[40px] mt-3">{c.cta.h2}</h2>

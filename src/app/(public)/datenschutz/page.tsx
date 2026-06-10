@@ -250,6 +250,33 @@ export default async function Datenschutz() {
             Einwilligung jederzeit widerrufen — schreib uns einfach an{" "}
             <a href="mailto:info@skifreunde-gt.de">info@skifreunde-gt.de</a>.
           </RuleBox>
+
+          <h3>3.7 Beim Radtouren-Matching (/radtouren)</h3>
+          <p>
+            Wenn Du Dich für gemeinsame Rad-Wochenenden einträgst, verarbeiten wir:
+          </p>
+          <ul>
+            <li>Deine E-Mail-Adresse</li>
+            <li>Deinen Vornamen (sofern angegeben)</li>
+            <li>die von Dir gewählten Wunsch-Wochenenden</li>
+            <li>ob Du Interesse an einem Lunchpaket hast</li>
+            <li>Zeitpunkt von Eintrag und Bestätigung</li>
+          </ul>
+          <RuleBox>
+            <strong>Zweck:</strong> Zusammenführung von Interessierten zu gemeinsamen
+            Radtouren-Gruppen an der Wiesenhütte. Kommt eine Gruppe von mindestens 8
+            bestätigten Personen für denselben Zeitraum zustande, geben wir Deine
+            E-Mail-Adresse an die übrigen Teilnehmer:innen genau dieses Zeitraums weiter,
+            damit Ihr Euch direkt abstimmen könnt.
+            <br />
+            <strong>Rechtsgrundlage:</strong> Art. 6 Abs. 1 lit. a DSGVO (Deine Einwilligung),
+            erteilt im Double-Opt-in-Verfahren; in die Weitergabe an die Gruppe willigst Du
+            beim Eintragen ausdrücklich ein.
+            <br />
+            <strong>Speicherdauer:</strong> Bis zum Widerruf bzw. bis der gewählte Zeitraum
+            verstrichen ist. Du kannst Dich jederzeit per Mail an{" "}
+            <a href="mailto:info@skifreunde-gt.de">info@skifreunde-gt.de</a> austragen.
+          </RuleBox>
         </Block>
 
         <Block id="4" title="4. Auftragsverarbeiter & Drittanbieter">

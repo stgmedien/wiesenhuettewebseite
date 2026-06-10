@@ -51,7 +51,7 @@ const COPY: Record<Locale, Copy> = {
       h3: "Kurze Hinweise vor Eurer Anreise",
       items: [
         "Spätestens **2 Tage vor Anreise** meldet Ihr Toni Klauke telefonisch Eure genaue Ankunftszeit.",
-        "Toni empfängt Euch an der Hütte und übergibt Schlüssel und Kurkarten.",
+        "Toni empfängt Euch an der Hütte und übergibt die Schlüssel. Eure Kurkarten bekommt Ihr vorab automatisch per E-Mail zugesendet.",
         "Mängel bitte sofort nach Anreise telefonisch melden — wird gemeinsam protokolliert.",
       ],
     },
@@ -81,7 +81,7 @@ const COPY: Record<Locale, Copy> = {
       h3: "A few notes before your arrival",
       items: [
         "At the latest **2 days before arrival** call Toni Klauke to tell him your exact arrival time.",
-        "Toni meets you at the cabin and hands over keys and resort cards.",
+        "Toni meets you at the cabin and hands over the keys. Your visitor cards (Kurkarten) are emailed to you in advance.",
         "Please report any defects by phone right after arrival — we'll log them together.",
       ],
     },
@@ -111,7 +111,7 @@ const COPY: Record<Locale, Copy> = {
       h3: "Korte aanwijzingen vóór aankomst",
       items: [
         "Uiterlijk **2 dagen vóór aankomst** bel je Toni Klauke om je precieze aankomsttijd door te geven.",
-        "Toni ontvangt jullie bij de hut en overhandigt sleutels en kurkarten.",
+        "Toni ontvangt jullie bij de hut en overhandigt de sleutels. Jullie kurkarten krijgen jullie vooraf automatisch per e-mail.",
         "Gebreken graag direct na aankomst telefonisch melden — leggen we samen vast.",
       ],
     },

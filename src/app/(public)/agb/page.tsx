@@ -103,7 +103,9 @@ export default async function AGB() {
             Anreise nach Absprache mit dem Hüttenwart, frühestens jedoch ab 14:00 Uhr. Abreise
             spätestens bis 12:00 Uhr am Abreisetag. Spätestens 2 Tage vor Anreise meldet der Mieter
             dem Hüttenwart Toni Klauke (02758 / 2014822, mobil 0151 / 67 44 82 73) telefonisch die
-            genaue Ankunftszeit. Schlüssel und Kurkarten werden persönlich an der Hütte übergeben.
+            genaue Ankunftszeit. Die Schlüssel werden persönlich an der Hütte übergeben; die
+            Kurkarten erhält der Mieter vorab automatisch per E-Mail (Kurbeitragspflicht der
+            Gemeinde Winterberg).
           </p>
         </Block>
 

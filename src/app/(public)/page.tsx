@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { getServerLocale } from "@/lib/i18n";
 import { makeT, type Locale } from "@/lib/i18n-shared";
+import { getSeason, SEASON_CLAIMS } from "@/lib/season";
 import { loadTrustData, type TrustData } from "@/lib/trust-reviews";
 import { TrustBadgeButton } from "@/components/public/TrustBadgeButton";
 import { EditorialGallery } from "@/components/public/landing/EditorialGallery";
@@ -78,9 +79,10 @@ const Hero = ({
           letterSpacing: "-0.025em",
         }}
       >
-        {tr("home.hero.h1.l1")}
+        {/* Saisonaler Claim — wechselt automatisch zu jedem Jahreszeitenbeginn. */}
+        {SEASON_CLAIMS[locale][getSeason()].l1}
         <br />
-        {tr("home.hero.h1.l2")}
+        {SEASON_CLAIMS[locale][getSeason()].l2}
       </h1>
       <p className="text-base sm:text-[19px] leading-relaxed text-[var(--color-wh-snow)]/95 m-0 max-w-xl drop-shadow">
         {tr("home.hero.lead")}
