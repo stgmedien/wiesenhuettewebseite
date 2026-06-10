@@ -36,6 +36,13 @@ yarn-error.log*
 # vercel
 .vercel
 
+# --- Parallele Vertrags-Migration: NIEMALS committen ---
+# Enthalten echte Personendaten (unterschriebene/versendete Verträge, Manifeste).
+# Repo ist öffentlich → diese Dateien dürfen nie in die Git-Historie.
+/docs/Vertrag_gesendet/
+/docs/Vertrag_unterschrieben/
+/scripts/.migrate-vertraege*
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
