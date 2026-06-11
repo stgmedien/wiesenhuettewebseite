@@ -36,9 +36,6 @@ const FEUERSTELLE_BILDER = [1, 2, 3, 4, 5, 6, 7, 8].map((i) => ({
 const PROJEKTFAHRT_BILDER = [
   { src: "/media/photos/projektfahrten/zusammen_essen_kochen.jpeg", alt: "Schüler:innen kochen zusammen in der Hütten-Küche" },
   { src: "/media/photos/projektfahrten/fruestueck_gemeinsam.jpeg", alt: "Gemeinsames Frühstück am großen Tisch" },
-  { src: "/media/photos/projektfahrten/gemeinschaftliches_grillen.jpeg", alt: "Gemeinschaftliches Grillen vor der Hütte" },
-  { src: "/media/photos/projektfahrten/grillen_2.jpeg", alt: "Lagerfeuer und Grillen am Abend" },
-  { src: "/media/photos/projektfahrten/karten_spielen.jpeg", alt: "Karten spielen am Hütten-Tisch" },
   { src: "/media/photos/projektfahrten/eine_bank_wird_gebaut.jpeg", alt: "Eine Holzbank wird gebaut" },
   { src: "/media/photos/projektfahrten/bank_wird_gebaut_2.jpeg", alt: "Schüler beim Bau der Bank" },
   { src: "/media/photos/projektfahrten/fertige_bank.jpeg", alt: "Die fertige selbstgebaute Bank" },
