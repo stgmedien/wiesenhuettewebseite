@@ -16,11 +16,32 @@ export const metadata = {
     "1949 gegründet, seit 1956 Träger der Wiesenhütte in Langewiese. Skigymnastik, Adventskaffeetrinken, Grünkohlwanderung — und Generationen, die die Hütte erhalten.",
 };
 
-const VEREINSAKTIVITAETEN_BILDER = [
-  { src: "/media/photos/vereinsaktivitaeten/signal-2026-04-21-084348.jpeg", alt: "Vereinsaktivität — Skifreunde Gütersloh" },
-  { src: "/media/photos/vereinsaktivitaeten/signal-2026-04-21-084428.jpeg", alt: "Vereinsaktivität — Skifreunde Gütersloh" },
-  { src: "/media/photos/vereinsaktivitaeten/signal-2026-04-21-084456.jpeg", alt: "Vereinsaktivität — Skifreunde Gütersloh" },
-  { src: "/media/photos/vereinsaktivitaeten/signal-2026-04-21-084531.jpeg", alt: "Vereinsaktivität — Skifreunde Gütersloh" },
+// Foto-Übersicht zur Grünkohlwanderung — die traditionelle Winterwanderung
+const GRUENKOHLWANDERUNG_BILDER = [
+  { src: "/media/photos/vereinsaktivitaeten/gruenkohlwanderung/bachlauf-wintersonne.jpeg", alt: "Verschneiter Bachlauf in der Wintersonne entlang der Grünkohlwanderung" },
+  { src: "/media/photos/vereinsaktivitaeten/gruenkohlwanderung/gruppe-feldweg.jpeg", alt: "Wandergruppe auf verschneitem Feldweg unter blauem Winterhimmel" },
+  { src: "/media/photos/vereinsaktivitaeten/gruenkohlwanderung/paar-am-weg.jpeg", alt: "Zwei Wanderer Arm in Arm auf der winterlichen Strecke" },
+  { src: "/media/photos/vereinsaktivitaeten/gruenkohlwanderung/gruppe-fuenf.jpeg", alt: "Fünf gut gelaunte Teilnehmende am verschneiten Wegrand" },
+  { src: "/media/photos/vereinsaktivitaeten/gruenkohlwanderung/familie-unterwegs.jpeg", alt: "Familie mit Kindern unterwegs auf der Grünkohlwanderung" },
+  { src: "/media/photos/vereinsaktivitaeten/gruenkohlwanderung/rast-warme-getraenke.jpeg", alt: "Rast mit warmen Getränken aus dem Suppentopf an Strohballen" },
+  { src: "/media/photos/vereinsaktivitaeten/gruenkohlwanderung/rast-scheune.jpeg", alt: "Gemeinsame Rast in der Scheune mit Heißgetränken" },
+  { src: "/media/photos/vereinsaktivitaeten/gruenkohlwanderung/scheune-unterstand.jpeg", alt: "Pause unter dem Scheunendach im Schnee" },
+  { src: "/media/photos/vereinsaktivitaeten/gruenkohlwanderung/zwei-portrait.jpeg", alt: "Zwei Teilnehmende lächeln in die Kamera, verschneite Allee im Hintergrund" },
+  { src: "/media/photos/vereinsaktivitaeten/gruenkohlwanderung/einkehr-essen.jpeg", alt: "Herzhafte Einkehr nach der Wanderung mit Wurst, Kassler und Pommes" },
+];
+
+// Eigene Foto-Geschichte zum Adventskaffeetrinken (Kuchen) — bewusst getrennt von der Grünkohlwanderung
+const ADVENTSKAFFEE_BILDER = [
+  { src: "/media/photos/vereinsaktivitaeten/adventskaffee/kaffeetafel.jpeg", alt: "Adventskaffeetrinken — lange Kaffeetafel mit Mitgliedern im Bauernhaus" },
+  { src: "/media/photos/vereinsaktivitaeten/adventskaffee/paar-am-tisch.jpeg", alt: "Zwei Mitglieder lächeln am festlich gedeckten Tisch im Fachwerk-Bauernhaus" },
+  { src: "/media/photos/vereinsaktivitaeten/adventskaffee/zwei-gaeste.jpeg", alt: "Zwei Gäste beim Adventskaffee, Kaffeetafel im Hintergrund" },
+  { src: "/media/photos/vereinsaktivitaeten/adventskaffee/kuchen.jpeg", alt: "Hausgemachter Bienenstich mit Sahne beim Adventskaffee" },
+  { src: "/media/photos/vereinsaktivitaeten/adventskaffee/bienenstich-nah.jpeg", alt: "Bienenstich mit Mandelkruste aus der Nähe" },
+  { src: "/media/photos/vereinsaktivitaeten/adventskaffee/kaesesahnetorte.jpeg", alt: "Angeschnittene Käsesahnetorte auf einer Glasplatte" },
+  { src: "/media/photos/vereinsaktivitaeten/adventskaffee/sahnekuchen.jpeg", alt: "Sahnekuchen mit Zitronenguss auf der Kaffeetafel" },
+  { src: "/media/photos/vereinsaktivitaeten/adventskaffee/schokotorte.jpeg", alt: "Schokoladen-Sahne-Torte mit Schokoraspeln" },
+  { src: "/media/photos/vereinsaktivitaeten/adventskaffee/schnittchen.jpeg", alt: "Belegte Brötchenhälften mit Schinken, Salami und Käse" },
+  { src: "/media/photos/vereinsaktivitaeten/adventskaffee/kaffeetasse.jpeg", alt: "Tasse Kaffee auf rotem Tischtuch beim Adventskaffeetrinken" },
 ];
 
 type TimelineItem = { year: string; title: string; body: string };
@@ -397,38 +418,55 @@ export default async function VereinPage() {
       </section>
 
       <section className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24">
-        <div className="max-w-[1080px] mx-auto grid grid-cols-1 md:grid-cols-[1.2fr_1fr] gap-10 md:gap-16 items-center">
-          <div>
-            <div className="eyebrow">{c.active.eyebrow}</div>
-            <h2 className="text-[32px] sm:text-[40px] mt-3 mb-6">{c.active.h2}</h2>
+        <div className="max-w-[1080px] mx-auto">
+          <div className="eyebrow">{c.active.eyebrow}</div>
+          <h2 className="text-[32px] sm:text-[40px] mt-3 mb-6">{c.active.h2}</h2>
 
-            {/* Gymnastikkurse — eigene Karte, klar getrennt von den Veranstaltungen */}
-            <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 mt-2">
-              <div className="eyebrow text-[var(--color-wh-green)]">
-                {c.active.gymHeading}
-              </div>
-              <h3 className="text-[20px] mt-2 mb-2">{c.active.gymH3}</h3>
-              <p className="text-[var(--color-wh-fg-muted)] m-0">{c.active.gymBody}</p>
-              <p className="text-sm text-[var(--color-wh-deep-green)] font-medium mt-3 mb-0">
-                {c.active.gymOrt}
-              </p>
-              {/* Foto-Slot Sportstunde: folgt, sobald Aufnahmen vorliegen (D1) */}
+          {/* Gymnastikkurse — eigene Karte, klar getrennt von den Veranstaltungen */}
+          <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 max-w-3xl">
+            <div className="eyebrow text-[var(--color-wh-green)]">
+              {c.active.gymHeading}
             </div>
-
-            {/* Veranstaltungen — eigene Karte */}
-            <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 mt-5">
-              <div className="eyebrow text-[var(--color-wh-green)]">
-                {c.active.eventsHeading}
-              </div>
-              <h3 className="text-[20px] mt-2 mb-2">{c.active.adventH3}</h3>
-              <p className="text-[var(--color-wh-fg-muted)] m-0">{c.active.adventBody}</p>
-
-              <h3 className="text-[20px] mt-6 mb-2">{c.active.walkH3}</h3>
-              <p className="text-[var(--color-wh-fg-muted)] m-0">{c.active.walkBody}</p>
-            </div>
+            <h3 className="text-[20px] mt-2 mb-2">{c.active.gymH3}</h3>
+            <p className="text-[var(--color-wh-fg-muted)] m-0">{c.active.gymBody}</p>
+            <p className="text-sm text-[var(--color-wh-deep-green)] font-medium mt-3 mb-0">
+              {c.active.gymOrt}
+            </p>
+            {/* Foto-Slot Sportstunde: folgt, sobald Aufnahmen vorliegen (D1) */}
           </div>
 
-          <ImageCarousel images={VEREINSAKTIVITAETEN_BILDER} aspectClass="aspect-[4/3]" />
+          {/* Veranstaltungen — zwei getrennte Foto-Geschichten:
+              Grünkohlwanderung und Adventskaffeetrinken (Kuchen) jeweils mit eigener Galerie */}
+          <div className="eyebrow text-[var(--color-wh-green)] mt-12">
+            {c.active.eventsHeading}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+            {/* Grünkohlwanderung — die Winterwanderung mit eigener Foto-Übersicht */}
+            <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] overflow-hidden flex flex-col">
+              <ImageCarousel
+                images={GRUENKOHLWANDERUNG_BILDER}
+                aspectClass="aspect-[4/3]"
+                rounded="rounded-none"
+              />
+              <div className="p-6">
+                <h3 className="text-[20px] mt-0 mb-2">{c.active.walkH3}</h3>
+                <p className="text-[var(--color-wh-fg-muted)] m-0">{c.active.walkBody}</p>
+              </div>
+            </div>
+
+            {/* Adventskaffeetrinken — eigene Foto-Geschichte rund um Kaffee & Kuchen */}
+            <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] overflow-hidden flex flex-col">
+              <ImageCarousel
+                images={ADVENTSKAFFEE_BILDER}
+                aspectClass="aspect-[4/3]"
+                rounded="rounded-none"
+              />
+              <div className="p-6">
+                <h3 className="text-[20px] mt-0 mb-2">{c.active.adventH3}</h3>
+                <p className="text-[var(--color-wh-fg-muted)] m-0">{c.active.adventBody}</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
