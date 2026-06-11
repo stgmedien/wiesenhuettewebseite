@@ -112,12 +112,12 @@ export default async function EsgPage() {
       <section id="einstieg" className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-16 sm:py-20">
         <div className="max-w-[1080px] mx-auto">
           <p className="text-base sm:text-[18px] leading-relaxed text-[var(--color-wh-black)] max-w-2xl">
-            Die Wiesenhütte in Langewiese ist keine Klassenfahrt-Adresse. Sie ist ein
-            außerschulischer Lernort des Evangelisch Stiftischen Gymnasiums, einer
-            Gütersloher Schule — seit Generationen im Besitz des Vereins Skifreunde
-            Gütersloh und seit einigen Jahren auch für die pädagogische Arbeit des ESG
-            geöffnet. Exklusiv ist hier nichts: Vereine, Familien und andere Gruppen
-            buchen die Hütte genauso.
+            Die Wiesenhütte in Langewiese gehört dem Verein Skifreunde Gütersloh e.V. — und
+            steht allen offen: Vereine, Familien, Schulen und andere Gruppen buchen sie als
+            Selbstversorgerhütte. Das Evangelisch Stiftische Gymnasium, eine Gütersloher
+            Schule, nutzt sie seit einigen Jahren als außerschulischen Lernort und darf sie
+            dabei aktiv mitgestalten. Ein Vorrecht ist das nicht: Diesen Gestaltungsraum
+            öffnen wir gern auch für andere Schulen.
           </p>
           <p className="text-base sm:text-[18px] leading-relaxed text-[var(--color-wh-black)] max-w-2xl mt-4">
             Hier gilt eine einfache Beobachtung: <strong>Manches lernt man nur dort, wo das
@@ -126,6 +126,21 @@ export default async function EsgPage() {
             gehen, geschieht etwas, das zu Persönlichkeitsbildung wird — und nicht nur zu
             Stoff. Genau dafür gibt es die Hütte.
           </p>
+          {/* Einladung an weitere Schulen + Verweis auf den Kontaktabschnitt (#stimmen) */}
+          <div className="mt-6 bg-[var(--color-wh-green-soft)] border border-[var(--color-wh-green)]/30 rounded-[var(--radius-card)] p-5 sm:p-6 max-w-2xl">
+            <p className="text-[15px] sm:text-base leading-relaxed text-[var(--color-wh-black)] m-0">
+              <strong>Ihr seid eine Schule und möchtet die Wiesenhütte als Lernort nutzen — und
+              vielleicht eigene Ideen mit einbringen?</strong> Genau dafür ist sie da. Meldet Euch
+              bei der Hüttenarbeit, dann denken wir gemeinsam mit Euch, wie ein Projekt für Eure
+              Klassen aussehen könnte.{" "}
+              <a
+                href="#stimmen"
+                className="text-[var(--color-wh-deep-green)] font-semibold underline underline-offset-2 hover:no-underline"
+              >
+                Kontakt zur Hüttenarbeit →
+              </a>
+            </p>
+          </div>
         </div>
       </section>
 
