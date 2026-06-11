@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Mountain } from "lucide-react";
 import { CookieSettingsLink } from "@/components/consent/CookieBanner";
+import { NewsletterForm } from "@/components/public/NewsletterForm";
 import { t, type Locale } from "@/lib/i18n";
 
 export const Footer = ({ locale }: { locale: Locale }) => (
@@ -17,6 +18,16 @@ export const Footer = ({ locale }: { locale: Locale }) => (
           Selbstversorgerhütte in Langewiese, Hochsauerland. Getragen vom Verein Skifreunde
           Gütersloh e.V. — gebaut, gepflegt und genutzt von Generationen.
         </p>
+
+        <div className="mt-7 max-w-md">
+          <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-wh-snow)]/70">
+            {t("footer.newsletter.heading", locale)}
+          </span>
+          <p className="text-[var(--color-wh-snow)]/70 text-[13px] leading-relaxed mt-1.5 mb-3">
+            {t("footer.newsletter.sub", locale)}
+          </p>
+          <NewsletterForm locale={locale} variant="footer" />
+        </div>
       </div>
 
       <nav className="text-sm flex flex-col gap-2 items-start">
@@ -68,6 +79,9 @@ export const Footer = ({ locale }: { locale: Locale }) => (
         </Link>
         <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/kontakt">
           {t("footer.verein.kontakt", locale)}
+        </Link>
+        <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/newsletter">
+          {t("footer.newsletter.heading", locale)}
         </Link>
         <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/downloads">
           {t("footer.downloads", locale)}

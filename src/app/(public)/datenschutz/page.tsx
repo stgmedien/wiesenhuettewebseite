@@ -194,11 +194,15 @@ export default async function Datenschutz() {
             aus der Anfrage ein Vertrag entsteht, gelten die Fristen aus 3.2.
           </RuleBox>
 
-          <h3>3.4 Bei Anmeldung zum Newsletter (sofern angeboten)</h3>
+          <h3>3.4 Bei Anmeldung zum Newsletter</h3>
           <p>
-            Falls wir auf der Webseite einen Newsletter anbieten, verarbeiten wir bei Anmeldung
-            Deine <strong>E-Mail-Adresse</strong> sowie ggf. Deinen <strong>Vornamen</strong> zur
-            persönlichen Anrede.
+            Für den Versand unseres Newsletters nutzen wir den Dienst{" "}
+            <strong>Brevo</strong> (Sendinblue GmbH). Bei der Anmeldung verarbeiten wir Deine{" "}
+            <strong>E-Mail-Adresse</strong> sowie ggf. Deinen <strong>Vornamen</strong> zur
+            persönlichen Anrede. Die Anmeldung erfolgt im{" "}
+            <strong>Double-Opt-in-Verfahren</strong>: Nach dem Eintragen erhältst Du eine
+            Bestätigungsmail; erst nach Klick auf den darin enthaltenen Link wirst Du in den
+            Verteiler aufgenommen.
           </p>
           <RuleBox>
             <strong>Zweck:</strong> Versand des Newsletters mit Tipps zur Region, Hütten-Updates und
@@ -207,11 +211,34 @@ export default async function Datenschutz() {
             <strong>Rechtsgrundlage:</strong> Art. 6 Abs. 1 lit. a DSGVO (Deine Einwilligung),
             erteilt im Double-Opt-in-Verfahren.
             <br />
+            <strong>Auftragsverarbeiter:</strong> Sendinblue GmbH (Brevo), Köln — Versand und
+            Verwaltung des Verteilers; siehe Abschnitt 4.
+            <br />
             <strong>Speicherdauer:</strong> Bis zur Abmeldung vom Newsletter. Du kannst Dich
             jederzeit über den Abmeldelink in jeder Newsletter-E-Mail oder per Mail an{" "}
-            <a href="mailto:skifreunde@wiesenhuette.de">skifreunde@wiesenhuette.de</a> abmelden. Wir
-            speichern Deinen Anmelde-Zeitpunkt sowie die zugehörige IP-Adresse zum Nachweis der
-            Einwilligung — diese Nachweisdaten werden 3 Jahre nach Abmeldung gelöscht.
+            <a href="mailto:skifreunde@wiesenhuette.de">skifreunde@wiesenhuette.de</a> abmelden. Zum
+            Nachweis der Einwilligung speichert Brevo den Anmelde- und Bestätigungszeitpunkt
+            samt zugehöriger IP-Adresse.
+          </RuleBox>
+
+          <h3>3.4a Bei einer Vereinsmitgliedschaft</h3>
+          <p>
+            Wenn Du Mitglied der Skifreunde Gütersloh wirst, nehmen wir Deine{" "}
+            <strong>E-Mail-Adresse</strong> und Deinen <strong>Namen</strong> in unsere bei{" "}
+            <strong>Brevo</strong> geführte Mitgliederliste auf, um Dich über Vereinsangelegenheiten
+            (Termine, Einladungen, organisatorische Hinweise) informieren zu können.
+          </p>
+          <RuleBox>
+            <strong>Zweck:</strong> Kommunikation mit den Vereinsmitgliedern.
+            <br />
+            <strong>Rechtsgrundlage:</strong> Art. 6 Abs. 1 lit. b DSGVO (Durchführung des
+            Mitgliedschaftsverhältnisses).
+            <br />
+            <strong>Auftragsverarbeiter:</strong> Sendinblue GmbH (Brevo); siehe Abschnitt 4.
+            <br />
+            <strong>Speicherdauer:</strong> Für die Dauer der Mitgliedschaft. Vereinsbezogenen
+            Mitteilungen kannst Du jederzeit per Mail an{" "}
+            <a href="mailto:skifreunde@wiesenhuette.de">skifreunde@wiesenhuette.de</a> widersprechen.
           </RuleBox>
 
           <h3>3.5 Beim Manager-Login (Backend)</h3>
@@ -313,6 +340,13 @@ export default async function Datenschutz() {
             location="Deutschland"
             avv="geschlossen"
             link="https://www.ionos.de/terms-gtc/datenschutzerklaerung/"
+          />
+          <Provider
+            name="Sendinblue GmbH (Brevo)"
+            purpose="Newsletter-Versand und Verwaltung der Newsletter- sowie Mitgliederliste"
+            location="Köln (Deutschland); Konzern mit Sitz in Frankreich (EU)"
+            avv="geschlossen"
+            link="https://www.brevo.com/de/legal/privacypolicy/"
           />
           <Provider
             name="Vercel Blob (Vercel Inc.)"

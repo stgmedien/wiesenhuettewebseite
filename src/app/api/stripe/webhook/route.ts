@@ -24,6 +24,7 @@ import VoucherPurchaseEmail from "@/lib/mail/templates/voucher-purchase";
 import VoucherGiftEmail from "@/lib/mail/templates/voucher-gift";
 import MemberWelcomeEmail from "@/lib/mail/templates/member-welcome";
 import MemberJoinedInternalEmail from "@/lib/mail/templates/member-joined-internal";
+import { addContactToMembersList } from "@/lib/brevo";
 import { formatDateLong } from "@/lib/utils";
 import { createInvoiceForBooking } from "@/lib/invoice";
 import type Stripe from "stripe";
@@ -830,9 +831,22 @@ async function handleMembershipSignupPaid(session: Stripe.Checkout.Session) {
     }
   }
 
+  // Brevo: neues Mitglied automatisch in die Mitgliederliste aufnehmen.
+  // Best effort — ein Brevo-Ausfall darf die Aktivierung nicht blockieren.
+  const brevo = await addContactToMembersList(customer.email, {
+    firstName: customer.firstName,
+    lastName: customer.lastName,
+  });
+  if (!brevo.ok && brevo.reason !== "not_configured") {
+    await db.insert(activityLog).values({
+      who: "Brevo",
+      what: `⚠️ Mitglied ${customer.email} konnte nicht automatisch in die Brevo-Mitgliederliste eingetragen werden (${brevo.reason}). Bitte manuell ergänzen.`,
+    });
+  }
+
   await db.insert(activityLog).values({
     who: "Stripe",
-    what: `Online-Beitritt: ${customer.firstName} ${customer.lastName} ist jetzt Mitglied (${tierName}, ${(feeCents / 100).toFixed(2)} €/Jahr) — automatisch verifiziert`,
+    what: `Online-Beitritt: ${customer.firstName} ${customer.lastName} ist jetzt Mitglied (${tierName}, ${(feeCents / 100).toFixed(2)} €/Jahr) — automatisch verifiziert${brevo.ok ? " + Brevo-Mitgliederliste" : ""}`,
   });
 }
 
