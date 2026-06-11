@@ -13,10 +13,9 @@ export const dynamic = "force-dynamic";
 export const metadata = {
   title: "Verein · Skifreunde Gütersloh e.V.",
   description:
-    "1949 gegründet, seit 1956 Träger der Wiesenhütte in Langewiese. Skigymnastik, Adventskaffeetrinken, Grünkohlwanderung — und Generationen, die die Hütte erhalten.",
+    "Skigymnastik dienstags & donnerstags, Radtouren, Grünkohlwanderung, Adventskaffee — und eine Hütte, die seit 1956 von Ehrenamtlichen getragen wird.",
 };
 
-// Foto-Übersicht zur Grünkohlwanderung — die traditionelle Winterwanderung
 const GRUENKOHLWANDERUNG_BILDER = [
   { src: "/media/photos/vereinsaktivitaeten/gruenkohlwanderung/bachlauf-wintersonne.jpeg", alt: "Verschneiter Bachlauf in der Wintersonne entlang der Grünkohlwanderung" },
   { src: "/media/photos/vereinsaktivitaeten/gruenkohlwanderung/gruppe-feldweg.jpeg", alt: "Wandergruppe auf verschneitem Feldweg unter blauem Winterhimmel" },
@@ -30,7 +29,6 @@ const GRUENKOHLWANDERUNG_BILDER = [
   { src: "/media/photos/vereinsaktivitaeten/gruenkohlwanderung/einkehr-essen.jpeg", alt: "Herzhafte Einkehr nach der Wanderung mit Wurst, Kassler und Pommes" },
 ];
 
-// Eigene Foto-Geschichte zum Adventskaffeetrinken (Kuchen) — bewusst getrennt von der Grünkohlwanderung
 const ADVENTSKAFFEE_BILDER = [
   { src: "/media/photos/vereinsaktivitaeten/adventskaffee/kaffeetafel.jpeg", alt: "Adventskaffeetrinken — lange Kaffeetafel mit Mitgliedern im Bauernhaus" },
   { src: "/media/photos/vereinsaktivitaeten/adventskaffee/paar-am-tisch.jpeg", alt: "Zwei Mitglieder lächeln am festlich gedeckten Tisch im Fachwerk-Bauernhaus" },
@@ -47,6 +45,38 @@ const ADVENTSKAFFEE_BILDER = [
 type TimelineItem = { year: string; title: string; body: string };
 type Copy = {
   hero: { eyebrow: string; h1: string; lead: string };
+  sport: {
+    eyebrow: string;
+    h2: string;
+    intro: string;
+    diTag: string;
+    diTime: string;
+    diHall: string;
+    diLabel: string;
+    diBody: string;
+    doTag: string;
+    doTime: string;
+    doHall: string;
+    doLabel: string;
+    doBody: string;
+    trainerLabel: string;
+    trainerName: string;
+    schnupperNote: string;
+    ctaMail: string;
+  };
+  events: {
+    eyebrow: string;
+    adventH3: string;
+    adventBody: string;
+    walkH3: string;
+    walkBody: string;
+  };
+  rad: {
+    eyebrow: string;
+    h2: string;
+    body: string;
+    cta: string;
+  };
   profile: {
     eyebrow: string;
     h2: string;
@@ -57,19 +87,6 @@ type Copy = {
   };
   timelineHeading: { eyebrow: string; h2: string };
   timeline: TimelineItem[];
-  active: {
-    eyebrow: string;
-    h2: string;
-    gymHeading: string;
-    gymH3: string;
-    gymBody: string;
-    gymOrt: string;
-    eventsHeading: string;
-    adventH3: string;
-    adventBody: string;
-    walkH3: string;
-    walkBody: string;
-  };
   member: {
     eyebrow: string;
     h2: string;
@@ -98,6 +115,45 @@ const COPY: Record<Locale, Copy> = {
       lead:
         "Gegründet von 124 Skibegeisterten in Gütersloh, getragen über mehr als sieben Jahrzehnte von ehrenamtlicher Arbeit, Vereinsfahrten und Generationen, die in Langewiese ihre erste Skispur gezogen haben.",
     },
+    sport: {
+      eyebrow: "Sportangebot",
+      h2: "Zweimal die Woche. Mitten in Gütersloh.",
+      intro:
+        "Bewegung, Gemeinschaft, Musik — für Mitglieder aller Altersgruppen. Unsere Sportleiterin Alexandra Lütgert bietet zwei feste Abende pro Woche in der Sporthalle des SG Gütersloh.",
+      diTag: "Dienstag",
+      diTime: "18:30 Uhr",
+      diHall: "Halle A · SG Gütersloh",
+      diLabel: "Gemütlich & schonend",
+      diBody:
+        "Eine entspannte Runde in kleiner Gruppe — zu Musik. Schonend, aber wirksam. Ideal für den Ein- oder Wiedereinstieg.",
+      doTag: "Donnerstag",
+      doTime: "20:00 Uhr",
+      doHall: "Halle B · SG Gütersloh",
+      doLabel: "Breites Programm",
+      doBody:
+        "Aufwärmen, Stabilisierungsübungen für Rumpf, Schulter und Rücken, Dehnungen — zu Musik. Im Anschluss: Volleyball, Basketball oder was die Gruppe möchte.",
+      trainerLabel: "Sportleiterin",
+      trainerName: "Alexandra Lütgert",
+      schnupperNote:
+        "Einmal reinschnuppern? Sprecht uns an — wir melden Euch an:",
+      ctaMail: "skifreunde@wiesenhuette.de",
+    },
+    events: {
+      eyebrow: "Vereinsveranstaltungen",
+      adventH3: "Adventskaffeetrinken",
+      adventBody:
+        "Vorweihnachtliches Beisammensein im Spexarder Bauernhaus, organisiert von Karin Lütgert. Mitglieder aller Generationen kommen zusammen, alle tragen etwas bei — und lecker ist es traditionell auch. Für 2026 ist das Bauernhaus bereits gebucht.",
+      walkH3: "Grünkohlwanderung",
+      walkBody:
+        "Die traditionelle Winterwanderung mit gemeinsamem Essen: Jahr für Jahr geht es zum Gasthof Hesse nach Versmold — munteres Beisammensein, gute Stimmung und beim Grünkohl gute Gespräche.",
+    },
+    rad: {
+      eyebrow: "Radtouren",
+      h2: "Gemeinsam aufs Rad.",
+      body:
+        "Das Hochsauerland rund um Langewiese gehört zu den schönsten Radrevieren NRWs — Hügel, Wälder, stille Straßen. Die Wiesenhütte ist das ideale Basislager. Über unser Matching-System findet Ihr Mitfahrende für gemeinsame Wochenenden: Wunsch-Termin eintragen, auf acht Mitfahrende warten, loslegen. Auf Wunsch mit Lunchpaket der Bäckerei Gerke.",
+      cta: "Radtouren-Matching →",
+    },
     profile: {
       eyebrow: "Vereinsprofil",
       h2: "Naturerlebnis. Bewegung. Gemeinschaft.",
@@ -119,19 +175,6 @@ const COPY: Record<Locale, Copy> = {
       { year: "1986", title: "Letzter Erweiterungsbau", body: "Seitdem 33 Schlafplätze in 5 Schlafzimmern, 2 Aufenthaltsräume, voll ausgestattete Küche, Sanitäranlagen, Skikeller." },
       { year: "Heute", title: "Verein in Bewegung", body: "Skigymnastik, Vereinsfahrten, Renovierungswochenenden, ESG-Projekte — getragen von Ehrenamt und Generationen." },
     ],
-    active: {
-      eyebrow: "Aktive Vereinszeit",
-      h2: "Bewegung & Veranstaltungen.",
-      gymHeading: "Gymnastikkurse",
-      gymH3: "Skigymnastik mit Alexandra Lütgert",
-      gymBody: "Kraft, Beweglichkeit, Koordination und Kondition — ideal für alle, die aktiv bleiben möchten. Dienstags 18:30 Uhr und donnerstags 20:00 Uhr, Schnupperstunde jederzeit möglich.",
-      gymOrt: "Ort: Sporthalle in Gütersloh — den genauen Hallen-Standort und alles zur Anmeldung erfahrt Ihr unter skifreunde@wiesenhuette.de.",
-      eventsHeading: "Veranstaltungen",
-      adventH3: "Adventskaffeetrinken",
-      adventBody: "Vorweihnachtliches Beisammensein im Spexarder Bauernhaus, organisiert von Karin Lütgert. Mitglieder aller Generationen kommen zusammen, alle tragen etwas bei — und lecker ist es traditionell auch. Für 2026 ist das Bauernhaus bereits gebucht.",
-      walkH3: "Grünkohlwanderung",
-      walkBody: "Die traditionelle Winterwanderung mit gemeinsamem Essen: Jahr für Jahr geht es zum Gasthof Hesse nach Versmold — munteres Beisammensein, gute Stimmung und beim Grünkohl gute Gespräche.",
-    },
     member: {
       eyebrow: "Mitgliedschaft",
       h2: "Mitglied werden.",
@@ -165,6 +208,44 @@ const COPY: Record<Locale, Copy> = {
       h1: "In motion since 1949.",
       lead: "Founded by 124 ski enthusiasts in Gütersloh, carried for more than seven decades by volunteer work, club trips and generations who carved their first turns in Langewiese.",
     },
+    sport: {
+      eyebrow: "Sport offer",
+      h2: "Twice a week. Right in Gütersloh.",
+      intro:
+        "Movement, community, music — for members of all ages. Our instructor Alexandra Lütgert runs two regular evenings a week at the SG Gütersloh sports hall.",
+      diTag: "Tuesday",
+      diTime: "6:30 pm",
+      diHall: "Hall A · SG Gütersloh",
+      diLabel: "Relaxed & gentle",
+      diBody:
+        "An easy session in a small group — with music. Gentle but effective. Perfect for beginners or those returning to exercise.",
+      doTag: "Thursday",
+      doTime: "8:00 pm",
+      doHall: "Hall B · SG Gütersloh",
+      doLabel: "Full programme",
+      doBody:
+        "Warm-up, core, shoulder and back strengthening, stretching — with music. Afterwards: volleyball, basketball or whatever the group fancies.",
+      trainerLabel: "Instructor",
+      trainerName: "Alexandra Lütgert",
+      schnupperNote: "Want to try it out? Just get in touch — we'll sign you up:",
+      ctaMail: "skifreunde@wiesenhuette.de",
+    },
+    events: {
+      eyebrow: "Club events",
+      adventH3: "Advent coffee",
+      adventBody:
+        "A pre-Christmas get-together at the Spexarder Bauernhaus, organised by Karin Lütgert. Members of all generations come together, everyone contributes — and it is traditionally delicious. The venue is already booked for 2026.",
+      walkH3: "Kale hike",
+      walkBody:
+        "The traditional winter hike with a shared meal: year after year the route leads to Gasthof Hesse in Versmold — great company, good spirits and good conversations over dinner.",
+    },
+    rad: {
+      eyebrow: "Bike tours",
+      h2: "Ride together.",
+      body:
+        "The Hochsauerland around Langewiese is one of NRW's finest cycling regions — hills, forests, quiet roads. The Wiesenhütte is the perfect base camp. Our matching system connects you with fellow riders for joint weekends: enter your preferred dates, wait for eight participants, and off you go.",
+      cta: "Bike-tour matching →",
+    },
     profile: {
       eyebrow: "Club profile",
       h2: "Nature. Movement. Community.",
@@ -184,19 +265,6 @@ const COPY: Record<Locale, Copy> = {
       { year: "1986", title: "Last major extension", body: "Since then: 33 beds in 5 bedrooms, 2 common rooms, fully equipped kitchen, bathrooms, ski cellar." },
       { year: "Today", title: "A club in motion", body: "Ski gymnastics, club trips, renovation weekends, ESG school projects — carried by volunteer work and generations." },
     ],
-    active: {
-      eyebrow: "Active club life",
-      h2: "Movement & events.",
-      gymHeading: "Gymnastics classes",
-      gymH3: "Ski gymnastics with Alexandra Lütgert",
-      gymBody: "Strength, flexibility, coordination and stamina — ideal for everyone who wants to stay active. Tuesdays 18:30 and Thursdays 20:00, trial sessions possible at any time.",
-      gymOrt: "Location: sports hall in Gütersloh — details and sign-up via skifreunde@wiesenhuette.de.",
-      eventsHeading: "Events",
-      adventH3: "Advent coffee",
-      adventBody: "A pre-Christmas get-together at the Spexarder Bauernhaus, organised by Karin Lütgert. Members of all generations come together, everyone contributes — and it is traditionally delicious. The venue is already booked for 2026.",
-      walkH3: "Kale hike",
-      walkBody: "The traditional winter hike with a shared meal: year after year the route leads to Gasthof Hesse in Versmold — great company, good spirits and good conversations over dinner.",
-    },
     member: {
       eyebrow: "Membership",
       h2: "Become a member.",
@@ -230,6 +298,44 @@ const COPY: Record<Locale, Copy> = {
       h1: "Sinds 1949 in beweging.",
       lead: "Opgericht door 124 ski-enthousiastelingen in Gütersloh, ruim zeven decennia gedragen door vrijwilligerswerk, verenigingsreizen en generaties die in Langewiese hun eerste skispoor trokken.",
     },
+    sport: {
+      eyebrow: "Sportaanbod",
+      h2: "Twee keer per week. Midden in Gütersloh.",
+      intro:
+        "Beweging, gemeenschap, muziek — voor leden van alle leeftijden. Onze sportleidster Alexandra Lütgert geeft twee vaste avonden per week in de sporthal van SG Gütersloh.",
+      diTag: "Dinsdag",
+      diTime: "18:30 uur",
+      diHall: "Hal A · SG Gütersloh",
+      diLabel: "Gezellig & rustig",
+      diBody:
+        "Een ontspannen ronde in een kleine groep — op muziek. Rustig maar effectief. Ideaal voor (her)starters.",
+      doTag: "Donderdag",
+      doTime: "20:00 uur",
+      doHall: "Hal B · SG Gütersloh",
+      doLabel: "Breed programma",
+      doBody:
+        "Warming-up, stabilisatieoefeningen voor romp, schouder en rug, rekoefeningen — op muziek. Daarna: volleybal, basketbal of waar de groep zin in heeft.",
+      trainerLabel: "Sportleidster",
+      trainerName: "Alexandra Lütgert",
+      schnupperNote: "Eén keer komen kijken? Spreek ons aan — wij schrijven je in:",
+      ctaMail: "skifreunde@wiesenhuette.de",
+    },
+    events: {
+      eyebrow: "Verenigingsevenementen",
+      adventH3: "Adventkoffie",
+      adventBody:
+        "Voorkerstmis-samenzijn in het Spexarder Bauernhaus, georganiseerd door Karin Lütgert. Leden van alle generaties komen samen, iedereen draagt bij — en lekker is het traditioneel ook. Voor 2026 is de locatie al geboekt.",
+      walkH3: "Grünkohl-wandeling",
+      walkBody:
+        "De traditionele winterwandeling met gezamenlijke maaltijd: jaar na jaar gaat het naar Gasthof Hesse in Versmold — gezellig samenzijn, goede sfeer en goede gesprekken aan tafel.",
+    },
+    rad: {
+      eyebrow: "Fietstochten",
+      h2: "Samen op de fiets.",
+      body:
+        "Het Hochsauerland rond Langewiese is een van de mooiste fietsgebieden van NRW — heuvels, bossen, stille wegen. De Wiesenhütte is het ideale basiskamp. Via ons matching-systeem vind je mederiijders voor gezamenlijke weekenden: gewenste datum invoeren, op acht deelnemers wachten, en rijden maar.",
+      cta: "Fietstochtmatching →",
+    },
     profile: {
       eyebrow: "Verenigingsprofiel",
       h2: "Natuur. Beweging. Gemeenschap.",
@@ -249,19 +355,6 @@ const COPY: Record<Locale, Copy> = {
       { year: "1986", title: "Laatste grote uitbreiding", body: "Sindsdien 33 slaapplaatsen in 5 slaapkamers, 2 verblijfsruimtes, volledig ingerichte keuken, sanitair, skikelder." },
       { year: "Vandaag", title: "Een vereniging in beweging", body: "Skigymnastiek, verenigingsreizen, renovatieweekenden, ESG-schoolprojecten — gedragen door vrijwilligers en generaties." },
     ],
-    active: {
-      eyebrow: "Actieve verenigingstijd",
-      h2: "Beweging & evenementen.",
-      gymHeading: "Gymnastieklessen",
-      gymH3: "Skigymnastiek met Alexandra Lütgert",
-      gymBody: "Kracht, lenigheid, coördinatie en conditie — ideaal voor wie actief wil blijven. Dinsdag 18:30 en donderdag 20:00, proefles altijd mogelijk.",
-      gymOrt: "Locatie: sporthal in Gütersloh — details en aanmelding via skifreunde@wiesenhuette.de.",
-      eventsHeading: "Evenementen",
-      adventH3: "Adventkoffie",
-      adventBody: "Voorkerstmis-samenzijn in het Spexarder Bauernhaus, georganiseerd door Karin Lütgert. Leden van alle generaties komen samen, iedereen draagt bij — en lekker is het traditioneel ook. Voor 2026 is de locatie al geboekt.",
-      walkH3: "Grünkohl-wandeling",
-      walkBody: "De traditionele winterwandeling met gezamenlijke maaltijd: jaar na jaar gaat het naar Gasthof Hesse in Versmold — gezellig samenzijn, goede sfeer en goede gesprekken aan tafel.",
-    },
     member: {
       eyebrow: "Lidmaatschap",
       h2: "Lid worden.",
@@ -355,6 +448,7 @@ export default async function VereinPage() {
 
   return (
     <div>
+      {/* HERO */}
       <section className="bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] px-6 sm:px-8 py-20 sm:py-24">
         <div className="max-w-[1080px] mx-auto">
           <div className="eyebrow text-[var(--color-wh-snow)]/80">{c.hero.eyebrow}</div>
@@ -367,7 +461,135 @@ export default async function VereinPage() {
         </div>
       </section>
 
+      {/* SPORTANGEBOT — prominent, two day cards */}
       <section className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24">
+        <div className="max-w-[1080px] mx-auto">
+          <div className="eyebrow text-[var(--color-wh-green)]">{c.sport.eyebrow}</div>
+          <h2 className="text-[32px] sm:text-[44px] mt-3 mb-3">{c.sport.h2}</h2>
+          <p className="text-[17px] leading-relaxed text-[var(--color-wh-fg-muted)] max-w-2xl mb-10">
+            {c.sport.intro}
+          </p>
+
+          {/* Foto-Slot Sportstunde: folgt, sobald Aufnahmen vorliegen */}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* Dienstag */}
+            <div className="bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] rounded-[var(--radius-card)] p-7 sm:p-8 flex flex-col gap-2">
+              <div className="eyebrow text-[var(--color-wh-snow)]/60">{c.sport.diTag}</div>
+              <div className="font-display text-[48px] sm:text-[56px] font-bold leading-none">
+                {c.sport.diTime}
+              </div>
+              <div className="text-sm text-[var(--color-wh-snow)]/55 mb-2">{c.sport.diHall}</div>
+              <div className="border-t border-[var(--color-wh-snow)]/20 pt-4 mt-auto">
+                <div className="font-semibold text-[var(--color-wh-snow)] mb-1.5 text-[15px]">
+                  {c.sport.diLabel}
+                </div>
+                <p className="text-[var(--color-wh-snow)]/80 text-[15px] leading-relaxed m-0">
+                  {c.sport.diBody}
+                </p>
+              </div>
+            </div>
+
+            {/* Donnerstag */}
+            <div className="bg-[var(--color-wh-green)] text-[var(--color-wh-snow)] rounded-[var(--radius-card)] p-7 sm:p-8 flex flex-col gap-2">
+              <div className="eyebrow text-[var(--color-wh-snow)]/60">{c.sport.doTag}</div>
+              <div className="font-display text-[48px] sm:text-[56px] font-bold leading-none">
+                {c.sport.doTime}
+              </div>
+              <div className="text-sm text-[var(--color-wh-snow)]/55 mb-2">{c.sport.doHall}</div>
+              <div className="border-t border-[var(--color-wh-snow)]/20 pt-4 mt-auto">
+                <div className="font-semibold text-[var(--color-wh-snow)] mb-1.5 text-[15px]">
+                  {c.sport.doLabel}
+                </div>
+                <p className="text-[var(--color-wh-snow)]/80 text-[15px] leading-relaxed m-0">
+                  {c.sport.doBody}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Trainer + Schnupper-CTA */}
+          <div className="mt-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[var(--color-wh-beige)] rounded-[var(--radius-card)] px-6 py-5">
+            <div>
+              <span className="text-xs font-semibold uppercase tracking-widest text-[var(--color-wh-green)]">
+                {c.sport.trainerLabel}
+              </span>
+              <div className="text-[var(--color-wh-deep-green)] font-semibold text-[17px] mt-0.5">
+                {c.sport.trainerName}
+              </div>
+            </div>
+            <p className="text-[var(--color-wh-fg-muted)] text-[15px] m-0 sm:text-right max-w-sm">
+              {c.sport.schnupperNote}{" "}
+              <a
+                href={`mailto:${c.sport.ctaMail}`}
+                className="text-[var(--color-wh-deep-green)] font-semibold"
+              >
+                {c.sport.ctaMail}
+              </a>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* VERANSTALTUNGEN — Grünkohlwanderung + Adventskaffee */}
+      <section className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-16 sm:py-24">
+        <div className="max-w-[1080px] mx-auto">
+          <div className="eyebrow text-[var(--color-wh-green)]">{c.events.eyebrow}</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            {/* Grünkohlwanderung */}
+            <div className="bg-white rounded-[var(--radius-card)] overflow-hidden flex flex-col">
+              <ImageCarousel
+                images={GRUENKOHLWANDERUNG_BILDER}
+                aspectClass="aspect-[4/3]"
+                rounded="rounded-none"
+              />
+              <div className="p-6">
+                <h3 className="text-[20px] mt-0 mb-2">{c.events.walkH3}</h3>
+                <p className="text-[var(--color-wh-fg-muted)] m-0">{c.events.walkBody}</p>
+              </div>
+            </div>
+
+            {/* Adventskaffeetrinken */}
+            <div className="bg-white rounded-[var(--radius-card)] overflow-hidden flex flex-col">
+              <ImageCarousel
+                images={ADVENTSKAFFEE_BILDER}
+                aspectClass="aspect-[4/3]"
+                rounded="rounded-none"
+              />
+              <div className="p-6">
+                <h3 className="text-[20px] mt-0 mb-2">{c.events.adventH3}</h3>
+                <p className="text-[var(--color-wh-fg-muted)] m-0">{c.events.adventBody}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* RADTOUREN TEASER */}
+      <section className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-20">
+        <div className="max-w-[1080px] mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-8 items-center">
+            <div>
+              <div className="eyebrow text-[var(--color-wh-green)]">{c.rad.eyebrow}</div>
+              <h2 className="text-[32px] sm:text-[40px] mt-3 mb-4">{c.rad.h2}</h2>
+              <p className="text-[17px] leading-relaxed text-[var(--color-wh-fg-muted)] max-w-2xl m-0">
+                {c.rad.body}
+              </p>
+            </div>
+            <div className="md:shrink-0">
+              <Link
+                href="/radtouren"
+                className="inline-flex items-center gap-2 bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] px-6 py-3 rounded-full font-semibold text-[15px] no-underline hover:opacity-90 whitespace-nowrap"
+              >
+                {c.rad.cta}
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* VEREINSPROFIL */}
+      <section className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-16 sm:py-24">
         <div className="max-w-[1080px] mx-auto grid grid-cols-1 md:grid-cols-[1fr_1.4fr] gap-10 md:gap-16 items-start">
           <div className="relative aspect-[3/4] rounded-[var(--radius-card)] overflow-hidden">
             <Image
@@ -398,7 +620,8 @@ export default async function VereinPage() {
         </div>
       </section>
 
-      <section className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-16 sm:py-24">
+      {/* VEREINSGESCHICHTE — Timeline */}
+      <section className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24">
         <div className="max-w-[820px] mx-auto">
           <div className="eyebrow">{c.timelineHeading.eyebrow}</div>
           <h2 className="text-[32px] sm:text-[40px] mt-3 sm:mt-4">{c.timelineHeading.h2}</h2>
@@ -417,66 +640,13 @@ export default async function VereinPage() {
         </div>
       </section>
 
-      <section className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24">
-        <div className="max-w-[1080px] mx-auto">
-          <div className="eyebrow">{c.active.eyebrow}</div>
-          <h2 className="text-[32px] sm:text-[40px] mt-3 mb-6">{c.active.h2}</h2>
-
-          {/* Gymnastikkurse — eigene Karte, klar getrennt von den Veranstaltungen */}
-          <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 max-w-3xl">
-            <div className="eyebrow text-[var(--color-wh-green)]">
-              {c.active.gymHeading}
-            </div>
-            <h3 className="text-[20px] mt-2 mb-2">{c.active.gymH3}</h3>
-            <p className="text-[var(--color-wh-fg-muted)] m-0">{c.active.gymBody}</p>
-            <p className="text-sm text-[var(--color-wh-deep-green)] font-medium mt-3 mb-0">
-              {c.active.gymOrt}
-            </p>
-            {/* Foto-Slot Sportstunde: folgt, sobald Aufnahmen vorliegen (D1) */}
-          </div>
-
-          {/* Veranstaltungen — zwei getrennte Foto-Geschichten:
-              Grünkohlwanderung und Adventskaffeetrinken (Kuchen) jeweils mit eigener Galerie */}
-          <div className="eyebrow text-[var(--color-wh-green)] mt-12">
-            {c.active.eventsHeading}
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-            {/* Grünkohlwanderung — die Winterwanderung mit eigener Foto-Übersicht */}
-            <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] overflow-hidden flex flex-col">
-              <ImageCarousel
-                images={GRUENKOHLWANDERUNG_BILDER}
-                aspectClass="aspect-[4/3]"
-                rounded="rounded-none"
-              />
-              <div className="p-6">
-                <h3 className="text-[20px] mt-0 mb-2">{c.active.walkH3}</h3>
-                <p className="text-[var(--color-wh-fg-muted)] m-0">{c.active.walkBody}</p>
-              </div>
-            </div>
-
-            {/* Adventskaffeetrinken — eigene Foto-Geschichte rund um Kaffee & Kuchen */}
-            <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] overflow-hidden flex flex-col">
-              <ImageCarousel
-                images={ADVENTSKAFFEE_BILDER}
-                aspectClass="aspect-[4/3]"
-                rounded="rounded-none"
-              />
-              <div className="p-6">
-                <h3 className="text-[20px] mt-0 mb-2">{c.active.adventH3}</h3>
-                <p className="text-[var(--color-wh-fg-muted)] m-0">{c.active.adventBody}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
+      {/* MITGLIED WERDEN */}
       <section className="bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24">
         <div className="max-w-[820px] mx-auto">
           <div className="eyebrow text-[var(--color-wh-snow)]/80">{c.member.eyebrow}</div>
           <h2 className="text-[var(--color-wh-snow)] text-[32px] sm:text-[40px] mt-3 mb-6">
             {c.member.h2}
           </h2>
-          {/* Warum Mitglied werden? — Mehrwert vor den Preisen */}
           <div className="bg-[var(--color-wh-snow)]/10 border border-[var(--color-wh-snow)]/20 rounded-[var(--radius-card)] p-6 sm:p-7 mb-8 max-w-3xl">
             <h3 className="text-[var(--color-wh-snow)] text-[20px] m-0 mb-3 font-display font-bold">
               {c.member.whyH}
