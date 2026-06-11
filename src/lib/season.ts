@@ -18,21 +18,21 @@ export const getSeason = (d: Date = new Date()): Season => {
  */
 export const SEASON_CLAIMS: Record<Locale, Record<Season, { l1: string; l2: string }>> = {
   de: {
-    winter: { l1: "Draußen kalt.", l2: "Drinnen gemeinsam." },
-    fruehling: { l1: "Draußen grünt's.", l2: "Drinnen gemeinsam." },
-    sommer: { l1: "Draußen Sonne.", l2: "Drinnen gemeinsam." },
-    herbst: { l1: "Draußen stürmt's.", l2: "Drinnen gemeinsam." },
+    winter: { l1: "Draußen kalt.", l2: "Drinnen Basiscamp." },
+    fruehling: { l1: "Draußen grünt's.", l2: "Drinnen Basiscamp." },
+    sommer: { l1: "Draußen Sonne.", l2: "Drinnen Basiscamp." },
+    herbst: { l1: "Draußen stürmt's.", l2: "Drinnen Basiscamp." },
   },
   en: {
-    winter: { l1: "Cold outside.", l2: "Warm together inside." },
-    fruehling: { l1: "Green outside.", l2: "Together inside." },
-    sommer: { l1: "Sun outside.", l2: "Together inside." },
-    herbst: { l1: "Storms outside.", l2: "Together inside." },
+    winter: { l1: "Cold outside.", l2: "Base camp inside." },
+    fruehling: { l1: "Green outside.", l2: "Base camp inside." },
+    sommer: { l1: "Sun outside.", l2: "Base camp inside." },
+    herbst: { l1: "Storms outside.", l2: "Base camp inside." },
   },
   nl: {
-    winter: { l1: "Buiten koud.", l2: "Binnen samen." },
-    fruehling: { l1: "Buiten groen.", l2: "Binnen samen." },
-    sommer: { l1: "Buiten zon.", l2: "Binnen samen." },
-    herbst: { l1: "Buiten stormt het.", l2: "Binnen samen." },
+    winter: { l1: "Buiten koud.", l2: "Binnen basiskamp." },
+    fruehling: { l1: "Buiten groen.", l2: "Binnen basiskamp." },
+    sommer: { l1: "Buiten zon.", l2: "Binnen basiskamp." },
+    herbst: { l1: "Buiten stormt het.", l2: "Binnen basiskamp." },
   },
 };

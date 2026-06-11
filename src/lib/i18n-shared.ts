@@ -53,7 +53,7 @@ const DE: Record<string, string> = {
 
   // ===== HOME =====
   "home.hero.h1.l1": "Draußen kalt.",
-  "home.hero.h1.l2": "Drinnen gemeinsam.",
+  "home.hero.h1.l2": "Drinnen Basiscamp.",
   "home.hero.lead": "Die Wiesenhütte der Skifreunde Gütersloh in Langewiese — seit 1956 ein einfacher, naturnaher Aufenthaltsort für Gruppen, Vereine und Schulklassen im Hochsauerland.",
   "home.hero.cta.book": "Verfügbarkeit prüfen",
   "home.hero.cta.more": "Mehr über die Hütte",
