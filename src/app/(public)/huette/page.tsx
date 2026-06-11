@@ -190,13 +190,13 @@ const COPY: Record<Locale, Copy> = {
     },
     spenden: {
       eyebrow: "Mitmachen · Crowdfunding",
-      h2: "Spendet für den Beachvolleyballplatz.",
-      body: "Direkt neben der Hütte soll ein Beachvolleyballplatz entstehen — Sand, Netz, Einfassung. Gebaut wird er, wie an der Wiese alles entsteht: gemeinsam, mit vielen helfenden Händen und vielen kleinen Beiträgen. Jede Spende bringt den Platz ein Stück näher; über den Baufortschritt halten wir Euch hier auf dem Laufenden.",
+      h2: "Spendet für das Zeltpodest.",
+      body: "Direkt neben der Hütte soll ein ebenes Holzpodest zum Zelten entstehen — ein fester, gerader Untergrund, auf dem Zelte trocken und bequem stehen. Gebaut wird es, wie an der Wiese alles entsteht: gemeinsam, mit vielen helfenden Händen und vielen kleinen Beiträgen. Jede Spende bringt das Podest ein Stück näher; über den Baufortschritt halten wir Euch hier auf dem Laufenden.",
       amountLabel: "Betrag wählen",
       customLabel: "Eigener Betrag in €",
       cta: "Jetzt spenden",
-      secure: "Sichere Zahlung über Stripe · Empfänger: Skifreunde Gütersloh e.V. · Zweck: Beachvolleyballplatz",
-      thanks: "Danke für Deine Spende — der Beachvolleyballplatz rückt ein Stück näher!",
+      secure: "Sichere Zahlung über Stripe · Empfänger: Skifreunde Gütersloh e.V. · Zweck: Zeltpodest",
+      thanks: "Danke für Deine Spende — das Zeltpodest rückt ein Stück näher!",
       error: "Bitte wähle einen Betrag zwischen 2 € und 5.000 €.",
     },
     cta: { eyebrow: "Bereit?", h2: "Termin auswählen, Personen eintragen, buchen.", button: "Verfügbarkeit prüfen" },
@@ -333,13 +333,13 @@ const COPY: Record<Locale, Copy> = {
     },
     spenden: {
       eyebrow: "Join in · Crowdfunding",
-      h2: "Donate for the beach volleyball court.",
-      body: "Right next to the cabin, we want to build a beach volleyball court — sand, net, framing. It will come together the way everything here does: as a group, with many helping hands and many small contributions. Every donation brings the court a step closer; we'll keep you posted on the progress here.",
+      h2: "Donate for the tent deck.",
+      body: "Right next to the cabin, we want to build a level wooden deck for tents — a firm, even base where tents stand dry and comfortable. It will come together the way everything here does: as a group, with many helping hands and many small contributions. Every donation brings the deck a step closer; we'll keep you posted on the progress here.",
       amountLabel: "Choose an amount",
       customLabel: "Custom amount in €",
       cta: "Donate now",
-      secure: "Secure payment via Stripe · Recipient: Skifreunde Gütersloh e.V. · Purpose: beach volleyball court",
-      thanks: "Thank you for your donation — the court just moved a step closer!",
+      secure: "Secure payment via Stripe · Recipient: Skifreunde Gütersloh e.V. · Purpose: tent deck",
+      thanks: "Thank you for your donation — the tent deck just moved a step closer!",
       error: "Please choose an amount between €2 and €5,000.",
     },
     cta: { eyebrow: "Ready?", h2: "Pick dates, enter guests, book.", button: "Check availability" },
@@ -476,13 +476,13 @@ const COPY: Record<Locale, Copy> = {
     },
     spenden: {
       eyebrow: "Doe mee · Crowdfunding",
-      h2: "Doneer voor het beachvolleybalveld.",
-      body: "Direct naast de hut moet een beachvolleybalveld komen — zand, net, omranding. Het wordt gebouwd zoals alles hier ontstaat: samen, met veel helpende handen en veel kleine bijdragen. Elke donatie brengt het veld een stap dichterbij; over de voortgang houden we jullie hier op de hoogte.",
+      h2: "Doneer voor de tentvlonder.",
+      body: "Direct naast de hut moet een vlakke houten vlonder voor tenten komen — een stevige, egale ondergrond waarop tenten droog en comfortabel staan. Het wordt gebouwd zoals alles hier ontstaat: samen, met veel helpende handen en veel kleine bijdragen. Elke donatie brengt de vlonder een stap dichterbij; over de voortgang houden we jullie hier op de hoogte.",
       amountLabel: "Kies een bedrag",
       customLabel: "Eigen bedrag in €",
       cta: "Nu doneren",
-      secure: "Veilig betalen via Stripe · Ontvanger: Skifreunde Gütersloh e.V. · Doel: beachvolleybalveld",
-      thanks: "Bedankt voor je donatie — het veld komt een stap dichterbij!",
+      secure: "Veilig betalen via Stripe · Ontvanger: Skifreunde Gütersloh e.V. · Doel: tentvlonder",
+      thanks: "Bedankt voor je donatie — de vlonder komt een stap dichterbij!",
       error: "Kies een bedrag tussen € 2 en € 5.000.",
     },
     cta: { eyebrow: "Klaar?", h2: "Datum kiezen, personen invoeren, boeken.", button: "Beschikbaarheid bekijken" },
@@ -735,7 +735,7 @@ export default async function HuettePage({
         </div>
       </section>
 
-      {/* Crowdfunding: Beachvolleyballplatz */}
+      {/* Crowdfunding: Zeltpodest */}
       <DonationSection copy={c.spenden} status={spendeStatus} />
 
       <section className="bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-20 border-t border-[var(--color-wh-snow)]/15">

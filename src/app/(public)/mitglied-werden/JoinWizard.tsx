@@ -134,7 +134,7 @@ const COPY: Record<Locale, {
       {
         icon: "hammer",
         title: "Die Hütte bleibt in Schuss",
-        body: "Seit 1956 in Eigenleistung gebaut und gepflegt. Beiträge zahlen Holz, Farbe und neue Projekte wie den Beachvolleyballplatz.",
+        body: "Seit 1956 in Eigenleistung gebaut und gepflegt. Beiträge zahlen Holz, Farbe und neue Projekte wie das Zeltpodest.",
       },
       {
         icon: "gym",
@@ -299,7 +299,7 @@ const COPY: Record<Locale, {
       {
         icon: "hammer",
         title: "De hut blijft in vorm",
-        body: "Sinds 1956 door leden gebouwd en onderhouden. Bijdragen betalen hout, verf en nieuwe projecten zoals het beachvolleybalveld.",
+        body: "Sinds 1956 door leden gebouwd en onderhouden. Bijdragen betalen hout, verf en nieuwe projecten zoals de tentvlonder.",
       },
       {
         icon: "gym",

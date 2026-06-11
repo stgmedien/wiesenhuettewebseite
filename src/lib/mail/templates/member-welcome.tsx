@@ -125,8 +125,8 @@ export default function MemberWelcomeEmail({
           </Text>
           <Text style={text}>
             Und das Beste: Dein Beitrag wirkt. Er hält die Hütte in Schuss, trägt das
-            Schulprojekt mit dem ESG mit und ermöglicht Projekte wie den neuen
-            Beachvolleyballplatz.
+            Schulprojekt mit dem ESG mit und ermöglicht Projekte wie das neue
+            Zeltpodest.
           </Text>
           <Section style={{ margin: "24px 0 8px 0" }}>
             <EmailButton href={bookUrl} style={button}>

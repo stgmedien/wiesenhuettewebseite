@@ -125,7 +125,7 @@ const COPY: Record<Locale, Copy> = {
       gymHeading: "Gymnastikkurse",
       gymH3: "Skigymnastik mit Alexandra Lütgert",
       gymBody: "Kraft, Beweglichkeit, Koordination und Kondition — ideal für alle, die aktiv bleiben möchten. Dienstags 18:30 Uhr und donnerstags 20:00 Uhr, Schnupperstunde jederzeit möglich.",
-      gymOrt: "Ort: Sporthalle in Gütersloh — den genauen Hallen-Standort und alles zur Anmeldung erfahrt Ihr unter info@skifreunde-gt.de.",
+      gymOrt: "Ort: Sporthalle in Gütersloh — den genauen Hallen-Standort und alles zur Anmeldung erfahrt Ihr unter skifreunde@wiesenhuette.de.",
       eventsHeading: "Veranstaltungen",
       adventH3: "Adventskaffeetrinken",
       adventBody: "Vorweihnachtliches Beisammensein im Spexarder Bauernhaus, organisiert von Karin Lütgert. Mitglieder aller Generationen kommen zusammen, alle tragen etwas bei — und lecker ist es traditionell auch. Für 2026 ist das Bauernhaus bereits gebucht.",
@@ -190,7 +190,7 @@ const COPY: Record<Locale, Copy> = {
       gymHeading: "Gymnastics classes",
       gymH3: "Ski gymnastics with Alexandra Lütgert",
       gymBody: "Strength, flexibility, coordination and stamina — ideal for everyone who wants to stay active. Tuesdays 18:30 and Thursdays 20:00, trial sessions possible at any time.",
-      gymOrt: "Location: sports hall in Gütersloh — details and sign-up via info@skifreunde-gt.de.",
+      gymOrt: "Location: sports hall in Gütersloh — details and sign-up via skifreunde@wiesenhuette.de.",
       eventsHeading: "Events",
       adventH3: "Advent coffee",
       adventBody: "A pre-Christmas get-together at the Spexarder Bauernhaus, organised by Karin Lütgert. Members of all generations come together, everyone contributes — and it is traditionally delicious. The venue is already booked for 2026.",
@@ -255,7 +255,7 @@ const COPY: Record<Locale, Copy> = {
       gymHeading: "Gymnastieklessen",
       gymH3: "Skigymnastiek met Alexandra Lütgert",
       gymBody: "Kracht, lenigheid, coördinatie en conditie — ideaal voor wie actief wil blijven. Dinsdag 18:30 en donderdag 20:00, proefles altijd mogelijk.",
-      gymOrt: "Locatie: sporthal in Gütersloh — details en aanmelding via info@skifreunde-gt.de.",
+      gymOrt: "Locatie: sporthal in Gütersloh — details en aanmelding via skifreunde@wiesenhuette.de.",
       eventsHeading: "Evenementen",
       adventH3: "Adventkoffie",
       adventBody: "Voorkerstmis-samenzijn in het Spexarder Bauernhaus, georganiseerd door Karin Lütgert. Leden van alle generaties komen samen, iedereen draagt bij — en lekker is het traditioneel ook. Voor 2026 is de locatie al geboekt.",
@@ -513,7 +513,7 @@ export default async function VereinPage() {
                 cta={c.member.ctaBox}
               />
               <a
-                href="mailto:info@skifreunde-gt.de"
+                href="mailto:skifreunde@wiesenhuette.de"
                 className="inline-flex items-center px-5 py-2.5 rounded-full text-sm font-semibold no-underline border border-[var(--color-wh-snow)]/40 text-[var(--color-wh-snow)]/85 hover:bg-[var(--color-wh-snow)]/10"
               >
                 {c.member.ctaBox.ctaMail}
