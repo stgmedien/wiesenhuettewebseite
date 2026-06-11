@@ -10,7 +10,7 @@ const MIN_CENTS = 200;
 const MAX_CENTS = 500_000;
 
 /**
- * Spenden-Checkout für den Beachvolleyballplatz.
+ * Spenden-Checkout für das Zeltpodest.
  * Eine simple Stripe-Checkout-Session (mode=payment, submit_type=donate) —
  * der Webhook ignoriert kind="donation" bewusst, Stripe selbst ist die
  * Buchhaltung der Spenden.
@@ -36,13 +36,13 @@ export async function createDonationCheckout(formData: FormData) {
             currency: "eur",
             unit_amount: cents,
             product_data: {
-              name: "Spende: Beachvolleyballplatz an der Wiesenhütte",
+              name: "Spende: Zeltpodest an der Wiesenhütte",
               description: "Skifreunde Gütersloh e.V. · Langewiese",
             },
           },
         },
       ],
-      metadata: { kind: "donation", purpose: "beachvolleyball" },
+      metadata: { kind: "donation", purpose: "zeltpodest" },
       success_url: `${BASE_URL}/huette?spende=danke#spenden`,
       cancel_url: `${BASE_URL}/huette#spenden`,
     });

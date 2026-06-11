@@ -49,10 +49,10 @@ export default async function Impressum() {
         <Block title="Kontakt">
           <p>
             <strong>E-Mail:</strong>{" "}
-            <a href="mailto:info@skifreunde-gt.de">info@skifreunde-gt.de</a>
+            <a href="mailto:skifreunde@wiesenhuette.de">skifreunde@wiesenhuette.de</a>
             <br />
             <strong>Buchungsanfragen:</strong>{" "}
-            <a href="mailto:vorstand@skifreunde-gt.de">vorstand@skifreunde-gt.de</a>
+            <a href="mailto:skifreunde@wiesenhuette.de">skifreunde@wiesenhuette.de</a>
             <br />
             <strong>Hüttenwart vor Ort:</strong> Toni Klauke,{" "}
             <a href="tel:+4927582014822">02758 / 2014822</a> ·{" "}

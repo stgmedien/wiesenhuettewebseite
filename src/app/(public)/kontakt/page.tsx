@@ -174,7 +174,7 @@ export default async function KontaktPage() {
             label={c.cards.fragen.label}
             primary="Tanja Milse"
             secondary={[
-              { kind: "mail", value: "vorstand@skifreunde-gt.de" },
+              { kind: "mail", value: "hello@wiesenhuette.de" },
               { kind: "info", value: c.cards.fragen.info },
             ]}
           />

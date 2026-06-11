@@ -143,7 +143,7 @@ export default function MietvertragEmail({
             <Text style={muted}>
               Postfach 2819 · 33258 Gütersloh
               <br />
-              vorstand@skifreunde-gt.de
+              hello@wiesenhuette.de
             </Text>
           </Section>
 

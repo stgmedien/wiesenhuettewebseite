@@ -69,7 +69,7 @@ export default async function Datenschutz() {
             <br />
             33258 Gütersloh
             <br />
-            E-Mail: <a href="mailto:info@skifreunde-gt.de">info@skifreunde-gt.de</a>
+            E-Mail: <a href="mailto:skifreunde@wiesenhuette.de">skifreunde@wiesenhuette.de</a>
           </Address>
           <p>
             <strong>Vorstand (vertretungsberechtigt):</strong>
@@ -209,7 +209,7 @@ export default async function Datenschutz() {
             <br />
             <strong>Speicherdauer:</strong> Bis zur Abmeldung vom Newsletter. Du kannst Dich
             jederzeit über den Abmeldelink in jeder Newsletter-E-Mail oder per Mail an{" "}
-            <a href="mailto:info@skifreunde-gt.de">info@skifreunde-gt.de</a> abmelden. Wir
+            <a href="mailto:skifreunde@wiesenhuette.de">skifreunde@wiesenhuette.de</a> abmelden. Wir
             speichern Deinen Anmelde-Zeitpunkt sowie die zugehörige IP-Adresse zum Nachweis der
             Einwilligung — diese Nachweisdaten werden 3 Jahre nach Abmeldung gelöscht.
           </RuleBox>
@@ -248,7 +248,7 @@ export default async function Datenschutz() {
             <br />
             <strong>Speicherdauer:</strong> Bis zum Widerruf der Einwilligung. Du kannst die
             Einwilligung jederzeit widerrufen — schreib uns einfach an{" "}
-            <a href="mailto:info@skifreunde-gt.de">info@skifreunde-gt.de</a>.
+            <a href="mailto:skifreunde@wiesenhuette.de">skifreunde@wiesenhuette.de</a>.
           </RuleBox>
 
           <h3>3.7 Beim Radtouren-Matching (/radtouren)</h3>
@@ -275,7 +275,7 @@ export default async function Datenschutz() {
             <br />
             <strong>Speicherdauer:</strong> Bis zum Widerruf bzw. bis der gewählte Zeitraum
             verstrichen ist. Du kannst Dich jederzeit per Mail an{" "}
-            <a href="mailto:info@skifreunde-gt.de">info@skifreunde-gt.de</a> austragen.
+            <a href="mailto:skifreunde@wiesenhuette.de">skifreunde@wiesenhuette.de</a> austragen.
           </RuleBox>
         </Block>
 
@@ -530,7 +530,7 @@ export default async function Datenschutz() {
           </ul>
           <p>
             Anfragen richtest Du formlos an{" "}
-            <a href="mailto:info@skifreunde-gt.de">info@skifreunde-gt.de</a>. Wir antworten{" "}
+            <a href="mailto:skifreunde@wiesenhuette.de">skifreunde@wiesenhuette.de</a>. Wir antworten{" "}
             <strong>innerhalb eines Monats</strong>, in der Regel deutlich schneller. Eine
             Identitätsprüfung kann erforderlich sein, wenn Zweifel an Deiner Identität bestehen.
           </p>
@@ -599,7 +599,7 @@ export default async function Datenschutz() {
         <Callout className="mt-12">
           <p className="m-0">
             <strong>Fragen?</strong> Schreib uns:{" "}
-            <a href="mailto:info@skifreunde-gt.de">info@skifreunde-gt.de</a>. Wir antworten
+            <a href="mailto:skifreunde@wiesenhuette.de">skifreunde@wiesenhuette.de</a>. Wir antworten
             persönlich.
           </p>
         </Callout>

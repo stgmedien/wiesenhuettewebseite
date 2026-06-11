@@ -162,7 +162,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     return;
   }
 
-  // Spenden (z. B. Beachvolleyballplatz): kein Folgeprozess nötig —
+  // Spenden (z. B. Zeltpodest): kein Folgeprozess nötig —
   // Stripe selbst ist hier die Buchhaltung. Bewusst still erledigen.
   if (kind === "donation") {
     return;
