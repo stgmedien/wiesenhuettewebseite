@@ -43,6 +43,11 @@ const PROJEKTFAHRT_BILDER = [
   { src: "/media/photos/projektfahrten/maedchen_boehrt.jpeg", alt: "Schülerin bohrt mit der Akkuschraubmaschine" },
   { src: "/media/photos/projektfahrten/maedchen_schrauben_in_ein_brett.jpeg", alt: "Schülerinnen schrauben in ein Brett" },
   { src: "/media/photos/projektfahrten/voegelhaeurser_bemalen.jpeg", alt: "Vogelhäuser werden bemalt" },
+  { src: "/media/photos/projektfahrten/insektenhotel_vogelhaeuser.jpeg", alt: "Selbstgebautes Insektenhotel und bunte Vogelhäuser an der Hütte" },
+  { src: "/media/photos/projektfahrten/vogelhaus_bemalt.jpeg", alt: "Bunt bemaltes Vogelhaus mit Baum- und Blumenmotiv" },
+  { src: "/media/photos/projektfahrten/baumbank_bau.jpeg", alt: "Schüler:innen bauen eine Rundbank um den Baum vor der Hütte" },
+  { src: "/media/photos/projektfahrten/baumbank_fertig.jpeg", alt: "Die fertige Baumbank mit Blick über die Wiese" },
+  { src: "/media/photos/projektfahrten/holzarbeiten.jpeg", alt: "Schülerin und Betreuer bei Holzarbeiten vor der Hütte" },
 ];
 
 export default async function EsgPage() {
