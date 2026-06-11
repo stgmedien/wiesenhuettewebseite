@@ -43,6 +43,11 @@ const PROJEKTFAHRT_BILDER = [
   { src: "/media/photos/projektfahrten/maedchen_boehrt.jpeg", alt: "Schülerin bohrt mit der Akkuschraubmaschine" },
   { src: "/media/photos/projektfahrten/maedchen_schrauben_in_ein_brett.jpeg", alt: "Schülerinnen schrauben in ein Brett" },
   { src: "/media/photos/projektfahrten/voegelhaeurser_bemalen.jpeg", alt: "Vogelhäuser werden bemalt" },
+  { src: "/media/photos/projektfahrten/insektenhotel_vogelhaeuser.jpeg", alt: "Selbstgebautes Insektenhotel und bunte Vogelhäuser an der Hütte" },
+  { src: "/media/photos/projektfahrten/vogelhaus_bemalt.jpeg", alt: "Bunt bemaltes Vogelhaus mit Baum- und Blumenmotiv" },
+  { src: "/media/photos/projektfahrten/baumbank_bau.jpeg", alt: "Schüler:innen bauen eine Rundbank um den Baum vor der Hütte" },
+  { src: "/media/photos/projektfahrten/baumbank_fertig.jpeg", alt: "Die fertige Baumbank mit Blick über die Wiese" },
+  { src: "/media/photos/projektfahrten/holzarbeiten.jpeg", alt: "Schülerin und Betreuer bei Holzarbeiten vor der Hütte" },
 ];
 
 export default async function EsgPage() {
@@ -619,6 +624,28 @@ export default async function EsgPage() {
       {/* ---------------------------------------------------------------- */}
       <section id="fragen" className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24">
         <div className="max-w-[800px] mx-auto">
+          {/* Eltern-Teaser: bewusst ÜBER der FAQ — Mitgliedschaft = Gestaltungsraum */}
+          <div className="mb-10 bg-[var(--color-wh-green-soft)] border border-[var(--color-wh-green)]/30 rounded-[var(--radius-card)] p-6 sm:p-7">
+            <div className="text-xs uppercase tracking-wider text-[var(--color-wh-deep-green)] font-semibold mb-2">
+              Für Eltern
+            </div>
+            <h3 className="font-display font-bold text-[20px] sm:text-[22px] text-[var(--color-wh-deep-green)] mt-0 mb-2">
+              Mitgestalten statt nur zuschauen.
+            </h3>
+            <p className="text-[15px] leading-relaxed text-[var(--color-wh-black)] m-0 mb-4">
+              Als Mitglied der Skifreunde Gütersloh bekommt Ihr echten Gestaltungsraum: bei
+              der Hütte, bei den Projekten Eurer Kinder und in einer Vereinsgemeinschaft,
+              die diesen Ort seit über 70 Jahren trägt. Dazu nutzt Ihr die Hütte zu
+              reduzierten Konditionen — die Skigymnastik ist inklusive.
+            </p>
+            <a
+              href="/mitglied-werden"
+              className="inline-flex items-center h-11 px-5 rounded-[var(--radius-btn)] bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] no-underline font-semibold text-sm hover:bg-[var(--color-wh-green)] transition-colors"
+            >
+              Mitglied werden →
+            </a>
+          </div>
+
           <div className="eyebrow">Häufige Fragen</div>
           <h2 className="text-[32px] sm:text-[44px] mt-3 mb-10 leading-tight">
             Was Eltern wissen wollen.
@@ -644,27 +671,6 @@ export default async function EsgPage() {
             ))}
           </div>
 
-          {/* Eltern-Teaser: Mitgliedschaft = Gestaltungsraum */}
-          <div className="mt-10 bg-[var(--color-wh-green-soft)] border border-[var(--color-wh-green)]/30 rounded-[var(--radius-card)] p-6 sm:p-7">
-            <div className="text-xs uppercase tracking-wider text-[var(--color-wh-deep-green)] font-semibold mb-2">
-              Für Eltern
-            </div>
-            <h3 className="font-display font-bold text-[20px] sm:text-[22px] text-[var(--color-wh-deep-green)] mt-0 mb-2">
-              Mitgestalten statt nur zuschauen.
-            </h3>
-            <p className="text-[15px] leading-relaxed text-[var(--color-wh-black)] m-0 mb-4">
-              Als Mitglied der Skifreunde Gütersloh bekommt Ihr echten Gestaltungsraum: bei
-              der Hütte, bei den Projekten Eurer Kinder und in einer Vereinsgemeinschaft,
-              die diesen Ort seit über 70 Jahren trägt. Dazu nutzt Ihr die Hütte zu
-              reduzierten Konditionen — die Skigymnastik ist inklusive.
-            </p>
-            <a
-              href="/mitglied-werden"
-              className="inline-flex items-center h-11 px-5 rounded-[var(--radius-btn)] bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] no-underline font-semibold text-sm hover:bg-[var(--color-wh-green)] transition-colors"
-            >
-              Mitglied werden →
-            </a>
-          </div>
         </div>
       </section>
 

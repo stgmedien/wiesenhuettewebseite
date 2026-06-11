@@ -90,7 +90,7 @@ const COPY: Record<Locale, {
     eyebrow: "Skifreunde Gütersloh e.V.",
     h1: "Werde Teil der Wiese.",
     lead:
-      "Online beitreten dauert drei Minuten. Dein Beitrag hält die Hütte am Leben — und Deine Mitgliedschaft ist sofort aktiv: Mitgliederpreise gelten ab der nächsten Buchung.",
+      "Online beitreten dauert drei Minuten. Dein Beitrag für Leben und Lernen in Langewiese — und Deine Mitgliedschaft ist sofort aktiv: Mitgliederpreise gelten ab der nächsten Buchung.",
     steps: ["Beitrag wählen", "Deine Daten", "Beitreten"],
     stepDone: "Fertig",
     tierTitle: "Welcher Beitrag passt zu Dir?",
@@ -150,8 +150,8 @@ const COPY: Record<Locale, {
     benefitsTitle: "Deine Mitgliedschaft",
     benefits: [
       "50 % auf Übernachtungen an der Wiesenhütte",
-      "Skigymnastik dienstags & donnerstags inklusive",
-      "Vereinsfahrten & Veranstaltungen durchs Jahr",
+      "2× wöchentlich Sport (Skigymnastik) inklusive",
+      "Vereinsfahrten nach Langewiese",
       "Sofort aktiv — direkt mit Mitgliederpreisen buchen",
     ],
     alreadyTitle: "Du bist schon Mitglied! 🎉",
@@ -173,7 +173,7 @@ const COPY: Record<Locale, {
     eyebrow: "Skifreunde Gütersloh e.V.",
     h1: "Become part of the meadow.",
     lead:
-      "Joining online takes three minutes. Your fee keeps the cabin alive — and your membership is active immediately: member rates apply from your very next booking.",
+      "Joining online takes three minutes. Your contribution to living and learning in Langewiese — and your membership is active immediately: member rates apply from your very next booking.",
     steps: ["Choose your fee", "Your details", "Join"],
     stepDone: "Done",
     tierTitle: "Which fee fits you?",
@@ -233,8 +233,8 @@ const COPY: Record<Locale, {
     benefitsTitle: "Your membership",
     benefits: [
       "50% off overnight stays at the Wiesenhütte",
-      "Ski gymnastics on Tuesdays & Thursdays included",
-      "Club trips & events all year round",
+      "Sport twice a week (ski gymnastics) included",
+      "Club trips to Langewiese",
       "Active immediately — book at member rates right away",
     ],
     alreadyTitle: "You're already a member! 🎉",
@@ -255,7 +255,7 @@ const COPY: Record<Locale, {
     eyebrow: "Skifreunde Gütersloh e.V.",
     h1: "Word deel van de wei.",
     lead:
-      "Online lid worden duurt drie minuten. Jouw bijdrage houdt de hut in leven — en je lidmaatschap is meteen actief: ledentarieven gelden vanaf je eerstvolgende boeking.",
+      "Online lid worden duurt drie minuten. Jouw bijdrage voor leven en leren in Langewiese — en je lidmaatschap is meteen actief: ledentarieven gelden vanaf je eerstvolgende boeking.",
     steps: ["Bijdrage kiezen", "Jouw gegevens", "Lid worden"],
     stepDone: "Klaar",
     tierTitle: "Welke bijdrage past bij jou?",
@@ -315,8 +315,8 @@ const COPY: Record<Locale, {
     benefitsTitle: "Jouw lidmaatschap",
     benefits: [
       "50% op overnachtingen in de Wiesenhütte",
-      "Skigymnastiek op dinsdag & donderdag inbegrepen",
-      "Verenigingsreizen & evenementen het hele jaar",
+      "2× per week sport (skigymnastiek) inbegrepen",
+      "Verenigingsreizen naar Langewiese",
       "Meteen actief — direct boeken tegen ledentarieven",
     ],
     alreadyTitle: "Je bent al lid! 🎉",
