@@ -351,14 +351,14 @@ export default async function EsgPage() {
               </div>
               <div className="space-y-10 sm:space-y-14">
                 <FeaturedQuote
-                  text="Den Wald der nebenan liegt, dass jeder Spaß hatte, das Programm."
+                  text="Der Wald liegt direkt nebenan, und das Programm war so, dass jeder Spaß hatte."
                   author="Lena Brinkmann"
                   role="Schülerin der 9b · 16 Jahre"
                   align="left"
                   delayMs={0}
                 />
                 <FeaturedQuote
-                  text="Man kann da gut Gemeinschaftsspiele spielen Abends und die Nacht ausklingen lassen. Das Miteinander hat sehr spaß gemacht."
+                  text="Abends kann man dort gut Gemeinschaftsspiele spielen und die Nacht ausklingen lassen. Das Miteinander hat richtig Spaß gemacht."
                   author="Jonas Friedrich"
                   role="Schüler der 9b · 16 Jahre"
                   align="right"
