@@ -9,6 +9,8 @@ import {
   emailLog,
   stripeWebhookEvents,
   vouchers,
+  membershipTiers,
+  users,
 } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
@@ -20,6 +22,8 @@ import KurtaxeInfoEmail from "@/lib/mail/templates/kurtaxe-info";
 import MietvertragEmail from "@/lib/mail/templates/mietvertrag";
 import VoucherPurchaseEmail from "@/lib/mail/templates/voucher-purchase";
 import VoucherGiftEmail from "@/lib/mail/templates/voucher-gift";
+import MemberWelcomeEmail from "@/lib/mail/templates/member-welcome";
+import MemberJoinedInternalEmail from "@/lib/mail/templates/member-joined-internal";
 import { formatDateLong } from "@/lib/utils";
 import { createInvoiceForBooking } from "@/lib/invoice";
 import type Stripe from "stripe";
@@ -161,6 +165,13 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   // Spenden (z. B. Beachvolleyballplatz): kein Folgeprozess nötig —
   // Stripe selbst ist hier die Buchhaltung. Bewusst still erledigen.
   if (kind === "donation") {
+    return;
+  }
+
+  // Online-Beitritt (/mitglied-werden): Zahlung bestätigt →
+  // Mitgliedschaft sofort aktivieren (kein bookingId).
+  if (kind === "membership-signup") {
+    await handleMembershipSignupPaid(session);
     return;
   }
 
@@ -657,6 +668,172 @@ async function findCustomerForSubscription(sub: Stripe.Subscription) {
     if (r[0]) return r[0];
   }
   return null;
+}
+
+/**
+ * Online-Beitritt über /mitglied-werden: Die Checkout-Session (mode=subscription,
+ * kind=membership-signup) ist bezahlt → Mitgliedschaft SOFORT aktivieren.
+ * Anders als der manuelle Nachweis-Pfad (pending → Manager prüft) ist die
+ * Zahlung hier selbst der Nachweis des Beitritts.
+ */
+async function handleMembershipSignupPaid(session: Stripe.Checkout.Session) {
+  const customerId = session.metadata?.customerId;
+  const tierCode = session.metadata?.tierCode ?? null;
+  if (!customerId) {
+    console.warn("[webhook] membership-signup ohne customerId");
+    return;
+  }
+
+  const rows = await db
+    .select()
+    .from(customers)
+    .where(eq(customers.id, customerId))
+    .limit(1);
+  const customer = rows[0];
+  if (!customer) {
+    console.warn(`[webhook] membership-signup: customer ${customerId} nicht gefunden`);
+    return;
+  }
+
+  // SEPA & Co. zahlen asynchron: checkout.session.completed kommt dann mit
+  // payment_status='unpaid'. NICHT sofort aktivieren — sobald die Zahlung
+  // durch ist, feuert checkout.session.async_payment_succeeded und landet
+  // wieder hier (gleicher Handler, dann mit payment_status='paid').
+  if (session.payment_status === "unpaid") {
+    await db.insert(activityLog).values({
+      who: "Stripe",
+      what: `Online-Beitritt: Zahlung ausstehend (SEPA/async) — ${customer.firstName} ${customer.lastName}, Aktivierung folgt nach Zahlungseingang`,
+    });
+    return;
+  }
+
+  const subId =
+    typeof session.subscription === "string"
+      ? session.subscription
+      : session.subscription?.id ?? null;
+  const stripeCustomerId =
+    typeof session.customer === "string" ? session.customer : session.customer?.id ?? null;
+
+  // Idempotenz bei Stripe-Retries: dieselbe Subscription wurde bereits
+  // aktiviert → nichts mehr tun (insbesondere keine zweite Willkommensmail).
+  if (
+    customer.membershipStatus === "verified" &&
+    subId &&
+    customer.stripeSubscriptionId === subId
+  ) {
+    return;
+  }
+
+  // Doppel-Beitritt (z. B. zwei parallel geöffnete Checkouts): Es existiert
+  // bereits ein anderes Abo auf diesem Kunden → das NEUE Abo sofort beenden,
+  // damit niemand doppelt Jahresbeitrag zahlt. Erstattung der bereits
+  // gelaufenen Abbuchung macht der Vorstand manuell (steht im Activity-Log).
+  if (
+    customer.membershipStatus === "verified" &&
+    subId &&
+    customer.stripeSubscriptionId &&
+    customer.stripeSubscriptionId !== subId
+  ) {
+    try {
+      await stripe.subscriptions.cancel(subId);
+    } catch (err) {
+      console.error("[webhook] doppeltes Beitritts-Abo konnte nicht gekündigt werden:", err);
+    }
+    await db.insert(activityLog).values({
+      who: "Stripe",
+      what: `⚠️ Doppelter Online-Beitritt erkannt: ${customer.firstName} ${customer.lastName} hatte bereits Abo ${customer.stripeSubscriptionId} — neues Abo ${subId} wurde storniert. Bitte ggf. Zahlung erstatten.`,
+    });
+    return;
+  }
+
+  // Existiert schon ein Konto mit dieser Adresse (Beitritt ohne Login)?
+  // Dann direkt verknüpfen — getBookingPrefill() löst die Mitgliederpreise
+  // über customers.userId auf. Ohne Konto übernimmt das später der
+  // Magic-Link-Konsum (consumeMagicLinkToken).
+  let linkUserId: string | null = customer.userId;
+  if (!linkUserId) {
+    const u = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, customer.email))
+      .limit(1);
+    linkUserId = u[0]?.id ?? null;
+  }
+
+  await db
+    .update(customers)
+    .set({
+      type: "mitglied",
+      membershipStatus: "verified",
+      membershipVerifiedAt: new Date(),
+      membershipVerifiedBy: "Online-Beitritt (Stripe)",
+      membershipRejectedReason: null,
+      subscriptionStatus: "active",
+      ...(linkUserId && !customer.userId ? { userId: linkUserId } : {}),
+      ...(tierCode ? { membershipTierCode: tierCode } : {}),
+      ...(subId ? { stripeSubscriptionId: subId } : {}),
+      ...(stripeCustomerId ? { stripeSubscriptionCustomerId: stripeCustomerId } : {}),
+    })
+    .where(eq(customers.id, customer.id));
+
+  // Tier-Name + Jahresbeitrag für die Mails (Fallback: Session-Betrag).
+  let tierName = "Mitgliedschaft";
+  let feeCents = session.amount_total ?? 0;
+  if (tierCode) {
+    const t = await db
+      .select()
+      .from(membershipTiers)
+      .where(eq(membershipTiers.code, tierCode))
+      .limit(1);
+    if (t[0]) {
+      tierName = t[0].name;
+      feeCents = t[0].annualFeeCents;
+    }
+  }
+
+  try {
+    await sendMail({
+      to: customer.email,
+      subject: "Willkommen bei den Skifreunden Gütersloh — Deine Mitgliedschaft ist aktiv! 🎿",
+      template: "member-welcome",
+      react: MemberWelcomeEmail({
+        firstName: customer.firstName ?? null,
+        tierName,
+        annualFeeCents: feeCents,
+        bookUrl: `${baseUrl}/buchen`,
+        loginUrl: `${baseUrl}/login`,
+      }),
+    });
+  } catch (err) {
+    console.error("[webhook] member-welcome mail failed:", err);
+  }
+
+  // Interner Hinweis — der Vorstand übernimmt das neue Mitglied ins Verzeichnis.
+  const internal = process.env.MAIL_INTERNAL_TO;
+  if (internal) {
+    try {
+      await sendMail({
+        to: internal,
+        subject: `Neues Mitglied (online): ${customer.firstName} ${customer.lastName} — ${tierName}`,
+        template: "member-joined-internal",
+        react: MemberJoinedInternalEmail({
+          name: `${customer.firstName} ${customer.lastName}`,
+          email: customer.email,
+          phone: customer.phone ?? null,
+          tierName,
+          annualFeeCents: feeCents,
+          managerUrl: `${baseUrl}/m/mitgliedschaften`,
+        }),
+      });
+    } catch (err) {
+      console.error("[webhook] member-joined-internal mail failed:", err);
+    }
+  }
+
+  await db.insert(activityLog).values({
+    who: "Stripe",
+    what: `Online-Beitritt: ${customer.firstName} ${customer.lastName} ist jetzt Mitglied (${tierName}, ${(feeCents / 100).toFixed(2)} €/Jahr) — automatisch verifiziert`,
+  });
 }
 
 async function handleSubscriptionUpsert(sub: Stripe.Subscription) {

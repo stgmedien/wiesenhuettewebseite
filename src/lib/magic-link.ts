@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { magicLinkTokens, users } from "@/lib/db/schema";
+import { customers, magicLinkTokens, users } from "@/lib/db/schema";
 import { eq, and, gt, lt, isNull } from "drizzle-orm";
 
 // Web-Crypto-API statt Node-`crypto` — funktioniert in Edge-Runtime UND
@@ -143,6 +143,15 @@ export const consumeMagicLinkToken = async (
       .set({ emailVerified: new Date(), updatedAt: new Date() })
       .where(eq(users.id, user.id));
   }
+
+  // Unverknüpfte Customer-Datensätze derselben Adresse an den User hängen.
+  // Wichtig u. a. für Online-Beitritte und Gast-Buchungen ohne Konto:
+  // getBookingPrefill() löst Mitgliederpreise NUR über customers.userId auf —
+  // der Magic-Link-Klick ist der Besitz-Beweis für die Adresse.
+  await db
+    .update(customers)
+    .set({ userId: user.id })
+    .where(and(eq(customers.email, tk.email), isNull(customers.userId)));
 
   return { ok: true, userId: user.id, email: user.email, isNewUser };
 };

@@ -206,7 +206,7 @@ export const Header = ({
                 Nur ab xl (darunter überläuft der volle Header) und NICHT im
                 gemorphten Pill-Zustand (980px-Pill hat dafür keinen Platz). */}
             <Link
-              href="/registrieren"
+              href="/mitglied-werden"
               className={cn(
                 "h-9 px-4 items-center rounded-full border border-[var(--color-wh-snow)]/40 text-[var(--color-wh-snow)]/90 text-sm font-semibold no-underline hover:bg-white/12 transition-colors whitespace-nowrap",
                 morph ? "hidden" : "hidden xl:inline-flex"
@@ -315,7 +315,7 @@ export const Header = ({
                       {hc.login}
                     </Link>
                     <Link
-                      href="/registrieren"
+                      href="/mitglied-werden"
                       onClick={() => setOpen(false)}
                       className="flex items-center gap-2 px-3 py-3 text-base font-medium no-underline rounded-md text-[var(--color-wh-snow)]/90 hover:bg-white/12"
                     >

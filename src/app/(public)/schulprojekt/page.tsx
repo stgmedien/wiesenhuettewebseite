@@ -662,7 +662,7 @@ export default async function EsgPage() {
               reduzierten Konditionen — die Skigymnastik ist inklusive.
             </p>
             <a
-              href="/registrieren"
+              href="/mitglied-werden"
               className="inline-flex items-center h-11 px-5 rounded-[var(--radius-btn)] bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] no-underline font-semibold text-sm hover:bg-[var(--color-wh-green)] transition-colors"
             >
               Mitglied werden →

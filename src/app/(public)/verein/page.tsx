@@ -301,7 +301,7 @@ function MemberCta({
   const primary = "bg-[var(--color-wh-snow)] text-[var(--color-wh-deep-green)] hover:bg-white";
   if (!loggedIn) {
     return (
-      <Link href="/registrieren" className={`${base} ${primary}`}>
+      <Link href="/mitglied-werden" className={`${base} ${primary}`}>
         {cta.ctaSignup}
       </Link>
     );

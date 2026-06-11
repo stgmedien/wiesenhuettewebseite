@@ -302,7 +302,7 @@ export default async function Datenschutz() {
           />
           <Provider
             name="Stripe Payments Europe Ltd."
-            purpose="Zahlungsabwicklung (Kreditkarten, SEPA, Anzahlung & Restzahlung)"
+            purpose="Zahlungsabwicklung (Kreditkarten, SEPA, Anzahlung & Restzahlung, Mitgliedsbeiträge, Spenden)"
             location="Irland (EU). Im Rahmen der Betrugserkennung erfolgt eine teilweise Verarbeitung in den USA — siehe Abschnitt 6."
             avv="geschlossen"
             link="https://stripe.com/de/privacy"

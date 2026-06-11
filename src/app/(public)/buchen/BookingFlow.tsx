@@ -222,11 +222,11 @@ const BF_COPY = {
     teachersLabel: "Lehrkräfte",
     teachersHint: "bei Schulgruppen · zählen wie Erwachsene (22,00 €)",
     memberLockedLabel: "Mitglieder-Tarife (−50 %)",
-    memberLockedHintPre: "Nur für verifizierte Skifreunde-Mitglieder.",
-    memberLockedLogin: "Login",
-    memberLockedOr: "oder im",
-    memberLockedProfile: "Konto-Profil",
-    memberLockedEnd: "Mitgliedschaft beantragen.",
+    memberLockedExisting: "Schon Mitglied?",
+    memberLockedLogin: "Einloggen",
+    memberLockedExistingEnd: " — dann schalten sich die Tarife hier frei.",
+    memberJoinCta: "Noch kein Mitglied? Jetzt online beitreten",
+    memberJoinCtaSub: "ab 15 €/Jahr · sofort aktiv · 50 % auf Übernachtungen",
     memberLockedState: "gesperrt",
     ariaLess: "Weniger",
     ariaMore: "Mehr",
@@ -381,11 +381,11 @@ const BF_COPY = {
     teachersLabel: "Teachers",
     teachersHint: "for school groups · counted as adults (22.00 €)",
     memberLockedLabel: "Member rates (−50%)",
-    memberLockedHintPre: "Only for verified Skifreunde members.",
+    memberLockedExisting: "Already a member?",
     memberLockedLogin: "Log in",
-    memberLockedOr: "or apply for membership in your",
-    memberLockedProfile: "account profile",
-    memberLockedEnd: ".",
+    memberLockedExistingEnd: " — the rates unlock right here.",
+    memberJoinCta: "Not a member yet? Join online now",
+    memberJoinCtaSub: "from €15/year · active immediately · 50% off overnight stays",
     memberLockedState: "locked",
     ariaLess: "Less",
     ariaMore: "More",
@@ -538,11 +538,11 @@ const BF_COPY = {
     teachersLabel: "Docenten",
     teachersHint: "bij schoolgroepen · tellen als volwassenen (€ 22,00)",
     memberLockedLabel: "Ledentarieven (−50%)",
-    memberLockedHintPre: "Alleen voor geverifieerde Skifreunde-leden.",
+    memberLockedExisting: "Al lid?",
     memberLockedLogin: "Inloggen",
-    memberLockedOr: "of vraag lidmaatschap aan in je",
-    memberLockedProfile: "accountprofiel",
-    memberLockedEnd: ".",
+    memberLockedExistingEnd: " — dan worden de tarieven hier vrijgeschakeld.",
+    memberJoinCta: "Nog geen lid? Word nu online lid",
+    memberJoinCtaSub: "vanaf €15/jaar · meteen actief · 50% op overnachtingen",
     memberLockedState: "geblokkeerd",
     ariaLess: "Minder",
     ariaMore: "Meer",
@@ -1422,26 +1422,40 @@ const PersonsEditor = ({
       ariaLess={tt.ariaLess}
       ariaMore={tt.ariaMore}
     />
-    {/* Hinweis auf die Mitglieder-Tarife (−50 %), wenn nicht eingeloggtes Mitglied */}
+    {/* Mitglieder-Tarife gesperrt: zwei klar getrennte Wege —
+        (1) bestehendes Mitglied loggt sich ein (Nachweis),
+        (2) Neumitglied tritt online bei und bucht sofort günstiger. */}
     {!memberAllowed && (
-      <div className="border-t border-[var(--color-wh-winter-grey)]/50 mt-1 pt-3 flex items-center justify-between gap-4 text-sm">
-        <div>
+      <div className="border-t border-[var(--color-wh-winter-grey)]/50 mt-1 pt-3 text-sm">
+        <div className="flex items-center justify-between gap-4">
           <div className="font-medium text-[var(--color-wh-fg-muted)]">
             {tt.memberLockedLabel}
           </div>
-          <div className="text-xs text-[var(--color-wh-fg-muted)]/80">
-            {tt.memberLockedHintPre}{" "}
-            <a href="/login?callbackUrl=/buchen" className="underline">
-              {tt.memberLockedLogin}
-            </a>{" "}
-            {tt.memberLockedOr}{" "}
-            <a href="/registrieren" className="underline">
-              {tt.memberLockedProfile}
-            </a>
-            {tt.memberLockedEnd}
-          </div>
+          <div className="text-[var(--color-wh-fg-muted)]/60 shrink-0">{tt.memberLockedState}</div>
         </div>
-        <div className="text-[var(--color-wh-fg-muted)]/60 text-sm shrink-0">{tt.memberLockedState}</div>
+        <div className="text-xs text-[var(--color-wh-fg-muted)]/80 mt-1">
+          {tt.memberLockedExisting}{" "}
+          <a href="/login?callbackUrl=/buchen" className="underline">
+            {tt.memberLockedLogin}
+          </a>
+          {tt.memberLockedExistingEnd}
+        </div>
+        <a
+          href="/mitglied-werden?next=/buchen"
+          className="mt-3 flex items-center justify-between gap-3 rounded-xl bg-[var(--color-wh-green-soft)] border border-[var(--color-wh-green)]/40 px-3.5 py-3 no-underline hover:border-[var(--color-wh-deep-green)] transition-colors"
+        >
+          <span>
+            <span className="block font-semibold text-[13px] text-[var(--color-wh-deep-green)]">
+              {tt.memberJoinCta}
+            </span>
+            <span className="block text-[11px] text-[var(--color-wh-deep-green)]/75 mt-0.5">
+              {tt.memberJoinCtaSub}
+            </span>
+          </span>
+          <span className="text-[var(--color-wh-deep-green)] shrink-0" aria-hidden>
+            →
+          </span>
+        </a>
       </div>
     )}
   </div>

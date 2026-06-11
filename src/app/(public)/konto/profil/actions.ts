@@ -463,20 +463,29 @@ export async function createMembershipCheckoutSession(formData: FormData) {
   if (!tier || !tier.active) {
     return { ok: false as const, error: "Beitragskategorie nicht verfügbar." };
   }
-  if (!tier.stripePriceId) {
-    return {
-      ok: false as const,
-      error:
-        "Für diese Beitragskategorie ist die automatische Abbuchung noch nicht eingerichtet. Bitte überweise den Beitrag wie gewohnt manuell.",
-    };
-  }
-
   const base = baseUrl();
   try {
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       payment_method_types: ["card", "sepa_debit"],
-      line_items: [{ price: tier.stripePriceId, quantity: 1 }],
+      // Vorhandene Stripe-Price nutzen, sonst Preis inline aus
+      // membership_tiers.annualFeeCents (gleicher Mechanismus wie /mitglied-werden).
+      line_items: [
+        tier.stripePriceId
+          ? { price: tier.stripePriceId, quantity: 1 }
+          : {
+              quantity: 1,
+              price_data: {
+                currency: "eur",
+                unit_amount: tier.annualFeeCents,
+                recurring: { interval: "year" },
+                product_data: {
+                  name: `Mitgliedschaft Skifreunde Gütersloh — ${tier.name}`,
+                  description: "Jahresbeitrag · jederzeit zum Jahresende kündbar",
+                },
+              },
+            },
+      ],
       customer_email: customer.stripeSubscriptionCustomerId
         ? undefined
         : user.email,
