@@ -20,7 +20,6 @@ export const metadata = {
 const GRUENKOHLWANDERUNG_BILDER = [
   { src: "/media/photos/vereinsaktivitaeten/gruenkohlwanderung/bachlauf-wintersonne.jpeg", alt: "Verschneiter Bachlauf in der Wintersonne entlang der Grünkohlwanderung" },
   { src: "/media/photos/vereinsaktivitaeten/gruenkohlwanderung/gruppe-feldweg.jpeg", alt: "Wandergruppe auf verschneitem Feldweg unter blauem Winterhimmel" },
-  { src: "/media/photos/vereinsaktivitaeten/gruenkohlwanderung/drei-wanderer.jpeg", alt: "Drei Wanderer der Skifreunde unterwegs im Schnee" },
   { src: "/media/photos/vereinsaktivitaeten/gruenkohlwanderung/paar-am-weg.jpeg", alt: "Zwei Wanderer Arm in Arm auf der winterlichen Strecke" },
   { src: "/media/photos/vereinsaktivitaeten/gruenkohlwanderung/gruppe-fuenf.jpeg", alt: "Fünf gut gelaunte Teilnehmende am verschneiten Wegrand" },
   { src: "/media/photos/vereinsaktivitaeten/gruenkohlwanderung/familie-unterwegs.jpeg", alt: "Familie mit Kindern unterwegs auf der Grünkohlwanderung" },
@@ -34,7 +33,15 @@ const GRUENKOHLWANDERUNG_BILDER = [
 // Eigene Foto-Geschichte zum Adventskaffeetrinken (Kuchen) — bewusst getrennt von der Grünkohlwanderung
 const ADVENTSKAFFEE_BILDER = [
   { src: "/media/photos/vereinsaktivitaeten/adventskaffee/kaffeetafel.jpeg", alt: "Adventskaffeetrinken — lange Kaffeetafel mit Mitgliedern im Bauernhaus" },
-  { src: "/media/photos/vereinsaktivitaeten/adventskaffee/kuchen.jpeg", alt: "Hausgemachter Mandelkuchen mit Sahne beim Adventskaffee" },
+  { src: "/media/photos/vereinsaktivitaeten/adventskaffee/paar-am-tisch.jpeg", alt: "Zwei Mitglieder lächeln am festlich gedeckten Tisch im Fachwerk-Bauernhaus" },
+  { src: "/media/photos/vereinsaktivitaeten/adventskaffee/zwei-gaeste.jpeg", alt: "Zwei Gäste beim Adventskaffee, Kaffeetafel im Hintergrund" },
+  { src: "/media/photos/vereinsaktivitaeten/adventskaffee/kuchen.jpeg", alt: "Hausgemachter Bienenstich mit Sahne beim Adventskaffee" },
+  { src: "/media/photos/vereinsaktivitaeten/adventskaffee/bienenstich-nah.jpeg", alt: "Bienenstich mit Mandelkruste aus der Nähe" },
+  { src: "/media/photos/vereinsaktivitaeten/adventskaffee/kaesesahnetorte.jpeg", alt: "Angeschnittene Käsesahnetorte auf einer Glasplatte" },
+  { src: "/media/photos/vereinsaktivitaeten/adventskaffee/sahnekuchen.jpeg", alt: "Sahnekuchen mit Zitronenguss auf der Kaffeetafel" },
+  { src: "/media/photos/vereinsaktivitaeten/adventskaffee/schokotorte.jpeg", alt: "Schokoladen-Sahne-Torte mit Schokoraspeln" },
+  { src: "/media/photos/vereinsaktivitaeten/adventskaffee/schnittchen.jpeg", alt: "Belegte Brötchenhälften mit Schinken, Salami und Käse" },
+  { src: "/media/photos/vereinsaktivitaeten/adventskaffee/kaffeetasse.jpeg", alt: "Tasse Kaffee auf rotem Tischtuch beim Adventskaffeetrinken" },
 ];
 
 type TimelineItem = { year: string; title: string; body: string };
