@@ -50,7 +50,6 @@ type Copy = {
     eyebrow: string;
     h2: string;
     body: string;
-    routes: { eye: string; title: string; body: string; cta: string };
     list: { eye: string; title: string; body: string; cta: string };
   };
   spenden: import("@/components/public/huette/DonationSection").DonationCopy;
@@ -174,13 +173,7 @@ const COPY: Record<Locale, Copy> = {
     hub: {
       eyebrow: "Für Deinen Aufenthalt",
       h2: "Damit Du gut vorbereitet bist.",
-      body: "Zwei kleine Tools, die wir Gästen vor und während des Aufenthalts an die Hand geben: kuratierte Wandertouren rund um die Hütte (mit GPX-Datei für Komoot oder Garmin) und einen persönlichen Packlisten-Generator, der zu Saison und Plan passt.",
-      routes: {
-        eye: "Outdoor · GPX-Download",
-        title: "Wandertouren rund um die Hütte.",
-        body: "Hand-kuratierte Routen direkt von der Wiesenhütte aus — mit Schwierigkeit, Distanz und Höhenmetern. Jede Tour kommt mit GPX-Datei, die Du in Komoot, Outdooractive oder auf Dein Garmin laden kannst.",
-        cta: "Touren ansehen →",
-      },
+      body: "Ein kleines Tool, das wir Gästen vor der Anreise an die Hand geben: einen persönlichen Packlisten-Generator, der zu Saison und Plan passt.",
       list: {
         eye: "Vor der Anreise · Persönlich",
         title: "Persönliche Packliste.",
@@ -317,13 +310,7 @@ const COPY: Record<Locale, Copy> = {
     hub: {
       eyebrow: "For your stay",
       h2: "So you're well prepared.",
-      body: "Two small tools we hand to guests before and during their stay: curated hiking routes around the cabin (with GPX files for Komoot or Garmin) and a personal packing-list generator that matches season and plan.",
-      routes: {
-        eye: "Outdoor · GPX download",
-        title: "Hiking routes around the cabin.",
-        body: "Hand-curated routes straight from the Wiesenhütte — with difficulty, distance and elevation. Each tour comes with a GPX file you can load into Komoot, Outdooractive or your Garmin.",
-        cta: "View routes →",
-      },
+      body: "One small tool we hand to guests before arrival: a personal packing-list generator that matches season and plan.",
       list: {
         eye: "Before arrival · Personal",
         title: "Personal packing list.",
@@ -460,13 +447,7 @@ const COPY: Record<Locale, Copy> = {
     hub: {
       eyebrow: "Voor je verblijf",
       h2: "Zodat je goed voorbereid bent.",
-      body: "Twee kleine tools die we gasten meegeven vóór en tijdens hun verblijf: samengestelde wandelroutes rond de hut (met GPX-bestand voor Komoot of Garmin) en een persoonlijke paklijst-generator op maat van seizoen en plan.",
-      routes: {
-        eye: "Outdoor · GPX-download",
-        title: "Wandelroutes rond de hut.",
-        body: "Met de hand samengestelde routes direct vanaf de Wiesenhütte — met moeilijkheid, afstand en hoogtemeters. Elke tour komt met een GPX-bestand voor Komoot, Outdooractive of Garmin.",
-        cta: "Routes bekijken →",
-      },
+      body: "Eén kleine tool die we gasten vóór aankomst meegeven: een persoonlijke paklijst-generator op maat van seizoen en plan.",
       list: {
         eye: "Voor aankomst · Persoonlijk",
         title: "Persoonlijke paklijst.",
@@ -679,33 +660,7 @@ export default async function HuettePage({
           <h2 className="text-[32px] sm:text-[44px] mt-3 mb-3 leading-tight">{c.hub.h2}</h2>
           <p className="text-[var(--color-wh-fg-muted)] text-[16px] max-w-2xl mb-10">{c.hub.body}</p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
-            <Link
-              href="/wandertouren"
-              className="group relative block bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 sm:p-8 no-underline hover:shadow-md transition-shadow overflow-hidden"
-            >
-              <div
-                aria-hidden
-                className="absolute -top-4 -right-2 text-[120px] leading-none text-[var(--color-wh-deep-green)]/[0.07] font-display font-bold pointer-events-none select-none"
-              >
-                ↗
-              </div>
-              <div className="relative">
-                <div className="text-[10px] uppercase tracking-wider text-[var(--color-wh-deep-green)]/80 font-bold mb-2">
-                  {c.hub.routes.eye}
-                </div>
-                <h3 className="font-display font-bold text-[24px] sm:text-[26px] text-[var(--color-wh-deep-green)] mt-0 mb-3 leading-tight">
-                  {c.hub.routes.title}
-                </h3>
-                <p className="text-[14px] sm:text-[15px] leading-relaxed text-[var(--color-wh-black)] m-0 mb-4">
-                  {c.hub.routes.body}
-                </p>
-                <span className="inline-flex items-center gap-1 text-[14px] text-[var(--color-wh-deep-green)] font-semibold group-hover:gap-2 transition-all">
-                  {c.hub.routes.cta}
-                </span>
-              </div>
-            </Link>
-
+          <div className="max-w-xl">
             <Link
               href="/packliste"
               className="group relative block bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 sm:p-8 no-underline hover:shadow-md transition-shadow overflow-hidden"
