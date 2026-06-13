@@ -17,6 +17,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { Locale } from "@/lib/i18n-shared";
 import { startMembershipJoin } from "./actions";
+import { track } from "@/lib/analytics";
 
 type Tier = { code: string; name: string; annualFeeCents: number };
 type Prefill = {
@@ -654,7 +655,13 @@ export const JoinWizard = ({
               )}
 
               {step === 2 && tier && (
-                <form action={startMembershipJoin} onSubmit={() => setSubmitting(true)}>
+                <form
+                  action={startMembershipJoin}
+                  onSubmit={() => {
+                    setSubmitting(true);
+                    track("membership_checkout_start");
+                  }}
+                >
                   {/* Honeypot */}
                   <div aria-hidden className="hidden">
                     <label>

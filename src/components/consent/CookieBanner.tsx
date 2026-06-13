@@ -22,7 +22,7 @@ const CATEGORIES = [
   {
     key: "analytics" as const,
     label: "Statistik",
-    body: "Anonyme Nutzungsstatistiken zur Verbesserung der Webseite. Aktuell nicht aktiv — Reservierung für zukünftige privacy-freundliche Tools wie Plausible.",
+    body: "Anonyme, cookielose Nutzungsstatistik (Vercel Web Analytics & Speed Insights) zur Verbesserung der Webseite — z. B. welche Seiten gefragt sind und wo der Buchungsweg hakt. Keine personenbezogenen Daten, kein Tracking über andere Seiten hinweg. Nur mit Deiner Zustimmung aktiv.",
     locked: false,
   },
   {

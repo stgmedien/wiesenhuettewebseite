@@ -8,6 +8,7 @@ import { calculatePrice, formatEuro, RULES, type Persons } from "@/lib/pricing";
 import { toLocalIso, daysUntilLocalDate } from "@/lib/utils";
 import { daysUntil, getCancellationTier, getCancellationTiers } from "@/lib/cancellation";
 import { createBookingAndCheckout, previewDiscountAction } from "./actions";
+import { track } from "@/lib/analytics";
 import { AvailabilityCalendar } from "./AvailabilityCalendar";
 
 // Anlass-Kategorien + Sub-Auswahl bei "Private Feier".
@@ -759,18 +760,35 @@ export const BookingFlow = ({
       // Phase B: Bei Private Feier landet die Buchung erst in der Vorstands-
       // Prüfung — kein Stripe-Redirect.
       if ("requiresReview" in res && res.requiresReview) {
+        track("booking_review_requested", { nights: breakdown?.nights, purpose: purposeCategory || null });
         window.location.href = `/buchen/pruefung?b=${encodeURIComponent(res.bookingNumber)}`;
         return;
       }
       // Schulgruppe: kein Sofort-Checkout — Anzahlung wird später per Mail fällig.
       if ("schoolDeferred" in res && res.schoolDeferred) {
+        track("booking_school_deferred", { nights: breakdown?.nights });
         window.location.href = `/buchen/schul-anfrage?b=${encodeURIComponent(res.bookingNumber)}`;
         return;
       }
       if ("checkoutUrl" in res && res.checkoutUrl) {
+        track("booking_checkout_start", {
+          nights: breakdown?.nights,
+          total: breakdown ? Math.round(breakdown.subtotalCents / 100) : null,
+          purpose: purposeCategory || null,
+        });
         window.location.href = res.checkoutUrl;
       }
     });
+  };
+
+  // Funnel-Tracking: nur beim Vorwärts-Springen den neu erreichten Schritt melden.
+  const goToStep = (s: Step) => {
+    if (s > step) {
+      if (s === 1) track("booking_step_purpose");
+      else if (s === 2) track("booking_step_contact");
+      else if (s === 3) track("booking_step_review");
+    }
+    setStep(s);
   };
 
   return (
@@ -845,7 +863,7 @@ export const BookingFlow = ({
             <div className="flex justify-end pt-2">
               <Button
                 disabled={!canGoStep1}
-                onClick={() => setStep(1)}
+                onClick={() => goToStep(1)}
                 iconRight={<ArrowRight size={18} />}
               >
                 {tt.next}
@@ -920,7 +938,7 @@ export const BookingFlow = ({
               </Button>
               <Button
                 disabled={!canGoStep2}
-                onClick={() => setStep(2)}
+                onClick={() => goToStep(2)}
                 iconRight={<ArrowRight size={18} />}
               >
                 {tt.next}
@@ -1051,7 +1069,7 @@ export const BookingFlow = ({
               </Button>
               <Button
                 onClick={() => {
-                  if (canGoStep3) setStep(3);
+                  if (canGoStep3) goToStep(3);
                   else setStep2Tried(true);
                 }}
                 iconRight={<ArrowRight size={18} />}

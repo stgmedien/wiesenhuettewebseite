@@ -40,6 +40,12 @@ export const Footer = ({ locale }: { locale: Locale }) => (
         <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/huette">
           {t("footer.huette.ausstattung", locale)}
         </Link>
+        <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/preise">
+          {t("footer.huette.preise", locale)}
+        </Link>
+        <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/faq">
+          {t("footer.huette.faq", locale)}
+        </Link>
         <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/lage">
           {t("footer.huette.lage", locale)}
         </Link>
