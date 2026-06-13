@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useTransition } from "react";
+import { ChevronLeft, ChevronRight, Sparkles, Undo2, Loader2 } from "lucide-react";
+import { toggleCleaningReleaseAction } from "./actions";
 
 const MONTHS = [
   "Januar", "Februar", "März", "April", "Mai", "Juni",
@@ -44,13 +46,29 @@ export const CalendarGrid = ({
   monthIdx,
   events,
   cleaningDates = [],
+  releasedDates = [],
 }: {
   year: number;
   monthIdx: number;
   events: Event[];
   cleaningDates?: string[];
+  releasedDates?: string[];
 }) => {
   const cleaningSet = new Set(cleaningDates);
+  const releasedSet = new Set(releasedDates);
+
+  // Reinigungstag freigeben ↔ wieder sperren. revalidatePath in der Action
+  // liefert frische Props zurück, daher kein lokaler optimistischer State nötig.
+  const [pendingIso, setPendingIso] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const toggleRelease = (iso: string) => {
+    setPendingIso(iso);
+    startTransition(async () => {
+      await toggleCleaningReleaseAction(iso);
+      setPendingIso(null);
+    });
+  };
+
   const firstOfMonth = new Date(year, monthIdx, 1);
   // 0=Sun 1=Mon ... — convert to Mo-first
   const dayOfWeek = (firstOfMonth.getDay() + 6) % 7;
@@ -103,6 +121,28 @@ export const CalendarGrid = ({
         </div>
       </div>
 
+      {/* Hinweis: Reinigungstage lassen sich freigeben, wenn die Reinigung
+          schneller fertig ist — der Tag wird dann wieder buchbar. */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-4 text-[12px] text-[var(--color-wh-fg-muted)]">
+        <span className="inline-flex items-center gap-1.5">
+          <span
+            className="inline-block w-3.5 h-3.5 rounded border border-[var(--color-wh-winter-grey)]"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(45deg, rgba(138,90,56,0.25) 0 4px, transparent 4px 8px)",
+            }}
+          />
+          Reinigungstag (gesperrt)
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="inline-block w-3.5 h-3.5 rounded bg-[var(--color-wh-green-soft)] border border-[var(--color-wh-green)]/40" />
+          Freigegeben (buchbar)
+        </span>
+        <span className="text-[var(--color-wh-deep-green)]">
+          Tipp: Auf einem Reinigungstag „Freigeben" klicken, wenn die Reinigung schon erledigt ist — dann kann die Hütte an dem Tag neu vermietet werden.
+        </span>
+      </div>
+
       <div className="grid grid-cols-7 gap-2 text-xs uppercase tracking-wider text-[var(--color-wh-fg-muted)] mb-2">
         {WEEKDAYS.map((w) => (
           <div key={w} className="px-2">
@@ -118,33 +158,48 @@ export const CalendarGrid = ({
           const dayEvents = eventsForDay(d);
           const isToday = iso === todayIso;
           const isCleaning = cleaningSet.has(iso);
+          const isReleased = isCleaning && releasedSet.has(iso);
+          // Freigeben/Sperren nur für reine Reinigungstage (keine Übernachtung
+          // an dem Tag) und nur ab heute — Vergangenes ist irrelevant.
+          const canToggle = isCleaning && dayEvents.length === 0 && iso >= todayIso;
+          const rowPending = pendingIso === iso && isPending;
           return (
             <div
               key={idx}
-              className={`bg-white border rounded-[var(--radius-md)] min-h-[110px] p-2 flex flex-col gap-1 relative overflow-hidden ${
+              className={`border rounded-[var(--radius-md)] min-h-[110px] p-2 flex flex-col gap-1 relative overflow-hidden ${
                 isToday
                   ? "border-[var(--color-wh-deep-green)] border-2"
                   : "border-[var(--color-wh-winter-grey)]"
-              }`}
+              } ${isReleased ? "bg-[var(--color-wh-green-soft)]" : "bg-white"}`}
               style={
-                isCleaning
+                isCleaning && !isReleased
                   ? {
                       backgroundImage:
                         "repeating-linear-gradient(45deg, rgba(138,90,56,0.10) 0 6px, transparent 6px 12px)",
                     }
                   : undefined
               }
-              title={isCleaning ? "Reinigungstag — nicht buchbar" : undefined}
+              title={
+                isReleased
+                  ? "Reinigungstag freigegeben — wieder buchbar"
+                  : isCleaning
+                    ? "Reinigungstag — nicht buchbar"
+                    : undefined
+              }
             >
               <div className="flex items-center justify-between">
                 <div className="text-xs font-semibold text-[var(--color-wh-deep-green)]">
                   {d.getDate()}
                 </div>
-                {isCleaning && (
+                {isReleased ? (
+                  <span className="text-[9px] uppercase tracking-wider font-semibold text-[var(--color-wh-deep-green)] bg-[var(--color-wh-green)]/25 px-1.5 py-0.5 rounded">
+                    Frei · buchbar
+                  </span>
+                ) : isCleaning ? (
                   <span className="text-[9px] uppercase tracking-wider font-semibold text-[var(--color-wh-wood)] bg-[var(--color-wh-wood)]/15 px-1.5 py-0.5 rounded">
                     Reinigung
                   </span>
-                )}
+                ) : null}
               </div>
               <div className="flex flex-col gap-1 overflow-hidden">
                 {dayEvents.slice(0, 3).map((e) => (
@@ -167,6 +222,33 @@ export const CalendarGrid = ({
                   </div>
                 )}
               </div>
+
+              {canToggle && (
+                <button
+                  type="button"
+                  onClick={() => toggleRelease(iso)}
+                  disabled={rowPending}
+                  className={`mt-auto inline-flex items-center justify-center gap-1 w-full text-[10px] font-semibold rounded px-1.5 py-1 transition-colors disabled:opacity-60 cursor-pointer ${
+                    isReleased
+                      ? "border border-[var(--color-wh-deep-green)]/40 text-[var(--color-wh-deep-green)] hover:bg-white"
+                      : "bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] hover:bg-[var(--color-wh-deep-green-hover)]"
+                  }`}
+                  title={
+                    isReleased
+                      ? "Tag wieder als Reinigungstag sperren"
+                      : "Reinigungstag freigeben — Hütte wird an diesem Tag buchbar"
+                  }
+                >
+                  {rowPending ? (
+                    <Loader2 size={11} className="animate-spin" />
+                  ) : isReleased ? (
+                    <Undo2 size={11} />
+                  ) : (
+                    <Sparkles size={11} />
+                  )}
+                  {isReleased ? "Wieder sperren" : "Freigeben"}
+                </button>
+              )}
             </div>
           );
         })}

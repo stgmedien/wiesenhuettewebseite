@@ -3,6 +3,7 @@ import { bookings, customers } from "@/lib/db/schema";
 import { eq, gte, lte, and } from "drizzle-orm";
 import { CalendarGrid } from "./CalendarGrid";
 import { getSiteSettings } from "@/lib/settings";
+import { getReleasedCleaningDates } from "@/lib/cleaning-overrides";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Kalender · Wiesenhütte Manager" };
@@ -61,6 +62,10 @@ export default async function CalendarPage({ searchParams }: Props) {
     }
   }
 
+  // Vom Wart bereits freigegebene Reinigungstage in diesem Monat — werden im
+  // Grid als „freigegeben (buchbar)" markiert und lassen sich wieder sperren.
+  const releasedDates = await getReleasedCleaningDates(fromIso, toIso);
+
   return (
     <div className="px-4 sm:px-8 py-8 sm:py-10 max-w-[1400px]">
       <div className="eyebrow">Kalender</div>
@@ -70,6 +75,7 @@ export default async function CalendarPage({ searchParams }: Props) {
         monthIdx={monthIdx}
         events={events}
         cleaningDates={Array.from(cleaningDates)}
+        releasedDates={Array.from(releasedDates)}
       />
     </div>
   );
