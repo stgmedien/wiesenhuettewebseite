@@ -243,16 +243,6 @@ export default async function EsgPage() {
                     <strong>Entwurf:</strong> Skizzen, Materialliste, Bauablauf — Mathematik,
                     Kunst und Werken in dieser Phase verschränkt.
                   </li>
-                  <li>
-                    <strong>Bau:</strong> An zwei Hütten-Wochenenden vor Ort. Jede:r Schüler:in
-                    war an mindestens einem Bauschritt beteiligt — vom Ausheben der Grube bis zum
-                    Schichten der Steine.
-                  </li>
-                  <li>
-                    <strong>Übergabe & Einweihung:</strong> Die Klasse 9e hat die fertige
-                    Feuerstelle in einem kleinen Akt der Schulgemeinschaft und den Skifreunden
-                    übergeben.
-                  </li>
                 </ul>
               </div>
 
