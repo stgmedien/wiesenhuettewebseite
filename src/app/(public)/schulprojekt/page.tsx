@@ -298,12 +298,28 @@ export default async function EsgPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
               <div>
                 <h4 className="font-semibold text-[18px] text-[var(--color-wh-deep-green)] mb-2">
-                  Was haben sie gebaut?
+                  Was war das Projekt?
                 </h4>
+                <p className="prose-block">
+                  Im Schuljahr 2024/25 fuhr die Klasse 9b des ESG für mehrere Tage zur Wiesenhütte —
+                  mit einem klaren Auftrag: etwas bauen, das bleibt. Eine Holzbank, ein Jackenständer,
+                  Vogelhäuser, ein Insektenhotel und eine Baumbank entstanden in dieser Zeit. Alles
+                  selbst geplant, selbst gebaut, selbst aufgestellt. Heute wird es von jeder Gruppe
+                  genutzt, die seitdem dort war.
+                </p>
+
+                <h4 className="font-semibold text-[18px] text-[var(--color-wh-deep-green)] mt-6 mb-2">
+                  Wie ist es entstanden?
+                </h4>
+                <p className="prose-block">
+                  Die Fahrt war keine klassische Klassenfahrt. Die Schüler:innen kochten selbst,
+                  organisierten sich selbst — und hatten daneben einen Werkstatt-Auftrag, der in
+                  Kleingruppen bearbeitet wurde:
+                </p>
                 <ul className="prose-block list-disc pl-5 mt-2 space-y-1.5">
                   <li>
-                    <strong>Holzbank:</strong> geplant, gesägt, geschraubt — komplett in Eigenarbeit,
-                    heute fester Bestandteil der Hütte.
+                    <strong>Holzbank & Baumbank:</strong> geplant, gesägt, geschraubt — die Baumbank
+                    umschließt heute den alten Baum vor der Hütte.
                   </li>
                   <li>
                     <strong>Jackenständer:</strong> direkt nach der Fertigstellung in Betrieb genommen.
@@ -312,27 +328,36 @@ export default async function EsgPage() {
                     <strong>Vogelhäuser:</strong> gebaut und bunt bemalt, hängen jetzt an der Hütte.
                   </li>
                   <li>
-                    <strong>Insektenhotel:</strong> draußen aufgestellt, mit Schülerhänden befüllt.
-                  </li>
-                  <li>
-                    <strong>Baumbank:</strong> eine Rundbank um den alten Baum vor der Hütte — das
-                    bleibendste Stück der Fahrt.
+                    <strong>Insektenhotel:</strong> draußen aufgestellt und mit Schülerhänden befüllt.
                   </li>
                 </ul>
               </div>
 
               <div>
                 <h4 className="font-semibold text-[18px] text-[var(--color-wh-deep-green)] mb-2">
-                  Wenn der Hammer weggelegt war.
+                  Was wurde dabei gelernt?
                 </h4>
-                <p className="prose-block">
-                  Gemeinsam kochen, gemeinsam frühstücken. Abends Grillen vor der Hütte, danach Uno
-                  und Karten am großen Tisch. Was als Werkstatt-Projekt begann, war abends auch
-                  Gemeinschaft — und beides gehört zur Fahrt.
-                </p>
+                <ul className="prose-block list-disc pl-5 space-y-3">
+                  <li>
+                    Dass Holz nicht gerade ist, Schrauben manchmal nicht greifen — und man trotzdem
+                    fertig wird, wenn die Gruppe zusammenhält.
+                  </li>
+                  <li>
+                    Wie Selbstversorgung in der Praxis aussieht: wer kocht, wer einkauft, wer
+                    abspült. Und dass das besser funktioniert als erwartet.
+                  </li>
+                  <li>
+                    Wie Gemeinschaft entsteht — nicht im Stundentakt, sondern beim Grillen, beim
+                    Uno-Spielen, beim gemeinsamen Frühstück am großen Tisch.
+                  </li>
+                  <li>
+                    Was es bedeutet, etwas zu bauen, das nach der Fahrt bleibt — und das andere
+                    benutzen werden, ohne zu wissen, wer es gebaut hat.
+                  </li>
+                </ul>
 
                 {/* ESBlog-Teaser */}
-                <div className="mt-6 bg-[var(--color-wh-green-soft)] border border-[var(--color-wh-green)]/30 rounded-[var(--radius-card)] p-5">
+                <div className="mt-8 bg-[var(--color-wh-green-soft)] border border-[var(--color-wh-green)]/30 rounded-[var(--radius-card)] p-5">
                   <div className="text-xs uppercase tracking-wider text-[var(--color-wh-deep-green)] font-semibold mb-2">
                     Aus der Schülerzeitung
                   </div>
