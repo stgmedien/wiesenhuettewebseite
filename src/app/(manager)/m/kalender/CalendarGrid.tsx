@@ -89,7 +89,9 @@ export const CalendarGrid = ({
 
   const eventsForDay = (d: Date) => {
     const iso = toLocalIso(d);
-    return events.filter((e) => iso >= e.arrival && iso < e.departure);
+    // Abreisetag inklusive — er ist der letzte Buchungstag (Gäste reisen an
+    // diesem Tag ab); die Reinigung liegt erst am Tag danach.
+    return events.filter((e) => iso >= e.arrival && iso <= e.departure);
   };
 
   const todayIso = toLocalIso(new Date());

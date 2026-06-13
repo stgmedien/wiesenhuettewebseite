@@ -47,11 +47,13 @@ export const isRangeAvailable = async (
   const settings = await getSiteSettings();
   const cleaningDays = settings.cleaningDaysAfterDeparture;
 
-  // Effective new range = [arrival, departure + cleaningDays). Two intervals overlap iff
-  //   existing.arrival < new.effectiveEnd  AND  existing.effectiveEnd > new.arrival
-  // Because date strings compare lexicographically (ISO-8601 yyyy-mm-dd) we can do a
-  // simple SQL-side check by adding cleaningDays to one side. We compute the cutoffs in JS.
-  const newEffectiveEnd = addDaysIso(departure, cleaningDays);
+  // Belegung gilt bis EINSCHLIESSLICH Abreisetag (der Abreisetag ist der letzte
+  // Buchungstag — Gäste reisen an dem Tag ab), die Reinigung erfolgt am/an den
+  // Tag(en) DANACH. Effektiv belegt eine Buchung also
+  //   [arrival, departure + 1 + cleaningDays)  (halb-offen).
+  // Zwei Intervalle überlappen iff existing.arrival < new.effectiveEnd UND
+  // existing.effectiveEnd > new.arrival.
+  const newEffectiveEnd = addDaysIso(departure, cleaningDays + 1);
 
   // existing.arrival < newEffectiveEnd  AND  existing.departure + cleaningDays > new.arrival
   // Rewriting: existing.arrival <= addDaysIso(newEffectiveEnd, -1)
@@ -83,10 +85,12 @@ export const isRangeAvailable = async (
     );
 
   for (const c of conflicts) {
-    // Wartung doesn't get a cleaning buffer afterwards
+    // Wartung bekommt keinen Reinigungs-Puffer danach, belegt aber ebenfalls
+    // bis einschließlich End-Tag. Gäste-Buchungen: Abreisetag belegt + danach
+    // Reinigung → +1 für den (inklusiven) Abreisetag.
     let cleaningForExisting = c.status === "wartung" ? 0 : cleaningDays;
     const depIso = toIso(c.departure);
-    let existingEffectiveEnd = addDaysIso(depIso, cleaningForExisting);
+    let existingEffectiveEnd = addDaysIso(depIso, cleaningForExisting + 1);
     // Freigegebene Reinigungstage am Ende des Puffers wegkürzen (Tag für Tag),
     // damit sie die Verfügbarkeit nicht mehr blockieren.
     while (
@@ -152,20 +156,23 @@ const getBookingBlocksRaw = unstable_cache(
     const start = new Date(toIso(row.arrival));
     const end = new Date(toIso(row.departure));
 
-    // Overnight nights: [arrival, departure)
+    // Belegte Tage [arrival, departure] INKLUSIVE Abreisetag — der Abreisetag
+    // ist der letzte Buchungstag (Gäste reisen erst an diesem Tag ab).
     const cur = new Date(start);
-    while (cur < end) {
+    while (cur <= end) {
       const iso = cur.toISOString().slice(0, 10);
       if (isWartung) wartung.add(iso);
       else booked.add(iso);
       cur.setDate(cur.getDate() + 1);
     }
 
-    // Cleaning days: [departure, departure + cleaningDays). Wartung has no cleaning buffer.
+    // Reinigungstage: am/an den Tag(en) NACH dem Abreisetag —
+    // [departure+1, departure+1+cleaningDays). Wartung hat keinen Puffer.
     if (!isWartung) {
-      const clEnd = new Date(end);
-      clEnd.setDate(clEnd.getDate() + cleaningDays);
       const c = new Date(end);
+      c.setDate(c.getDate() + 1); // erster Reinigungstag = Tag nach Abreise
+      const clEnd = new Date(c);
+      clEnd.setDate(clEnd.getDate() + cleaningDays);
       while (c < clEnd) {
         cleaning.add(c.toISOString().slice(0, 10));
         c.setDate(c.getDate() + 1);
@@ -187,7 +194,9 @@ const getBookingBlocksRaw = unstable_cache(
       wartung: Array.from(wartung),
     };
   },
-  ["booking-blocks-v1"],
+  // v2: Reinigungstag liegt jetzt NACH dem Abreisetag (Belegung inkl. Abreisetag).
+  // Key-Bump erzwingt frische Berechnung nach Deploy statt alter gecachter Sets.
+  ["booking-blocks-v2"],
   { tags: [BOOKING_BLOCKS_TAG] }
 );
 
