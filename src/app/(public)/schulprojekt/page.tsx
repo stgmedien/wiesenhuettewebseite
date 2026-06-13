@@ -763,12 +763,12 @@ const FAQS = [
     a: "Ja. Die Hüttenküche ist groß genug, um mehrere Bedürfnisse parallel zu bedienen. Wir fragen vor der Fahrt explizit ab und planen entsprechend.",
   },
   {
-    q: "Mein Kind ist sehr schüchtern / hatte schon mal Heimweh. Was passiert dann?",
-    a: "Heimweh ist Teil des Lernens, wird aber sensibel gehandhabt. Lehrkräfte kennen das Kind aus dem Schulalltag und sind erreichbar, ein erstes Gespräch erfolgt früh. Im seltenen Notfall erfolgt selbstverständlich Rücksprache mit den Eltern.",
+    q: "Was soll mein Kind mitbringen?",
+    a: "Feste Schuhe, wetterfeste Kleidung (Sauerland ist Sauerland), Schlafsack oder Bettzeug, Handtücher, Toilettenartikel. Die genaue Packliste bekommt Ihr rechtzeitig von der Klassenleitung — die Hütte stellt Küche, Bettengestelle und Aufenthaltsräume, der Rest kommt mit.",
   },
   {
-    q: "Was, wenn mein Kind nicht möchte / krank wird?",
-    a: "Wir besprechen das individuell. Eine Hüttenfahrt ist Teil des Schulprogramms, aber niemand wird gegen seinen Willen in eine Überforderung gezwungen.",
+    q: "Gibt es Handyempfang oder WLAN an der Hütte?",
+    a: "Handyempfang ist in Langewiese eingeschränkt — je nach Anbieter mal vorhanden, mal nicht. WLAN gibt es an der Hütte nicht. Das ist bewusst so: Ein Teil des Konzepts ist, für ein paar Tage wirklich dort zu sein. Erreichbar sind die begleitenden Lehrkräfte jederzeit — ein Notfallkontakt wird vor der Fahrt kommuniziert.",
   },
   {
     q: "Wie passt das zum Schulprogramm des ESG?",
