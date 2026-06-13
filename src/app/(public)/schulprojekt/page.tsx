@@ -295,44 +295,66 @@ export default async function EsgPage() {
               />
             </div>
 
-            {/* Teaser-Karten: 9b-Zusammenfassung + ESBlog */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-              <div className="bg-[var(--color-wh-green-soft)] border border-[var(--color-wh-green)]/30 rounded-[var(--radius-card)] p-6 sm:p-7">
-                <div className="text-xs uppercase tracking-wider text-[var(--color-wh-deep-green)] font-semibold mb-3">
-                  Projektfahrt 9b · Mai 2026
-                </div>
-                <h3 className="font-display font-bold text-[20px] sm:text-[22px] text-[var(--color-wh-deep-green)] mt-0 mb-3 leading-snug">
-                  Gebaut, gegrillt, gespielt.
-                </h3>
-                <p className="text-[15px] leading-relaxed text-[var(--color-wh-black)] m-0">
-                  In drei Tagen entstanden eine Holzbank, ein Jackenständer, Vogelhäuser, ein
-                  Insektenhotel und eine Baumbank — alles selbst gebaut, selbst bemalt, selbst
-                  aufgestellt. Abends: Grillen, Uno, Kartenspielen am großen Tisch.
-                </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+              <div>
+                <h4 className="font-semibold text-[18px] text-[var(--color-wh-deep-green)] mb-2">
+                  Was haben sie gebaut?
+                </h4>
+                <ul className="prose-block list-disc pl-5 mt-2 space-y-1.5">
+                  <li>
+                    <strong>Holzbank:</strong> geplant, gesägt, geschraubt — komplett in Eigenarbeit,
+                    heute fester Bestandteil der Hütte.
+                  </li>
+                  <li>
+                    <strong>Jackenständer:</strong> direkt nach der Fertigstellung in Betrieb genommen.
+                  </li>
+                  <li>
+                    <strong>Vogelhäuser:</strong> gebaut und bunt bemalt, hängen jetzt an der Hütte.
+                  </li>
+                  <li>
+                    <strong>Insektenhotel:</strong> draußen aufgestellt, mit Schülerhänden befüllt.
+                  </li>
+                  <li>
+                    <strong>Baumbank:</strong> eine Rundbank um den alten Baum vor der Hütte — das
+                    bleibendste Stück der Fahrt.
+                  </li>
+                </ul>
               </div>
 
-              <div className="bg-[var(--color-wh-green-soft)] border border-[var(--color-wh-green)]/30 rounded-[var(--radius-card)] p-6 sm:p-7">
-                <div className="text-xs uppercase tracking-wider text-[var(--color-wh-deep-green)] font-semibold mb-3">
-                  Aus der Schülerzeitung
+              <div>
+                <h4 className="font-semibold text-[18px] text-[var(--color-wh-deep-green)] mb-2">
+                  Wenn der Hammer weggelegt war.
+                </h4>
+                <p className="prose-block">
+                  Gemeinsam kochen, gemeinsam frühstücken. Abends Grillen vor der Hütte, danach Uno
+                  und Karten am großen Tisch. Was als Werkstatt-Projekt begann, war abends auch
+                  Gemeinschaft — und beides gehört zur Fahrt.
+                </p>
+
+                {/* ESBlog-Teaser */}
+                <div className="mt-6 bg-[var(--color-wh-green-soft)] border border-[var(--color-wh-green)]/30 rounded-[var(--radius-card)] p-5">
+                  <div className="text-xs uppercase tracking-wider text-[var(--color-wh-deep-green)] font-semibold mb-2">
+                    Aus der Schülerzeitung
+                  </div>
+                  <p className="text-[15px] font-semibold text-[var(--color-wh-deep-green)] m-0 mb-2 leading-snug">
+                    Vier Tage Chaos, Spaß und Abenteuer.
+                  </p>
+                  <p className="text-[14px] leading-relaxed text-[var(--color-wh-black)] m-0 mb-3">
+                    Die 8a des ESG war in Langewiese — und hat direkt selbst darüber geschrieben.
+                    Ein Artikel in der digitalen Schülerzeitung, aus Schülersicht.
+                  </p>
+                  <a
+                    href="https://esblog.de/blog/2026/05/22/8a-on-tour-vier-tage-chaos-spass-und-abenteuer/#more-27583"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-[var(--color-wh-deep-green)] font-semibold text-[14px] underline underline-offset-2 hover:no-underline"
+                  >
+                    Zum Artikel im ESBlog →
+                  </a>
+                  <p className="text-[12px] text-[var(--color-wh-fg-muted)] mt-3 mb-0">
+                    Mit dabei: Frau Rapp und Frau Bannert.
+                  </p>
                 </div>
-                <h3 className="font-display font-bold text-[20px] sm:text-[22px] text-[var(--color-wh-deep-green)] mt-0 mb-3 leading-snug">
-                  Vier Tage Chaos, Spaß und Abenteuer.
-                </h3>
-                <p className="text-[15px] leading-relaxed text-[var(--color-wh-black)] m-0 mb-4">
-                  Die 8a des ESG war in Langewiese — und hat direkt selbst darüber geschrieben. Ein
-                  Artikel in der digitalen Schülerzeitung des ESG, aus Schülersicht.
-                </p>
-                <a
-                  href="https://esblog.de/blog/2026/05/22/8a-on-tour-vier-tage-chaos-spass-und-abenteuer/#more-27583"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-[var(--color-wh-deep-green)] font-semibold text-[15px] underline underline-offset-2 hover:no-underline"
-                >
-                  Zum Artikel im ESBlog →
-                </a>
-                <p className="text-[13px] text-[var(--color-wh-fg-muted)] mt-4 mb-0">
-                  Mit dabei: Frau Rapp und Frau Bannert.
-                </p>
               </div>
             </div>
 
