@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { PhotoGallery } from "@/components/public/PhotoGallery";
+import { BilderStapel } from "@/components/public/BilderStapel";
 import { FeaturedQuote } from "@/components/public/FeaturedQuote";
 import { CommunityEntryCard, type CommunityEntryView } from "@/components/public/CommunityEntryCard";
 import { CommunitySubmitForm } from "@/components/public/CommunitySubmitForm";
@@ -243,16 +244,6 @@ export default async function EsgPage() {
                     <strong>Entwurf:</strong> Skizzen, Materialliste, Bauablauf — Mathematik,
                     Kunst und Werken in dieser Phase verschränkt.
                   </li>
-                  <li>
-                    <strong>Bau:</strong> An zwei Hütten-Wochenenden vor Ort. Jede:r Schüler:in
-                    war an mindestens einem Bauschritt beteiligt — vom Ausheben der Grube bis zum
-                    Schichten der Steine.
-                  </li>
-                  <li>
-                    <strong>Übergabe & Einweihung:</strong> Die Klasse 9e hat die fertige
-                    Feuerstelle in einem kleinen Akt der Schulgemeinschaft und den Skifreunden
-                    übergeben.
-                  </li>
                 </ul>
               </div>
 
@@ -296,14 +287,103 @@ export default async function EsgPage() {
               Erfahrungsumfrage Mai 2026 mit 20 Gästen (15–16 Jahre, 100 % Rücklauf).
             </p>
 
-            {/* Foto-Galerie 12 Bilder — klickbar mit Lightbox-Carousel */}
-            <div className="mb-10">
-              <PhotoGallery
-                images={PROJEKTFAHRT_BILDER}
-                gridClassName="grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
-                sizes="(min-width: 1024px) 250px, (min-width: 640px) 33vw, 50vw"
-              />
+            <BilderStapel
+              images={PROJEKTFAHRT_BILDER}
+              gridClassName="grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
+              sizes="(min-width: 1024px) 250px, (min-width: 640px) 33vw, 50vw"
+            />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+              <div>
+                <h4 className="font-semibold text-[18px] text-[var(--color-wh-deep-green)] mb-2">
+                  Was war das Projekt?
+                </h4>
+                <p className="prose-block">
+                  Im Schuljahr 2024/25 fuhr die Klasse 9b des ESG für mehrere Tage zur Wiesenhütte —
+                  mit einem klaren Auftrag: etwas bauen, das bleibt. Eine Holzbank, ein Jackenständer,
+                  Vogelhäuser, ein Insektenhotel und eine Baumbank entstanden in dieser Zeit. Alles
+                  selbst geplant, selbst gebaut, selbst aufgestellt. Heute wird es von jeder Gruppe
+                  genutzt, die seitdem dort war.
+                </p>
+
+                <h4 className="font-semibold text-[18px] text-[var(--color-wh-deep-green)] mt-6 mb-2">
+                  Wie ist es entstanden?
+                </h4>
+                <p className="prose-block">
+                  Die Fahrt war keine klassische Klassenfahrt. Die Schüler:innen kochten selbst,
+                  organisierten sich selbst — und hatten daneben einen Werkstatt-Auftrag, der in
+                  Kleingruppen bearbeitet wurde:
+                </p>
+                <ul className="prose-block list-disc pl-5 mt-2 space-y-1.5">
+                  <li>
+                    <strong>Holzbank & Baumbank:</strong> geplant, gesägt, geschraubt — die Baumbank
+                    umschließt heute den alten Baum vor der Hütte.
+                  </li>
+                  <li>
+                    <strong>Jackenständer:</strong> direkt nach der Fertigstellung in Betrieb genommen.
+                  </li>
+                  <li>
+                    <strong>Vogelhäuser:</strong> gebaut und bunt bemalt, hängen jetzt an der Hütte.
+                  </li>
+                  <li>
+                    <strong>Insektenhotel:</strong> draußen aufgestellt und mit Schülerhänden befüllt.
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-semibold text-[18px] text-[var(--color-wh-deep-green)] mb-2">
+                  Was wurde dabei gelernt?
+                </h4>
+                <ul className="prose-block list-disc pl-5 space-y-3">
+                  <li>
+                    Dass Holz nicht gerade ist, Schrauben manchmal nicht greifen — und man trotzdem
+                    fertig wird, wenn die Gruppe zusammenhält.
+                  </li>
+                  <li>
+                    Wie Selbstversorgung in der Praxis aussieht: wer kocht, wer einkauft, wer
+                    abspült. Und dass das besser funktioniert als erwartet.
+                  </li>
+                  <li>
+                    Wie Gemeinschaft entsteht — nicht im Stundentakt, sondern beim Grillen, beim
+                    Uno-Spielen, beim gemeinsamen Frühstück am großen Tisch.
+                  </li>
+                  <li>
+                    Was es bedeutet, etwas zu bauen, das nach der Fahrt bleibt — und das andere
+                    benutzen werden, ohne zu wissen, wer es gebaut hat.
+                  </li>
+                </ul>
+
+              </div>
             </div>
+
+            {/* ESBlog-Teaser — unter dem Artikel-Grid */}
+            <div className="mt-2 mb-10 bg-[var(--color-wh-green-soft)] border border-[var(--color-wh-green)]/30 rounded-[var(--radius-card)] p-6 sm:p-7 max-w-3xl">
+              <div className="text-xs uppercase tracking-wider text-[var(--color-wh-deep-green)] font-semibold mb-3">
+                Aus der Schülerzeitung
+              </div>
+              <h3 className="font-display font-bold text-[20px] sm:text-[22px] text-[var(--color-wh-deep-green)] mt-0 mb-3 leading-snug">
+                Vier Tage Chaos, Spaß und Abenteuer.
+              </h3>
+              <p className="text-[15px] leading-relaxed text-[var(--color-wh-black)] m-0 mb-4">
+                Die 8a des ESG war in Langewiese — und hat direkt selbst darüber geschrieben.
+                Ein Artikel in der digitalen Schülerzeitung des ESG, aus Schülersicht.
+              </p>
+              <a
+                href="https://esblog.de/blog/2026/05/22/8a-on-tour-vier-tage-chaos-spass-und-abenteuer/#more-27583"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-[var(--color-wh-deep-green)] font-semibold text-[15px] underline underline-offset-2 hover:no-underline"
+              >
+                Zum Artikel im ESBlog →
+              </a>
+              <p className="text-[13px] text-[var(--color-wh-fg-muted)] mt-4 mb-0">
+                Mit dabei: Frau Rapp und Frau Bannert.
+              </p>
+            </div>
+
+            {/* Trennlinie vor dem ausführlichen Bericht */}
+            <div className="border-t border-[var(--color-wh-winter-grey)] pt-10" />
 
             {/* Lead */}
             <div className="prose-block max-w-3xl">
@@ -748,12 +828,12 @@ const FAQS = [
     a: "Ja. Die Hüttenküche ist groß genug, um mehrere Bedürfnisse parallel zu bedienen. Wir fragen vor der Fahrt explizit ab und planen entsprechend.",
   },
   {
-    q: "Mein Kind ist sehr schüchtern / hatte schon mal Heimweh. Was passiert dann?",
-    a: "Heimweh ist Teil des Lernens, wird aber sensibel gehandhabt. Lehrkräfte kennen das Kind aus dem Schulalltag und sind erreichbar, ein erstes Gespräch erfolgt früh. Im seltenen Notfall erfolgt selbstverständlich Rücksprache mit den Eltern.",
+    q: "Was soll mein Kind mitbringen?",
+    a: "Feste Schuhe, wetterfeste Kleidung (Sauerland ist Sauerland), Schlafsack oder Bettzeug, Handtücher, Toilettenartikel. Die genaue Packliste bekommt Ihr rechtzeitig von der Klassenleitung — die Hütte stellt Küche, Bettengestelle und Aufenthaltsräume, der Rest kommt mit.",
   },
   {
-    q: "Was, wenn mein Kind nicht möchte / krank wird?",
-    a: "Wir besprechen das individuell. Eine Hüttenfahrt ist Teil des Schulprogramms, aber niemand wird gegen seinen Willen in eine Überforderung gezwungen.",
+    q: "Gibt es Handyempfang oder WLAN an der Hütte?",
+    a: "Handyempfang ist in Langewiese eingeschränkt — je nach Anbieter mal vorhanden, mal nicht. WLAN gibt es an der Hütte nicht. Das ist bewusst so: Ein Teil des Konzepts ist, für ein paar Tage wirklich dort zu sein. Erreichbar sind die begleitenden Lehrkräfte jederzeit — ein Notfallkontakt wird vor der Fahrt kommuniziert.",
   },
   {
     q: "Wie passt das zum Schulprogramm des ESG?",
