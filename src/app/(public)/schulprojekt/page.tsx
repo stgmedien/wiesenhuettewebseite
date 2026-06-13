@@ -437,6 +437,31 @@ export default async function EsgPage() {
             </div>
           </article>
 
+          {/* ESBlog-Teaser — Artikel der 8a in der digitalen Schülerzeitung */}
+          <div className="mt-12 bg-[var(--color-wh-green-soft)] border border-[var(--color-wh-green)]/30 rounded-[var(--radius-card)] p-6 sm:p-7 max-w-3xl">
+            <div className="text-xs uppercase tracking-wider text-[var(--color-wh-deep-green)] font-semibold mb-3">
+              Aus der Schülerzeitung
+            </div>
+            <h3 className="font-display font-bold text-[20px] sm:text-[22px] text-[var(--color-wh-deep-green)] mt-0 mb-3 leading-snug">
+              Vier Tage Chaos, Spaß und Abenteuer.
+            </h3>
+            <p className="text-[15px] leading-relaxed text-[var(--color-wh-black)] m-0 mb-4">
+              Die 8a des ESG war in Langewiese — und hat direkt selbst darüber geschrieben. Ein
+              Artikel in der digitalen Schülerzeitung des ESG, aus Schülersicht.
+            </p>
+            <a
+              href="https://esblog.de/blog/2026/05/22/8a-on-tour-vier-tage-chaos-spass-und-abenteuer/#more-27583"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-[var(--color-wh-deep-green)] font-semibold text-[15px] underline underline-offset-2 hover:no-underline"
+            >
+              Zum Artikel im ESBlog →
+            </a>
+            <p className="text-[13px] text-[var(--color-wh-fg-muted)] mt-4 mb-0">
+              Mit dabei: Frau Rapp und Frau Bannert.
+            </p>
+          </div>
+
           <p className="text-[15px] text-[var(--color-wh-fg-muted)] italic mt-8 border-t border-[var(--color-wh-winter-grey)] pt-6">
             <strong>Mehr Einträge folgen.</strong> Die Klassen, AGs und Stufen, die nach der Hütte
             zurückkommen, sind eingeladen, eigene Beiträge fürs Projekttagebuch zu schreiben. So
