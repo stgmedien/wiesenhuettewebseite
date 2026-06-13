@@ -44,12 +44,12 @@ export const BENTO_TILES: GalleryTile[] = [
   },
   {
     src: "/media/photos/feuerstelle_8.jpg",
-    alt: "Lagerfeuer mit Funkenflug am Abend",
+    alt: "Lagerfeuer am Abend vor der Wiesenhütte",
     area: "atmos",
     caption: {
-      de: { lead: "Abendrunde", sub: "Feuer, Funken, lange Gespräche" },
-      en: { lead: "Evening fire", sub: "Flames, sparks, long conversations" },
-      nl: { lead: "Avondvuur", sub: "Vuur, vonken, lange gesprekken" },
+      de: { lead: "Abendrunde", sub: "Lagerfeuer, Stockbrot, lange Gespräche" },
+      en: { lead: "Evening fire", sub: "Campfire, roasting sticks, long conversations" },
+      nl: { lead: "Avondvuur", sub: "Kampvuur, stokbrood, lange gesprekken" },
     },
   },
   {
@@ -104,12 +104,12 @@ export const BENTO_TILES: GalleryTile[] = [
   },
   {
     src: "/media/photos/feuerstelle_6.jpg",
-    alt: "Funken steigen vom Lagerfeuer in den dunklen Himmel",
+    alt: "Lagerfeuer vor der Wiesenhütte in der Abenddämmerung",
     area: "small-3",
     caption: {
-      de: { lead: "Funkenflug" },
-      en: { lead: "Sparks" },
-      nl: { lead: "Vonken" },
+      de: { lead: "Abend an der Hütte" },
+      en: { lead: "Evening at the cabin" },
+      nl: { lead: "Avond bij de hut" },
     },
   },
   {
