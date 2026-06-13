@@ -4,7 +4,7 @@ export const metadata = {
 };
 
 /*
-  Ladungsfähige Anschrift: c/o Dr. Horst Borcherding (Vorstand Skihütte),
+  Ladungsfähige Anschrift: c/o Vorstand Hütte Dr. Horst Borcherding,
   Brockhäger Straße 48, 33330 Gütersloh — mit dessen Einverständnis.
 */
 
@@ -27,7 +27,7 @@ export default async function Impressum() {
           <Address>
             <strong>Skifreunde Gütersloh e.V.</strong>
             <br />
-            c/o Dr. Horst Borcherding
+            c/o Vorstand Hütte Dr. Horst Borcherding
             <br />
             Brockhäger Straße 48
             <br />
