@@ -56,17 +56,25 @@ const NAVI_LINKS = {
   osm: `https://www.openstreetmap.org/?mlat=${LAT}&mlon=${LNG}#map=16/${LAT}/${LNG}`,
 };
 
-// Wandertouren ab Langewiese — offizielle komoot-Embed-Codes (Teilen → Einbetten).
+// Wandertouren rund um Langewiese — offizielle komoot-Embed-Codes (Teilen → Einbetten).
 // Titel/Meta lokalisiert aus c.wandern.tours (gleiche Reihenfolge).
 const WANDER_TOURS = [
   {
-    id: "1767059841",
+    key: "rothaarsteig",
+    url: "https://www.komoot.com/tour/1767059841",
     embedSrc: "https://www.komoot.com/tour/1767059841/embed?hl=de&layout=gallery&gallery=1",
     height: 640,
   },
   {
-    id: "2143370462",
+    key: "heilklima",
+    url: "https://www.komoot.com/tour/2143370462",
     embedSrc: "https://www.komoot.com/tour/2143370462/embed?hl=de&layout=classic&profile=1",
+    height: 700,
+  },
+  {
+    key: "hoher-knochen",
+    url: "https://www.komoot.com/smarttour/32278781",
+    embedSrc: "https://www.komoot.com/smarttour/32278781/embed?hl=de&layout=classic&profile=1",
     height: 700,
   },
 ];
@@ -222,11 +230,11 @@ const COPY: Record<Locale, Copy> = {
     },
     wandern: {
       eyebrow: "Wandern",
-      h2: "Direkt ab der Haustür.",
-      lead: "Langewiese liegt mitten in Deutschlands erster und größter Qualitätswanderregion. Zwei Touren starten direkt ab dem Dorf: der berühmte Rothaarsteig über den Kahlen Asten und eine gemütliche Rundtour durch Wald und Wiese.",
+      h2: "Rund um Langewiese.",
+      lead: "Langewiese liegt mitten in Deutschlands erster und größter Qualitätswanderregion. Drei Touren ab dem Dorf und der direkten Umgebung: der berühmte Rothaarsteig über den Kahlen Asten, eine gemütliche Rundtour durch Wald und Wiese und die aussichtsreiche Runde über den Hohen Knochen.",
       openLabel: "Auf komoot öffnen",
       source:
-        "Touren & GPX-Download über komoot · Tour 1 © Sauerland-Tourismus. Die Karten laden erst nach Deiner Zustimmung („Komfort & Einbettungen“) — Details in der Datenschutzerklärung.",
+        "Touren & GPX-Download über komoot · teils © Sauerland-Tourismus. Die Karten laden erst nach Deiner Zustimmung („Komfort & Einbettungen“) — Details in der Datenschutzerklärung.",
       tours: [
         {
           title: "Rothaarsteig: Langewiese → Winterberg",
@@ -235,6 +243,10 @@ const COPY: Record<Locale, Copy> = {
         {
           title: "Heilklima-Tour 4 — Rundweg ab Langewiese",
           meta: "13,6 km · ~3:56 h · 360 hm · Rundtour",
+        },
+        {
+          title: "Hoher Knochen & Kahler Asten — Aussichtsrunde",
+          meta: "12,8 km · ~3:51 h · 420 hm · ab Neuastenberg",
         },
       ],
     },
@@ -392,11 +404,11 @@ const COPY: Record<Locale, Copy> = {
     },
     wandern: {
       eyebrow: "Hiking",
-      h2: "Straight from the doorstep.",
-      lead: "Langewiese sits in the heart of Germany's first and largest quality hiking region. Two tours start right from the village: the famous Rothaarsteig over the Kahler Asten, and a relaxed loop through forest and meadow.",
+      h2: "Around Langewiese.",
+      lead: "Langewiese sits in the heart of Germany's first and largest quality hiking region. Three tours from the village and its immediate surroundings: the famous Rothaarsteig over the Kahler Asten, a relaxed loop through forest and meadow, and the scenic round over the Hoher Knochen.",
       openLabel: "Open on komoot",
       source:
-        "Tours & GPX download via komoot · Tour 1 © Sauerland-Tourismus. The maps load only after your consent (\"Comfort & embeds\") — see the privacy policy for details.",
+        "Tours & GPX download via komoot · partly © Sauerland-Tourismus. The maps load only after your consent (\"Comfort & embeds\") — see the privacy policy for details.",
       tours: [
         {
           title: "Rothaarsteig: Langewiese → Winterberg",
@@ -405,6 +417,10 @@ const COPY: Record<Locale, Copy> = {
         {
           title: "Heilklima-Tour 4 — loop from Langewiese",
           meta: "13.6 km · ~3:56 h · 360 m up · circular",
+        },
+        {
+          title: "Hoher Knochen & Kahler Asten — scenic loop",
+          meta: "12.8 km · ~3:51 h · 420 m up · from Neuastenberg",
         },
       ],
     },
@@ -531,11 +547,11 @@ const COPY: Record<Locale, Copy> = {
     },
     wandern: {
       eyebrow: "Wandelen",
-      h2: "Direct vanaf de voordeur.",
-      lead: "Langewiese ligt middenin Duitslands eerste en grootste kwaliteitswandelregio. Twee tochten starten direct vanuit het dorp: de beroemde Rothaarsteig over de Kahler Asten en een rustige rondwandeling door bos en weide.",
+      h2: "Rondom Langewiese.",
+      lead: "Langewiese ligt middenin Duitslands eerste en grootste kwaliteitswandelregio. Drie tochten vanuit het dorp en de directe omgeving: de beroemde Rothaarsteig over de Kahler Asten, een rustige rondwandeling door bos en weide en de panoramische ronde over de Hoher Knochen.",
       openLabel: "Openen op komoot",
       source:
-        "Tochten & GPX-download via komoot · Tour 1 © Sauerland-Tourismus. De kaarten laden pas na jouw toestemming (\"Comfort & insluitingen\") — zie de privacyverklaring.",
+        "Tochten & GPX-download via komoot · deels © Sauerland-Tourismus. De kaarten laden pas na jouw toestemming (\"Comfort & insluitingen\") — zie de privacyverklaring.",
       tours: [
         {
           title: "Rothaarsteig: Langewiese → Winterberg",
@@ -544,6 +560,10 @@ const COPY: Record<Locale, Copy> = {
         {
           title: "Heilklima-Tour 4 — rondweg vanaf Langewiese",
           meta: "13,6 km · ~3:56 u · 360 hm · rondwandeling",
+        },
+        {
+          title: "Hoher Knochen & Kahler Asten — panoramaronde",
+          meta: "12,8 km · ~3:51 u · 420 hm · vanaf Neuastenberg",
         },
       ],
     },
@@ -934,11 +954,11 @@ export default async function LagePage() {
             </div>
           </ScrollReveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-8 items-start">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8 items-start">
             {WANDER_TOURS.map((t, i) => (
-              <ScrollReveal key={t.id} delay={i * 120}>
+              <ScrollReveal key={t.key} delay={i * 120}>
                 <KomootEmbed
-                  tourId={t.id}
+                  tourUrl={t.url}
                   embedSrc={t.embedSrc}
                   height={t.height}
                   title={c.wandern.tours[i].title}

@@ -10,22 +10,20 @@ export type KomootEmbedTexts = {
 // Das iframe lädt erst, wenn die Kategorie „Komfort & Einbettungen" (functional)
 // per ConsentGate freigegeben ist — erst dann werden Daten an komoot übertragen.
 export function KomootEmbed({
-  tourId,
+  tourUrl,
   embedSrc,
   height = 640,
   title,
   meta,
   texts,
 }: {
-  tourId: string;
+  tourUrl: string;
   embedSrc: string;
   height?: number;
   title: string;
   meta: string;
   texts: KomootEmbedTexts;
 }) {
-  const tourUrl = `https://www.komoot.com/tour/${tourId}`;
-
   return (
     <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] overflow-hidden flex flex-col h-full">
       <div className="p-5 flex items-start justify-between gap-4 border-b border-[var(--color-wh-winter-grey)]">
