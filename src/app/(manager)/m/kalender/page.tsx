@@ -50,14 +50,15 @@ export default async function CalendarPage({ searchParams }: Props) {
   }));
 
   const { cleaningDaysAfterDeparture } = await getSiteSettings();
-  // Cleaning days = day of departure (and following days when cleaningDays > 1) for non-Wartung
+  // Reinigungstage = Tag(e) NACH dem Abreisetag (der Abreisetag selbst ist der
+  // letzte Buchungstag, an dem die Gäste noch da sind). Für non-Wartung.
   const cleaningDates = new Set<string>();
   for (const e of list) {
     if (e.status === "wartung") continue;
     const dep = new Date(e.departure);
     for (let i = 0; i < cleaningDaysAfterDeparture; i++) {
       const d = new Date(dep);
-      d.setDate(d.getDate() + i);
+      d.setDate(d.getDate() + 1 + i); // +1 = Tag nach Abreise
       cleaningDates.add(d.toISOString().slice(0, 10));
     }
   }

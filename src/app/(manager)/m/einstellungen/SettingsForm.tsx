@@ -73,9 +73,10 @@ export default function SettingsForm({ initial, updatedAt, updatedBy }: Props) {
           </div>
           <div className="mt-3 text-xs text-[var(--color-wh-fg-muted)] leading-relaxed">
             <strong>Beispiel:</strong> Bei {cleaningDays} {cleaningDays === 1 ? "Tag" : "Tagen"}{" "}
-            Reinigungspuffer und Abreise am 16.05. ist die nächste Anreise frühestens am{" "}
+            Reinigungspuffer und Abreise am 16.05. (= letzter Buchungstag, Gäste reisen an dem
+            Tag ab; gereinigt wird danach) ist die nächste Anreise frühestens am{" "}
             <strong>
-              {new Date(2026, 4, 16 + cleaningDays).toLocaleDateString("de-DE", {
+              {new Date(2026, 4, 16 + cleaningDays + 1).toLocaleDateString("de-DE", {
                 day: "numeric",
                 month: "long",
               })}
