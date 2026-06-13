@@ -18,7 +18,7 @@ export default async function AGB() {
           Allgemeine Geschäftsbedingungen
         </h1>
         <p className="text-sm text-[var(--color-wh-fg-muted)] mt-4">
-          Skifreunde Gütersloh e.V. · Stand: Mai 2026 · Version 1.0
+          Skifreunde Gütersloh e.V. · Stand: Juni 2026 · Version 1.1
         </p>
 
         <Block title="§ 1 Geltungsbereich">
@@ -38,6 +38,12 @@ export default async function AGB() {
             Mietvertrag zwischen dem Mieter und dem Vermieter zustande. Der Mieter erhält
             unverzüglich nach Vertragsschluss eine Bestätigung sowie den vollständigen Mietvertrag
             per E-Mail.
+          </p>
+          <p>
+            <strong>Kein Widerrufsrecht:</strong> Da die Wiesenhütte zur Beherbergung zu einem
+            bestimmten Termin bzw. Zeitraum überlassen wird, besteht für diesen Vertrag kein
+            gesetzliches Widerrufsrecht (§ 312g Abs. 2 Nr. 9 BGB). Für die Möglichkeit einer
+            kostenfreien oder anteiligen Stornierung gelten ausschließlich die Regelungen in § 5.
           </p>
         </Block>
 
