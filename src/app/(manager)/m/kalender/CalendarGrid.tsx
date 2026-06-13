@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { ChevronLeft, ChevronRight, Sparkles, Undo2, Loader2 } from "lucide-react";
 import { toggleCleaningReleaseAction } from "./actions";
+import { toLocalIso } from "@/lib/utils";
 
 const MONTHS = [
   "Januar", "Februar", "März", "April", "Mai", "Juni",
@@ -87,11 +88,11 @@ export const CalendarGrid = ({
   const nextMonth = monthIdx === 11 ? 1 : monthIdx + 2;
 
   const eventsForDay = (d: Date) => {
-    const iso = d.toISOString().slice(0, 10);
+    const iso = toLocalIso(d);
     return events.filter((e) => iso >= e.arrival && iso < e.departure);
   };
 
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayIso = toLocalIso(new Date());
 
   return (
     <div className="mt-6">
@@ -154,7 +155,7 @@ export const CalendarGrid = ({
       <div className="grid grid-cols-7 gap-2">
         {cells.map((d, idx) => {
           if (!d) return <div key={idx} className="bg-transparent min-h-[110px]" />;
-          const iso = d.toISOString().slice(0, 10);
+          const iso = toLocalIso(d);
           const dayEvents = eventsForDay(d);
           const isToday = iso === todayIso;
           const isCleaning = cleaningSet.has(iso);
