@@ -21,6 +21,7 @@ import {
   Backpack,
 } from "lucide-react";
 import { ScrollReveal } from "@/components/public/ScrollReveal";
+import { KomootEmbed } from "@/components/public/huette/KomootEmbed";
 import { getServerLocale } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n-shared";
 
@@ -55,6 +56,21 @@ const NAVI_LINKS = {
   osm: `https://www.openstreetmap.org/?mlat=${LAT}&mlon=${LNG}#map=16/${LAT}/${LNG}`,
 };
 
+// Wandertouren ab Langewiese — offizielle komoot-Embed-Codes (Teilen → Einbetten).
+// Titel/Meta lokalisiert aus c.wandern.tours (gleiche Reihenfolge).
+const WANDER_TOURS = [
+  {
+    id: "1767059841",
+    embedSrc: "https://www.komoot.com/tour/1767059841/embed?hl=de&layout=gallery&gallery=1",
+    height: 640,
+  },
+  {
+    id: "2143370462",
+    embedSrc: "https://www.komoot.com/tour/2143370462/embed?hl=de&layout=classic&profile=1",
+    height: 700,
+  },
+];
+
 type Copy = {
   hero: { meta: string; h1l1: string; h1l2: string; lead: string };
   address: {
@@ -82,6 +98,14 @@ type Copy = {
     winter: { label: string; h: string; body: string };
   };
   map: { eyebrow: string; h2: string; lead: string; openIn: string };
+  wandern: {
+    eyebrow: string;
+    h2: string;
+    lead: string;
+    openLabel: string;
+    source: string;
+    tours: Array<{ title: string; meta: string }>;
+  };
   infra: {
     eyebrow: string;
     h2: string;
@@ -195,6 +219,24 @@ const COPY: Record<Locale, Copy> = {
       h2: "Hier liegen wir.",
       lead: "Langewiese, Westhang. Drumherum: Asten-Massiv, Hochheide, Rothaarsteig.",
       openIn: "In Karten-App öffnen",
+    },
+    wandern: {
+      eyebrow: "Wandern",
+      h2: "Direkt ab der Haustür.",
+      lead: "Langewiese liegt mitten in Deutschlands erster und größter Qualitätswanderregion. Zwei Touren starten direkt ab dem Dorf: der berühmte Rothaarsteig über den Kahlen Asten und eine gemütliche Rundtour durch Wald und Wiese.",
+      openLabel: "Auf komoot öffnen",
+      source:
+        "Touren & GPX-Download über komoot · Tour 1 © Sauerland-Tourismus. Die Karten laden erst nach Deiner Zustimmung („Komfort & Einbettungen“) — Details in der Datenschutzerklärung.",
+      tours: [
+        {
+          title: "Rothaarsteig: Langewiese → Winterberg",
+          meta: "10,3 km · ~2:52 h · 170 hm · über Kahler Asten",
+        },
+        {
+          title: "Heilklima-Tour 4 — Rundweg ab Langewiese",
+          meta: "13,6 km · ~3:56 h · 360 hm · Rundtour",
+        },
+      ],
     },
     infra: {
       eyebrow: "Im Dorf",
@@ -348,6 +390,24 @@ const COPY: Record<Locale, Copy> = {
       lead: "Langewiese, west-facing slope. Around: Asten massif, high moor, Rothaarsteig trail.",
       openIn: "Open in maps app",
     },
+    wandern: {
+      eyebrow: "Hiking",
+      h2: "Straight from the doorstep.",
+      lead: "Langewiese sits in the heart of Germany's first and largest quality hiking region. Two tours start right from the village: the famous Rothaarsteig over the Kahler Asten, and a relaxed loop through forest and meadow.",
+      openLabel: "Open on komoot",
+      source:
+        "Tours & GPX download via komoot · Tour 1 © Sauerland-Tourismus. The maps load only after your consent (\"Comfort & embeds\") — see the privacy policy for details.",
+      tours: [
+        {
+          title: "Rothaarsteig: Langewiese → Winterberg",
+          meta: "10.3 km · ~2:52 h · 170 m up · over Kahler Asten",
+        },
+        {
+          title: "Heilklima-Tour 4 — loop from Langewiese",
+          meta: "13.6 km · ~3:56 h · 360 m up · circular",
+        },
+      ],
+    },
     infra: {
       eyebrow: "In the village",
       h2: "What you'll find within walking distance.",
@@ -468,6 +528,24 @@ const COPY: Record<Locale, Copy> = {
       h2: "Hier liggen we.",
       lead: "Langewiese, helling op het westen. Eromheen: Asten-massief, hoogveen, Rothaarsteig.",
       openIn: "In kaarten-app openen",
+    },
+    wandern: {
+      eyebrow: "Wandelen",
+      h2: "Direct vanaf de voordeur.",
+      lead: "Langewiese ligt middenin Duitslands eerste en grootste kwaliteitswandelregio. Twee tochten starten direct vanuit het dorp: de beroemde Rothaarsteig over de Kahler Asten en een rustige rondwandeling door bos en weide.",
+      openLabel: "Openen op komoot",
+      source:
+        "Tochten & GPX-download via komoot · Tour 1 © Sauerland-Tourismus. De kaarten laden pas na jouw toestemming (\"Comfort & insluitingen\") — zie de privacyverklaring.",
+      tours: [
+        {
+          title: "Rothaarsteig: Langewiese → Winterberg",
+          meta: "10,3 km · ~2:52 u · 170 hm · over Kahler Asten",
+        },
+        {
+          title: "Heilklima-Tour 4 — rondweg vanaf Langewiese",
+          meta: "13,6 km · ~3:56 u · 360 hm · rondwandeling",
+        },
+      ],
     },
     infra: {
       eyebrow: "In het dorp",
@@ -831,6 +909,49 @@ export default async function LagePage() {
               <MapDeepLink href={NAVI_LINKS.osm} label="OpenStreetMap" />
             </div>
           </ScrollReveal>
+        </div>
+      </section>
+
+      {/* ============= WANDERN (komoot-Embeds, DSGVO via ConsentGate) ============= */}
+      <section className="px-6 sm:px-8 py-20 sm:py-28 bg-[var(--color-wh-deep-green)]">
+        <div className="max-w-[1280px] mx-auto">
+          <ScrollReveal>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8 sm:mb-12">
+              <div className="md:col-span-5">
+                <div className="eyebrow text-[var(--color-wh-snow)]/70 mb-3">{c.wandern.eyebrow}</div>
+                <h2
+                  className="font-display font-bold text-[var(--color-wh-snow)] m-0 leading-[1.02]"
+                  style={{ fontSize: "clamp(32px, 5vw, 56px)", letterSpacing: "-0.02em" }}
+                >
+                  {c.wandern.h2}
+                </h2>
+              </div>
+              <div className="md:col-span-7 md:pt-3">
+                <p className="text-base sm:text-[18px] leading-[1.7] text-[var(--color-wh-snow)]/85 m-0 max-w-2xl">
+                  {c.wandern.lead}
+                </p>
+              </div>
+            </div>
+          </ScrollReveal>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-8 items-start">
+            {WANDER_TOURS.map((t, i) => (
+              <ScrollReveal key={t.id} delay={i * 120}>
+                <KomootEmbed
+                  tourId={t.id}
+                  embedSrc={t.embedSrc}
+                  height={t.height}
+                  title={c.wandern.tours[i].title}
+                  meta={c.wandern.tours[i].meta}
+                  texts={{ openLabel: c.wandern.openLabel }}
+                />
+              </ScrollReveal>
+            ))}
+          </div>
+
+          <p className="text-[12px] text-[var(--color-wh-snow)]/60 mt-6 max-w-2xl leading-relaxed">
+            {c.wandern.source}
+          </p>
         </div>
       </section>
 

@@ -364,7 +364,7 @@ export default async function Datenschutz() {
           />
           <Provider
             name="komoot GmbH"
-            purpose={`Eingebettete Wanderkarten auf /huette (interaktive Tour-Karten). Werden erst geladen, nachdem Du der Kategorie "Komfort & Einbettungen" zugestimmt hast. Dabei kann u. a. Deine IP-Adresse an komoot übermittelt werden.`}
+            purpose={`Eingebettete Wanderkarten auf /lage (interaktive Tour-Karten). Werden erst geladen, nachdem Du der Kategorie "Komfort & Einbettungen" zugestimmt hast. Dabei kann u. a. Deine IP-Adresse an komoot übermittelt werden.`}
             location="Potsdam (Deutschland)"
             avv="Art. 6 Abs. 1 lit. a DSGVO i. V. m. § 25 Abs. 1 TTDSG (Einwilligung)"
             link="https://www.komoot.com/legal/privacy"
@@ -418,7 +418,7 @@ export default async function Datenschutz() {
             rows={[
               [
                 "Komfort & Einbettungen",
-                "OpenStreetMap-Karte auf /lage, komoot-Wanderkarten auf /huette, ggf. YouTube-/Vimeo-Embeds in Blogbeiträgen",
+                "OpenStreetMap-Karte auf /lage, komoot-Wanderkarten auf /lage, ggf. YouTube-/Vimeo-Embeds in Blogbeiträgen",
                 "OpenStreetMap, komoot, Google (YouTube), Vimeo",
                 "aktiv",
               ],

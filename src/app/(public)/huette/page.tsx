@@ -4,7 +4,6 @@ import { DonationSection } from "@/components/public/huette/DonationSection";
 import { getServerLocale } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n-shared";
 import { FloorPlanExplorer, type Floor } from "@/components/public/huette/FloorPlanExplorer";
-import { KomootEmbed } from "@/components/public/huette/KomootEmbed";
 
 export const metadata = {
   title: "Die Hütte · Wiesenhütte Langewiese",
@@ -47,14 +46,6 @@ type Copy = {
     };
   };
   gallery: { eyebrow: string; h2: string };
-  wandern: {
-    eyebrow: string;
-    h2: string;
-    lead: string;
-    openLabel: string;
-    source: string;
-    tours: Array<{ title: string; meta: string }>;
-  };
   hub: {
     eyebrow: string;
     h2: string;
@@ -179,24 +170,6 @@ const COPY: Record<Locale, Copy> = {
       },
     },
     gallery: { eyebrow: "Galerie", h2: "Innen, außen, Natur." },
-    wandern: {
-      eyebrow: "Lage & Umgebung",
-      h2: "Wandern direkt ab Langewiese.",
-      lead: "Die Wiesenhütte liegt in Langewiese, einem Höhendorf bei Winterberg im Hochsauerland — mitten in Deutschlands erster und größter Qualitätswanderregion. Zwei Touren führen direkt ab dem Ort: der berühmte Rothaarsteig über den Kahlen Asten und eine gemütliche Rundtour durch Wald und Wiese.",
-      openLabel: "Auf komoot öffnen",
-      source:
-        "Touren & GPX-Download über komoot · Tour 1 © Sauerland-Tourismus. Die Karten laden erst nach Deiner Zustimmung („Komfort & Einbettungen“) — Details in der Datenschutzerklärung.",
-      tours: [
-        {
-          title: "Rothaarsteig: Langewiese → Winterberg",
-          meta: "10,3 km · ~2:52 h · 170 hm · über Kahler Asten",
-        },
-        {
-          title: "Heilklima-Tour 4 — Rundweg ab Langewiese",
-          meta: "13,6 km · ~3:56 h · 360 hm · Rundtour",
-        },
-      ],
-    },
     hub: {
       eyebrow: "Für Deinen Aufenthalt",
       h2: "Damit Du gut vorbereitet bist.",
@@ -334,24 +307,6 @@ const COPY: Record<Locale, Copy> = {
       },
     },
     gallery: { eyebrow: "Gallery", h2: "Inside, outside, nature." },
-    wandern: {
-      eyebrow: "Location & surroundings",
-      h2: "Hiking straight from Langewiese.",
-      lead: "The Wiesenhütte sits in Langewiese, a highland village near Winterberg in the Hochsauerland — in the heart of Germany's first and largest quality hiking region. Two tours start right from the village: the famous Rothaarsteig over the Kahler Asten, and a relaxed loop through forest and meadow.",
-      openLabel: "Open on komoot",
-      source:
-        "Tours & GPX download via komoot · Tour 1 © Sauerland-Tourismus. The maps load only after your consent (\"Comfort & embeds\") — see the privacy policy for details.",
-      tours: [
-        {
-          title: "Rothaarsteig: Langewiese → Winterberg",
-          meta: "10.3 km · ~2:52 h · 170 m up · over Kahler Asten",
-        },
-        {
-          title: "Heilklima-Tour 4 — loop from Langewiese",
-          meta: "13.6 km · ~3:56 h · 360 m up · circular",
-        },
-      ],
-    },
     hub: {
       eyebrow: "For your stay",
       h2: "So you're well prepared.",
@@ -489,24 +444,6 @@ const COPY: Record<Locale, Copy> = {
       },
     },
     gallery: { eyebrow: "Galerij", h2: "Binnen, buiten, natuur." },
-    wandern: {
-      eyebrow: "Ligging & omgeving",
-      h2: "Wandelen direct vanaf Langewiese.",
-      lead: "De Wiesenhütte ligt in Langewiese, een hooggelegen dorp bij Winterberg in het Hochsauerland — middenin Duitslands eerste en grootste kwaliteitswandelregio. Twee tochten starten direct vanuit het dorp: de beroemde Rothaarsteig over de Kahler Asten en een rustige rondwandeling door bos en weide.",
-      openLabel: "Openen op komoot",
-      source:
-        "Tochten & GPX-download via komoot · Tour 1 © Sauerland-Tourismus. De kaarten laden pas na jouw toestemming (\"Comfort & insluitingen\") — zie de privacyverklaring.",
-      tours: [
-        {
-          title: "Rothaarsteig: Langewiese → Winterberg",
-          meta: "10,3 km · ~2:52 u · 170 hm · over Kahler Asten",
-        },
-        {
-          title: "Heilklima-Tour 4 — rondweg vanaf Langewiese",
-          meta: "13,6 km · ~3:56 u · 360 hm · rondwandeling",
-        },
-      ],
-    },
     hub: {
       eyebrow: "Voor je verblijf",
       h2: "Zodat je goed voorbereid bent.",
@@ -539,10 +476,6 @@ const FACT_KPIS = [
   { kpi: "2", labelKey: "lounges" as const },
   { kpi: "15–33", labelKey: "occupancy" as const },
 ];
-
-// Wandertouren ab Langewiese — öffentliche komoot-Tour-IDs.
-// Titel/Meta kommen lokalisiert aus c.wandern.tours (gleiche Reihenfolge).
-const WANDER_TOURS = ["1767059841", "2143370462"];
 
 const GALLERY = [
   { src: "/media/photos/exterior-main.jpg" },
@@ -721,33 +654,7 @@ export default async function HuettePage({
         </div>
       </section>
 
-      {/* Lage & Wandern — DSGVO-Zwei-Klick-Embeds der komoot-Touren ab Langewiese */}
       <section className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-16 sm:py-24">
-        <div className="max-w-[1080px] mx-auto">
-          <div className="eyebrow">{c.wandern.eyebrow}</div>
-          <h2 className="text-[32px] sm:text-[44px] mt-3 mb-3 leading-tight">{c.wandern.h2}</h2>
-          <p className="text-[var(--color-wh-fg-muted)] text-[16px] max-w-2xl mb-10">{c.wandern.lead}</p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {WANDER_TOURS.map((id, i) => (
-              <KomootEmbed
-                key={id}
-                tourId={id}
-                hl={locale}
-                title={c.wandern.tours[i].title}
-                meta={c.wandern.tours[i].meta}
-                texts={{ openLabel: c.wandern.openLabel }}
-              />
-            ))}
-          </div>
-
-          <p className="text-[12px] text-[var(--color-wh-fg-muted)] mt-5 max-w-2xl leading-relaxed">
-            {c.wandern.source}
-          </p>
-        </div>
-      </section>
-
-      <section className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24">
         <div className="max-w-[1080px] mx-auto">
           <div className="eyebrow">{c.hub.eyebrow}</div>
           <h2 className="text-[32px] sm:text-[44px] mt-3 mb-3 leading-tight">{c.hub.h2}</h2>

@@ -6,27 +6,28 @@ export type KomootEmbedTexts = {
   openLabel: string;
 };
 
-// Bindet eine öffentliche komoot-Tour ein. Das iframe lädt erst, wenn die
-// Kategorie „Komfort & Einbettungen" (functional) per ConsentGate freigegeben
-// ist — dieselbe Mechanik wie für alle anderen Einbettungen der Seite.
+// Bindet eine öffentliche komoot-Tour über den offiziellen Embed-Code ein.
+// Das iframe lädt erst, wenn die Kategorie „Komfort & Einbettungen" (functional)
+// per ConsentGate freigegeben ist — erst dann werden Daten an komoot übertragen.
 export function KomootEmbed({
   tourId,
+  embedSrc,
+  height = 640,
   title,
   meta,
-  hl = "de",
   texts,
 }: {
   tourId: string;
+  embedSrc: string;
+  height?: number;
   title: string;
   meta: string;
-  hl?: string;
   texts: KomootEmbedTexts;
 }) {
   const tourUrl = `https://www.komoot.com/tour/${tourId}`;
-  const embedUrl = `https://www.komoot.com/tour/${tourId}/embed?hl=${hl}&layout=classic&profile=1`;
 
   return (
-    <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] overflow-hidden flex flex-col">
+    <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] overflow-hidden flex flex-col h-full">
       <div className="p-5 flex items-start justify-between gap-4 border-b border-[var(--color-wh-winter-grey)]">
         <div className="min-w-0">
           <h3 className="font-display font-bold text-[18px] text-[var(--color-wh-deep-green)] m-0 mb-1 leading-snug">
@@ -47,12 +48,13 @@ export function KomootEmbed({
         category="functional"
         serviceName="komoot"
         serviceUrl="https://www.komoot.com/legal/privacy"
-        className="m-0 rounded-none border-0 min-h-[300px]"
+        className="m-0 rounded-none border-0 min-h-[300px] grow"
       >
         <iframe
-          src={embedUrl}
+          src={embedSrc}
           title={title}
-          className="w-full h-[440px] border-0 block"
+          className="w-full border-0 block"
+          style={{ height }}
           loading="lazy"
         />
       </ConsentGate>
