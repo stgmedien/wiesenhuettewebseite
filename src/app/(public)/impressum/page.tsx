@@ -4,19 +4,8 @@ export const metadata = {
 };
 
 /*
-  PRIVATER HINWEIS — nicht öffentlich:
-  Nach § 5 DDG ist eine "Anschrift, unter der sie niedergelassen sind" anzugeben.
-  Postfach allein wird zunehmend kritisch gesehen. Für einen Verein mit
-  Buchungsfunktion (Stripe, Mietverträge) wird eine ladungsfähige Anschrift
-  empfohlen. Drei Varianten:
-   1. Geschäftsadresse über ein Vorstandsmitglied (Standardlösung), z. B.
-      "c/o Norbert Monscheidt, Oesternforth-West 28, 33397 Rietberg"
-      — bei Norbert klären, ob er einverstanden ist
-   2. Adresse der Wiesenhütte als geschäftliche Niederlassung
-      ("Bundesstraße 6, 59955 Winterberg-Langewiese") — rechtlich nicht eindeutig
-   3. Eigene Geschäftsadresse beim Verein bzw. Vorstandsmitglied
-  Empfehlung: Variante 1. Sobald entschieden, hier ergänzen. Bis dahin bleibt
-  das Postfach — abmahn-anfällig, aber nicht akut illegal.
+  Ladungsfähige Anschrift: c/o Dr. Horst Borcherding (Vorstand Skihütte),
+  Brockhäger Straße 48, 33330 Gütersloh — mit dessen Einverständnis.
 */
 
 import { DeOnlyBanner } from "@/components/public/DeOnlyBanner";
@@ -31,16 +20,18 @@ export default async function Impressum() {
         <div className="eyebrow">Rechtliches</div>
         <h1 className="text-[40px] sm:text-[56px] mt-4 mb-3">Impressum</h1>
         <p className="text-sm text-[var(--color-wh-fg-muted)] mt-2 mb-8">
-          Angaben gemäß § 5 Digitale-Dienste-Gesetz (DDG) · Stand: Mai 2026
+          Angaben gemäß § 5 Digitale-Dienste-Gesetz (DDG) · Stand: Juni 2026
         </p>
 
         <Block title="Anbieter">
           <Address>
             <strong>Skifreunde Gütersloh e.V.</strong>
             <br />
-            Postfach 2819
+            c/o Dr. Horst Borcherding
             <br />
-            33258 Gütersloh
+            Brockhäger Straße 48
+            <br />
+            33330 Gütersloh
             <br />
             Deutschland
           </Address>
@@ -210,7 +201,7 @@ export default async function Impressum() {
         </Block>
 
         <p className="text-xs text-[var(--color-wh-fg-muted)] mt-12 italic">
-          Stand: Mai 2026 · Skifreunde Gütersloh e.V. · Vereinsregister AG Gütersloh VR 320
+          Stand: Juni 2026 · Skifreunde Gütersloh e.V. · Vereinsregister AG Gütersloh VR 320
         </p>
       </div>
     </div>
