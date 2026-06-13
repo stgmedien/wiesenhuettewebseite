@@ -162,7 +162,7 @@ const COPY: Record<Locale, Copy> = {
           label: "Dachgeschoss",
           tag: "DG",
           highlights: [
-            "Baumkrone — 10 Schlafplätze",
+            "Baumkrone — 13 Schlafplätze",
             "Waldblick — 4 Schlafplätze",
             "Vogelnest — 4 Schlafplätze",
             "Eigene Dach-Toilette",
@@ -305,7 +305,7 @@ const COPY: Record<Locale, Copy> = {
           label: "Attic",
           tag: "A",
           highlights: [
-            "Baumkrone — 10 beds",
+            "Baumkrone — 13 beds",
             "Waldblick — 4 beds",
             "Vogelnest — 4 beds",
             "Own attic toilet",
@@ -448,7 +448,7 @@ const COPY: Record<Locale, Copy> = {
           label: "Zolder",
           tag: "ZL",
           highlights: [
-            "Baumkrone — 10 slaapplaatsen",
+            "Baumkrone — 13 slaapplaatsen",
             "Waldblick — 4 slaapplaatsen",
             "Vogelnest — 4 slaapplaatsen",
             "Eigen zoldertoilet",
