@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { PhotoGallery } from "@/components/public/PhotoGallery";
+import { BilderStapel } from "@/components/public/BilderStapel";
 import { FeaturedQuote } from "@/components/public/FeaturedQuote";
 import { CommunityEntryCard, type CommunityEntryView } from "@/components/public/CommunityEntryCard";
 import { CommunitySubmitForm } from "@/components/public/CommunitySubmitForm";
@@ -286,14 +287,11 @@ export default async function EsgPage() {
               Erfahrungsumfrage Mai 2026 mit 20 Gästen (15–16 Jahre, 100 % Rücklauf).
             </p>
 
-            {/* Foto-Galerie 12 Bilder — klickbar mit Lightbox-Carousel */}
-            <div className="mb-8">
-              <PhotoGallery
-                images={PROJEKTFAHRT_BILDER}
-                gridClassName="grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
-                sizes="(min-width: 1024px) 250px, (min-width: 640px) 33vw, 50vw"
-              />
-            </div>
+            <BilderStapel
+              images={PROJEKTFAHRT_BILDER}
+              gridClassName="grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
+              sizes="(min-width: 1024px) 250px, (min-width: 640px) 33vw, 50vw"
+            />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
               <div>
@@ -356,31 +354,32 @@ export default async function EsgPage() {
                   </li>
                 </ul>
 
-                {/* ESBlog-Teaser */}
-                <div className="mt-8 bg-[var(--color-wh-green-soft)] border border-[var(--color-wh-green)]/30 rounded-[var(--radius-card)] p-5">
-                  <div className="text-xs uppercase tracking-wider text-[var(--color-wh-deep-green)] font-semibold mb-2">
-                    Aus der Schülerzeitung
-                  </div>
-                  <p className="text-[15px] font-semibold text-[var(--color-wh-deep-green)] m-0 mb-2 leading-snug">
-                    Vier Tage Chaos, Spaß und Abenteuer.
-                  </p>
-                  <p className="text-[14px] leading-relaxed text-[var(--color-wh-black)] m-0 mb-3">
-                    Die 8a des ESG war in Langewiese — und hat direkt selbst darüber geschrieben.
-                    Ein Artikel in der digitalen Schülerzeitung, aus Schülersicht.
-                  </p>
-                  <a
-                    href="https://esblog.de/blog/2026/05/22/8a-on-tour-vier-tage-chaos-spass-und-abenteuer/#more-27583"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-[var(--color-wh-deep-green)] font-semibold text-[14px] underline underline-offset-2 hover:no-underline"
-                  >
-                    Zum Artikel im ESBlog →
-                  </a>
-                  <p className="text-[12px] text-[var(--color-wh-fg-muted)] mt-3 mb-0">
-                    Mit dabei: Frau Rapp und Frau Bannert.
-                  </p>
-                </div>
               </div>
+            </div>
+
+            {/* ESBlog-Teaser — unter dem Artikel-Grid */}
+            <div className="mt-2 mb-10 bg-[var(--color-wh-green-soft)] border border-[var(--color-wh-green)]/30 rounded-[var(--radius-card)] p-6 sm:p-7 max-w-3xl">
+              <div className="text-xs uppercase tracking-wider text-[var(--color-wh-deep-green)] font-semibold mb-3">
+                Aus der Schülerzeitung
+              </div>
+              <h3 className="font-display font-bold text-[20px] sm:text-[22px] text-[var(--color-wh-deep-green)] mt-0 mb-3 leading-snug">
+                Vier Tage Chaos, Spaß und Abenteuer.
+              </h3>
+              <p className="text-[15px] leading-relaxed text-[var(--color-wh-black)] m-0 mb-4">
+                Die 8a des ESG war in Langewiese — und hat direkt selbst darüber geschrieben.
+                Ein Artikel in der digitalen Schülerzeitung des ESG, aus Schülersicht.
+              </p>
+              <a
+                href="https://esblog.de/blog/2026/05/22/8a-on-tour-vier-tage-chaos-spass-und-abenteuer/#more-27583"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-[var(--color-wh-deep-green)] font-semibold text-[15px] underline underline-offset-2 hover:no-underline"
+              >
+                Zum Artikel im ESBlog →
+              </a>
+              <p className="text-[13px] text-[var(--color-wh-fg-muted)] mt-4 mb-0">
+                Mit dabei: Frau Rapp und Frau Bannert.
+              </p>
             </div>
 
             {/* Trennlinie vor dem ausführlichen Bericht */}
