@@ -4,6 +4,8 @@ import { DonationSection } from "@/components/public/huette/DonationSection";
 import { getServerLocale } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n-shared";
 import { FloorPlanExplorer, type Floor } from "@/components/public/huette/FloorPlanExplorer";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { lodgingBusinessSchema } from "@/lib/seo";
 
 export const metadata = {
   title: "Die Hütte · Wiesenhütte Langewiese",
@@ -537,6 +539,7 @@ export default async function HuettePage({
 
   return (
     <div>
+      <JsonLd data={lodgingBusinessSchema()} />
       <section className="relative h-[420px] sm:h-[520px] overflow-hidden">
         <Image
           src="/media/photos/aerial-1.jpg"

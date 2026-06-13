@@ -10,6 +10,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPaths: MetadataRoute.Sitemap = [
     "",
     "/huette",
+    "/preise",
+    "/faq",
     "/verein",
     "/schulprojekt",
     "/wandertouren",
@@ -28,7 +30,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${baseUrl}${p}`,
     lastModified: now,
     changeFrequency: p === "" || p === "/buchen" || p === "/blog" ? "weekly" : "monthly",
-    priority: p === "" ? 1 : p === "/buchen" ? 0.9 : 0.7,
+    priority:
+      p === "" ? 1 : p === "/buchen" ? 0.9 : p === "/preise" || p === "/huette" ? 0.8 : 0.7,
   }));
 
   let posts: Array<{ slug: string; updatedAt: Date }> = [];

@@ -10,6 +10,8 @@ import { PullQuote } from "@/components/public/landing/PullQuote";
 import { ScrollStory } from "@/components/public/landing/ScrollStory";
 import { HistoryTimeline } from "@/components/public/landing/HistoryTimeline";
 import { HuettenbuchSection } from "@/components/public/landing/HuettenbuchSection";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { lodgingBusinessSchema } from "@/lib/seo";
 
 // Hero zeigt aktuelle Trust-Daten (DB-Aggregat) — keine Static-Render-Cache,
 // damit Manager-seitige Aenderungen (Reviews ein/ausblenden) sofort sichtbar
@@ -22,6 +24,12 @@ export default async function HomePage() {
   const trust = await loadTrustData();
   return (
     <div>
+      <JsonLd
+        data={lodgingBusinessSchema({
+          ratingValue: trust.avg,
+          reviewCount: trust.count,
+        })}
+      />
       <Hero tr={tr} trust={trust} locale={locale} />
       <IntroBlock tr={tr} />
       <EditorialGallery locale={locale} />

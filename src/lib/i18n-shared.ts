@@ -32,6 +32,8 @@ const DE: Record<string, string> = {
   // ===== FOOTER =====
   "footer.huette.heading": "Hütte",
   "footer.huette.ausstattung": "Ausstattung",
+  "footer.huette.preise": "Preise & Tarife",
+  "footer.huette.faq": "Häufige Fragen",
   "footer.huette.lage": "Lage & Anfahrt",
   "footer.huette.wandertouren": "Wandertouren",
   "footer.huette.radtouren": "Radtouren",
@@ -118,6 +120,8 @@ const EN: Record<string, string> = {
   // ===== FOOTER =====
   "footer.huette.heading": "The Cabin",
   "footer.huette.ausstattung": "Amenities",
+  "footer.huette.preise": "Prices & rates",
+  "footer.huette.faq": "FAQ",
   "footer.huette.lage": "Location & Directions",
   "footer.huette.wandertouren": "Hiking routes",
   "footer.huette.radtouren": "Bike tours",
@@ -204,6 +208,8 @@ const NL: Record<string, string> = {
   // ===== FOOTER =====
   "footer.huette.heading": "De Hut",
   "footer.huette.ausstattung": "Voorzieningen",
+  "footer.huette.preise": "Prijzen & tarieven",
+  "footer.huette.faq": "Veelgestelde vragen",
   "footer.huette.lage": "Ligging & Route",
   "footer.huette.wandertouren": "Wandelroutes",
   "footer.huette.radtouren": "Fietstochten",

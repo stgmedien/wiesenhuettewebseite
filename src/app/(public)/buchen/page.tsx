@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { BookingFlow } from "./BookingFlow";
 import { getBookingBlocks } from "@/lib/availability";
 import { getBookingPrefill } from "./actions";
@@ -8,13 +9,14 @@ import { auth } from "@/lib/auth";
 import { getServerLocale } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n-shared";
 
-const PAGE_COPY: Record<Locale, { eyebrow: string; h1: string; lead: string; loggedIn: string; member: string }> = {
+const PAGE_COPY: Record<Locale, { eyebrow: string; h1: string; lead: string; loggedIn: string; member: string; pricesLink: string }> = {
   de: {
     eyebrow: "Buchen",
     h1: "Wann kommt ihr?",
     lead: "Mindestaufenthalt 2 Nächte, maximal 33 Personen. Buchungen unter 15 Personen werden zum Preisniveau von 15 Personen abgerechnet. Preise und Pauschalen werden live berechnet.",
     loggedIn: "Eingeloggt als",
     member: "Mitglied",
+    pricesLink: "Preise & Rechenbeispiele ansehen",
   },
   en: {
     eyebrow: "Book",
@@ -22,6 +24,7 @@ const PAGE_COPY: Record<Locale, { eyebrow: string; h1: string; lead: string; log
     lead: "Minimum stay 2 nights, maximum 33 guests. Bookings below 15 guests are billed at the 15-guest price level. Prices and flat-rates are calculated live.",
     loggedIn: "Signed in as",
     member: "Member",
+    pricesLink: "See prices & example calculations",
   },
   nl: {
     eyebrow: "Boeken",
@@ -29,6 +32,7 @@ const PAGE_COPY: Record<Locale, { eyebrow: string; h1: string; lead: string; log
     lead: "Minimaal 2 nachten, maximaal 33 personen. Boekingen onder 15 personen worden afgerekend op het prijsniveau van 15 personen. Prijzen en pakketten worden live berekend.",
     loggedIn: "Ingelogd als",
     member: "Lid",
+    pricesLink: "Bekijk prijzen & rekenvoorbeelden",
   },
 };
 
@@ -126,6 +130,12 @@ export default async function BuchenPage({ searchParams }: Props) {
         <div className="eyebrow">{pc.eyebrow}</div>
         <h1 className="text-[36px] sm:text-[56px] mt-4 mb-2 leading-tight">{pc.h1}</h1>
         <p className="text-[var(--color-wh-fg-muted)] text-[16px] sm:text-[18px] max-w-xl mt-4 leading-relaxed">{pc.lead}</p>
+        <Link
+          href="/preise"
+          className="inline-flex items-center gap-1.5 mt-3 text-[15px] font-semibold text-[var(--color-wh-deep-green)] hover:underline"
+        >
+          {pc.pricesLink} →
+        </Link>
         {prefill.loggedIn && (
           <div className="mt-6 flex flex-wrap items-center gap-2 rounded-2xl sm:rounded-full bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)]/40 px-4 py-2 text-sm max-w-full">
             <span className="text-[var(--color-wh-deep-green)] shrink-0">●</span>

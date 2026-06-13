@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Mail, Printer, Gift, ArrowRight, MountainSnow, Sparkles, ShieldCheck } from "lucide-react";
 import { createGiftCheckoutSession } from "./actions";
+import { track } from "@/lib/analytics";
 import type { Locale } from "@/lib/i18n-shared";
 
 const PRESETS = [50, 100, 150, 250] as const;
@@ -231,6 +232,7 @@ export function PurchaseClient({ locale }: { locale: Locale }) {
             fd.set("deliveryMode", delivery);
             const r = await createGiftCheckoutSession(fd);
             if (r.ok) {
+              track("voucher_checkout_start", { value, delivery });
               window.location.href = r.checkoutUrl;
             } else {
               setError(r.error);

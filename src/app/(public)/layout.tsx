@@ -2,6 +2,7 @@ import { Header } from "@/components/public/Header";
 import { Footer } from "@/components/public/Footer";
 import { ConsentProvider } from "@/components/consent/ConsentContext";
 import { CookieBanner } from "@/components/consent/CookieBanner";
+import { ConsentedAnalytics } from "@/components/consent/ConsentedAnalytics";
 import { auth } from "@/lib/auth";
 import { getServerLocale } from "@/lib/i18n";
 
@@ -28,6 +29,7 @@ export default async function PublicLayout({
       <main className="flex-1 overflow-x-clip">{children}</main>
       <Footer locale={locale} />
       <CookieBanner />
+      <ConsentedAnalytics />
     </ConsentProvider>
   );
 }
