@@ -27,6 +27,7 @@ const BLOCKING_STATUSES = [
   "bestaetigt",
   "bezahlt",
   "angereist",
+  "abgereist",
   "wartung",
 ] as const;
 

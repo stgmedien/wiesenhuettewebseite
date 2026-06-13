@@ -50,11 +50,11 @@ export default async function CalendarPage({ searchParams }: Props) {
   }));
 
   const { cleaningDaysAfterDeparture } = await getSiteSettings();
-  // Reinigungstage = Tag(e) NACH dem Abreisetag (der Abreisetag selbst ist der
-  // letzte Buchungstag, an dem die Gäste noch da sind). Für non-Wartung.
+  // Reinigungstage = Tag(e) NACH dem Abreisetag. Wartung und stornierte
+  // Buchungen erhalten keinen Putztag (konsistent mit dem öffentlichen Kalender).
   const cleaningDates = new Set<string>();
   for (const e of list) {
-    if (e.status === "wartung") continue;
+    if (e.status === "wartung" || e.status === "storniert") continue;
     const dep = new Date(e.departure);
     for (let i = 0; i < cleaningDaysAfterDeparture; i++) {
       const d = new Date(dep);
