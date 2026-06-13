@@ -3,6 +3,7 @@ import { db } from "./db";
 import { bookings } from "./db/schema";
 import { and, gte, lte, ne, or, eq } from "drizzle-orm";
 import { getSiteSettings } from "./settings";
+import { getReleasedCleaningDates } from "./cleaning-overrides";
 
 /** Cache-Tag — bei jeder Buchungs-/Sperrzeit-Mutation via
  *  revalidateTag("booking-blocks") invalidieren. */
@@ -59,6 +60,11 @@ export const isRangeAvailable = async (
   const broadFrom = addDaysIso(arrival, -30);
   const broadTo = addDaysIso(newEffectiveEnd, 30);
 
+  // Vom Wart freigegebene Reinigungstage verkürzen den Reinigungs-Puffer der
+  // jeweiligen Buchung — so ist eine direkt anschließende (Back-to-back-)
+  // Buchung an einem freigegebenen Tag wieder möglich.
+  const released = await getReleasedCleaningDates(broadFrom, broadTo);
+
   const conflicts = await db
     .select({
       id: bookings.id,
@@ -78,8 +84,19 @@ export const isRangeAvailable = async (
 
   for (const c of conflicts) {
     // Wartung doesn't get a cleaning buffer afterwards
-    const cleaningForExisting = c.status === "wartung" ? 0 : cleaningDays;
-    const existingEffectiveEnd = addDaysIso(toIso(c.departure), cleaningForExisting);
+    let cleaningForExisting = c.status === "wartung" ? 0 : cleaningDays;
+    const depIso = toIso(c.departure);
+    let existingEffectiveEnd = addDaysIso(depIso, cleaningForExisting);
+    // Freigegebene Reinigungstage am Ende des Puffers wegkürzen (Tag für Tag),
+    // damit sie die Verfügbarkeit nicht mehr blockieren.
+    while (
+      cleaningForExisting > 0 &&
+      existingEffectiveEnd > depIso &&
+      released.has(addDaysIso(existingEffectiveEnd, -1))
+    ) {
+      existingEffectiveEnd = addDaysIso(existingEffectiveEnd, -1);
+      cleaningForExisting--;
+    }
     // Overlap
     if (toIso(c.arrival) < newEffectiveEnd && existingEffectiveEnd > arrival) {
       return false;
@@ -155,6 +172,14 @@ const getBookingBlocksRaw = unstable_cache(
       }
     }
   }
+
+    // Vom Wart freigegebene Reinigungstage wieder freigeben (aus dem
+    // Reinigungs-Block entfernen) — der Tag ist dann öffentlich buchbar.
+    const released = await getReleasedCleaningDates(
+      addDaysIso(fromIso, -cleaningDays),
+      toIsoStr
+    );
+    for (const d of released) cleaning.delete(d);
 
     return {
       booked: Array.from(booked),
