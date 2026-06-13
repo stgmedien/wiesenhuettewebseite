@@ -7,12 +7,39 @@ import { customers, activityLog } from "@/lib/db/schema";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { parseCsv } from "@/lib/csv-parse";
+import { addContactToMembersList } from "@/lib/brevo";
 
 async function requireManager() {
   const session = await auth();
   const role = (session?.user as { role?: string } | undefined)?.role;
   if (role !== "manager" && role !== "admin") throw new Error("Nicht autorisiert");
   return session!.user!.email!;
+}
+
+/**
+ * Importiertes Mitglied in die Brevo-Mitgliederliste spiegeln. Best effort —
+ * ein Brevo-Ausfall darf den Import nicht abbrechen; Fehler landen im
+ * Activity-Log zum manuellen Nachtragen.
+ */
+async function syncMemberToBrevo(
+  r: { email: string; firstName: string; lastName: string },
+  who: string
+) {
+  try {
+    const res = await addContactToMembersList(r.email, {
+      firstName: r.firstName,
+      lastName: r.lastName,
+    });
+    if (!res.ok && res.reason !== "not_configured") {
+      await db.insert(activityLog).values({
+        who: "Brevo",
+        what: `⚠️ Mitglied ${r.email} konnte nicht in die Brevo-Mitgliederliste eingetragen werden (${res.reason}). Bitte manuell ergänzen. [${who} · Bulk-Import]`,
+      });
+    }
+  } catch (e) {
+    // Strikt non-blocking: ein Brevo-Fehler darf den Import nicht abbrechen.
+    console.error("[import] Brevo-Sync Ausnahme:", e);
+  }
 }
 
 export type ParsedRow = {
@@ -193,6 +220,7 @@ export async function commitImport(formData: FormData): Promise<CommitResult> {
         who: me,
         what: `Mitglied via Bulk-Import angelegt: ${r.firstName} ${r.lastName} (${r.email}${r.memberId ? `, Nr. ${r.memberId}` : ""})`,
       });
+      await syncMemberToBrevo(r, me);
       continue;
     }
     if (r.status === "update" && r.existingCustomerId) {
@@ -213,6 +241,7 @@ export async function commitImport(formData: FormData): Promise<CommitResult> {
         who: me,
         what: `Mitglied via Bulk-Import verifiziert: ${r.firstName} ${r.lastName} (${r.email}${r.memberId ? `, Nr. ${r.memberId}` : ""})`,
       });
+      await syncMemberToBrevo(r, me);
     }
   }
 
