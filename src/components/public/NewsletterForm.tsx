@@ -68,13 +68,19 @@ const COPY: Record<Locale, {
 export const NewsletterForm = ({
   locale,
   variant = "page",
+  action = subscribeNewsletter,
+  subOverride,
 }: {
   locale: Locale;
   variant?: Variant;
+  /** Server-Action — Default öffentlicher Newsletter; z. B. Mitglieder-Newsletter überschreibt. */
+  action?: typeof subscribeNewsletter;
+  /** Optionaler Untertitel-Text (ersetzt den Default-Newsletter-Text). */
+  subOverride?: string;
 }) => {
   const c = COPY[locale];
   const [state, formAction, pending] = useActionState<NewsletterState, FormData>(
-    subscribeNewsletter,
+    action,
     { status: "idle" }
   );
 
@@ -113,7 +119,7 @@ export const NewsletterForm = ({
   return (
     <form action={formAction} className={onFooter ? "" : "space-y-3 max-w-md"}>
       {!onFooter && (
-        <p className="text-[var(--color-wh-fg-muted)] m-0 mb-1 text-[15px]">{c.sub}</p>
+        <p className="text-[var(--color-wh-fg-muted)] m-0 mb-1 text-[15px]">{subOverride ?? c.sub}</p>
       )}
 
       {/* Honeypot */}

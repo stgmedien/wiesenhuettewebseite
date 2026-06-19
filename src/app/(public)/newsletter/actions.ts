@@ -1,7 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
-import { subscribeNewsletterDoi } from "@/lib/brevo";
+import { subscribeNewsletterDoi, subscribeMemberNewsletterDoi } from "@/lib/brevo";
 import { db } from "@/lib/db";
 import { activityLog } from "@/lib/db/schema";
 
@@ -15,12 +15,17 @@ export type NewsletterState = { status: "idle" | "ok" | "error" | "invalid"; mes
 const recent = new Map<string, number>();
 const WINDOW_MS = 60_000;
 
+type NewsletterKind = "public" | "member";
+
 /**
- * Newsletter-Anmeldung: stößt das Brevo-Double-Opt-in an. Brevo verschickt
- * die Bestätigungsmail; der Kontakt landet erst nach dem Klick in der Liste.
+ * Gemeinsame Newsletter-Anmelde-Logik (Honeypot, Validierung, Rate-Limit,
+ * Brevo-Double-Opt-in). `kind` wählt die Ziel-Liste:
+ *   - "public" → öffentlicher Newsletter (Liste 7)
+ *   - "member" → versteckter Mitglieder-Newsletter (Liste 12)
+ * Brevo verschickt die Bestätigungsmail; der Kontakt landet erst nach dem Klick.
  */
-export async function subscribeNewsletter(
-  _prev: NewsletterState,
+async function handleSubscribe(
+  kind: NewsletterKind,
   formData: FormData
 ): Promise<NewsletterState> {
   // Honeypot — Bots füllen unsichtbare Felder aus. Still „ok" zurückgeben.
@@ -38,7 +43,7 @@ export async function subscribeNewsletter(
 
   // Rate-Limit pro IP+Mail.
   const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  const key = `${ip}:${email}`;
+  const key = `${kind}:${ip}:${email}`;
   const now = Date.now();
   for (const [k, ts] of recent) if (now - ts > WINDOW_MS) recent.delete(k);
   if (recent.has(key)) {
@@ -47,10 +52,11 @@ export async function subscribeNewsletter(
   }
   recent.set(key, now);
 
-  const result = await subscribeNewsletterDoi(email, {
-    firstName,
-    redirectionUrl: `${BASE_URL}/newsletter/bestaetigt`,
-  });
+  const redirectionUrl = `${BASE_URL}/newsletter/bestaetigt`;
+  const result =
+    kind === "member"
+      ? await subscribeMemberNewsletterDoi(email, { firstName, redirectionUrl })
+      : await subscribeNewsletterDoi(email, { firstName, redirectionUrl });
 
   if (!result.ok) {
     return {
@@ -65,11 +71,27 @@ export async function subscribeNewsletter(
   try {
     await db.insert(activityLog).values({
       who: "Newsletter",
-      what: `Newsletter-Anmeldung (Double-Opt-in angestoßen) für ${email}`,
+      what: `${kind === "member" ? "Mitglieder-" : ""}Newsletter-Anmeldung (Double-Opt-in angestoßen) für ${email}`,
     });
   } catch {
     /* Log ist best effort */
   }
 
   return { status: "ok" };
+}
+
+/** Öffentliche Newsletter-Anmeldung (Liste 7). */
+export async function subscribeNewsletter(
+  _prev: NewsletterState,
+  formData: FormData
+): Promise<NewsletterState> {
+  return handleSubscribe("public", formData);
+}
+
+/** Versteckter Mitglieder-Newsletter (Liste 12) — nur über Direktlink erreichbar. */
+export async function subscribeMemberNewsletter(
+  _prev: NewsletterState,
+  formData: FormData
+): Promise<NewsletterState> {
+  return handleSubscribe("member", formData);
 }
