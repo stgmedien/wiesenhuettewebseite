@@ -13,6 +13,10 @@ const BASE = "https://api.brevo.com/v3";
 const apiKey = () => process.env.BREVO_API_KEY ?? "";
 const newsletterListId = () => Number(process.env.BREVO_NEWSLETTER_LIST_ID ?? "0");
 const membersListId = () => Number(process.env.BREVO_MEMBERS_LIST_ID ?? "0");
+// Mitglieder-Newsletter (versteckte Seite). Default = Brevo-Liste 12
+// ("Mitglieder-Newsletter", Ordner 3). Per BREVO_MEMBER_NEWSLETTER_LIST_ID
+// überschreibbar, falls sich die Liste mal ändert.
+const memberNewsletterListId = () => Number(process.env.BREVO_MEMBER_NEWSLETTER_LIST_ID ?? "12");
 const doiTemplateId = () => Number(process.env.BREVO_DOI_TEMPLATE_ID ?? "0");
 
 export const brevoConfigured = () => apiKey().length > 0;
@@ -41,16 +45,21 @@ async function brevoFetch(path: string, body: unknown): Promise<Response> {
  */
 export async function subscribeNewsletterDoi(
   email: string,
-  opts: { firstName?: string | null; redirectionUrl: string } = { redirectionUrl: "" }
+  opts: { firstName?: string | null; redirectionUrl: string; listId?: number } = {
+    redirectionUrl: "",
+  }
 ): Promise<BrevoResult> {
-  if (!brevoConfigured() || !newsletterListId() || !doiTemplateId()) {
+  // Ziel-Liste: explizit übergeben (z. B. Mitglieder-Newsletter) oder die
+  // öffentliche Newsletter-Liste als Default.
+  const targetList = opts.listId && opts.listId > 0 ? opts.listId : newsletterListId();
+  if (!brevoConfigured() || !targetList || !doiTemplateId()) {
     console.warn("[brevo] Newsletter nicht konfiguriert (API-Key/Listen-ID/DOI-Template fehlt)");
     return { ok: false, reason: "not_configured" };
   }
   try {
     const res = await brevoFetch("/contacts/doubleOptinConfirmation", {
       email,
-      includeListIds: [newsletterListId()],
+      includeListIds: [targetList],
       templateId: doiTemplateId(),
       redirectionUrl: opts.redirectionUrl,
       ...(opts.firstName ? { attributes: { VORNAME: opts.firstName, FIRSTNAME: opts.firstName } } : {}),
@@ -63,6 +72,18 @@ export async function subscribeNewsletterDoi(
     console.error("[brevo] DOI-Anmeldung Ausnahme:", e);
     return { ok: false, reason: "exception" };
   }
+}
+
+/**
+ * Anmeldung zum (versteckten) MITGLIEDER-Newsletter — Double-Opt-in in die
+ * separate Brevo-Liste (BREVO_MEMBER_NEWSLETTER_LIST_ID). Nur über den
+ * direkten Link der versteckten Seite erreichbar.
+ */
+export async function subscribeMemberNewsletterDoi(
+  email: string,
+  opts: { firstName?: string | null; redirectionUrl: string } = { redirectionUrl: "" }
+): Promise<BrevoResult> {
+  return subscribeNewsletterDoi(email, { ...opts, listId: memberNewsletterListId() });
 }
 
 /**
