@@ -2,6 +2,8 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { db } from "@/lib/db";
+import { wapelbadRegistrations } from "@/lib/db/schema-wapelbad";
 import { sendMail } from "@/lib/mail/send";
 import WapelbadInternalEmail from "@/lib/mail/templates/wapelbad-internal";
 import WapelbadConfirmEmail from "@/lib/mail/templates/wapelbad-confirm";
@@ -57,7 +59,17 @@ export async function submitWapelbad(formData: FormData) {
     redirect("/wapelbad?status=ok");
   }
 
-  // Interne Benachrichtigung an den Vorstand (entscheidend).
+  // Dauerhaft speichern — der Vorstand sieht alle Anmeldungen unter
+  // /m/wapelbad (Quelle der Wahrheit für die Liste & Kopfzahl).
+  let savedOk = true;
+  try {
+    await db.insert(wapelbadRegistrations).values({ name, email, persons, grill });
+  } catch (e) {
+    console.error("[wapelbad] db insert failed", e);
+    savedOk = false;
+  }
+
+  // Interne Benachrichtigung an den Vorstand (zusätzlicher Sofort-Hinweis).
   let internalOk = true;
   try {
     await sendMail({
@@ -85,5 +97,6 @@ export async function submitWapelbad(formData: FormData) {
     console.error("[wapelbad] confirm mail failed", e);
   }
 
-  redirect(internalOk ? "/wapelbad?status=ok" : "/wapelbad?status=mailfehler");
+  // Erfolg, sobald die Anmeldung irgendwo angekommen ist (DB ODER interne Mail).
+  redirect(savedOk || internalOk ? "/wapelbad?status=ok" : "/wapelbad?status=mailfehler");
 }
