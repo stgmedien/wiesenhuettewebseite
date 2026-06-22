@@ -33,7 +33,7 @@ function rateLimited(ip: string): boolean {
 export async function submitWapelbad(formData: FormData) {
   // Honeypot: für Menschen unsichtbar, Bots füllen es aus. Stilles OK.
   if (String(formData.get("website") ?? "").trim() !== "") {
-    redirect("/verein?wapelbad=ok#wapelbad");
+    redirect("/wapelbad?status=ok");
   }
 
   const teilnahme =
@@ -47,14 +47,14 @@ export async function submitWapelbad(formData: FormData) {
     : 1;
 
   if (!name || !EMAIL_RE.test(email) || email.length > 255) {
-    redirect("/verein?wapelbad=fehler#wapelbad");
+    redirect("/wapelbad?status=fehler");
   }
 
   const ip =
     (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
   if (rateLimited(ip)) {
     // Still als Erfolg quittieren — keine Auskunft über die Drosselung.
-    redirect("/verein?wapelbad=ok#wapelbad");
+    redirect("/wapelbad?status=ok");
   }
 
   // Interne Benachrichtigung an den Vorstand (entscheidend).
@@ -85,7 +85,5 @@ export async function submitWapelbad(formData: FormData) {
     console.error("[wapelbad] confirm mail failed", e);
   }
 
-  redirect(
-    internalOk ? "/verein?wapelbad=ok#wapelbad" : "/verein?wapelbad=mailfehler#wapelbad"
-  );
+  redirect(internalOk ? "/wapelbad?status=ok" : "/wapelbad?status=mailfehler");
 }
