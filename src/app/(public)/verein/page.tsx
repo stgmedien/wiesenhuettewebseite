@@ -7,6 +7,7 @@ import { customers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { getServerLocale } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n-shared";
+import { WapelbadForm } from "./WapelbadForm";
 
 export const dynamic = "force-dynamic";
 
@@ -441,10 +442,33 @@ function MemberCta({
   );
 }
 
-export default async function VereinPage() {
+export default async function VereinPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ wapelbad?: string }>;
+}) {
+  const { wapelbad } = await searchParams;
   const locale = await getServerLocale();
   const c = COPY[locale];
   const memberCta = await getMemberCtaState();
+
+  const wapelbadMsg =
+    wapelbad === "ok"
+      ? {
+          tone: "ok" as const,
+          text: "Danke! Deine Anmeldung ist eingegangen – eine Bestätigung kommt per E-Mail.",
+        }
+      : wapelbad === "fehler"
+        ? {
+            tone: "err" as const,
+            text: "Bitte gib einen Namen und eine gültige E-Mail-Adresse an.",
+          }
+        : wapelbad === "mailfehler"
+          ? {
+              tone: "err" as const,
+              text: "Die Anmeldung konnte gerade nicht versendet werden. Bitte versuch es später erneut oder schreib an skifreunde@wiesenhuette.de.",
+            }
+          : null;
 
   return (
     <div>
@@ -527,6 +551,57 @@ export default async function VereinPage() {
                 {c.sport.ctaMail}
               </a>
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* WAPELBAD — Vereinsfest mit Anmeldung */}
+      <section
+        id="wapelbad"
+        className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-16 sm:py-24 scroll-mt-24"
+      >
+        <div className="max-w-[1080px] mx-auto">
+          <div className="eyebrow text-[var(--color-wh-green)]">Gemeinschaftserlebnis</div>
+          <h2 className="text-[32px] sm:text-[44px] mt-3 mb-3">Wapelbad – sei dabei.</h2>
+          <p className="text-[17px] leading-relaxed text-[var(--color-wh-fg-muted)] max-w-2xl mb-8">
+            Gemütliches Beisammensein im Wapelbad – mit Grillbuffet, wenn ihr mögt. Meldet euch
+            kurz an, damit wir besser planen können.
+          </p>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+            {/* Eckdaten */}
+            <div className="bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] rounded-[var(--radius-card)] p-7 sm:p-8">
+              <div className="eyebrow text-[var(--color-wh-snow)]/60">Termin</div>
+              <div className="font-display text-[40px] sm:text-[48px] font-bold leading-none mt-2">
+                5. September 2026
+              </div>
+              <div className="text-[var(--color-wh-snow)]/80 mt-2">Freitag · 16 Uhr · Wapelbad</div>
+              <div className="border-t border-[var(--color-wh-snow)]/20 pt-4 mt-6 text-[15px] text-[var(--color-wh-snow)]/85 leading-relaxed">
+                Grillbuffet optional:{" "}
+                <strong className="text-[var(--color-wh-snow)]">10 € pro Person</strong>, vor Ort zu
+                zahlen. Getränke und gute Laune bringt ihr mit.
+              </div>
+            </div>
+
+            {/* Anmeldung */}
+            <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-7 sm:p-8">
+              <h3 className="text-[22px] font-semibold text-[var(--color-wh-deep-green)] mb-5">
+                Anmeldung
+              </h3>
+              {wapelbadMsg && (
+                <div
+                  className={
+                    "mb-5 rounded-[var(--radius-md)] px-4 py-3 text-[15px] " +
+                    (wapelbadMsg.tone === "ok"
+                      ? "bg-[var(--color-wh-green-soft)] text-[var(--color-wh-deep-green)] border border-[var(--color-wh-green)]/40"
+                      : "bg-red-50 text-red-700 border border-red-200")
+                  }
+                >
+                  {wapelbadMsg.text}
+                </div>
+              )}
+              <WapelbadForm />
+            </div>
           </div>
         </div>
       </section>
