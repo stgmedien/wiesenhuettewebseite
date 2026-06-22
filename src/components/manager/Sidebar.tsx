@@ -30,6 +30,7 @@ import {
   MapPin,
   ThumbsUp,
   Bike,
+  Flame,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -58,6 +59,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/m/sperrzeiten", label: "Sperrzeiten", Icon: Lock },
       { href: "/m/gutscheine", label: "Gutscheine", Icon: Gift },
       { href: "/m/radtouren", label: "Radtouren", Icon: Bike },
+      { href: "/m/wapelbad", label: "Wapelbad", Icon: Flame },
     ],
   },
   {
