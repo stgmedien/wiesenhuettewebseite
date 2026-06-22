@@ -7,7 +7,9 @@ import WapelbadInternalEmail from "@/lib/mail/templates/wapelbad-internal";
 import WapelbadConfirmEmail from "@/lib/mail/templates/wapelbad-confirm";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const INTERNAL_TO = process.env.MAIL_INTERNAL_TO ?? "skifreunde@wiesenhuette.de";
+// `||` (nicht `??`): fällt auch bei leerem String auf die Standardadresse
+// zurück — sonst ginge die interne Mail bei MAIL_INTERNAL_TO="" ins Leere.
+const INTERNAL_TO = process.env.MAIL_INTERNAL_TO || "skifreunde@wiesenhuette.de";
 
 // Best-effort In-Memory-Throttle pro IP. Serverless: gilt je Instanz und wird
 // beim Cold Start zurückgesetzt — bremst aber Bursts, und der Honeypot fängt
