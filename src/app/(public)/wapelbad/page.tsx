@@ -12,7 +12,7 @@ export const metadata = {
 };
 
 const FACTS = [
-  { icon: CalendarDays, label: "Freitag, 5. September 2026" },
+  { icon: CalendarDays, label: "Samstag, 5. September 2026" },
   { icon: Clock, label: "ab 16 Uhr" },
   { icon: MapPin, label: "Wapelbad" },
   { icon: Flame, label: "Grillbuffet optional – 10 € pro Person, vor Ort" },

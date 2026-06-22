@@ -70,7 +70,7 @@ export default function WapelbadConfirmEmail({ name, persons, grill }: Props) {
 
           <Section style={box}>
             <Text style={{ ...text, margin: "0 0 6px 0", fontWeight: 600 }}>
-              Freitag, 5. September 2026 · 16 Uhr · Wapelbad
+              Samstag, 5. September 2026 · 16 Uhr · Wapelbad
             </Text>
             <Text style={{ ...muted, margin: 0 }}>
               Angemeldet: {persons} {persons === 1 ? "Person" : "Personen"}
