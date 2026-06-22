@@ -36,8 +36,6 @@ export async function submitWapelbad(formData: FormData) {
     redirect("/wapelbad?status=ok");
   }
 
-  const teilnahme =
-    String(formData.get("teilnahme") ?? "ich") === "familie" ? "familie" : "ich";
   const name = String(formData.get("name") ?? "").trim().slice(0, 120);
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const grill = formData.get("grill") === "on";
@@ -65,7 +63,7 @@ export async function submitWapelbad(formData: FormData) {
       subject: `Wapelbad-Anmeldung: ${name} (${persons} ${persons === 1 ? "Person" : "Personen"}${grill ? ", Grillbuffet" : ""})`,
       template: "wapelbad-internal",
       replyTo: email,
-      react: WapelbadInternalEmail({ name, email, teilnahme, persons, grill }),
+      react: WapelbadInternalEmail({ name, email, persons, grill }),
     });
   } catch (e) {
     console.error("[wapelbad] internal mail failed", e);
@@ -79,7 +77,7 @@ export async function submitWapelbad(formData: FormData) {
       subject: "Deine Anmeldung zum Wapelbad ist da",
       template: "wapelbad-confirm",
       replyTo: "skifreunde@wiesenhuette.de",
-      react: WapelbadConfirmEmail({ name, teilnahme, persons, grill }),
+      react: WapelbadConfirmEmail({ name, persons, grill }),
     });
   } catch (e) {
     console.error("[wapelbad] confirm mail failed", e);

@@ -11,7 +11,6 @@ import {
 
 type Props = {
   name: string;
-  teilnahme: "ich" | "familie";
   persons: number;
   grill: boolean;
 };
@@ -56,12 +55,7 @@ const box = {
 };
 const muted = { ...text, color: "#5b5b56", fontSize: "14px" };
 
-export default function WapelbadConfirmEmail({
-  name,
-  teilnahme,
-  persons,
-  grill,
-}: Props) {
+export default function WapelbadConfirmEmail({ name, persons, grill }: Props) {
   return (
     <Html>
       <Head />
@@ -71,8 +65,7 @@ export default function WapelbadConfirmEmail({
           <Text style={eyebrow}>Skifreunde Gütersloh · Wapelbad</Text>
           <Heading style={heading}>Danke für deine Anmeldung, {name}!</Heading>
           <Text style={text}>
-            Wir freuen uns auf einen gemütlichen Nachmittag mit dir
-            {teilnahme === "familie" ? " und deiner Familie" : ""} im Wapelbad.
+            Wir freuen uns auf einen gemütlichen Nachmittag mit dir im Wapelbad.
           </Text>
 
           <Section style={box}>
