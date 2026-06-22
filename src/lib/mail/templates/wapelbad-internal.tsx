@@ -12,7 +12,6 @@ import {
 type Props = {
   name: string;
   email: string;
-  teilnahme: "ich" | "familie";
   persons: number;
   grill: boolean;
 };
@@ -54,7 +53,6 @@ const label = { fontWeight: 600, color: "#5b5b56" };
 export default function WapelbadInternalEmail({
   name,
   email,
-  teilnahme,
   persons,
   grill,
 }: Props) {
@@ -74,10 +72,6 @@ export default function WapelbadInternalEmail({
             <Text style={row}>
               <span style={label}>E-Mail: </span>
               {email}
-            </Text>
-            <Text style={row}>
-              <span style={label}>Teilnahme: </span>
-              {teilnahme === "familie" ? "Mit Familie" : "Einzelperson"}
             </Text>
             <Text style={row}>
               <span style={label}>Personenanzahl: </span>
