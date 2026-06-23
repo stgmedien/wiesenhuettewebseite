@@ -241,6 +241,26 @@ export default async function Datenschutz() {
             <a href="mailto:skifreunde@wiesenhuette.de">skifreunde@wiesenhuette.de</a> widersprechen.
           </RuleBox>
 
+          <h3>3.4b Bei Anmeldung zu Vereinsveranstaltungen</h3>
+          <p>
+            Wenn Du Dich über unsere Webseite zu einer Vereinsveranstaltung (z. B. dem
+            Wapelbad-Vereinsfest) anmeldest, verarbeiten wir folgende Daten:
+          </p>
+          <RuleBox>
+            <strong>Daten:</strong> Name, E-Mail-Adresse, Personenanzahl, ggf. Teilnahme an
+            optionalen Zusatzleistungen (z. B. Grillbuffet).
+            <br />
+            <strong>Zweck:</strong> Durchführung und Organisation der Veranstaltung, Kontaktaufnahme
+            bei kurzfristigen Änderungen (z. B. wetterbedingter Absage).
+            <br />
+            <strong>Rechtsgrundlage:</strong> Art. 6 Abs. 1 lit. b DSGVO (vorvertragliche bzw.
+            vertragliche Maßnahme) sowie Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse des
+            Vereins an der Veranstaltungsorganisation).
+            <br />
+            <strong>Speicherdauer:</strong> Bis zu 30 Tage nach der Veranstaltung, danach
+            vollständige Löschung. Es erfolgt keine Weitergabe der Daten an Dritte.
+          </RuleBox>
+
           <h3>3.5 Beim Manager-Login (Backend)</h3>
           <p>
             Für die Pflege der Webseite und die Verwaltung der Buchungen gibt es einen geschützten
@@ -490,6 +510,11 @@ export default async function Datenschutz() {
                 "Newsletter-Daten",
                 "bis Abmeldung; Nachweis-Log 3 Jahre",
                 "Art. 6 Abs. 1 lit. a DSGVO",
+              ],
+              [
+                "Veranstaltungsanmeldungen",
+                "bis 30 Tage nach der Veranstaltung",
+                "Art. 6 Abs. 1 lit. b/f DSGVO",
               ],
               ["Manager-Login Audit-Logs", "90 Tage", "Art. 6 Abs. 1 lit. f DSGVO"],
               ["Blog-Einwilligungen (Foto/Zitat)", "bis Widerruf", "Art. 6 Abs. 1 lit. a DSGVO"],

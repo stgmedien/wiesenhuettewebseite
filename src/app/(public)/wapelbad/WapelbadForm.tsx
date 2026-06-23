@@ -68,6 +68,11 @@ export function WapelbadForm() {
         />
         <span className="block text-[13px] text-[var(--color-wh-fg-muted)] mt-1.5">
           Nur für die Anmeldung und eine eventuelle wetterbedingte Absage – wird nicht weitergegeben.
+          Weitere Infos in unserer{" "}
+          <a href="/datenschutz" className="underline underline-offset-2 hover:no-underline">
+            Datenschutzerklärung
+          </a>
+          .
         </span>
       </label>
 
