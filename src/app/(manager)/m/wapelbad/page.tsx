@@ -50,6 +50,15 @@ export default async function WapelbadManagerPage() {
         Vereinsfest am Samstag, 5. September 2026 · 16 Uhr · Wapelbad. Jede Anmeldung wird hier
         gespeichert (zusätzlich geht eine Hinweis-Mail an den Vorstand).
       </p>
+      <p className="text-[13px] text-[var(--color-wh-sunset)] mt-2 m-0 font-medium">
+        ⚠️ DSGVO-Hinweis: Die Anmeldedaten sind laut Datenschutzerklärung bis 30 Tage nach der
+        Veranstaltung zu speichern. Bitte die Tabelle bis spätestens{" "}
+        <strong>5. Oktober 2026</strong> manuell löschen (Neon SQL Editor:{" "}
+        <code className="text-[12px] bg-gray-100 px-1 rounded">
+          DELETE FROM wapelbad_registrations;
+        </code>
+        ).
+      </p>
 
       {tableMissing ? (
         <div className="mt-8 rounded-[var(--radius-card)] border border-[var(--color-wh-sunset)]/40 bg-[var(--color-wh-sunset)]/10 p-5 text-[15px]">
