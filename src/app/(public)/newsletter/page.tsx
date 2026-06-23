@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export const metadata = {
   title: "Newsletter · Wiesenhütte",
   description:
-    "Hütten-Neuigkeiten, Termine und Tipps aus dem Hochsauerland — ein paar Mal im Jahr in Dein Postfach.",
+    "Vereinsleben und Hütten-Neuigkeiten der Skifreunde Gütersloh — Termine, Aktionen und was an der Wiesenhütte passiert. Ein paar Mal im Jahr, kein Spam.",
 };
 
 const COPY: Record<Locale, {
@@ -18,33 +18,33 @@ const COPY: Record<Locale, {
   perks: { icon: "cal" | "tag" | "spark"; text: string }[];
 }> = {
   de: {
-    eyebrow: "Bleib in Verbindung",
-    h1: "Der Wiesenhütten-Newsletter.",
-    lead: "Ein paar Mal im Jahr schreiben wir, was an der Hütte und im Verein passiert — und was Du nicht verpassen solltest. Kein Spam, jederzeit abbestellbar.",
+    eyebrow: "Vereinsleben & Wiesenhütte",
+    h1: "Was bei uns passiert — im Verein und an der Hütte.",
+    lead: "Ein paar Mal im Jahr schreiben wir, was die Skifreunde Gütersloh bewegt: Vereinsaktivitäten, Termine, Neuigkeiten aus Langewiese und was an der Hütte passiert. Kein Spam, jederzeit abbestellbar.",
     perks: [
-      { icon: "cal", text: "Termine: Vereinsfahrten, Grünkohlwanderung, Adventskaffee" },
-      { icon: "spark", text: "Hütten-Neuigkeiten und Projekte wie das Zeltpodest" },
-      { icon: "tag", text: "Tipps für die Region und gelegentliche Aktionen" },
+      { icon: "cal", text: "Vereinstermine: Skigymnastik, Grünkohlwanderung, Adventskaffee, Vereinsfahrten" },
+      { icon: "spark", text: "Hütten-Neuigkeiten: Projekte, Renovierungen, neue Angebote" },
+      { icon: "tag", text: "Tipps für die Region rund um Langewiese und gelegentliche Aktionen" },
     ],
   },
   en: {
-    eyebrow: "Stay in touch",
-    h1: "The Wiesenhütte newsletter.",
-    lead: "A few times a year we share what's happening at the cabin and in the club — and what you shouldn't miss. No spam, unsubscribe any time.",
+    eyebrow: "Club life & Wiesenhütte",
+    h1: "What's happening — in the club and at the cabin.",
+    lead: "A few times a year we share what's moving the Skifreunde Gütersloh: club activities, dates, news from Langewiese and what's happening at the cabin. No spam, unsubscribe any time.",
     perks: [
-      { icon: "cal", text: "Dates: club trips, the kale hike, advent coffee" },
-      { icon: "spark", text: "Cabin news and projects like the tent deck" },
-      { icon: "tag", text: "Tips for the region and the occasional offer" },
+      { icon: "cal", text: "Club dates: ski fitness, kale hike, advent coffee, club trips" },
+      { icon: "spark", text: "Cabin news: projects, renovations, new offerings" },
+      { icon: "tag", text: "Tips for the Langewiese region and the occasional offer" },
     ],
   },
   nl: {
-    eyebrow: "Blijf op de hoogte",
-    h1: "De Wiesenhütte-nieuwsbrief.",
-    lead: "Een paar keer per jaar schrijven we wat er bij de hut en in de vereniging gebeurt — en wat je niet mag missen. Geen spam, altijd afmeldbaar.",
+    eyebrow: "Verenigingsleven & Wiesenhütte",
+    h1: "Wat er bij ons speelt — in de vereniging en bij de hut.",
+    lead: "Een paar keer per jaar schrijven we wat de Skifreunde Gütersloh bezighoudt: verenigingsactiviteiten, data, nieuws uit Langewiese en wat er bij de hut gebeurt. Geen spam, altijd afmeldbaar.",
     perks: [
-      { icon: "cal", text: "Data: verenigingsreizen, Grünkohl-wandeling, adventkoffie" },
-      { icon: "spark", text: "Hutnieuws en projecten zoals de tentvlonder" },
-      { icon: "tag", text: "Tips voor de regio en af en toe een actie" },
+      { icon: "cal", text: "Verenigingsdata: skigymnastiek, Grünkohl-wandeling, adventkoffie, verenigingsreizen" },
+      { icon: "spark", text: "Hutnieuws: projecten, renovaties, nieuwe aanbiedingen" },
+      { icon: "tag", text: "Tips voor de regio rond Langewiese en af en toe een actie" },
     ],
   },
 };
