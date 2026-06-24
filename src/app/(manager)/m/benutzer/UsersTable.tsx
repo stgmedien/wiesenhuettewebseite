@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Plus, Trash2, KeyRound, ShieldCheck, Loader2, X, Copy, Check, RefreshCw, Mail, ChevronDown,
+  Plus, Trash2, KeyRound, ShieldCheck, Loader2, X, Copy, Check, RefreshCw, Mail, ChevronDown, Pencil,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
@@ -14,6 +14,7 @@ import {
   generatePassword,
   resetUserPassword,
   updateUserRole,
+  updateUserEmail,
 } from "./actions";
 
 type Role = "customer" | "manager" | "admin";
@@ -38,6 +39,7 @@ export default function UsersTable({
 }) {
   const [createOpen, setCreateOpen] = useState(false);
   const [resetUser, setResetUser] = useState<Row | null>(null);
+  const [editEmailUser, setEditEmailUser] = useState<Row | null>(null);
   const [createdPassword, setCreatedPassword] = useState<string | null>(null);
 
   return (
@@ -83,6 +85,7 @@ export default function UsersTable({
                 isMe={r.id === myId}
                 isAdmin={isAdmin}
                 onResetClick={() => setResetUser(r)}
+                onEditEmailClick={() => setEditEmailUser(r)}
               />
             ))}
           </tbody>
@@ -108,6 +111,10 @@ export default function UsersTable({
 
       {resetUser && (
         <ResetPasswordModal user={resetUser} onClose={() => setResetUser(null)} />
+      )}
+
+      {editEmailUser && (
+        <EditEmailModal user={editEmailUser} onClose={() => setEditEmailUser(null)} />
       )}
     </>
   );
@@ -135,11 +142,13 @@ function UserRow({
   isMe,
   isAdmin,
   onResetClick,
+  onEditEmailClick,
 }: {
   row: Row;
   isMe: boolean;
   isAdmin: boolean;
   onResetClick: () => void;
+  onEditEmailClick: () => void;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -227,6 +236,15 @@ function UserRow({
       <Td className="text-right">
         {isAdmin ? (
           <div className="inline-flex gap-1">
+            <button
+              type="button"
+              onClick={onEditEmailClick}
+              disabled={pending}
+              title="E-Mail-Adresse ändern"
+              className="inline-flex w-9 h-9 items-center justify-center rounded-md border border-[var(--color-wh-winter-grey)] text-[var(--color-wh-deep-green)] hover:bg-[var(--color-wh-green-soft)] cursor-pointer"
+            >
+              <Pencil size={14} />
+            </button>
             <button
               type="button"
               onClick={onResetClick}
@@ -583,6 +601,89 @@ function ResetPasswordModal({ user, onClose }: { user: Row; onClose: () => void 
             </div>
           </>
         )}
+      </form>
+    </div>
+  );
+}
+
+function EditEmailModal({ user, onClose }: { user: Row; onClose: () => void }) {
+  const router = useRouter();
+  const [email, setEmail] = useState(user.email);
+  const [pending, start] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    start(async () => {
+      const res = await updateUserEmail({ userId: user.id, email });
+      if (!res.ok) { setError(res.error ?? "Fehler"); return; }
+      setDone(true);
+      router.refresh();
+    });
+  };
+
+  return (
+    <div
+      role="dialog"
+      aria-modal
+      className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-3 sm:p-6"
+      onClick={(e) => { if (e.target === e.currentTarget && !done) onClose(); }}
+    >
+      <form
+        onSubmit={submit}
+        className="w-full max-w-[480px] bg-white rounded-[var(--radius-card)] shadow-[var(--shadow-deep)]"
+      >
+        <div className="flex items-start justify-between gap-4 p-5 sm:p-6 border-b border-[var(--color-wh-winter-grey)]">
+          <div className="flex items-center gap-2.5">
+            <Pencil size={20} className="text-[var(--color-wh-deep-green)]" />
+            <div>
+              <h2 className="m-0 text-[20px]">E-Mail ändern</h2>
+              <div className="text-xs text-[var(--color-wh-fg-muted)] mt-0.5">Für {user.name ?? user.email}</div>
+            </div>
+          </div>
+          <button type="button" onClick={onClose} aria-label="Schließen"
+            className="w-9 h-9 inline-flex items-center justify-center rounded-full hover:bg-[var(--color-wh-green-soft)] cursor-pointer">
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="p-5 sm:p-6 space-y-4">
+          {done ? (
+            <div className="bg-[var(--color-wh-green-soft)] text-[var(--color-wh-deep-green)] rounded-md p-4 flex items-center gap-2 font-semibold">
+              <Check size={16} /> E-Mail wurde auf <strong>{email}</strong> geändert.
+            </div>
+          ) : (
+            <>
+              <Input
+                id="new-email"
+                type="email"
+                label="Neue E-Mail-Adresse"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              {error && (
+                <div className="text-sm text-[var(--color-wh-sunset)] bg-[var(--color-wh-sunset)]/10 px-3 py-2 rounded-md">
+                  {error}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        <div className="p-5 sm:p-6 border-t border-[var(--color-wh-winter-grey)] flex gap-2 justify-end">
+          <Button type="button" variant="secondary" onClick={onClose}>
+            {done ? "Schließen" : "Abbrechen"}
+          </Button>
+          {!done && (
+            <Button type="submit" disabled={pending || email === user.email}
+              iconLeft={pending ? <Loader2 size={16} className="animate-spin" /> : null}>
+              {pending ? "Speichere …" : "Speichern"}
+            </Button>
+          )}
+        </div>
       </form>
     </div>
   );

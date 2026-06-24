@@ -232,6 +232,44 @@ export async function resetUserPassword(
   return { ok: true, tempPassword: newPassword };
 }
 
+const updateEmailSchema = z.object({
+  userId: z.string().uuid(),
+  email: z.string().email().max(255),
+});
+
+export async function updateUserEmail(
+  raw: z.infer<typeof updateEmailSchema>
+): Promise<{ ok: boolean; error?: string }> {
+  const session = await requireAdmin();
+  const parsed = updateEmailSchema.safeParse(raw);
+  if (!parsed.success) return { ok: false, error: "Ungültige E-Mail-Adresse." };
+  const { userId, email: newEmail } = parsed.data;
+  const lower = newEmail.toLowerCase().trim();
+
+  const target = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+  if (!target[0]) return { ok: false, error: "Nutzer nicht gefunden." };
+
+  const conflict = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(and(eq(users.email, lower), ne(users.id, userId)))
+    .limit(1);
+  if (conflict[0]) return { ok: false, error: `Die Adresse ${lower} ist bereits vergeben.` };
+
+  await db
+    .update(users)
+    .set({ email: lower, updatedAt: new Date() })
+    .where(eq(users.id, userId));
+
+  await db.insert(activityLog).values({
+    who: session.user?.name ?? session.user?.email ?? "Admin",
+    what: `E-Mail geändert: ${target[0].email} → ${lower}`,
+  });
+
+  revalidatePath("/m/benutzer");
+  return { ok: true };
+}
+
 export async function deleteUser(userId: string): Promise<{ ok: boolean; error?: string }> {
   const session = await requireAdmin();
   const meId = currentUserId(session);
