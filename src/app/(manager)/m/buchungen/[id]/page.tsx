@@ -9,6 +9,8 @@ import { StatusPill } from "@/components/manager/StatusPill";
 import { StatusActions } from "./StatusActions";
 import { ManagerMessage } from "./ManagerMessage";
 import { DepositHoldControl } from "./DepositHoldControl";
+import { InvoiceControl } from "./InvoiceControl";
+import { getInvoiceForBooking } from "./invoice-actions";
 import { Kundenakte } from "./Kundenakte";
 import { ReviewActions } from "./ReviewActions";
 
@@ -41,6 +43,8 @@ export default async function BookingDetail({ params }: Props) {
     .from(notes)
     .where(and(eq(notes.scope, "booking"), eq(notes.refId, id)))
     .orderBy(desc(notes.createdAt));
+
+  const existingInvoice = await getInvoiceForBooking(id);
 
   // Verfuegbare Mail-Templates fuer den ManagerMessage-Picker (nur die mit aktiver Version)
   const availableTemplates = await db
@@ -311,6 +315,8 @@ export default async function BookingDetail({ params }: Props) {
                 />
               </div>
             )}
+
+            <InvoiceControl bookingId={b.id} existing={existingInvoice} />
           </Section>
         </aside>
       </div>
