@@ -1196,6 +1196,44 @@ export const externalReviews = pgTable(
 );
 
 // =============================================================
+// DOCUMENTS — hochgeladene/migrierte Dateien zu einer Buchung
+// (signierte Mietverträge, Anschreiben, Meldescheine). Datei liegt in
+// Vercel Blob; hier nur Metadaten + URL.
+// =============================================================
+
+export const documentKindEnum = pgEnum("document_kind", [
+  "mietvertrag",   // unterschriebener Mietvertrag
+  "anschreiben",   // vorbereiteter Vertrag + Anschreiben
+  "meldeschein",   // Feuerwehr-Meldeschein
+  "sonstiges",
+]);
+
+export const documents = pgTable(
+  "documents",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    bookingId: uuid("booking_id").references(() => bookings.id, { onDelete: "cascade" }),
+    customerId: uuid("customer_id").references(() => customers.id, { onDelete: "set null" }),
+    kind: documentKindEnum("kind").notNull().default("sonstiges"),
+    title: varchar("title", { length: 255 }).notNull(),
+    blobUrl: text("blob_url").notNull(),
+    originalFilename: varchar("original_filename", { length: 500 }),
+    contentType: varchar("content_type", { length: 100 }),
+    sizeBytes: integer("size_bytes"),
+    signed: boolean("signed").notNull().default(false),
+    signedAt: timestamp("signed_at"),
+    uploadedBy: varchar("uploaded_by", { length: 255 }),
+    source: varchar("source", { length: 40 }).notNull().default("upload"), // upload | migration
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    bookingIdx: index("documents_booking_idx").on(t.bookingId),
+    customerIdx: index("documents_customer_idx").on(t.customerId),
+    kindIdx: index("documents_kind_idx").on(t.kind),
+  })
+);
+
+// =============================================================
 // RELATIONS
 // =============================================================
 
@@ -1211,6 +1249,12 @@ export const bookingsRelations = relations(bookings, ({ one, many }) => ({
   handovers: many(handovers),
   damageReports: many(damageReports),
   invoices: many(invoices),
+  documents: many(documents),
+}));
+
+export const documentsRelations = relations(documents, ({ one }) => ({
+  booking: one(bookings, { fields: [documents.bookingId], references: [bookings.id] }),
+  customer: one(customers, { fields: [documents.customerId], references: [customers.id] }),
 }));
 
 export const paymentsRelations = relations(payments, ({ one }) => ({
@@ -1298,3 +1342,5 @@ export type MailTemplateVersion = typeof mailTemplateVersions.$inferSelect;
 export type NewMailTemplateVersion = typeof mailTemplateVersions.$inferInsert;
 export type ExternalReview = typeof externalReviews.$inferSelect;
 export type NewExternalReview = typeof externalReviews.$inferInsert;
+export type DocumentRow = typeof documents.$inferSelect;
+export type NewDocumentRow = typeof documents.$inferInsert;
