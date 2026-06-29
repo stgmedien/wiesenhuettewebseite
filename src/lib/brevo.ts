@@ -37,6 +37,17 @@ async function brevoFetch(path: string, body: unknown): Promise<Response> {
   });
 }
 
+async function brevoGet(path: string): Promise<Response> {
+  return fetch(`${BASE}${path}`, {
+    method: "GET",
+    headers: {
+      "api-key": apiKey(),
+      accept: "application/json",
+    },
+    signal: AbortSignal.timeout(10_000),
+  });
+}
+
 /**
  * Öffentliche Newsletter-Anmeldung mit Double-Opt-in über Brevo.
  * Brevo verschickt die Bestätigungsmail (DOI-Template) und trägt den Kontakt
@@ -124,6 +135,52 @@ export async function addContactToMembersList(
     return { ok: false, reason: `http_${res.status}` };
   } catch (e) {
     console.error("[brevo] Mitglieder-Eintrag Ausnahme:", e);
+    return { ok: false, reason: "exception" };
+  }
+}
+
+export type BrevoMemberLookup =
+  | { ok: true; isMember: boolean; firstName?: string | null; lastName?: string | null }
+  | { ok: false; reason: string };
+
+/**
+ * Schlägt nach, ob eine E-Mail als Kontakt in der Brevo-MITGLIEDERLISTE steht.
+ * Quelle der Wahrheit für „ist Vereinsmitglied" — wird vom Konto-Freischalt-Flow
+ * (`/mitglied-konto`) genutzt, um bestehende Mitglieder ohne Vorstands-Eingriff
+ * automatisch (aber per E-Mail-Bestätigung gesichert) freizuschalten.
+ *
+ * Gibt `ok:false` zurück, wenn Brevo nicht konfiguriert ist oder die API einen
+ * Fehler liefert — der Aufrufer darf eine Mitgliedschaft dann NICHT bestätigen.
+ */
+export async function isEmailInMembersList(email: string): Promise<BrevoMemberLookup> {
+  if (!brevoConfigured() || !membersListId()) {
+    console.warn("[brevo] Mitglieder-Lookup nicht konfiguriert (API-Key/Listen-ID fehlt)");
+    return { ok: false, reason: "not_configured" };
+  }
+  try {
+    const res = await brevoGet(`/contacts/${encodeURIComponent(email)}`);
+    // Kontakt existiert gar nicht → definitiv kein Mitglied.
+    if (res.status === 404) return { ok: true, isMember: false };
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      console.error(`[brevo] Mitglieder-Lookup fehlgeschlagen (${res.status}): ${text}`);
+      return { ok: false, reason: `http_${res.status}` };
+    }
+    const data = (await res.json()) as {
+      listIds?: number[];
+      attributes?: Record<string, string>;
+    };
+    const listIds = Array.isArray(data.listIds) ? data.listIds : [];
+    const isMember = listIds.includes(membersListId());
+    const attrs = data.attributes ?? {};
+    return {
+      ok: true,
+      isMember,
+      firstName: attrs.VORNAME ?? attrs.FIRSTNAME ?? null,
+      lastName: attrs.NACHNAME ?? attrs.LASTNAME ?? null,
+    };
+  } catch (e) {
+    console.error("[brevo] Mitglieder-Lookup Ausnahme:", e);
     return { ok: false, reason: "exception" };
   }
 }
