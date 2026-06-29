@@ -15,7 +15,8 @@ import ReviewRejectedEmail from "@/lib/mail/templates/review-rejected";
 import BookingConfirmedEmail from "@/lib/mail/templates/booking-confirmed";
 import BookingCancelledEmail from "@/lib/mail/templates/booking-cancelled";
 import { formatDateLong } from "@/lib/utils";
-import { formatEuro } from "@/lib/pricing";
+import { formatEuro, calculatePrice, type Persons } from "@/lib/pricing";
+import { resolveTariffs } from "@/lib/pricing-tariffs";
 import { mailTemplates, mailTemplateVersions } from "@/lib/db/schema";
 import { substituteVars } from "@/lib/mail-render";
 import { buildBookingVars } from "@/lib/mail-template-vars";
@@ -561,5 +562,163 @@ export async function recordManualPayment(
 
   revalidatePath(`/m/buchungen/${data.bookingId}`);
   revalidatePath("/m/dashboard");
+  return { ok: true };
+}
+
+// =============================================================
+// Feature B: Personen-Zusammensetzung einer Buchung anpassen (NUR Vorstand).
+// Preis wird PERSONENABHAENGIG neu berechnet (Uebernachtung, Mindestbelegungs-
+// Aufschlag, Allein-Aufschlag) — Extras, Rabatte, Kaution bleiben unangetastet
+// (Delta-Ansatz, robust gegen Sonderfaelle). Die Geld-Differenz wird separat,
+// vom Vorstand bestaetigt, ueber Stripe erstattet (refundBookingDifference).
+//
+// Use-Case: Mitglied wird nachtraeglich Mitglied -> ein Erwachsener wird zum
+// Mitglied (-50% NUR fuer diese Person, nicht die ganze Gruppe).
+// =============================================================
+
+const editPersonsSchema = z.object({
+  bookingId: z.string().uuid(),
+  adults: z.coerce.number().int().min(0).max(60),
+  members: z.coerce.number().int().min(0).max(60),
+  children: z.coerce.number().int().min(0).max(60),
+  pupils: z.coerce.number().int().min(0).max(60),
+  teachers: z.coerce.number().int().min(0).max(60),
+});
+
+export type EditPersonsResult =
+  | {
+      ok: true;
+      deltaCents: number; // < 0 = Erstattung an Gast, > 0 = Nachforderung
+      newSubtotalCents: number;
+      refundableCents: number; // ueber Stripe automatisch erstattbar (0 = nicht moeglich)
+    }
+  | { ok: false; error: string };
+
+export async function editBookingPersons(
+  raw: z.infer<typeof editPersonsSchema>
+): Promise<EditPersonsResult> {
+  let session: Awaited<ReturnType<typeof requireManager>>;
+  try {
+    session = await requireManager();
+  } catch {
+    return { ok: false, error: "Nicht autorisiert" };
+  }
+  const parsed = editPersonsSchema.safeParse(raw);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues.map((i) => i.message).join(", ") };
+  }
+  const d = parsed.data;
+
+  const b = (await db.select().from(bookings).where(eq(bookings.id, d.bookingId)).limit(1))[0];
+  if (!b) return { ok: false, error: "Buchung nicht gefunden." };
+
+  const newPersons: Persons = {
+    adults: d.adults,
+    members: d.members,
+    children: d.children,
+    pupils: d.pupils,
+    teachers: d.teachers,
+  };
+  const totalPersons = d.adults + d.members + d.children + d.pupils + d.teachers;
+  if (totalPersons < 1) return { ok: false, error: "Mindestens 1 Person erforderlich." };
+
+  // Personenabhaengige Posten frisch berechnen — gleiche Tarife/Saison/Solo.
+  const tariffs = await resolveTariffs(b.arrival);
+  const nb = calculatePrice({
+    arrival: b.arrival,
+    departure: b.departure,
+    persons: newPersons,
+    soloUse: b.soloUse,
+    tariffs,
+  });
+
+  const deltaCents =
+    nb.accommodationCents -
+    b.accommodationCents +
+    (nb.minOccupancySurchargeCents - b.minOccupancySurchargeCents) +
+    (nb.soloSurchargeCents - b.soloSurchargeCents);
+  const newSubtotalCents = b.subtotalCents + deltaCents;
+  if (newSubtotalCents < 0) {
+    return { ok: false, error: "Neue Zwischensumme wäre negativ — bitte Eingaben prüfen." };
+  }
+
+  await db
+    .update(bookings)
+    .set({
+      adults: d.adults,
+      members: d.members,
+      children: d.children,
+      pupils: d.pupils,
+      teachers: d.teachers,
+      persons: totalPersons,
+      accommodationCents: nb.accommodationCents,
+      minOccupancySurchargeCents: nb.minOccupancySurchargeCents,
+      soloSurchargeCents: nb.soloSurchargeCents,
+      subtotalCents: newSubtotalCents,
+      totalCents: newSubtotalCents,
+      updatedAt: new Date(),
+    })
+    .where(eq(bookings.id, d.bookingId));
+
+  await db.insert(activityLog).values({
+    who: session.user?.name ?? session.user?.email ?? "Manager",
+    what: `Personen angepasst (Mitgl ${d.members} · Erw ${d.adults} · Kind ${d.children} · Schü ${d.pupils} · Lehr ${d.teachers}) → Zwischensumme ${formatEuro(newSubtotalCents)} (${deltaCents >= 0 ? "+" : ""}${formatEuro(deltaCents)})`,
+    bookingId: d.bookingId,
+  });
+
+  revalidatePath(`/m/buchungen/${d.bookingId}`);
+  revalidatePath("/m/dashboard");
+
+  const refundableCents =
+    deltaCents < 0 && b.stripePaymentIntentId
+      ? Math.min(Math.abs(deltaCents), b.paidCents)
+      : 0;
+
+  return { ok: true, deltaCents, newSubtotalCents, refundableCents };
+}
+
+export async function refundBookingDifference(
+  bookingId: string,
+  amountCents: number
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  let session: Awaited<ReturnType<typeof requireManager>>;
+  try {
+    session = await requireManager();
+  } catch {
+    return { ok: false, error: "Nicht autorisiert" };
+  }
+  if (!Number.isInteger(amountCents) || amountCents <= 0) {
+    return { ok: false, error: "Ungültiger Erstattungsbetrag." };
+  }
+
+  const b = (await db.select().from(bookings).where(eq(bookings.id, bookingId)).limit(1))[0];
+  if (!b) return { ok: false, error: "Buchung nicht gefunden." };
+  if (!b.stripePaymentIntentId) {
+    return { ok: false, error: "Keine Stripe-Zahlung verknüpft — bitte manuell erstatten." };
+  }
+  if (amountCents > b.paidCents) {
+    return { ok: false, error: "Erstattung übersteigt den gezahlten Betrag." };
+  }
+
+  try {
+    await stripe.refunds.create({
+      payment_intent: b.stripePaymentIntentId,
+      amount: amountCents,
+      metadata: { bookingId: b.id, bookingNumber: b.bookingNumber, kind: "personen-anpassung" },
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Unbekannter Stripe-Fehler";
+    return { ok: false, error: `Stripe-Erstattung fehlgeschlagen: ${msg}` };
+  }
+
+  // Verbuchung (payments-Zeile + paidCents-Abzug) macht der bestehende
+  // charge.refunded-Webhook -> hier KEINE Doppelbuchung.
+  await db.insert(activityLog).values({
+    who: session.user?.name ?? session.user?.email ?? "Manager",
+    what: `Differenz erstattet (Stripe): ${formatEuro(amountCents)} → Buchung ${b.bookingNumber}`,
+    bookingId,
+  });
+
+  revalidatePath(`/m/buchungen/${bookingId}`);
   return { ok: true };
 }
