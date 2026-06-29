@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { customers, magicLinkTokens, users } from "@/lib/db/schema";
 import { eq, and, gt, lt, isNull } from "drizzle-orm";
+import { promoteToMemberRole } from "@/lib/membership-role";
 
 // Web-Crypto-API statt Node-`crypto` — funktioniert in Edge-Runtime UND
 // Node.js. Magic-Link wird ueber auth.ts vom middleware.ts (Edge) gepulled,
@@ -152,6 +153,10 @@ export const consumeMagicLinkToken = async (
     .update(customers)
     .set({ userId: user.id })
     .where(and(eq(customers.email, tk.email), isNull(customers.userId)));
+
+  // Verifizierte Mitglieder bekommen die Rolle "member" (Anzeige "Mitglied").
+  // No-op für Nicht-Mitglieder und für Manager/Admin.
+  await promoteToMemberRole(tk.email);
 
   return { ok: true, userId: user.id, email: user.email, isNewUser };
 };

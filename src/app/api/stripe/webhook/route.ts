@@ -25,6 +25,7 @@ import VoucherGiftEmail from "@/lib/mail/templates/voucher-gift";
 import MemberWelcomeEmail from "@/lib/mail/templates/member-welcome";
 import MemberJoinedInternalEmail from "@/lib/mail/templates/member-joined-internal";
 import { addContactToMembersList } from "@/lib/brevo";
+import { promoteToMemberRole } from "@/lib/membership-role";
 import { formatDateLong } from "@/lib/utils";
 import { createInvoiceForBooking } from "@/lib/invoice";
 import type Stripe from "stripe";
@@ -776,6 +777,9 @@ async function handleMembershipSignupPaid(session: Stripe.Checkout.Session) {
       ...(stripeCustomerId ? { stripeSubscriptionCustomerId: stripeCustomerId } : {}),
     })
     .where(eq(customers.id, customer.id));
+
+  // Login-Konto (falls vorhanden) auf Rolle "member" heben — Anzeige "Mitglied".
+  await promoteToMemberRole(customer.email);
 
   // Tier-Name + Jahresbeitrag für die Mails (Fallback: Session-Betrag).
   let tierName = "Mitgliedschaft";

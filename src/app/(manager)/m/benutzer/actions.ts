@@ -10,7 +10,7 @@ import { revalidatePath } from "next/cache";
 import { sendMail } from "@/lib/mail/send";
 import UserWelcomeEmail from "@/lib/mail/templates/user-welcome";
 
-type Role = "customer" | "manager" | "admin";
+type Role = "customer" | "member" | "manager" | "admin";
 
 const requireAdmin = async () => {
   const session = await auth();
@@ -119,7 +119,7 @@ export async function createUser(raw: z.infer<typeof createSchema>): Promise<Cre
 
 const updateRoleSchema = z.object({
   userId: z.string().uuid(),
-  role: z.enum(["customer", "manager", "admin"]),
+  role: z.enum(["customer", "member", "manager", "admin"]),
 });
 
 export async function updateUserRole(
