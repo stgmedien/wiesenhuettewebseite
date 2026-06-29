@@ -12,6 +12,9 @@ import { sendMail } from "@/lib/mail/send";
 import ManagerMessageEmail from "@/lib/mail/templates/manager-message";
 import ReviewApprovedEmail from "@/lib/mail/templates/review-approved";
 import ReviewRejectedEmail from "@/lib/mail/templates/review-rejected";
+import BookingConfirmedEmail from "@/lib/mail/templates/booking-confirmed";
+import BookingCancelledEmail from "@/lib/mail/templates/booking-cancelled";
+import { formatDateLong } from "@/lib/utils";
 import { formatEuro } from "@/lib/pricing";
 import { mailTemplates, mailTemplateVersions } from "@/lib/db/schema";
 import { substituteVars } from "@/lib/mail-render";
@@ -34,7 +37,11 @@ const ALLOWED_STATUSES = new Set([
   "wartung",
 ]);
 
-export async function setBookingStatus(bookingId: string, status: string) {
+export async function setBookingStatus(
+  bookingId: string,
+  status: string,
+  notifyGuest = false
+) {
   const session = await requireManager();
   if (!ALLOWED_STATUSES.has(status)) throw new Error("Invalid status");
 
@@ -52,6 +59,63 @@ export async function setBookingStatus(bookingId: string, status: string) {
     what: `Status geändert: ${b.status} → ${status}`,
     bookingId,
   });
+
+  // Optionale Gast-Benachrichtigung bei MANUELLEM Statuswechsel.
+  // Standardmaessig laufen Buchungs-Mails nur ueber den Stripe-Webhook; ein
+  // manueller Wechsel (z.B. storniert -> bestaetigt) verschickt sonst KEINE
+  // Mail. Best-effort: schlaegt der Versand fehl, bleibt der Statuswechsel gueltig.
+  if (notifyGuest && (status === "bestaetigt" || status === "storniert") && b.customerId) {
+    try {
+      const c = (
+        await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1)
+      )[0];
+      if (c?.email) {
+        const baseUrl =
+          process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.xn--wiesenhtte-geb.com";
+        if (status === "bestaetigt") {
+          await sendMail({
+            to: c.email,
+            subject: `Eure Buchung ${b.bookingNumber} ist bestätigt`,
+            template: "booking-confirmed",
+            bookingId,
+            react: BookingConfirmedEmail({
+              bookingNumber: b.bookingNumber,
+              guestName: `${c.firstName} ${c.lastName}`.trim(),
+              arrival: formatDateLong(b.arrival),
+              departure: formatDateLong(b.departure),
+              nights: b.nights,
+              persons: b.persons,
+              totalCents: b.subtotalCents,
+              depositCents: b.depositCents,
+              paidCents: b.paidCents,
+              baseUrl,
+            }),
+          });
+        } else {
+          await sendMail({
+            to: c.email,
+            subject: `Eure Buchung ${b.bookingNumber} wurde storniert`,
+            template: "booking-cancelled",
+            bookingId,
+            react: BookingCancelledEmail({
+              firstName: c.firstName,
+              bookingNumber: b.bookingNumber,
+              feePercent: 0,
+              feeCents: 0,
+              subtotalCents: b.subtotalCents,
+            }),
+          });
+        }
+        await db.insert(activityLog).values({
+          who: session.user?.name ?? session.user?.email ?? "Manager",
+          what: `Status-Mail (${status}) an ${c.email} gesendet`,
+          bookingId,
+        });
+      }
+    } catch (err) {
+      console.error("[setBookingStatus] Gast-Benachrichtigung fehlgeschlagen:", err);
+    }
+  }
 
   // Loyalty: Wechsel auf 'abgereist' triggert ggf. Treue-Rabatt-Code.
   if (status === "abgereist" && b.status !== "abgereist" && b.customerId) {
@@ -436,5 +500,66 @@ export async function reviewRejectBooking(
   revalidatePath(`/m/buchungen/${bookingId}`);
   revalidatePath("/m/buchungen");
   revalidateTag(BOOKING_BLOCKS_TAG, "max");
+  return { ok: true };
+}
+
+// =============================================================
+// Manuelle Zahlung erfassen — z.B. 100-€-Vorauszahlungen, die per
+// Ueberweisung an den Verein gingen. Schreibt eine payments-Zeile
+// (status="erhalten") und erhoeht bookings.paidCents.
+// =============================================================
+
+const recordPaymentSchema = z.object({
+  bookingId: z.string().uuid(),
+  amountEuros: z.coerce.number().positive().max(100000),
+  method: z.string().min(1).max(60),
+  kind: z.enum(["anzahlung", "restzahlung", "vollzahlung", "kaution"]).default("anzahlung"),
+});
+
+export type RecordPaymentResult = { ok: true } | { ok: false; error: string };
+
+export async function recordManualPayment(
+  raw: z.infer<typeof recordPaymentSchema>
+): Promise<RecordPaymentResult> {
+  let session: Awaited<ReturnType<typeof requireManager>>;
+  try {
+    session = await requireManager();
+  } catch {
+    return { ok: false, error: "Nicht autorisiert" };
+  }
+
+  const parsed = recordPaymentSchema.safeParse(raw);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues.map((i) => i.message).join(", ") };
+  }
+  const data = parsed.data;
+  const amountCents = Math.round(data.amountEuros * 100);
+
+  const b = (await db.select().from(bookings).where(eq(bookings.id, data.bookingId)).limit(1))[0];
+  if (!b) return { ok: false, error: "Buchung nicht gefunden." };
+
+  await db.insert(payments).values({
+    bookingId: data.bookingId,
+    kind: data.kind,
+    status: "erhalten",
+    amountCents,
+    method: data.method,
+    stripePaymentIntentId: null,
+    receivedAt: new Date(),
+  });
+
+  await db
+    .update(bookings)
+    .set({ paidCents: b.paidCents + amountCents, updatedAt: new Date() })
+    .where(eq(bookings.id, data.bookingId));
+
+  await db.insert(activityLog).values({
+    who: session.user?.name ?? session.user?.email ?? "Manager",
+    what: `Manuelle Zahlung erfasst: ${formatEuro(amountCents)} (${data.kind}, ${data.method})`,
+    bookingId: data.bookingId,
+  });
+
+  revalidatePath(`/m/buchungen/${data.bookingId}`);
+  revalidatePath("/m/dashboard");
   return { ok: true };
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { setBookingStatus } from "./actions";
 import { Button } from "@/components/ui/Button";
@@ -22,12 +22,13 @@ export function StatusActions({
   currentStatus: string;
 }) {
   const [pending, startTransition] = useTransition();
+  const [notify, setNotify] = useState(false);
   const router = useRouter();
 
   const change = (next: string) => {
     if (next === currentStatus) return;
     startTransition(async () => {
-      await setBookingStatus(bookingId, next);
+      await setBookingStatus(bookingId, next, notify);
       router.refresh();
     });
   };
@@ -54,6 +55,15 @@ export function StatusActions({
           </button>
         ))}
       </div>
+      <label className="flex items-center gap-2 text-xs text-[var(--color-wh-fg-muted)] cursor-pointer mt-1 max-w-[230px] text-right">
+        <input
+          type="checkbox"
+          checked={notify}
+          onChange={(e) => setNotify(e.target.checked)}
+          className="accent-[var(--color-wh-deep-green)] shrink-0"
+        />
+        <span>Gast per Mail benachrichtigen (bei „Bestätigt"/„Storniert")</span>
+      </label>
     </div>
   );
 }
