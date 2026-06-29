@@ -24,6 +24,7 @@ import SchoolDepositDueEmail from "@/lib/mail/templates/school-deposit-due";
 import SchoolDepositWarningEmail from "@/lib/mail/templates/school-deposit-warning";
 import SchoolBookingCancelledEmail from "@/lib/mail/templates/school-booking-cancelled";
 import HuettenwartNoticeEmail from "@/lib/mail/templates/huettenwart-notice";
+import RestzahlungRequestEmail from "@/lib/mail/templates/restzahlung-request";
 import {
   getOrCreateDepositCheckout,
   SCHOOL_DEPOSIT_DUE_DAYS,
@@ -116,6 +117,7 @@ export async function GET(req: Request) {
     schoolWarningSent: 0,
     schoolCancelled: 0,
     radMatches: 0,
+    manualRestSent: 0,
   };
 
   // ---------- T-21: Zahlungserinnerung (1 Woche vor Auto-Einzug bei T-14) ----------
@@ -232,6 +234,86 @@ export async function GET(req: Request) {
         });
         stats.autoChargeFailed++;
       }
+    }
+  }
+
+  // ---------- Altsystem-Restzahlung: T-14 Stripe-Link-Mail ----------
+  // Buchungen, die im ALTEN System mit 100 € angezahlt wurden (Anzahlung manuell
+  // verbucht). Marker: payments.method == MANUAL_REST_MARKER + status "offen";
+  // amountCents = geplanter Restbetrag (Summe + Kaution − 100). 14 Tage vor
+  // Anreise: Stripe-Checkout-Link für den Rest + Mail. Eng begrenzt auf die
+  // markierten Zeilen — fasst die normale Stripe-Pipeline nicht an.
+  const MANUAL_REST_MARKER = "Altsystem-Restzahlung @T-14";
+  const today0 = isoDayOffset(0);
+  const in14 = isoDayOffset(14);
+  const manualRest = await db
+    .select()
+    .from(payments)
+    .where(and(eq(payments.method, MANUAL_REST_MARKER), eq(payments.status, "offen")));
+  for (const pm of manualRest) {
+    const b = (await db.select().from(bookings).where(eq(bookings.id, pm.bookingId)).limit(1))[0];
+    if (!b || b.status === "storniert") continue;
+    if (b.arrival < today0 || b.arrival > in14) continue; // erst ab T-14, nicht rückwirkend
+    if (await alreadySent(b.id, "restzahlung_request_manual")) continue;
+    const customer = b.customerId
+      ? (await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1))[0]
+      : null;
+    if (!customer) continue;
+    const remainderCents = pm.amountCents;
+    if (remainderCents <= 0) continue;
+    try {
+      const session = await stripe.checkout.sessions.create({
+        mode: "payment",
+        payment_method_types: ["card"],
+        locale: "de",
+        customer_email: customer.email,
+        line_items: [
+          {
+            quantity: 1,
+            price_data: {
+              currency: "eur",
+              unit_amount: remainderCents,
+              product_data: {
+                name: `Restzahlung Wiesenhütte ${b.bookingNumber}`,
+                description: `Buchung ${b.bookingNumber} · ${b.arrival} bis ${b.departure} · inkl. Kaution, abzgl. 100 € Anzahlung.`,
+              },
+            },
+          },
+        ],
+        metadata: { bookingId: b.id, bookingNumber: b.bookingNumber, kind: "nachbelastung" },
+        success_url: `${BASE_URL}/buchen/erfolg?bn=${b.bookingNumber}`,
+        cancel_url: `${BASE_URL}/buchen/abbruch?bn=${b.bookingNumber}`,
+      });
+      if (!session.url) throw new Error("keine Stripe-Session-URL");
+      await sendMail({
+        to: customer.email,
+        subject: `Restzahlung Eurer Wiesenhütten-Buchung ${b.bookingNumber}`,
+        template: "restzahlung_request_manual",
+        bookingId: b.id,
+        react: RestzahlungRequestEmail({
+          firstName: customer.firstName,
+          bookingNumber: b.bookingNumber,
+          institution: b.institution,
+          arrival: formatDateLong(b.arrival),
+          departure: formatDateLong(b.departure),
+          remainderCents,
+          depositCents: b.depositCents,
+          checkoutUrl: session.url,
+        }),
+      });
+      // Marker entschärfen → kein erneuter Versand (zusätzlich zur alreadySent-Idempotenz).
+      await db
+        .update(payments)
+        .set({ method: "Altsystem-Restzahlung gesendet" })
+        .where(eq(payments.id, pm.id));
+      await db.insert(activityLog).values({
+        who: "Cron",
+        what: `Altsystem-Restzahlung angefordert (T-14): ${formatEuro(remainderCents)} → ${customer.email}`,
+        bookingId: b.id,
+      });
+      stats.manualRestSent++;
+    } catch (err) {
+      console.error(`[cron] Altsystem-Restzahlung fehlgeschlagen (${b.bookingNumber}):`, err);
     }
   }
 
