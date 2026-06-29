@@ -58,24 +58,7 @@ export default async function RegisterPage() {
       <p className="text-sm text-[var(--color-wh-black)]/80 mb-6">
         {pc.lead}
       </p>
-      {/* Klarer Abzweig: Mitglied WERDEN läuft über den Online-Beitritt,
-          dieses Formular ist Konto + Nachweis für Bestandsmitglieder. */}
-      <a
-        href="/mitglied-werden"
-        className="flex items-center justify-between gap-3 rounded-xl bg-[var(--color-wh-green-soft)] border border-[var(--color-wh-green)]/40 px-4 py-3 mb-8 no-underline hover:border-[var(--color-wh-deep-green)] transition-colors"
-      >
-        <span>
-          <span className="block font-semibold text-sm text-[var(--color-wh-deep-green)]">
-            {pc.joinTitle}
-          </span>
-          <span className="block text-xs text-[var(--color-wh-deep-green)]/75 mt-0.5">
-            {pc.joinBody}
-          </span>
-        </span>
-        <span className="shrink-0 text-sm font-semibold text-[var(--color-wh-deep-green)]">
-          {pc.joinCta} →
-        </span>
-      </a>
+      {/* Mitglied-werden-CTA hier entfernt — Mitgliedschaft unter /verein */}
       <SignupForm locale={locale} />
     </div>
   );

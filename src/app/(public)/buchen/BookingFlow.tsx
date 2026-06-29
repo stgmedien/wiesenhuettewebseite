@@ -1458,22 +1458,8 @@ const PersonsEditor = ({
           </a>
           {tt.memberLockedExistingEnd}
         </div>
-        <a
-          href="/mitglied-werden?next=/buchen"
-          className="mt-3 flex items-center justify-between gap-3 rounded-xl bg-[var(--color-wh-green-soft)] border border-[var(--color-wh-green)]/40 px-3.5 py-3 no-underline hover:border-[var(--color-wh-deep-green)] transition-colors"
-        >
-          <span>
-            <span className="block font-semibold text-[13px] text-[var(--color-wh-deep-green)]">
-              {tt.memberJoinCta}
-            </span>
-            <span className="block text-[11px] text-[var(--color-wh-deep-green)]/75 mt-0.5">
-              {tt.memberJoinCtaSub}
-            </span>
-          </span>
-          <span className="text-[var(--color-wh-deep-green)] shrink-0" aria-hidden>
-            →
-          </span>
-        </a>
+        {/* Mitglied-werden-CTA im Buchungsflow bewusst entfernt —
+            Mitgliedschaft ist eine Vereinsentscheidung, nicht ein Rabatt-Button. */}
       </div>
     )}
   </div>

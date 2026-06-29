@@ -202,18 +202,8 @@ export const Header = ({
                 {t("nav.login", locale)}
               </Link>
             )}
-            {/* Mitglied-werden-CTA — oben rechts, dezent neben dem Buchen-Button.
-                Nur ab xl (darunter überläuft der volle Header) und NICHT im
-                gemorphten Pill-Zustand (980px-Pill hat dafür keinen Platz). */}
-            <Link
-              href="/mitglied-werden"
-              className={cn(
-                "h-9 px-4 items-center rounded-full border border-[var(--color-wh-snow)]/40 text-[var(--color-wh-snow)]/90 text-sm font-semibold no-underline hover:bg-white/12 transition-colors whitespace-nowrap",
-                morph ? "hidden" : "hidden xl:inline-flex"
-              )}
-            >
-              {hc.member}
-            </Link>
+            {/* Mitglied-werden-CTA bewusst entfernt — Mitgliedschaft ist eine
+                Vereinsentscheidung, kein Buchungs-Rabatt. Infos unter /verein. */}
             <Link
               href="/buchen"
               className="inline-flex h-9 px-4 sm:px-5 items-center rounded-full bg-[var(--color-wh-snow)] text-[var(--color-wh-deep-green)] text-sm font-semibold no-underline hover:bg-white transition-colors whitespace-nowrap"
@@ -315,12 +305,12 @@ export const Header = ({
                       {hc.login}
                     </Link>
                     <Link
-                      href="/mitglied-werden"
+                      href="/verein"
                       onClick={() => setOpen(false)}
                       className="flex items-center gap-2 px-3 py-3 text-base font-medium no-underline rounded-md text-[var(--color-wh-snow)]/90 hover:bg-white/12"
                     >
                       <UserCircle size={18} />
-                      {hc.member}
+                      {t("nav.club", locale)}
                     </Link>
                   </>
                 )}
