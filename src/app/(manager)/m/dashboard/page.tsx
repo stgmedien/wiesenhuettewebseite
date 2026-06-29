@@ -40,7 +40,8 @@ export default async function Dashboard() {
     .where(
       and(
         gte(bookings.arrival, todayIso),
-        lte(bookings.arrival, in7dIso)
+        lte(bookings.arrival, in7dIso),
+        ne(bookings.status, "storniert")
       )
     )
     .orderBy(bookings.arrival)
@@ -59,7 +60,8 @@ export default async function Dashboard() {
     .where(
       and(
         gte(bookings.departure, todayIso),
-        lte(bookings.departure, in7dIso)
+        lte(bookings.departure, in7dIso),
+        ne(bookings.status, "storniert")
       )
     )
     .orderBy(bookings.departure)
