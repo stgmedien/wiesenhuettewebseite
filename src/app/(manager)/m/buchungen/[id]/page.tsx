@@ -8,6 +8,7 @@ import { formatDateLong } from "@/lib/utils";
 import { StatusPill } from "@/components/manager/StatusPill";
 import { StatusActions } from "./StatusActions";
 import { ManualPaymentForm } from "./ManualPaymentForm";
+import { PersonsPriceEditor } from "./PersonsPriceEditor";
 import { ManagerMessage } from "./ManagerMessage";
 import { DepositHoldControl } from "./DepositHoldControl";
 import { InvoiceControl } from "./InvoiceControl";
@@ -298,6 +299,17 @@ export default async function BookingDetail({ params }: Props) {
                 {formatEuro(b.paidCents)}
               </span>
             </div>
+
+            <PersonsPriceEditor
+              bookingId={b.id}
+              initial={{
+                adults: b.adults,
+                members: b.members,
+                children: b.children,
+                pupils: b.pupils,
+                teachers: b.teachers,
+              }}
+            />
 
             {b.depositCents > 0 && (
               <div className="border-t border-[var(--color-wh-winter-grey)] mt-4 pt-4">
