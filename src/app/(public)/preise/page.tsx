@@ -410,17 +410,17 @@ export default async function PreisePage() {
       {/* MITGLIEDSCHAFT */}
       <section className="px-6 sm:px-8 pb-12">
         <div className="max-w-[1080px] mx-auto">
-          <div className="rounded-[var(--radius-card)] bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] p-7 sm:p-9 flex flex-col sm:flex-row sm:items-center gap-6 justify-between">
-            <div className="max-w-2xl">
-              <h2 className="text-[22px] sm:text-[26px] m-0 mb-2 text-[var(--color-wh-snow)]">{c.memberHeading}</h2>
-              <p className="m-0 text-[15px] leading-relaxed text-[var(--color-wh-snow)]/85">{c.memberBody}</p>
-            </div>
-            <Link
-              href="/mitglied-werden"
-              className="shrink-0 inline-flex items-center gap-2 h-12 px-6 rounded-[var(--radius-btn)] bg-[var(--color-wh-snow)] text-[var(--color-wh-deep-green)] font-semibold hover:opacity-90 transition-opacity"
-            >
-              {c.memberCta} <ArrowRight size={18} />
-            </Link>
+          <div className="rounded-[var(--radius-card)] bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] p-7 sm:p-9">
+            <h2 className="text-[22px] sm:text-[26px] m-0 mb-2 text-[var(--color-wh-snow)]">{c.memberHeading}</h2>
+            <p className="m-0 text-[15px] leading-relaxed text-[var(--color-wh-snow)]/85">
+              {c.memberBody}{" "}
+              <Link
+                href="/verein"
+                className="text-[var(--color-wh-snow)] underline underline-offset-2 hover:no-underline"
+              >
+                {c.memberCta} →
+              </Link>
+            </p>
           </div>
         </div>
       </section>
