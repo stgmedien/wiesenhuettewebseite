@@ -108,6 +108,9 @@ export const Footer = ({ locale }: { locale: Locale }) => (
           <Link className="text-[var(--color-wh-snow)]/80 no-underline hover:underline" href="/agb">
             AGB
           </Link>
+          <Link className="text-[var(--color-wh-snow)]/80 no-underline hover:underline" href="/kuendigen">
+            Mitgliedschaft kündigen
+          </Link>
           <CookieSettingsLink />
         </nav>
       </div>
