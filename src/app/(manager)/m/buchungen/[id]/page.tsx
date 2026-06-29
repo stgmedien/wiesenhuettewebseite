@@ -7,6 +7,7 @@ import { formatEuro } from "@/lib/pricing";
 import { formatDateLong } from "@/lib/utils";
 import { StatusPill } from "@/components/manager/StatusPill";
 import { StatusActions } from "./StatusActions";
+import { ManualPaymentForm } from "./ManualPaymentForm";
 import { ManagerMessage } from "./ManagerMessage";
 import { DepositHoldControl } from "./DepositHoldControl";
 import { InvoiceControl } from "./InvoiceControl";
@@ -235,6 +236,7 @@ export default async function BookingDetail({ params }: Props) {
                 </tbody>
               </table>
             )}
+            <ManualPaymentForm bookingId={b.id} />
           </Section>
         </div>
 
