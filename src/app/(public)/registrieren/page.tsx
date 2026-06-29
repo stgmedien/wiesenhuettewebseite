@@ -8,33 +8,33 @@ const PAGE_COPY: Record<Locale, {
   eyebrow: string;
   h1: string;
   lead: string;
-  joinTitle: string;
-  joinBody: string;
-  joinCta: string;
+  claimTitle: string;
+  claimBody: string;
+  claimCta: string;
 }> = {
   de: {
     eyebrow: "Wiesenhütte · Registrierung",
     h1: "Konto anlegen.",
     lead: "Mit einem Konto siehst Du Deine Buchungen, Anfragen und kannst Folgebuchungen schneller abschließen. Bist Du schon Vereinsmitglied, kannst Du das unten angeben — wir schalten Dich nach kurzer Prüfung frei.",
-    joinTitle: "Noch kein Vereinsmitglied?",
-    joinBody: "Tritt online bei — ab 15 €/Jahr, sofort aktiv, 50 % auf Übernachtungen.",
-    joinCta: "Jetzt Mitglied werden",
+    claimTitle: "Schon Vereinsmitglied?",
+    claimBody: "Kein neues Konto nötig — E-Mail eingeben, sofort freischalten und zum halben Preis buchen.",
+    claimCta: "Konto freischalten",
   },
   en: {
     eyebrow: "Wiesenhütte · Sign up",
     h1: "Create an account.",
     lead: "With an account you can see your bookings, enquiries and complete follow-up bookings faster. If you're already a club member, you can tell us below — we'll unlock you after a quick check.",
-    joinTitle: "Not a club member yet?",
-    joinBody: "Join online — from €15/year, active immediately, 50% off overnight stays.",
-    joinCta: "Become a member",
+    claimTitle: "Already a club member?",
+    claimBody: "No new account needed — enter your email, unlock instantly and book at half price.",
+    claimCta: "Unlock account",
   },
   nl: {
     eyebrow: "Wiesenhütte · Registreren",
     h1: "Account aanmaken.",
     lead: "Met een account zie je je boekingen en aanvragen, en kun je vervolgboekingen sneller afronden. Ben je al verenigingslid, dan kun je dat hieronder aangeven — we schakelen je na een korte controle vrij.",
-    joinTitle: "Nog geen verenigingslid?",
-    joinBody: "Word online lid — vanaf €15/jaar, meteen actief, 50% op overnachtingen.",
-    joinCta: "Nu lid worden",
+    claimTitle: "Al verenigingslid?",
+    claimBody: "Geen nieuw account nodig — e-mail invoeren, meteen vrijschakelen en voor de halve prijs boeken.",
+    claimCta: "Account vrijschakelen",
   },
 };
 
@@ -58,7 +58,25 @@ export default async function RegisterPage() {
       <p className="text-sm text-[var(--color-wh-black)]/80 mb-6">
         {pc.lead}
       </p>
-      {/* Mitglied-werden-CTA hier entfernt — Mitgliedschaft unter /verein */}
+      {/* Bestandsmitglieder: sofortige Freischaltung per Brevo-Abgleich —
+          schneller als das Nachweis-Feld unten (keine manuelle Prüfung).
+          (Mitglied-WERDEN-CTA bewusst nicht hier — Mitgliedschaft unter /verein.) */}
+      <a
+        href="/mitglied-konto"
+        className="flex items-center justify-between gap-3 rounded-xl bg-[var(--color-wh-deep-green)] px-4 py-3 mb-8 no-underline hover:bg-[var(--color-wh-green)] transition-colors"
+      >
+        <span>
+          <span className="block font-semibold text-sm text-[var(--color-wh-snow)]">
+            {pc.claimTitle}
+          </span>
+          <span className="block text-xs text-[var(--color-wh-snow)]/85 mt-0.5">
+            {pc.claimBody}
+          </span>
+        </span>
+        <span className="shrink-0 text-sm font-semibold text-[var(--color-wh-snow)]">
+          {pc.claimCta} →
+        </span>
+      </a>
       <SignupForm locale={locale} />
     </div>
   );
