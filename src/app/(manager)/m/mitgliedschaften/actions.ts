@@ -7,6 +7,7 @@ import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { addContactToMembersList } from "@/lib/brevo";
+import { promoteToMemberRole } from "@/lib/membership-role";
 
 /**
  * Neues/verifiziertes Mitglied in die Brevo-Mitgliederliste spiegeln.
@@ -78,6 +79,9 @@ export async function approveMembership(formData: FormData) {
     revalidatePath("/m/mitgliedschaften");
     return;
   }
+
+  // Login-Konto (falls vorhanden) auf Rolle "member" heben — Anzeige "Mitglied".
+  await promoteToMemberRole(updated.email);
 
   const brevoOk = await syncMemberToBrevo(updated, me);
 

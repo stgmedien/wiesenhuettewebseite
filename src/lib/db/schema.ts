@@ -52,7 +52,7 @@ export const paymentStatusEnum = pgEnum("payment_status", [
   "erstattet",
 ]);
 
-export const userRoleEnum = pgEnum("user_role", ["customer", "manager", "admin"]);
+export const userRoleEnum = pgEnum("user_role", ["customer", "member", "manager", "admin"]);
 
 export const membershipStatusEnum = pgEnum("membership_status", [
   "none",

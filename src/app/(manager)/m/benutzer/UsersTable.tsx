@@ -17,7 +17,7 @@ import {
   updateUserEmail,
 } from "./actions";
 
-type Role = "customer" | "manager" | "admin";
+type Role = "customer" | "member" | "manager" | "admin";
 
 type Row = {
   id: string;
@@ -134,6 +134,7 @@ const Td = ({ children, className = "" }: { children: React.ReactNode; className
 const ROLE_BADGE: Record<string, { bg: string; fg: string; label: string }> = {
   admin: { bg: "#2F4A35", fg: "#F7F7F2", label: "Admin" },
   manager: { bg: "#6FA05F", fg: "#F7F7F2", label: "Manager" },
+  member: { bg: "#E7C66B", fg: "#5C4410", label: "Mitglied" },
   customer: { bg: "#EFE6D8", fg: "#8A5A38", label: "Kunde" },
 };
 
@@ -211,7 +212,7 @@ function UserRow({
           </button>
           {openRole && (
             <div className="absolute left-0 top-full mt-1 z-10 bg-white border border-[var(--color-wh-winter-grey)] rounded-md shadow-[var(--shadow-float)] min-w-[140px] py-1">
-              {(["admin", "manager", "customer"] as Role[]).map((r) => (
+              {(["admin", "manager", "member", "customer"] as Role[]).map((r) => (
                 <button
                   key={r}
                   type="button"
