@@ -29,7 +29,7 @@ const COPY: Record<Locale, Copy> = {
   de: {
     eyebrow: "Kontakt",
     h1: "So erreicht Ihr uns.",
-    lead: "Alle Buchungen laufen direkt über unser Online-Buchungstool. Für konkrete Fragen oder Sonderwünsche meldet Ihr Euch bei Tanja Milse vom Vorstand.",
+    lead: "Alle Buchungen laufen direkt über unser Online-Buchungstool. Für konkrete Fragen oder Sonderwünsche meldet Ihr Euch bei Dana vom Vorstand.",
     vorstand: { eyebrow: "Vorstand", line: "Skifreunde Gütersloh e.V. — die Menschen hinter dem Verein." },
     cards: {
       booking: {
@@ -39,7 +39,7 @@ const COPY: Record<Locale, Copy> = {
       },
       fragen: {
         label: "Fragen & Sonderwünsche",
-        info: "Bei konkreten Fragen rund um Eure Hüttenfahrt meldet Ihr Euch direkt bei Tanja Milse vom Vorstand.",
+        info: "Bei konkreten Fragen rund um Eure Hüttenfahrt meldet Ihr Euch direkt bei Dana vom Vorstand.",
       },
       huettenwart: {
         label: "Hüttenwart vor Ort",
@@ -59,7 +59,7 @@ const COPY: Record<Locale, Copy> = {
   en: {
     eyebrow: "Contact",
     h1: "How to reach us.",
-    lead: "All bookings go directly through our online booking tool. For specific questions or special requests, get in touch with Tanja Milse from the board.",
+    lead: "All bookings go directly through our online booking tool. For specific questions or special requests, get in touch with Dana from the board.",
     vorstand: { eyebrow: "Board", line: "Skifreunde Gütersloh e.V. — the people behind the club." },
     cards: {
       booking: {
@@ -69,7 +69,7 @@ const COPY: Record<Locale, Copy> = {
       },
       fragen: {
         label: "Questions & special requests",
-        info: "For specific questions about your stay, get in touch with Tanja Milse from the board.",
+        info: "For specific questions about your stay, get in touch with Dana from the board.",
       },
       huettenwart: {
         label: "On-site cabin keeper",
@@ -89,7 +89,7 @@ const COPY: Record<Locale, Copy> = {
   nl: {
     eyebrow: "Contact",
     h1: "Zo bereik je ons.",
-    lead: "Alle boekingen verlopen direct via onze online boekingstool. Voor concrete vragen of bijzondere wensen neem je contact op met Tanja Milse van het bestuur.",
+    lead: "Alle boekingen verlopen direct via onze online boekingstool. Voor concrete vragen of bijzondere wensen neem je contact op met Dana van het bestuur.",
     vorstand: { eyebrow: "Bestuur", line: "Skifreunde Gütersloh e.V. — de mensen achter de vereniging." },
     cards: {
       booking: {
@@ -99,7 +99,7 @@ const COPY: Record<Locale, Copy> = {
       },
       fragen: {
         label: "Vragen & bijzondere wensen",
-        info: "Voor concrete vragen over jullie verblijf neem je direct contact op met Tanja Milse van het bestuur.",
+        info: "Voor concrete vragen over jullie verblijf neem je direct contact op met Dana van het bestuur.",
       },
       huettenwart: {
         label: "Hutwacht ter plaatse",
@@ -172,7 +172,7 @@ export default async function KontaktPage() {
           <Card
             icon={<Mail size={20} strokeWidth={1.6} />}
             label={c.cards.fragen.label}
-            primary="Tanja Milse"
+            primary="Dana"
             secondary={[
               { kind: "mail", value: "hello@wiesenhuette.de" },
               { kind: "info", value: c.cards.fragen.info },
