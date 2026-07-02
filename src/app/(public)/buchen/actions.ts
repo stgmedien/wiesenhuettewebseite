@@ -13,12 +13,7 @@ import { sendMail } from "@/lib/mail/send";
 import WelcomeEmail from "@/lib/mail/templates/welcome";
 import ReviewPendingGuestEmail from "@/lib/mail/templates/review-pending-guest";
 import ReviewPendingInternalEmail from "@/lib/mail/templates/review-pending-internal";
-import SchoolBookingReceivedEmail from "@/lib/mail/templates/school-booking-received";
-import {
-  isSchoolDeferredPurpose,
-  schoolPrepaymentCents,
-  SCHOOL_DEPOSIT_DUE_DAYS,
-} from "@/lib/school-deposit";
+import { isSchoolDeferredPurpose } from "@/lib/school-deposit";
 import {
   validateDiscountCode,
   calculateDiscountCents,
@@ -528,25 +523,18 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
 
   // Effektive Werte nach Rabatt
   const effectiveSubtotal = breakdown.subtotalCents - discountCents;
-  // Komplettzahlung erzwingen, wenn die Anreise in weniger als 14 Tagen ist —
-  // dann bliebe fuer die normale T-14-Restzahlung keine Zeit. Sonst 50 %.
+  const isSchoolPurpose = isSchoolDeferredPurpose(data.purposeCategory);
+  // Komplettzahlung erzwingen, wenn die Anreise in weniger als 14 Tagen ist.
+  // Schulgruppen zahlen 10 % Anzahlung, alle anderen 50 %.
   const fullPaymentRequired = daysUntilLocalDate(data.arrival) < 14;
+  const prepayPercent = isSchoolPurpose ? 10 : 50;
   const effectivePrepayment = fullPaymentRequired
     ? effectiveSubtotal
-    : Math.round((effectiveSubtotal * 50) / 100);
+    : Math.round((effectiveSubtotal * prepayPercent) / 100);
   const effectiveRemainder = effectiveSubtotal - effectivePrepayment;
 
   // Phase B: Wenn Anlass "Private Feier" → Vorstands-Pruefung vor Stripe.
   const isPrivatePartyReview = data.purposeCategory === "privat";
-
-  // Schulgruppen (Klassenfahrt / Schul-/Studienfahrt) → Zahlungsaufschub:
-  // KEIN Sofort-Checkout, Anzahlung wird per Cron 30 Tage vor Anreise faellig.
-  // ABER nur, wenn die Anreise mehr als 30 Tage in der Zukunft liegt — sonst
-  // bliebe keine Zeit fuer die Anzahlungs-Frist. Bei <= 30 Tagen (erst recht
-  // <= 14) muss sofort online gezahlt werden (normaler Stripe-Checkout unten).
-  const isSchoolDeferred =
-    isSchoolDeferredPurpose(data.purposeCategory) &&
-    daysUntilLocalDate(data.arrival) > SCHOOL_DEPOSIT_DUE_DAYS;
 
   const inserted = await db
     .insert(bookings)
@@ -556,7 +544,7 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
       status: "angefragt",
       requiresReview: isPrivatePartyReview,
       reviewStatus: isPrivatePartyReview ? "pending" : null,
-      paymentMode: isSchoolDeferred ? "school_deferred" : "standard",
+      paymentMode: "standard",
       institution: data.institution?.trim() || null,
       arrival: data.arrival,
       departure: data.departure,
@@ -684,77 +672,6 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
   // per Cron 30 Tage vor Anreise faellig (Zahlungslink-Mail). Bis dahin ist
   // die Buchung in "angefragt" + payment_mode "school_deferred" und blockt
   // die Tage. Sobald die Anzahlung bezahlt ist, laeuft alles wie eine
-  // normale Buchung weiter (Webhook → "bezahlt", Restzahlung T-14).
-  // =====================================================================
-  if (isSchoolDeferred) {
-    const prepaymentLabel = formatEuro(schoolPrepaymentCents(effectiveSubtotal), locale);
-
-    // Faelligkeitsdatum der Anzahlung (Anreise minus 30 Tage), formatiert.
-    const dueDate = new Date(`${data.arrival}T00:00:00Z`);
-    dueDate.setUTCDate(dueDate.getUTCDate() - SCHOOL_DEPOSIT_DUE_DAYS);
-    const depositDueIso = dueDate.toISOString().slice(0, 10);
-
-    try {
-      await sendMail({
-        to: effectiveEmail,
-        subject: `Eure Hüttenfahrt ist reserviert — Buchung ${bookingNumber}`,
-        template: "school-booking-received",
-        bookingId,
-        react: SchoolBookingReceivedEmail({
-          firstName: data.firstName,
-          bookingNumber,
-          institution: data.institution?.trim() || "Eure Gruppe",
-          arrival: formatDateLong(data.arrival),
-          departure: formatDateLong(data.departure),
-          persons: totalPersons,
-          nights: breakdown.nights,
-          prepaymentEuroLabel: prepaymentLabel,
-          depositDueDateLabel: formatDateLong(depositDueIso),
-        }),
-      });
-    } catch (err) {
-      console.error("[school-booking-received] mail failed (non-blocking):", err);
-    }
-
-    // Interne Notification an den Vorstand (optional, non-blocking).
-    const internalToSchool = process.env.MAIL_INTERNAL_TO;
-    if (internalToSchool) {
-      const baseUrlSchool =
-        process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.xn--wiesenhtte-geb.com";
-      try {
-        await sendMail({
-          to: internalToSchool,
-          subject: `Schulgruppen-Buchung (Zahlungsaufschub) — ${bookingNumber}`,
-          template: "review-pending-internal",
-          bookingId,
-          react: ReviewPendingInternalEmail({
-            bookingNumber,
-            managerUrl: `${baseUrlSchool}/m/buchungen/${bookingId}`,
-            guestName: `${data.firstName} ${data.lastName}`,
-            guestEmail: effectiveEmail,
-            guestPhone: data.phone ?? null,
-            arrival: data.arrival,
-            departure: data.departure,
-            persons: totalPersons,
-            partyType: `Schulgruppe · ${data.institution?.trim() || "—"}`,
-            reason: `Zahlungsaufschub: Anzahlung ${prepaymentLabel} wird ${formatDateLong(depositDueIso)} (30 Tage vor Anreise) per Link fällig.`,
-          }),
-        });
-      } catch (err) {
-        console.error("[school-internal-notify] mail failed (non-blocking):", err);
-      }
-    }
-
-    await db.insert(activityLog).values({
-      who: "Portal",
-      what: `Schulgruppen-Buchung ${bookingNumber} eingegangen (Zahlungsaufschub) — Anzahlung ${prepaymentLabel} wird ${formatDateLong(depositDueIso)} fällig.`,
-      bookingId,
-    });
-
-    return { ok: true, schoolDeferred: true, bookingNumber };
-  }
-  // =====================================================================
-
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
   let checkoutSession;
   try {
@@ -782,7 +699,9 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
             product_data: {
               name: fullPaymentRequired
                 ? CL.fullName(data.arrival, data.departure)
-                : CL.depositName(data.arrival, data.departure),
+                : isSchoolPurpose
+                  ? CL.depositName(data.arrival, data.departure).replace("50 %", "10 %").replace("50%", "10%")
+                  : CL.depositName(data.arrival, data.departure),
               description: fullPaymentRequired
                 ? CL.fullDescription(totalPersons, breakdown.nights, bookingNumber, discountSnippet)
                 : CL.depositDescription(

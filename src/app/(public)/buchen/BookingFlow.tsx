@@ -699,21 +699,11 @@ export const BookingFlow = ({
     purposeCategory === "firma";
   const institutionValid = !institutionRequired || institution.trim().length >= 2;
 
-  // Schulgruppen (Klassenfahrt / Schul-/Studienfahrt): Zahlungsaufschub greift
-  // NUR, wenn die Anreise mehr als 30 Tage in der Zukunft liegt — sonst bliebe
-  // keine Zeit fuer die Anzahlungs-Frist und es muss sofort online gezahlt
-  // werden (30 muss mit SCHOOL_DEPOSIT_DUE_DAYS im Backend uebereinstimmen).
   const isSchoolPurpose = purposeCategory === "klasse" || purposeCategory === "schul";
-  const isSchoolDeferred =
-    isSchoolPurpose && !!arrival && daysUntilLocalDate(arrival) > 30;
-  // Schul-Anlass, aber Anreise <= 30 Tage → sofort zahlen (Hinweis im UI).
-  const isSchoolImmediate = isSchoolPurpose && !isSchoolDeferred;
-
   // Komplettzahlung: bei JEDER Buchung mit Anreise < 14 Tagen wird der gesamte
-  // Betrag sofort fällig (keine 50/50-Aufteilung mehr). Muss mit dem Backend
-  // übereinstimmen. Greift nicht im Schul-Aufschub (der ist immer > 30 Tage).
-  const fullPaymentRequired =
-    !isSchoolDeferred && !!arrival && daysUntilLocalDate(arrival) < 14;
+  // Betrag sofort fällig. Schulgruppen zahlen sonst 10 %, alle anderen 50 %.
+  const fullPaymentRequired = !!arrival && daysUntilLocalDate(arrival) < 14;
+  const prepayPercent = isSchoolPurpose ? 10 : 50;
 
   // Feld-Validität (für Inline-Fehler in Schritt 2).
   const firstNameValid = firstName.trim().length > 0;
@@ -762,12 +752,6 @@ export const BookingFlow = ({
       if ("requiresReview" in res && res.requiresReview) {
         track("booking_review_requested", { nights: breakdown?.nights, purpose: purposeCategory || null });
         window.location.href = `/buchen/pruefung?b=${encodeURIComponent(res.bookingNumber)}`;
-        return;
-      }
-      // Schulgruppe: kein Sofort-Checkout — Anzahlung wird später per Mail fällig.
-      if ("schoolDeferred" in res && res.schoolDeferred) {
-        track("booking_school_deferred", { nights: breakdown?.nights });
-        window.location.href = `/buchen/schul-anfrage?b=${encodeURIComponent(res.bookingNumber)}`;
         return;
       }
       if ("checkoutUrl" in res && res.checkoutUrl) {
@@ -1094,125 +1078,41 @@ export const BookingFlow = ({
               tt={tt}
             />
 
-            {/* Discount-Code */}
-            <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-4">
-              <p className="text-sm font-semibold text-[var(--color-wh-deep-green)] m-0 mb-2">
-                {tt.discountH}
-              </p>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={discountCode}
-                  onChange={(e) => {
-                    setDiscountCode(e.target.value.toUpperCase());
-                    setDiscountState({ status: "idle" });
-                  }}
-                  placeholder={tt.discountPlaceholder}
-                  disabled={discountState.status === "valid"}
-                  className="flex-1 rounded-lg border border-[var(--color-wh-winter-grey)] px-3 py-2 text-sm font-mono uppercase tracking-wider disabled:bg-[var(--color-wh-beige)] disabled:opacity-70"
-                />
-                {discountState.status !== "valid" ? (
-                  <button
-                    type="button"
-                    disabled={!discountCode.trim() || discountState.status === "checking"}
-                    onClick={async () => {
-                      setDiscountState({ status: "checking" });
-                      const res = await previewDiscountAction(
-                        discountCode.trim(),
-                        breakdown.subtotalCents
-                      );
-                      if (res.ok) {
-                        setDiscountState({
-                          status: "valid",
-                          code: res.code,
-                          discountCents: res.discountCents,
-                        });
-                      } else {
-                        setDiscountState({ status: "invalid", error: res.error });
-                      }
-                    }}
-                    className="rounded-full bg-[var(--color-wh-deep-green)] text-white px-4 py-2 text-sm font-semibold disabled:opacity-50"
-                  >
-                    {discountState.status === "checking" ? tt.discountChecking : tt.discountApply}
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setDiscountCode("");
-                      setDiscountState({ status: "idle" });
-                    }}
-                    className="rounded-full border border-[var(--color-wh-winter-grey)] px-4 py-2 text-sm"
-                  >
-                    {tt.discountRemove}
-                  </button>
-                )}
-              </div>
-              {discountState.status === "valid" && (
-                <p className="text-sm text-emerald-700 mt-2 m-0">
-                  ✓ {tt.discountAppliedPre} <span className="font-mono">{discountState.code}</span> {tt.discountAppliedPost} —{" "}
-                  <strong>−{formatEuro(discountState.discountCents, locale)}</strong>
-                </p>
-              )}
-              {discountState.status === "invalid" && (
-                <p className="text-sm text-red-700 mt-2 m-0">{discountState.error}</p>
-              )}
-            </div>
-
             {fullPaymentRequired ? (
               /* Anreise < 14 Tage → kompletter Betrag sofort fällig. */
               <div className="rounded-[var(--radius-md)] border-l-4 border-[var(--color-wh-sunset)] bg-[var(--color-wh-beige)] px-4 py-3 text-sm text-[var(--color-wh-black)]">
                 {tt.fullPaymentNote}
               </div>
-            ) : isSchoolImmediate ? (
-              /* Schul-Anlass, aber Anreise <= 30 Tage → 50 % Anzahlung sofort. */
-              <div className="rounded-[var(--radius-md)] border-l-4 border-[var(--color-wh-sunset)] bg-[var(--color-wh-beige)] px-4 py-3 text-sm text-[var(--color-wh-black)]">
-                {tt.schoolImmediateNote}
-              </div>
             ) : null}
 
-            {isSchoolDeferred ? (
-              /* Schulgruppen: keine Sofortzahlung — Anzahlung wird ~30 Tage
-                 vor Anreise per Mail fällig. */
-              <div className="bg-[var(--color-wh-beige)] rounded-[var(--radius-card)] border-l-4 border-[var(--color-wh-green)] p-5 text-sm text-[var(--color-wh-black)]">
-                <p className="m-0 font-semibold mb-2">{tt.schoolPayTitle}</p>
-                <p className="m-0">{tt.schoolPayBody}</p>
-                <p className="m-0 mt-3 text-[var(--color-wh-fg-muted)]">{tt.kurtaxeNote}</p>
-              </div>
-            ) : (
-              (() => {
-                const off =
-                  discountState.status === "valid" ? discountState.discountCents : 0;
-                const subAfter = breakdown.subtotalCents - off;
-                // Komplettzahlung (< 14 Tage) → 100 %, sonst 50 %.
-                const prepayAfter = fullPaymentRequired
-                  ? subAfter
-                  : Math.round((subAfter * 50) / 100);
-                const remainAfter = subAfter - prepayAfter;
-                const totalDueAfter = prepayAfter + breakdown.depositCents;
-                return (
-                  <div className="bg-[var(--color-wh-beige)] rounded-[var(--radius-card)] p-5 text-sm text-[var(--color-wh-black)]">
-                    <p className="m-0 font-semibold mb-2">{tt.dueToday}</p>
-                    <p className="m-0">
-                      <strong>{formatEuro(prepayAfter, locale)}</strong>{" "}
-                      {fullPaymentRequired ? tt.fullAmountLabel : tt.deposit} (
-                      {fullPaymentRequired ? tt.bookingSum : tt.bookingTotalAfter}
-                      {off > 0 ? ` ${tt.afterDiscount}` : ""}) +{" "}
-                      <strong>{formatEuro(breakdown.depositCents, locale)}</strong> {tt.kaution} ={" "}
-                      <strong>{formatEuro(totalDueAfter, locale)}</strong>
+            {(() => {
+              const subAfter = breakdown.subtotalCents;
+              const prepayAfter = fullPaymentRequired
+                ? subAfter
+                : Math.round((subAfter * prepayPercent) / 100);
+              const remainAfter = subAfter - prepayAfter;
+              const totalDueAfter = prepayAfter + breakdown.depositCents;
+              return (
+                <div className="bg-[var(--color-wh-beige)] rounded-[var(--radius-card)] p-5 text-sm text-[var(--color-wh-black)]">
+                  <p className="m-0 font-semibold mb-2">{tt.dueToday}</p>
+                  <p className="m-0">
+                    <strong>{formatEuro(prepayAfter, locale)}</strong>{" "}
+                    {fullPaymentRequired ? tt.fullAmountLabel : tt.deposit} (
+                    {fullPaymentRequired ? tt.bookingSum : tt.bookingTotalAfter}) +{" "}
+                    <strong>{formatEuro(breakdown.depositCents, locale)}</strong> {tt.kaution} ={" "}
+                    <strong>{formatEuro(totalDueAfter, locale)}</strong>
+                  </p>
+                  {remainAfter > 0 && (
+                    <p className="m-0 mt-3">
+                      {tt.restzahlung} <strong>{formatEuro(remainAfter, locale)}</strong> {tt.restzahlungBody}
                     </p>
-                    {remainAfter > 0 && (
-                      <p className="m-0 mt-3">
-                        {tt.restzahlung} <strong>{formatEuro(remainAfter, locale)}</strong> {tt.restzahlungBody}
-                      </p>
-                    )}
-                    <p className="m-0 mt-3 text-[var(--color-wh-fg-muted)]">
-                      {tt.kurtaxeNote}
-                    </p>
-                  </div>
-                );
-              })()
-            )}
+                  )}
+                  <p className="m-0 mt-3 text-[var(--color-wh-fg-muted)]">
+                    {tt.kurtaxeNote}
+                  </p>
+                </div>
+              );
+            })()}
 
             {/* Storno-Regelwerk klar im UI */}
             <CancellationPolicyBox arrival={arrival} tt={tt} locale={locale} />
@@ -1239,14 +1139,10 @@ export const BookingFlow = ({
               >
                 {(() => {
                   if (submitting) return tt.redirecting;
-                  // Schulgruppen: kein Betrag heute — nur Reservierungs-Anfrage.
-                  if (isSchoolDeferred) return tt.schoolSubmit;
-                  const off =
-                    discountState.status === "valid" ? discountState.discountCents : 0;
-                  const subAfter = breakdown.subtotalCents - off;
+                  const subAfter = breakdown.subtotalCents;
                   const prepayAfter = fullPaymentRequired
                     ? subAfter
-                    : Math.round((subAfter * 50) / 100);
+                    : Math.round((subAfter * prepayPercent) / 100);
                   const totalDueAfter = prepayAfter + breakdown.depositCents;
                   return `${tt.payNow} — ${formatEuro(totalDueAfter, locale)}`;
                 })()}
@@ -1262,8 +1158,8 @@ export const BookingFlow = ({
           arrival={arrival}
           departure={departure}
           totalPersons={totalPersons}
-          isSchoolDeferred={isSchoolDeferred}
           fullPayment={fullPaymentRequired}
+          prepayPercent={prepayPercent}
           tt={tt}
           locale={locale}
         />
@@ -1529,8 +1425,8 @@ const PriceSummary = ({
   arrival,
   departure,
   totalPersons,
-  isSchoolDeferred = false,
   fullPayment = false,
+  prepayPercent = 50,
   tt,
   locale,
 }: {
@@ -1538,8 +1434,8 @@ const PriceSummary = ({
   arrival: string;
   departure: string;
   totalPersons: number;
-  isSchoolDeferred?: boolean;
   fullPayment?: boolean;
+  prepayPercent?: number;
   tt: BfCopy;
   locale: "de" | "en" | "nl";
 }) => {
@@ -1579,36 +1475,7 @@ const PriceSummary = ({
         </div>
       </div>
 
-      {isSchoolDeferred ? (
-        /* Schulgruppen: heute fällt nichts an. Anzahlung + Kaution werden
-           ~30 Tage vor Anreise per Link fällig, Restzahlung 14 Tage vorher. */
-        <>
-          <div className="border-t border-[var(--color-wh-winter-grey)] mt-4 pt-4 space-y-2 text-sm">
-            <div className="flex justify-between text-base">
-              <span className="font-bold">{tt.todayToPay}</span>
-              <span className="font-bold text-[var(--color-wh-deep-green)]">
-                {formatEuro(0, locale)}
-              </span>
-            </div>
-          </div>
-          <div className="border-t border-[var(--color-wh-winter-grey)] mt-4 pt-4 space-y-2 text-xs text-[var(--color-wh-fg-muted)]">
-            <div className="flex justify-between">
-              <span>{tt.depositDueLater}</span>
-              <span>{formatEuro(breakdown.prepaymentCents, locale)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>{tt.plusKaution}</span>
-              <span>{formatEuro(breakdown.depositCents, locale)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>{tt.remainderBefore}</span>
-              <span>{formatEuro(breakdown.remainderCents, locale)}</span>
-            </div>
-            <div className="pt-1">{tt.schoolSummaryNote}</div>
-            <div>{tt.kurtaxeShort}</div>
-          </div>
-        </>
-      ) : fullPayment ? (
+      {fullPayment ? (
         /* Anreise < 14 Tage: kompletter Mietpreis + Kaution sofort fällig. */
         <>
           <div className="border-t border-[var(--color-wh-winter-grey)] mt-4 pt-4 space-y-2 text-sm">
@@ -1642,8 +1509,8 @@ const PriceSummary = ({
               {tt.dueTodayShort}
             </div>
             <div className="flex justify-between">
-              <span>{tt.prepayment50}</span>
-              <span className="font-semibold">{formatEuro(breakdown.prepaymentCents, locale)}</span>
+              <span>{tt.prepayment50.replace("50", String(prepayPercent))}</span>
+              <span className="font-semibold">{formatEuro(Math.round(breakdown.subtotalCents * prepayPercent / 100), locale)}</span>
             </div>
             <div className="flex justify-between">
               <span>{tt.plusKaution}</span>
@@ -1652,7 +1519,7 @@ const PriceSummary = ({
             <div className="flex justify-between text-base pt-2 border-t border-[var(--color-wh-winter-grey)]">
               <span className="font-bold">{tt.todayToPay}</span>
               <span className="font-bold text-[var(--color-wh-deep-green)]">
-                {formatEuro(breakdown.totalDueCents, locale)}
+                {formatEuro(Math.round(breakdown.subtotalCents * prepayPercent / 100) + breakdown.depositCents, locale)}
               </span>
             </div>
           </div>
@@ -1660,7 +1527,7 @@ const PriceSummary = ({
           <div className="border-t border-[var(--color-wh-winter-grey)] mt-4 pt-4 space-y-1 text-xs text-[var(--color-wh-fg-muted)]">
             <div className="flex justify-between">
               <span>{tt.remainderBefore}</span>
-              <span>{formatEuro(breakdown.remainderCents, locale)}</span>
+              <span>{formatEuro(breakdown.subtotalCents - Math.round(breakdown.subtotalCents * prepayPercent / 100), locale)}</span>
             </div>
             <div>{tt.kurtaxeShort}</div>
           </div>

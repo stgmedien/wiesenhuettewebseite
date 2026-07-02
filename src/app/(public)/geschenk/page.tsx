@@ -1,11 +1,10 @@
-import Link from "next/link";
-import { Flame, Mountain, Sparkles, ShieldCheck, Clock3, Mail, Coins, ArrowRight } from "lucide-react";
-import { PurchaseClient } from "./PurchaseClient";
-import { getServerLocale } from "@/lib/i18n";
-import type { Locale } from "@/lib/i18n-shared";
-import { ScrollReveal } from "@/components/public/ScrollReveal";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-static";
+
+export default function GeschenkPage() {
+  redirect("/");
+}
 
 export const metadata = {
   title: "Geschenk-Gutschein · Wiesenhütte",
