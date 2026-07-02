@@ -3,7 +3,6 @@ import Image from "next/image";
 import { DonationSection } from "@/components/public/huette/DonationSection";
 import { getServerLocale } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n-shared";
-import { FloorPlanExplorer, type Floor } from "@/components/public/huette/FloorPlanExplorer";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { lodgingBusinessSchema } from "@/lib/seo";
 
@@ -500,43 +499,6 @@ export default async function HuettePage({
   const spendeStatus =
     sp.spende === "danke" ? ("danke" as const) : sp.spende === "fehler" ? ("fehler" as const) : null;
 
-  // Floor-Plan-Daten zentral, damit der Client-Component keinen Locale-Branch
-  // braucht — wir füllen die Anzeige-Texte aus c.floorPlans.floors[key].
-  const FLOORS: Floor[] = [
-    {
-      key: "ug",
-      label: c.floorPlans.floors.ug.label,
-      tag: c.floorPlans.floors.ug.tag,
-      src: "/media/photos/grundrisse/untergeschoss.png",
-      sleeps: 0,
-      highlights: c.floorPlans.floors.ug.highlights,
-    },
-    {
-      key: "eg",
-      label: c.floorPlans.floors.eg.label,
-      tag: c.floorPlans.floors.eg.tag,
-      src: "/media/photos/grundrisse/erdgeschoss.png",
-      sleeps: 0,
-      highlights: c.floorPlans.floors.eg.highlights,
-    },
-    {
-      key: "og",
-      label: c.floorPlans.floors.og.label,
-      tag: c.floorPlans.floors.og.tag,
-      src: "/media/photos/grundrisse/obergeschoss.png",
-      sleeps: 12,
-      highlights: c.floorPlans.floors.og.highlights,
-    },
-    {
-      key: "dg",
-      label: c.floorPlans.floors.dg.label,
-      tag: c.floorPlans.floors.dg.tag,
-      src: "/media/photos/grundrisse/dachgeschoss.png",
-      sleeps: 21,
-      highlights: c.floorPlans.floors.dg.highlights,
-    },
-  ];
-
   return (
     <div>
       <JsonLd data={lodgingBusinessSchema()} />
@@ -617,21 +579,6 @@ export default async function HuettePage({
           </div>
         </div>
       </section>
-
-      <FloorPlanExplorer
-        floors={FLOORS}
-        texts={{
-          eyebrow: c.floorPlans.eyebrow,
-          h2: c.floorPlans.h2,
-          lead: c.floorPlans.lead,
-          sleepingLabel: c.floorPlans.sleepingLabel,
-          sleepingWordOne: c.floorPlans.sleepingWordOne,
-          sleepingWordOther: c.floorPlans.sleepingWordOther,
-          nonSleepingLabel: c.floorPlans.nonSleepingLabel,
-          roomsLabel: c.floorPlans.roomsLabel,
-          selectAriaLabel: c.floorPlans.selectAriaLabel,
-        }}
-      />
 
       <section className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24">
         <div className="max-w-[1280px] mx-auto">
