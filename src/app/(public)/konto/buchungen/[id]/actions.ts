@@ -12,6 +12,8 @@ import { formatDateLong } from "@/lib/utils";
 import { sendMail } from "@/lib/mail/send";
 import BookingCancelledEmail from "@/lib/mail/templates/booking-cancelled";
 import PersonsIncreasedEmail from "@/lib/mail/templates/persons-increased";
+import HuettenwartCancellationEmail from "@/lib/mail/templates/huettenwart-cancellation";
+import { HUETTENWART_EMAIL } from "@/lib/huettenwart";
 
 const idSchema = z.string().uuid();
 
@@ -107,6 +109,25 @@ export async function cancelOwnBooking(formData: FormData) {
     });
   } catch (err) {
     console.error("[cancel-mail] failed:", err);
+  }
+
+  // Hüttenwart informieren (Issue #68) — Buchung aus dem Kalender streichen.
+  try {
+    await sendMail({
+      to: HUETTENWART_EMAIL,
+      subject: `Stornierung — ${booking.bookingNumber} (${formatDateLong(booking.arrival)})`,
+      template: "huettenwart-cancellation",
+      bookingId: booking.id,
+      react: HuettenwartCancellationEmail({
+        bookingNumber: booking.bookingNumber,
+        guestName: `${customer.firstName} ${customer.lastName}`.trim(),
+        arrival: formatDateLong(booking.arrival),
+        departure: formatDateLong(booking.departure),
+        persons: booking.persons,
+      }),
+    });
+  } catch (err) {
+    console.error("[cancel-mail] Hüttenwart-Mail fehlgeschlagen:", err);
   }
 
   revalidatePath(`/konto/buchungen/${booking.id}`);
