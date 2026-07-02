@@ -8,7 +8,14 @@ import { StatusPill } from "@/components/manager/StatusPill";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Buchungen · Wiesenhütte Manager" };
 
-export default async function BookingsListPage() {
+export default async function BookingsListPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ sort?: string }>;
+}) {
+  const { sort } = await searchParams;
+  const sortByBooked = sort === "booked";
+
   const rows = await db
     .select({
       id: bookings.id,
@@ -29,7 +36,7 @@ export default async function BookingsListPage() {
     })
     .from(bookings)
     .leftJoin(customers, eq(customers.id, bookings.customerId))
-    .orderBy(desc(bookings.arrival));
+    .orderBy(sortByBooked ? desc(bookings.createdAt) : desc(bookings.arrival));
 
   return (
     <div className="px-4 sm:px-8 py-8 sm:py-10 max-w-[1400px]">
@@ -39,12 +46,28 @@ export default async function BookingsListPage() {
           <h1 className="text-[28px] sm:text-[40px] mt-2 mb-0">Alle Buchungen</h1>
           <p className="text-[var(--color-wh-fg-muted)] m-0 mt-2">{rows.length} insgesamt</p>
         </div>
-        <Link
-          href="/m/manuell"
-          className="inline-flex h-11 px-5 items-center justify-center rounded-[var(--radius-btn)] bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] no-underline font-semibold shrink-0"
-        >
-          + Manuelle Buchung
-        </Link>
+        <div className="flex items-center gap-3">
+          <div className="flex rounded-[var(--radius-btn)] border border-[var(--color-wh-winter-grey)] overflow-hidden text-sm font-medium">
+            <Link
+              href="/m/buchungen"
+              className={`px-4 py-2 no-underline transition-colors ${!sortByBooked ? "bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)]" : "text-[var(--color-wh-fg-muted)] hover:bg-[var(--color-wh-green-soft)]/30"}`}
+            >
+              Anreise
+            </Link>
+            <Link
+              href="/m/buchungen?sort=booked"
+              className={`px-4 py-2 no-underline transition-colors border-l border-[var(--color-wh-winter-grey)] ${sortByBooked ? "bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)]" : "text-[var(--color-wh-fg-muted)] hover:bg-[var(--color-wh-green-soft)]/30"}`}
+            >
+              Gebucht am
+            </Link>
+          </div>
+          <Link
+            href="/m/manuell"
+            className="inline-flex h-11 px-5 items-center justify-center rounded-[var(--radius-btn)] bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] no-underline font-semibold shrink-0"
+          >
+            + Manuelle Buchung
+          </Link>
+        </div>
       </div>
 
       <div className="mt-8 bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] overflow-hidden">
