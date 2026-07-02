@@ -150,6 +150,9 @@ export async function GET(req: Request) {
           daysUntilArrival: 21,
           paymentLink: null,
           autoChargePlanned: !!b.stripePaymentIntentId,
+          // Teilnehmer nachmelden geht bis Anreise−15 (Issue #60); bei T-21 ist
+          // das heute+6 — letzter Hinweis.
+          increaseHintUntil: formatDateLong(isoDayOffset(6)),
         }),
       });
       stats.paymentReminderSent++;

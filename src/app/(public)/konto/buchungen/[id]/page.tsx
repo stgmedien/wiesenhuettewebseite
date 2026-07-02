@@ -3,9 +3,10 @@ import { redirect, notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { bookings, customers, payments, invoices } from "@/lib/db/schema";
 import { eq, and, desc } from "drizzle-orm";
-import { formatEuro, cancellationFee } from "@/lib/pricing";
+import { formatEuro, cancellationFee, RULES } from "@/lib/pricing";
 import { formatDateLong } from "@/lib/utils";
 import { CancelBookingButton } from "./CancelBookingButton";
+import { AddPersonsForm } from "./AddPersonsForm";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -65,6 +66,20 @@ export default async function BuchungDetailPage({ params }: Props) {
   const daysToRefund = Math.ceil((refundDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
   const isPostStay = new Date() > departureDate;
 
+  // Teilnehmer nachmelden (Issue #60): nur erhöhen, letzter Tag = Anreise − 15
+  // (ab T-14 läuft die Restzahlung). Muss zur Prüfung in actions.ts passen.
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const arrivalDate = new Date(`${booking.arrival}T00:00:00`);
+  const daysUntilArrival = Math.round((arrivalDate.getTime() - today.getTime()) / 86_400_000);
+  const increaseDeadline = new Date(arrivalDate);
+  increaseDeadline.setDate(increaseDeadline.getDate() - 15);
+  const canIncreasePersons =
+    (booking.status === "bezahlt" || booking.status === "bestaetigt") &&
+    daysUntilArrival >= 15 &&
+    booking.paidCents < booking.subtotalCents &&
+    booking.persons < RULES.maxPersons;
+
   return (
     <div className="container max-w-3xl mx-auto px-6 py-12">
       <Link
@@ -92,6 +107,27 @@ export default async function BuchungDetailPage({ params }: Props) {
         </div>
         <span className={statusPill(booking.status)}>{statusLabel(booking.status)}</span>
       </div>
+
+      {/* Teilnehmer nachmelden — gut sichtbar vor der Preisübersicht (Issue #60) */}
+      {canIncreasePersons && (
+        <AddPersonsForm
+          bookingId={booking.id}
+          booked={{
+            adults: booking.adults,
+            members: booking.members,
+            children: booking.children,
+            pupils: booking.pupils,
+            teachers: booking.teachers,
+          }}
+          memberAllowed={customer.membershipStatus === "verified"}
+          deadlineLabel={increaseDeadline.toLocaleDateString("de-DE", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })}
+          maxPersons={RULES.maxPersons}
+        />
+      )}
 
       {/* Pricing-Aufschluesselung */}
       <section className="rounded-2xl bg-white border border-[var(--color-wh-winter-grey)]/40 p-6 mb-6">
