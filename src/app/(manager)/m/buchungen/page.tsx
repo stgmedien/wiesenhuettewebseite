@@ -21,6 +21,7 @@ export default async function BookingsListPage() {
       totalCents: bookings.subtotalCents,
       paidCents: bookings.paidCents,
       depositCents: bookings.depositCents,
+      createdAt: bookings.createdAt,
       customerFirst: customers.firstName,
       customerLast: customers.lastName,
       customerType: customers.type,
@@ -56,6 +57,7 @@ export default async function BookingsListPage() {
               <Th>Zeitraum</Th>
               <Th>Gast</Th>
               <Th>Personen</Th>
+              <Th>Gebucht am</Th>
               <Th>Summe</Th>
               <Th>Bezahlt</Th>
             </tr>
@@ -63,7 +65,7 @@ export default async function BookingsListPage() {
           <tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-[var(--color-wh-fg-muted)]">
+                <td colSpan={8} className="px-4 py-8 text-center text-[var(--color-wh-fg-muted)]">
                   Noch keine Buchungen.
                 </td>
               </tr>
@@ -94,6 +96,12 @@ export default async function BookingsListPage() {
                   <div className="text-xs text-[var(--color-wh-fg-muted)]">{r.customerEmail}</div>
                 </Td>
                 <Td>{r.persons}</Td>
+                <Td>
+                  <div>{new Date(r.createdAt).toLocaleDateString("de-DE")}</div>
+                  <div className="text-xs text-[var(--color-wh-fg-muted)]">
+                    {new Date(r.createdAt).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })} Uhr
+                  </div>
+                </Td>
                 <Td>{formatEuro(r.totalCents + r.depositCents)}</Td>
                 <Td>
                   <span
