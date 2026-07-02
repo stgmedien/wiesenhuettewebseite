@@ -17,7 +17,7 @@ import BookingConfirmedEmail from "@/lib/mail/templates/booking-confirmed";
 import BookingCancelledEmail from "@/lib/mail/templates/booking-cancelled";
 import AvsSelfCheckinEmail from "@/lib/mail/templates/avs-selfcheckin";
 import HuettenwartCancellationEmail from "@/lib/mail/templates/huettenwart-cancellation";
-import { HUETTENWART_EMAIL } from "@/lib/huettenwart";
+import { HUETTENWART_EMAIL, HUETTENWART_CC } from "@/lib/huettenwart";
 import { formatDateLong } from "@/lib/utils";
 import { formatEuro, calculatePrice, type Persons } from "@/lib/pricing";
 import { resolveTariffs } from "@/lib/pricing-tariffs";
@@ -131,6 +131,7 @@ export async function setBookingStatus(
         : null;
       await sendMail({
         to: HUETTENWART_EMAIL,
+        bcc: HUETTENWART_CC,
         subject: `Stornierung — ${b.bookingNumber} (${formatDateLong(b.arrival)})`,
         template: "huettenwart-cancellation",
         bookingId,
