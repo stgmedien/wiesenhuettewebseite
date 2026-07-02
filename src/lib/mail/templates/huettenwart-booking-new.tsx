@@ -82,9 +82,9 @@ export default function HuettenwartNewBookingEmail({
       <Preview>Neue Buchung {bookingNumber} — {arrival}</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Text style={eyebrow}>Wiesenhütte · Hüttenwart</Text>
+          <Text style={eyebrow}>Wiesenhütte · Hüttenservice</Text>
           <Heading style={heading}>Neue Buchung eingegangen.</Heading>
-          <Text style={text}>Hallo Toni,</Text>
+          <Text style={text}>Hallo Herr Klauke, liebe Fam. Brandenburg,</Text>
           <Text style={text}>
             die Anzahlung ist da — diese Buchung ist damit fest und kann eingeplant werden:
           </Text>

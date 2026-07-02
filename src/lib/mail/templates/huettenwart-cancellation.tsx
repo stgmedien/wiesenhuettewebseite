@@ -64,9 +64,9 @@ export default function HuettenwartCancellationEmail({
       <Preview>Stornierung {bookingNumber} — {arrival}</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Text style={eyebrow}>Wiesenhütte · Hüttenwart</Text>
+          <Text style={eyebrow}>Wiesenhütte · Hüttenservice</Text>
           <Heading style={heading}>Buchung storniert.</Heading>
-          <Text style={text}>Hallo Toni,</Text>
+          <Text style={text}>Hallo Herr Klauke, liebe Fam. Brandenburg,</Text>
           <Text style={text}>
             diese Buchung wurde storniert — Du kannst sie aus Deinem Kalender streichen:
           </Text>

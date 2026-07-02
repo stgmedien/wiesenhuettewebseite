@@ -18,6 +18,7 @@ import BookingCancelledEmail from "@/lib/mail/templates/booking-cancelled";
 import AvsSelfCheckinEmail from "@/lib/mail/templates/avs-selfcheckin";
 import HuettenwartCancellationEmail from "@/lib/mail/templates/huettenwart-cancellation";
 import { HUETTENWART_EMAIL, HUETTENWART_CC } from "@/lib/huettenwart";
+import { buildIcalCancel } from "@/lib/mail/ical";
 import { formatDateLong } from "@/lib/utils";
 import { formatEuro, calculatePrice, type Persons } from "@/lib/pricing";
 import { resolveTariffs } from "@/lib/pricing-tariffs";
@@ -122,9 +123,8 @@ export async function setBookingStatus(
     }
   }
 
-  // Hüttenwart bei jeder Stornierung informieren (Issue #68) — unabhängig von
-  // der optionalen Gast-Mail, damit Toni die Buchung aus dem Kalender streicht.
-  if (status === "storniert" && b.status !== "storniert") {
+  // Hüttenservice bei Stornierung informieren — nur wenn Zahlung eingegangen ist.
+  if (status === "storniert" && b.status !== "storniert" && b.paidCents > 0) {
     try {
       const c = b.customerId
         ? (await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1))[0]
@@ -135,6 +135,14 @@ export async function setBookingStatus(
         subject: `Stornierung — ${b.bookingNumber} (${formatDateLong(b.arrival)})`,
         template: "huettenwart-cancellation",
         bookingId,
+        attachments: [buildIcalCancel({
+          bookingId,
+          bookingNumber: b.bookingNumber,
+          guestName: c ? `${c.firstName} ${c.lastName}`.trim() : "—",
+          arrival: b.arrival,
+          departure: b.departure,
+          persons: b.persons,
+        })],
         react: HuettenwartCancellationEmail({
           bookingNumber: b.bookingNumber,
           guestName: c ? `${c.firstName} ${c.lastName}`.trim() : "—",

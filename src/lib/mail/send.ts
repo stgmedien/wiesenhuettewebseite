@@ -29,6 +29,12 @@ const getTransporter = (): nodemailer.Transporter => {
   return transporter;
 };
 
+export type MailAttachment = {
+  filename: string;
+  content: string;
+  contentType: string;
+};
+
 export type SendMailArgs = {
   to: string;
   subject: string;
@@ -37,6 +43,7 @@ export type SendMailArgs = {
   bookingId?: string;
   replyTo?: string;
   bcc?: string;
+  attachments?: MailAttachment[];
 };
 
 export const sendMail = async (args: SendMailArgs): Promise<void> => {
@@ -54,6 +61,7 @@ export const sendMail = async (args: SendMailArgs): Promise<void> => {
       text,
       replyTo: args.replyTo,
       bcc: args.bcc,
+      attachments: args.attachments,
     });
 
     await db.insert(emailLog).values({

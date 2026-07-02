@@ -14,6 +14,7 @@ import BookingCancelledEmail from "@/lib/mail/templates/booking-cancelled";
 import PersonsIncreasedEmail from "@/lib/mail/templates/persons-increased";
 import HuettenwartCancellationEmail from "@/lib/mail/templates/huettenwart-cancellation";
 import { HUETTENWART_EMAIL, HUETTENWART_CC } from "@/lib/huettenwart";
+import { buildIcalCancel } from "@/lib/mail/ical";
 
 const idSchema = z.string().uuid();
 
@@ -111,14 +112,22 @@ export async function cancelOwnBooking(formData: FormData) {
     console.error("[cancel-mail] failed:", err);
   }
 
-  // Hüttenwart informieren (Issue #68) — Buchung aus dem Kalender streichen.
-  try {
+  // Hüttenwart informieren (Issue #68) — nur wenn Zahlung eingegangen ist.
+  if (booking.paidCents > 0) try {
     await sendMail({
       to: HUETTENWART_EMAIL,
       bcc: HUETTENWART_CC,
       subject: `Stornierung — ${booking.bookingNumber} (${formatDateLong(booking.arrival)})`,
       template: "huettenwart-cancellation",
       bookingId: booking.id,
+      attachments: [buildIcalCancel({
+        bookingId: booking.id,
+        bookingNumber: booking.bookingNumber,
+        guestName: `${customer.firstName} ${customer.lastName}`.trim(),
+        arrival: booking.arrival,
+        departure: booking.departure,
+        persons: booking.persons,
+      })],
       react: HuettenwartCancellationEmail({
         bookingNumber: booking.bookingNumber,
         guestName: `${customer.firstName} ${customer.lastName}`.trim(),
@@ -128,7 +137,7 @@ export async function cancelOwnBooking(formData: FormData) {
       }),
     });
   } catch (err) {
-    console.error("[cancel-mail] Hüttenwart-Mail fehlgeschlagen:", err);
+    console.error("[cancel-mail] Hüttenservice-Mail fehlgeschlagen:", err);
   }
 
   revalidatePath(`/konto/buchungen/${booking.id}`);
