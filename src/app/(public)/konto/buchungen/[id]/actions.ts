@@ -14,6 +14,7 @@ import BookingCancelledEmail from "@/lib/mail/templates/booking-cancelled";
 import PersonsIncreasedEmail from "@/lib/mail/templates/persons-increased";
 import HuettenwartCancellationEmail from "@/lib/mail/templates/huettenwart-cancellation";
 import { HUETTENWART_EMAIL, HUETTENWART_CC } from "@/lib/huettenwart";
+import { buildIcalCancel } from "@/lib/mail/ical";
 
 const idSchema = z.string().uuid();
 
@@ -119,6 +120,14 @@ export async function cancelOwnBooking(formData: FormData) {
       subject: `Stornierung — ${booking.bookingNumber} (${formatDateLong(booking.arrival)})`,
       template: "huettenwart-cancellation",
       bookingId: booking.id,
+      attachments: [buildIcalCancel({
+        bookingId: booking.id,
+        bookingNumber: booking.bookingNumber,
+        guestName: `${customer.firstName} ${customer.lastName}`.trim(),
+        arrival: booking.arrival,
+        departure: booking.departure,
+        persons: booking.persons,
+      })],
       react: HuettenwartCancellationEmail({
         bookingNumber: booking.bookingNumber,
         guestName: `${customer.firstName} ${customer.lastName}`.trim(),

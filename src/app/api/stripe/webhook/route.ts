@@ -27,6 +27,7 @@ import { addContactToMembersList } from "@/lib/brevo";
 import { promoteToMemberRole } from "@/lib/membership-role";
 import { HUETTENWART_EMAIL, HUETTENWART_CC } from "@/lib/huettenwart";
 import HuettenwartNewBookingEmail from "@/lib/mail/templates/huettenwart-booking-new";
+import { buildIcalInvite } from "@/lib/mail/ical";
 import { formatDateLong } from "@/lib/utils";
 import { createInvoiceForBooking } from "@/lib/invoice";
 import type Stripe from "stripe";
@@ -414,6 +415,14 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
           subject: `Neue Buchung eingegangen — ${booking.bookingNumber} (${formatDateLong(booking.arrival)})`,
           template: "huettenwart-booking-new",
           bookingId,
+          attachments: [buildIcalInvite({
+            bookingId,
+            bookingNumber: booking.bookingNumber,
+            guestName,
+            arrival: booking.arrival,
+            departure: booking.departure,
+            persons: booking.persons,
+          })],
           react: HuettenwartNewBookingEmail({
             bookingNumber: booking.bookingNumber,
             guestName,
