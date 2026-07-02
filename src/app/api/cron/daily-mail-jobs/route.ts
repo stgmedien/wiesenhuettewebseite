@@ -25,6 +25,7 @@ import SchoolDepositWarningEmail from "@/lib/mail/templates/school-deposit-warni
 import SchoolBookingCancelledEmail from "@/lib/mail/templates/school-booking-cancelled";
 import HuettenwartNoticeEmail from "@/lib/mail/templates/huettenwart-notice";
 import RestzahlungRequestEmail from "@/lib/mail/templates/restzahlung-request";
+import { MANUAL_REST_MARKER, MANUAL_REST_SENT_MARKER } from "@/lib/payment-markers";
 import {
   getOrCreateDepositCheckout,
   SCHOOL_DEPOSIT_DUE_DAYS,
@@ -243,7 +244,6 @@ export async function GET(req: Request) {
   // amountCents = geplanter Restbetrag (Summe + Kaution − 100). 14 Tage vor
   // Anreise: Stripe-Checkout-Link für den Rest + Mail. Eng begrenzt auf die
   // markierten Zeilen — fasst die normale Stripe-Pipeline nicht an.
-  const MANUAL_REST_MARKER = "Altsystem-Restzahlung @T-14";
   const today0 = isoDayOffset(0);
   const in14 = isoDayOffset(14);
   const manualRest = await db
@@ -304,7 +304,7 @@ export async function GET(req: Request) {
       // Marker entschärfen → kein erneuter Versand (zusätzlich zur alreadySent-Idempotenz).
       await db
         .update(payments)
-        .set({ method: "Altsystem-Restzahlung gesendet" })
+        .set({ method: MANUAL_REST_SENT_MARKER })
         .where(eq(payments.id, pm.id));
       await db.insert(activityLog).values({
         who: "Cron",

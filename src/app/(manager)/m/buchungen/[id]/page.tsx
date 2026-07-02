@@ -8,6 +8,7 @@ import { formatDateLong } from "@/lib/utils";
 import { StatusPill } from "@/components/manager/StatusPill";
 import { StatusActions } from "./StatusActions";
 import { ManualPaymentForm } from "./ManualPaymentForm";
+import { PaymentsTable } from "./PaymentsTable";
 import { PersonsPriceEditor } from "./PersonsPriceEditor";
 import { ManagerMessage } from "./ManagerMessage";
 import { DepositHoldControl } from "./DepositHoldControl";
@@ -207,35 +208,19 @@ export default async function BookingDetail({ params }: Props) {
             {pmts.length === 0 ? (
               <div className="text-[var(--color-wh-fg-muted)] text-sm">Noch keine Zahlung erfasst.</div>
             ) : (
-              <table className="w-full text-sm">
-                <thead className="text-left text-xs uppercase tracking-wider text-[var(--color-wh-fg-muted)]">
-                  <tr>
-                    <th className="py-2">Datum</th>
-                    <th>Art</th>
-                    <th>Methode</th>
-                    <th>Status</th>
-                    <th className="text-right">Betrag</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pmts.map((p) => (
-                    <tr
-                      key={p.id}
-                      className="border-t border-[var(--color-wh-winter-grey)]"
-                    >
-                      <td className="py-2">
-                        {p.receivedAt
-                          ? new Date(p.receivedAt).toLocaleString("de-DE")
-                          : new Date(p.createdAt).toLocaleString("de-DE")}
-                      </td>
-                      <td className="capitalize">{p.kind}</td>
-                      <td>{p.method ?? "—"}</td>
-                      <td className="capitalize">{p.status}</td>
-                      <td className="text-right font-semibold">{formatEuro(p.amountCents)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <PaymentsTable
+                rows={pmts.map((p) => ({
+                  id: p.id,
+                  kind: p.kind,
+                  method: p.method,
+                  status: p.status,
+                  amountCents: p.amountCents,
+                  dateLabel: (p.receivedAt
+                    ? new Date(p.receivedAt)
+                    : new Date(p.createdAt)
+                  ).toLocaleString("de-DE"),
+                }))}
+              />
             )}
             <ManualPaymentForm bookingId={b.id} />
           </Section>
