@@ -111,8 +111,8 @@ export async function cancelOwnBooking(formData: FormData) {
     console.error("[cancel-mail] failed:", err);
   }
 
-  // Hüttenwart informieren (Issue #68) — Buchung aus dem Kalender streichen.
-  try {
+  // Hüttenwart informieren (Issue #68) — nur wenn Zahlung eingegangen ist.
+  if (booking.paidCents > 0) try {
     await sendMail({
       to: HUETTENWART_EMAIL,
       bcc: HUETTENWART_CC,
@@ -128,7 +128,7 @@ export async function cancelOwnBooking(formData: FormData) {
       }),
     });
   } catch (err) {
-    console.error("[cancel-mail] Hüttenwart-Mail fehlgeschlagen:", err);
+    console.error("[cancel-mail] Hüttenservice-Mail fehlgeschlagen:", err);
   }
 
   revalidatePath(`/konto/buchungen/${booking.id}`);

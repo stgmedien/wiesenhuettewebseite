@@ -122,9 +122,8 @@ export async function setBookingStatus(
     }
   }
 
-  // Hüttenwart bei jeder Stornierung informieren (Issue #68) — unabhängig von
-  // der optionalen Gast-Mail, damit Toni die Buchung aus dem Kalender streicht.
-  if (status === "storniert" && b.status !== "storniert") {
+  // Hüttenservice bei Stornierung informieren — nur wenn Zahlung eingegangen ist.
+  if (status === "storniert" && b.status !== "storniert" && b.paidCents > 0) {
     try {
       const c = b.customerId
         ? (await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1))[0]
