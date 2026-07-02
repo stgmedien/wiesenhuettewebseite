@@ -24,6 +24,7 @@ import SchoolDepositDueEmail from "@/lib/mail/templates/school-deposit-due";
 import SchoolDepositWarningEmail from "@/lib/mail/templates/school-deposit-warning";
 import SchoolBookingCancelledEmail from "@/lib/mail/templates/school-booking-cancelled";
 import HuettenwartNoticeEmail from "@/lib/mail/templates/huettenwart-notice";
+import { HUETTENWART_EMAIL } from "@/lib/huettenwart";
 import RestzahlungRequestEmail from "@/lib/mail/templates/restzahlung-request";
 import { MANUAL_REST_MARKER, MANUAL_REST_SENT_MARKER } from "@/lib/payment-markers";
 import {
@@ -62,9 +63,8 @@ export const maxDuration = 60;
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://wiesenhuette.de";
 
-// Hüttenwart (Toni Klauke) — bekommt 7 Tage vor Anreise eine Notiz mit
-// Portal-Link, um die Buchung anzusehen und die Übergabe/Abnahme zu machen.
-const HUTTENWART_EMAIL = "allegro.m@gmx.de";
+// Hüttenwart-Mails (T-7) gehen an die gemeinsame Konstante HUETTENWART_EMAIL
+// aus src/lib/huettenwart.ts (auch Webhook + Storno-Pfade nutzen sie, Issue #68).
 
 const isoDayOffset = (offset: number): string => {
   const d = new Date();
@@ -359,7 +359,7 @@ export async function GET(req: Request) {
     if (!(await alreadySent(b.id, "huettenwart_notice"))) {
       try {
         await sendMail({
-          to: HUTTENWART_EMAIL,
+          to: HUETTENWART_EMAIL,
           subject: `In 7 Tagen: Gruppe an der Wiesenhütte — ${b.bookingNumber}`,
           template: "huettenwart_notice",
           bookingId: b.id,

@@ -25,6 +25,8 @@ import MemberWelcomeEmail from "@/lib/mail/templates/member-welcome";
 import MemberJoinedInternalEmail from "@/lib/mail/templates/member-joined-internal";
 import { addContactToMembersList } from "@/lib/brevo";
 import { promoteToMemberRole } from "@/lib/membership-role";
+import { HUETTENWART_EMAIL } from "@/lib/huettenwart";
+import HuettenwartNewBookingEmail from "@/lib/mail/templates/huettenwart-booking-new";
 import { formatDateLong } from "@/lib/utils";
 import { createInvoiceForBooking } from "@/lib/invoice";
 import type Stripe from "stripe";
@@ -399,6 +401,31 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         });
       } catch (err) {
         console.error("[webhook] internal mail failed", err);
+      }
+    }
+
+    // Hüttenwart sofort bei Anzahlungseingang informieren (Issue #68) —
+    // damit Toni die Buchung fest einplanen kann (bisher erst T-7).
+    if (!(await wasMailSent(bookingId, "huettenwart-booking-new"))) {
+      try {
+        await sendMail({
+          to: HUETTENWART_EMAIL,
+          subject: `Neue Buchung eingegangen — ${booking.bookingNumber} (${formatDateLong(booking.arrival)})`,
+          template: "huettenwart-booking-new",
+          bookingId,
+          react: HuettenwartNewBookingEmail({
+            bookingNumber: booking.bookingNumber,
+            guestName,
+            arrival: formatDateLong(booking.arrival),
+            departure: formatDateLong(booking.departure),
+            nights: booking.nights,
+            persons: booking.persons,
+            purpose: booking.purpose,
+            managerUrl: `${baseUrl}/m/buchungen/${bookingId}`,
+          }),
+        });
+      } catch (err) {
+        console.error("[webhook] huettenwart mail failed", err);
       }
     }
   }

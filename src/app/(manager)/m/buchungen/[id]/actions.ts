@@ -16,6 +16,8 @@ import ReviewRejectedEmail from "@/lib/mail/templates/review-rejected";
 import BookingConfirmedEmail from "@/lib/mail/templates/booking-confirmed";
 import BookingCancelledEmail from "@/lib/mail/templates/booking-cancelled";
 import AvsSelfCheckinEmail from "@/lib/mail/templates/avs-selfcheckin";
+import HuettenwartCancellationEmail from "@/lib/mail/templates/huettenwart-cancellation";
+import { HUETTENWART_EMAIL } from "@/lib/huettenwart";
 import { formatDateLong } from "@/lib/utils";
 import { formatEuro, calculatePrice, type Persons } from "@/lib/pricing";
 import { resolveTariffs } from "@/lib/pricing-tariffs";
@@ -117,6 +119,31 @@ export async function setBookingStatus(
       }
     } catch (err) {
       console.error("[setBookingStatus] Gast-Benachrichtigung fehlgeschlagen:", err);
+    }
+  }
+
+  // Hüttenwart bei jeder Stornierung informieren (Issue #68) — unabhängig von
+  // der optionalen Gast-Mail, damit Toni die Buchung aus dem Kalender streicht.
+  if (status === "storniert" && b.status !== "storniert") {
+    try {
+      const c = b.customerId
+        ? (await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1))[0]
+        : null;
+      await sendMail({
+        to: HUETTENWART_EMAIL,
+        subject: `Stornierung — ${b.bookingNumber} (${formatDateLong(b.arrival)})`,
+        template: "huettenwart-cancellation",
+        bookingId,
+        react: HuettenwartCancellationEmail({
+          bookingNumber: b.bookingNumber,
+          guestName: c ? `${c.firstName} ${c.lastName}`.trim() : "—",
+          arrival: formatDateLong(b.arrival),
+          departure: formatDateLong(b.departure),
+          persons: b.persons,
+        }),
+      });
+    } catch (err) {
+      console.error("[setBookingStatus] Hüttenwart-Storno-Mail fehlgeschlagen:", err);
     }
   }
 
