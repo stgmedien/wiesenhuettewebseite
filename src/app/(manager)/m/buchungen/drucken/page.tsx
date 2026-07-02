@@ -3,7 +3,6 @@ import { bookings, customers } from "@/lib/db/schema";
 import { eq, gte, ne, desc } from "drizzle-orm";
 import { and } from "drizzle-orm";
 import { inArray } from "drizzle-orm";
-import { formatEuro } from "@/lib/pricing";
 import { PrintButton } from "./PrintButton";
 
 export const dynamic = "force-dynamic";
@@ -24,9 +23,6 @@ export default async function DruckenPage() {
       nights: bookings.nights,
       persons: bookings.persons,
       purpose: bookings.purpose,
-      subtotalCents: bookings.subtotalCents,
-      depositCents: bookings.depositCents,
-      paidCents: bookings.paidCents,
       customerId: bookings.customerId,
     })
     .from(bookings)
@@ -127,7 +123,6 @@ export default async function DruckenPage() {
                   <Th>Kontakt</Th>
                   <Th center>P.</Th>
                   <Th>Anlass</Th>
-                  <Th right>Summe</Th>
                 </tr>
               </thead>
               <tbody>
@@ -165,9 +160,6 @@ export default async function DruckenPage() {
                       <Td center>{r.persons}</Td>
                       <Td>
                         <div className="text-xs">{r.purpose ?? "—"}</div>
-                      </Td>
-                      <Td right>
-                        <div className="font-semibold">{formatEuro(r.subtotalCents + r.depositCents)}</div>
                       </Td>
                     </tr>
                   );
