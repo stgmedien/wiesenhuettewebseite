@@ -1,20 +1,30 @@
 import { db } from "@/lib/db";
 import { bookings, customers } from "@/lib/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import Link from "next/link";
 import { formatEuro } from "@/lib/pricing";
 import { StatusPill } from "@/components/manager/StatusPill";
+import { BookingsFilter } from "@/components/manager/BookingsFilter";
+import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Buchungen · Wiesenhütte Manager" };
 
+const VALID_STATUSES = ["angefragt", "bestaetigt", "bezahlt", "angereist", "abgereist", "storniert"] as const;
+type BookingStatus = typeof VALID_STATUSES[number];
+
 export default async function BookingsListPage({
   searchParams,
 }: {
-  searchParams: Promise<{ sort?: string }>;
+  searchParams: Promise<{ sort?: string; status?: string }>;
 }) {
-  const { sort } = await searchParams;
+  const { sort, status } = await searchParams;
   const sortByBooked = sort === "booked";
+  const statusFilter = VALID_STATUSES.includes(status as BookingStatus) ? (status as BookingStatus) : null;
+
+  const where = statusFilter
+    ? and(eq(bookings.status, statusFilter))
+    : undefined;
 
   const rows = await db
     .select({
@@ -36,6 +46,7 @@ export default async function BookingsListPage({
     })
     .from(bookings)
     .leftJoin(customers, eq(customers.id, bookings.customerId))
+    .where(where)
     .orderBy(sortByBooked ? desc(bookings.createdAt) : desc(bookings.arrival));
 
   return (
@@ -46,16 +57,19 @@ export default async function BookingsListPage({
           <h1 className="text-[28px] sm:text-[40px] mt-2 mb-0">Alle Buchungen</h1>
           <p className="text-[var(--color-wh-fg-muted)] m-0 mt-2">{rows.length} insgesamt</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <Suspense>
+            <BookingsFilter />
+          </Suspense>
           <div className="flex rounded-[var(--radius-btn)] border border-[var(--color-wh-winter-grey)] overflow-hidden text-sm font-medium">
             <Link
-              href="/m/buchungen"
+              href={statusFilter ? `/m/buchungen?status=${statusFilter}` : "/m/buchungen"}
               className={`px-4 py-2 no-underline transition-colors ${!sortByBooked ? "bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)]" : "text-[var(--color-wh-fg-muted)] hover:bg-[var(--color-wh-green-soft)]/30"}`}
             >
               Anreise
             </Link>
             <Link
-              href="/m/buchungen?sort=booked"
+              href={`/m/buchungen?sort=booked${statusFilter ? `&status=${statusFilter}` : ""}`}
               className={`px-4 py-2 no-underline transition-colors border-l border-[var(--color-wh-winter-grey)] ${sortByBooked ? "bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)]" : "text-[var(--color-wh-fg-muted)] hover:bg-[var(--color-wh-green-soft)]/30"}`}
             >
               Gebucht am
@@ -63,7 +77,7 @@ export default async function BookingsListPage({
           </div>
           <Link
             href="/m/manuell"
-            className="inline-flex h-11 px-5 items-center justify-center rounded-[var(--radius-btn)] bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] no-underline font-semibold shrink-0"
+            className="inline-flex h-10 px-5 items-center justify-center rounded-[var(--radius-btn)] bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] no-underline font-semibold shrink-0"
           >
             + Manuelle Buchung
           </Link>
@@ -89,7 +103,7 @@ export default async function BookingsListPage({
             {rows.length === 0 && (
               <tr>
                 <td colSpan={8} className="px-4 py-8 text-center text-[var(--color-wh-fg-muted)]">
-                  Noch keine Buchungen.
+                  Keine Buchungen gefunden.
                 </td>
               </tr>
             )}
