@@ -19,6 +19,8 @@ type Props = {
   daysUntilArrival: number;
   paymentLink?: string | null;
   autoChargePlanned: boolean;
+  /** Formatiertes Datum, bis zu dem Personen nachgemeldet werden können (Issue #60). */
+  increaseHintUntil?: string | null;
 };
 
 const main = { backgroundColor: "#F7F7F2", padding: "40px 0" };
@@ -76,6 +78,7 @@ export default function PaymentReminderEmail({
   daysUntilArrival,
   paymentLink,
   autoChargePlanned,
+  increaseHintUntil,
 }: Props) {
   return (
     <Html>
@@ -122,6 +125,18 @@ export default function PaymentReminderEmail({
                 </Section>
               )}
             </>
+          )}
+
+          {increaseHintUntil && (
+            <Text style={text}>
+              <strong>Kommen mehr Personen mit?</strong> Bis zum{" "}
+              <strong>{increaseHintUntil}</strong> könnt Ihr die Teilnehmerzahl noch selbst
+              nachmelden — in Eurem Konto unter{" "}
+              <a href="https://wiesenhuette.de/konto" style={{ color: "#2F4A35" }}>
+                wiesenhuette.de/konto
+              </a>
+              . Der Mehrbetrag fließt automatisch in die Restzahlung.
+            </Text>
           )}
 
           <Hr style={{ borderColor: "#C8CEC4", margin: "32px 0 16px" }} />
