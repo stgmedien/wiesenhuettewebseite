@@ -71,6 +71,9 @@ export default async function AGB() {
           <p>
             Die jeweils gültigen Tarife werden im Buchungsvorgang transparent angezeigt
             (Mitglieder der Skifreunde Gütersloh erhalten 50 % Nachlass auf die Übernachtungspreise).
+            Mitglieder-Tarife gelten ausschließlich für aktive Vereinsmitglieder; Buchungen, bei
+            denen unwahre Angaben zur Vereinsmitgliedschaft gemacht wurden, können vom Verein
+            storniert oder auf den regulären Tarif nachberechnet werden.
             Die Kurtaxe Hochsauerland ist nicht im Mietpreis enthalten und wird vom Mieter direkt über
             das offizielle Kurtaxen-Portal des Hochsauerlandkreises angemeldet und entrichtet. Aktueller
             Tarif Langewiese: <strong>2,20 € pro Person und Nacht</strong>.

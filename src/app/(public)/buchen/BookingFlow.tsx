@@ -214,12 +214,12 @@ const BF_COPY = {
     // PersonsEditor
     adultsLabel: "Erwachsene",
     adultsHint: "ab 16 Jahren · 22,00 € / Nacht",
-    membersLabel: "Erwachsene · Mitglied",
-    membersHint: "−50 % · 11,00 € / Nacht",
+    membersLabel: "Vereinsmitglieder Skifreunde Gütersloh e.V.",
+    membersHint: "nur für aktive Mitglieder des Vereins · −50 % · 11,00 € / Nacht",
     childrenLabel: "Kinder/Schüler bis 16 Jahre",
     childrenHint: "12,00 € / Nacht",
     pupilsLabel: "Kinder/Schüler bis 16 · Mitglied",
-    pupilsHint: "−50 % · 6,00 € / Nacht",
+    pupilsHint: "nur für aktive Mitglieder · −50 % · 6,00 € / Nacht",
     teachersLabel: "Lehrkräfte",
     teachersHint: "bei Schulgruppen · zählen wie Erwachsene (22,00 €)",
     memberLockedLabel: "Mitglieder-Tarife (−50 %)",
@@ -229,6 +229,11 @@ const BF_COPY = {
     memberJoinCta: "Noch kein Mitglied? Jetzt online beitreten",
     memberJoinCtaSub: "ab 15 €/Jahr · sofort aktiv · 50 % auf Übernachtungen",
     memberLockedState: "gesperrt",
+    memberHonestyNote:
+      "Mitglieder-Tarife gelten ausschließlich für aktive Mitglieder des Skifreunde Gütersloh e.V. Buchungen, bei denen unwahre Angaben zur Vereinsmitgliedschaft gemacht wurden, können storniert werden.",
+    memberConfirmLabel:
+      "Ich bestätige, dass alle zum Mitgliedstarif gebuchten Personen aktive Mitglieder des Skifreunde Gütersloh e.V. sind.",
+    valMemberConfirm: "Bitte bestätige die Mitgliedschaft der zum Mitgliedstarif gebuchten Personen.",
     ariaLess: "Weniger",
     ariaMore: "Mehr",
     // PriceSummary
@@ -373,12 +378,12 @@ const BF_COPY = {
     loginHint2: "— or continue booking; we'll create an account for you automatically.",
     adultsLabel: "Adults",
     adultsHint: "16+ · 22.00 € / night",
-    membersLabel: "Adults · member",
-    membersHint: "−50% · 11.00 € / night",
+    membersLabel: "Club members Skifreunde Gütersloh e.V.",
+    membersHint: "active club members only · −50% · 11.00 € / night",
     childrenLabel: "Children/pupils up to 16",
     childrenHint: "12.00 € / night",
     pupilsLabel: "Children/pupils up to 16 · member",
-    pupilsHint: "−50% · 6.00 € / night",
+    pupilsHint: "active club members only · −50% · 6.00 € / night",
     teachersLabel: "Teachers",
     teachersHint: "for school groups · counted as adults (22.00 €)",
     memberLockedLabel: "Member rates (−50%)",
@@ -388,6 +393,11 @@ const BF_COPY = {
     memberJoinCta: "Not a member yet? Join online now",
     memberJoinCtaSub: "from €15/year · active immediately · 50% off overnight stays",
     memberLockedState: "locked",
+    memberHonestyNote:
+      "Member rates apply exclusively to active members of Skifreunde Gütersloh e.V. Bookings based on false membership statements may be cancelled.",
+    memberConfirmLabel:
+      "I confirm that all persons booked at the member rate are active members of Skifreunde Gütersloh e.V.",
+    valMemberConfirm: "Please confirm the membership of all persons booked at the member rate.",
     ariaLess: "Less",
     ariaMore: "More",
     priceSummaryH: "Price summary",
@@ -530,12 +540,12 @@ const BF_COPY = {
     loginHint2: "— of ga door met boeken, we maken automatisch een account voor je aan.",
     adultsLabel: "Volwassenen",
     adultsHint: "vanaf 16 jaar · € 22,00 / nacht",
-    membersLabel: "Volwassenen · lid",
-    membersHint: "−50% · € 11,00 / nacht",
+    membersLabel: "Verenigingsleden Skifreunde Gütersloh e.V.",
+    membersHint: "alleen voor actieve leden van de vereniging · −50% · € 11,00 / nacht",
     childrenLabel: "Kinderen/leerlingen tot 16 jaar",
     childrenHint: "€ 12,00 / nacht",
     pupilsLabel: "Kinderen/leerlingen tot 16 · lid",
-    pupilsHint: "−50% · € 6,00 / nacht",
+    pupilsHint: "alleen voor actieve leden · −50% · € 6,00 / nacht",
     teachersLabel: "Docenten",
     teachersHint: "bij schoolgroepen · tellen als volwassenen (€ 22,00)",
     memberLockedLabel: "Ledentarieven (−50%)",
@@ -545,6 +555,11 @@ const BF_COPY = {
     memberJoinCta: "Nog geen lid? Word nu online lid",
     memberJoinCtaSub: "vanaf €15/jaar · meteen actief · 50% op overnachtingen",
     memberLockedState: "geblokkeerd",
+    memberHonestyNote:
+      "Ledentarieven gelden uitsluitend voor actieve leden van Skifreunde Gütersloh e.V. Boekingen met onjuiste opgaven over het lidmaatschap kunnen worden geannuleerd.",
+    memberConfirmLabel:
+      "Ik bevestig dat alle personen met ledentarief actieve leden van Skifreunde Gütersloh e.V. zijn.",
+    valMemberConfirm: "Bevestig het lidmaatschap van alle personen met ledentarief.",
     ariaLess: "Minder",
     ariaMore: "Meer",
     priceSummaryH: "Prijsoverzicht",
@@ -622,6 +637,7 @@ export const BookingFlow = ({
   const [city, setCity] = useState(prefill?.city ?? "");
   const [customerMessage, setCustomerMessage] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [memberConfirm, setMemberConfirm] = useState(false);
   // Wurde in Schritt 2 schon ein "Weiter"-Versuch gemacht? Steuert, ob
   // Feld-Fehler angezeigt werden (nicht naggy beim ersten Anschauen).
   const [step2Tried, setStep2Tried] = useState(false);
@@ -711,8 +727,14 @@ export const BookingFlow = ({
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const phoneValid = phone.trim().length >= 5;
   const termsValid = acceptedTerms;
+  // Ehrlichkeitsbestätigung (Issue #66): Pflicht, sobald Personen zum
+  // Mitgliedstarif gebucht sind — schafft Storno-Recht bei Falschangaben.
+  const memberTariffUsed =
+    !!prefill?.membershipVerified && persons.members + persons.pupils > 0;
+  const memberConfirmValid = !memberTariffUsed || memberConfirm;
   const canGoStep3 =
-    firstNameValid && lastNameValid && emailValid && phoneValid && institutionValid && termsValid;
+    firstNameValid && lastNameValid && emailValid && phoneValid && institutionValid &&
+    termsValid && memberConfirmValid;
 
   const submit = () => {
     setError(null);
@@ -1036,6 +1058,24 @@ export const BookingFlow = ({
               <p className="-mt-3 text-xs text-[var(--color-wh-sunset)]">{tt.valTerms}</p>
             )}
 
+            {/* Ehrlichkeitsbestätigung Mitgliedstarif (Issue #66) */}
+            {memberTariffUsed && (
+              <>
+                <label className="flex items-start gap-3 text-sm text-[var(--color-wh-fg-muted)] cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={memberConfirm}
+                    onChange={(e) => setMemberConfirm(e.target.checked)}
+                    className="mt-1"
+                  />
+                  <span>{tt.memberConfirmLabel}</span>
+                </label>
+                {step2Tried && !memberConfirmValid && (
+                  <p className="-mt-3 text-xs text-[var(--color-wh-sunset)]">{tt.valMemberConfirm}</p>
+                )}
+              </>
+            )}
+
             {/* Sammel-Hinweis, wenn der Übersicht-Versuch fehlschlug. */}
             {step2Tried && !canGoStep3 && (
               <div className="rounded-[var(--radius-md)] border-l-4 border-[var(--color-wh-sunset)] bg-[var(--color-wh-sunset)]/10 px-4 py-3 text-sm font-medium text-[var(--color-wh-sunset)]">
@@ -1336,6 +1376,13 @@ const PersonsEditor = ({
       ariaLess={tt.ariaLess}
       ariaMore={tt.ariaMore}
     />
+    {/* Ehrlichkeits-Hinweis unter den Mitglieder-Feldern (Issue #66) —
+        Tarif gilt nur für aktive Mitglieder; Falschangaben ⇒ Storno-Recht. */}
+    {memberAllowed && (
+      <p className="text-xs text-[var(--color-wh-fg-muted)] border-t border-[var(--color-wh-winter-grey)]/50 mt-1 pt-3 mb-0">
+        {tt.memberHonestyNote}
+      </p>
+    )}
     {/* Mitglieder-Tarife gesperrt: zwei klar getrennte Wege —
         (1) bestehendes Mitglied loggt sich ein (Nachweis),
         (2) Neumitglied tritt online bei und bucht sofort günstiger. */}
