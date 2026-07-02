@@ -113,7 +113,7 @@ const COPY: Record<Locale, Copy> = {
       eyebrow: "Skifreunde Gütersloh e.V.",
       h1: "Seit 1949 in Bewegung.",
       lead:
-        "Gegründet von 124 Skibegeisterten in Gütersloh, getragen über mehr als sieben Jahrzehnte von ehrenamtlicher Arbeit, Vereinsfahrten und Generationen, die in Langewiese ihre erste Skispur gezogen haben.",
+        "Gegründet von 124 Skibegeisterten in Gütersloh, getragen über mehr als sieben Jahrzehnten von ehrenamtlicher Arbeit, Vereinsfahrten und Generationen, die in Langewiese ihre erste Skispur gezogen haben.",
     },
     sport: {
       eyebrow: "Sportangebot",
