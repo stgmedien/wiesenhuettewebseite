@@ -7,6 +7,7 @@ import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { BOOKING_BLOCKS_TAG } from "@/lib/availability";
+import { MANUAL_REST_MARKER } from "@/lib/payment-markers";
 import { stripe } from "@/lib/stripe";
 import { sendMail } from "@/lib/mail/send";
 import ManagerMessageEmail from "@/lib/mail/templates/manager-message";
@@ -515,6 +516,10 @@ const recordPaymentSchema = z.object({
   amountEuros: z.coerce.number().positive().max(100000),
   method: z.string().min(1).max(60),
   kind: z.enum(["anzahlung", "restzahlung", "vollzahlung", "kaution"]).default("anzahlung"),
+  // Preset: legt den Altsystem-Restzahlungs-Marker an (exakter method-String,
+  // kind=restzahlung, status="offen") → T-14-Cron fordert den Rest per Stripe an.
+  // Zählt NICHT zu paidCents (noch nicht erhalten). Verhindert Tippfehler.
+  altsystemRest: z.boolean().optional(),
 });
 
 export type RecordPaymentResult = { ok: true } | { ok: false; error: string };
@@ -539,28 +544,123 @@ export async function recordManualPayment(
   const b = (await db.select().from(bookings).where(eq(bookings.id, data.bookingId)).limit(1))[0];
   if (!b) return { ok: false, error: "Buchung nicht gefunden." };
 
+  // Preset "Altsystem-Restzahlung": offener Marker für den T-14-Cron —
+  // exakter method-String, kind=restzahlung, status="offen", KEINE Erhöhung
+  // von paidCents (der Rest ist noch nicht bezahlt).
+  const isAltRest = data.altsystemRest === true;
+  const kind = isAltRest ? "restzahlung" : data.kind;
+  const status = isAltRest ? "offen" : "erhalten";
+  const method = isAltRest ? MANUAL_REST_MARKER : data.method;
+
   await db.insert(payments).values({
     bookingId: data.bookingId,
-    kind: data.kind,
-    status: "erhalten",
+    kind,
+    status,
     amountCents,
-    method: data.method,
+    method,
     stripePaymentIntentId: null,
-    receivedAt: new Date(),
+    receivedAt: isAltRest ? null : new Date(),
   });
 
-  await db
-    .update(bookings)
-    .set({ paidCents: b.paidCents + amountCents, updatedAt: new Date() })
-    .where(eq(bookings.id, data.bookingId));
+  if (!isAltRest) {
+    await db
+      .update(bookings)
+      .set({ paidCents: b.paidCents + amountCents, updatedAt: new Date() })
+      .where(eq(bookings.id, data.bookingId));
+  }
 
   await db.insert(activityLog).values({
     who: session.user?.name ?? session.user?.email ?? "Manager",
-    what: `Manuelle Zahlung erfasst: ${formatEuro(amountCents)} (${data.kind}, ${data.method})`,
+    what: isAltRest
+      ? `Altsystem-Restzahlungs-Marker angelegt: ${formatEuro(amountCents)} offen → T-14-Cron`
+      : `Manuelle Zahlung erfasst: ${formatEuro(amountCents)} (${data.kind}, ${data.method})`,
     bookingId: data.bookingId,
   });
 
   revalidatePath(`/m/buchungen/${data.bookingId}`);
+  revalidatePath("/m/dashboard");
+  return { ok: true };
+}
+
+// =============================================================
+// Bestehende Zahlungszeile korrigieren — Art, Status, Betrag, Methode.
+// Für Fehleingaben, die sonst nur per SQL zu beheben waren (z.B. ein
+// Altsystem-Restzahlungs-Marker mit falschem Status "erhalten" statt "offen").
+//
+// paidCents wird konsistent per Delta geführt: eine Zeile zählt zu paidCents,
+// wenn sie eine Einnahme ist (kind != "rueckerstattung") UND status "erhalten".
+// Beim Speichern wird die Differenz (neuer − alter Beitrag) auf paidCents
+// angewandt — self-healing auch für Umbuchungen wie erhalten→offen.
+// =============================================================
+
+const editPaymentSchema = z.object({
+  paymentId: z.string().uuid(),
+  kind: z.enum(["anzahlung", "restzahlung", "vollzahlung", "kaution", "rueckerstattung"]),
+  status: z.enum(["offen", "erhalten", "fehlgeschlagen", "erstattet"]),
+  amountEuros: z.coerce.number().positive().max(100000),
+  method: z.string().min(1).max(80),
+});
+
+/** Beitrag einer Zahlungszeile zu paidCents (nur erhaltene Einnahmen zählen). */
+const paidContribution = (kind: string, status: string, amountCents: number): number =>
+  kind !== "rueckerstattung" && status === "erhalten" ? amountCents : 0;
+
+export async function editPayment(
+  raw: z.infer<typeof editPaymentSchema>
+): Promise<{ ok: boolean; error?: string }> {
+  let session: Awaited<ReturnType<typeof requireManager>>;
+  try {
+    session = await requireManager();
+  } catch {
+    return { ok: false, error: "Nicht autorisiert" };
+  }
+
+  const parsed = editPaymentSchema.safeParse(raw);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues.map((i) => i.message).join(", ") };
+  }
+  const data = parsed.data;
+  const amountCents = Math.round(data.amountEuros * 100);
+
+  const p = (await db.select().from(payments).where(eq(payments.id, data.paymentId)).limit(1))[0];
+  if (!p) return { ok: false, error: "Zahlung nicht gefunden." };
+  const b = (await db.select().from(bookings).where(eq(bookings.id, p.bookingId)).limit(1))[0];
+  if (!b) return { ok: false, error: "Zugehörige Buchung nicht gefunden." };
+
+  const oldContrib = paidContribution(p.kind, p.status, p.amountCents);
+  const newContrib = paidContribution(data.kind, data.status, amountCents);
+
+  await db
+    .update(payments)
+    .set({
+      kind: data.kind,
+      status: data.status,
+      amountCents,
+      method: data.method.trim(),
+      // Zahlungsdatum konsistent halten: bei "erhalten" bestehendes Datum
+      // behalten (oder jetzt setzen), sonst leeren.
+      receivedAt: data.status === "erhalten" ? (p.receivedAt ?? new Date()) : null,
+    })
+    .where(eq(payments.id, data.paymentId));
+
+  const newPaid = Math.max(0, b.paidCents + (newContrib - oldContrib));
+  if (newPaid !== b.paidCents) {
+    await db
+      .update(bookings)
+      .set({ paidCents: newPaid, updatedAt: new Date() })
+      .where(eq(bookings.id, b.id));
+  }
+
+  await db.insert(activityLog).values({
+    who: session.user?.name ?? session.user?.email ?? "Manager",
+    what:
+      `Zahlung korrigiert: ${formatEuro(p.amountCents)}/${p.status}/${p.method ?? "—"} → ` +
+      `${formatEuro(amountCents)}/${data.status}/${data.method.trim()}` +
+      (newPaid !== b.paidCents ? ` · Bezahlt-Summe ${formatEuro(b.paidCents)} → ${formatEuro(newPaid)}` : ""),
+    bookingId: b.id,
+  });
+
+  revalidatePath(`/m/buchungen/${b.id}`);
   revalidatePath("/m/dashboard");
   return { ok: true };
 }

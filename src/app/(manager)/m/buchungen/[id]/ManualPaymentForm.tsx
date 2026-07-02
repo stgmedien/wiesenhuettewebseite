@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { recordManualPayment } from "./actions";
+import { MANUAL_REST_MARKER } from "@/lib/payment-markers";
 
 const KINDS = [
   { value: "anzahlung", label: "Anzahlung" },
@@ -19,6 +20,7 @@ export function ManualPaymentForm({ bookingId }: { bookingId: string }) {
   const [amount, setAmount] = useState("");
   const [method, setMethod] = useState("Banküberweisung");
   const [kind, setKind] = useState<string>("anzahlung");
+  const [altRest, setAltRest] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [pending, start] = useTransition();
   const router = useRouter();
@@ -34,12 +36,14 @@ export function ManualPaymentForm({ bookingId }: { bookingId: string }) {
       const r = await recordManualPayment({
         bookingId,
         amountEuros: amt,
-        method: method.trim() || "Manuell",
-        kind: kind as "anzahlung" | "restzahlung" | "vollzahlung" | "kaution",
+        method: altRest ? MANUAL_REST_MARKER : method.trim() || "Manuell",
+        kind: altRest ? "restzahlung" : (kind as "anzahlung" | "restzahlung" | "vollzahlung" | "kaution"),
+        altsystemRest: altRest,
       });
       if (r.ok) {
         setOpen(false);
         setAmount("");
+        setAltRest(false);
         router.refresh();
       } else {
         setErr(r.error);
@@ -64,9 +68,26 @@ export function ManualPaymentForm({ bookingId }: { bookingId: string }) {
       <div className="text-xs uppercase tracking-wider font-semibold text-[var(--color-wh-fg-muted)] mb-3">
         Zahlung manuell erfassen
       </div>
+
+      <label className="flex items-start gap-2.5 mb-3 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={altRest}
+          onChange={(e) => setAltRest(e.target.checked)}
+          className="mt-0.5 w-4 h-4 accent-[var(--color-wh-deep-green)]"
+        />
+        <span className="text-[13px] leading-snug text-[var(--color-wh-black)]">
+          <strong>Altsystem-Restzahlung</strong> anlegen — offener Restbetrag, wird{" "}
+          <em>14 Tage vor Anreise</em> automatisch per Stripe-Link angefordert. Zählt noch
+          nicht zur Bezahlt-Summe.
+        </span>
+      </label>
+
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <label className="block">
-          <span className="block text-xs text-[var(--color-wh-fg-muted)] mb-1">Betrag (€)</span>
+          <span className="block text-xs text-[var(--color-wh-fg-muted)] mb-1">
+            {altRest ? "Offener Restbetrag (€)" : "Betrag (€)"}
+          </span>
           <input
             type="text"
             inputMode="decimal"
@@ -78,7 +99,12 @@ export function ManualPaymentForm({ bookingId }: { bookingId: string }) {
         </label>
         <label className="block">
           <span className="block text-xs text-[var(--color-wh-fg-muted)] mb-1">Art</span>
-          <select value={kind} onChange={(e) => setKind(e.target.value)} className={inputCls}>
+          <select
+            value={altRest ? "restzahlung" : kind}
+            onChange={(e) => setKind(e.target.value)}
+            disabled={altRest}
+            className={`${inputCls} ${altRest ? "opacity-60" : ""}`}
+          >
             {KINDS.map((k) => (
               <option key={k.value} value={k.value}>
                 {k.label}
@@ -90,10 +116,11 @@ export function ManualPaymentForm({ bookingId }: { bookingId: string }) {
           <span className="block text-xs text-[var(--color-wh-fg-muted)] mb-1">Methode</span>
           <input
             type="text"
-            value={method}
+            value={altRest ? MANUAL_REST_MARKER : method}
             onChange={(e) => setMethod(e.target.value)}
+            readOnly={altRest}
             placeholder="Banküberweisung"
-            className={inputCls}
+            className={`${inputCls} ${altRest ? "opacity-60" : ""}`}
           />
         </label>
       </div>
