@@ -13,7 +13,7 @@ import { sendMail } from "@/lib/mail/send";
 import BookingCancelledEmail from "@/lib/mail/templates/booking-cancelled";
 import PersonsIncreasedEmail from "@/lib/mail/templates/persons-increased";
 import HuettenwartCancellationEmail from "@/lib/mail/templates/huettenwart-cancellation";
-import { HUETTENWART_EMAIL } from "@/lib/huettenwart";
+import { HUETTENWART_EMAIL, HUETTENWART_CC } from "@/lib/huettenwart";
 
 const idSchema = z.string().uuid();
 
@@ -115,6 +115,7 @@ export async function cancelOwnBooking(formData: FormData) {
   try {
     await sendMail({
       to: HUETTENWART_EMAIL,
+      bcc: HUETTENWART_CC,
       subject: `Stornierung — ${booking.bookingNumber} (${formatDateLong(booking.arrival)})`,
       template: "huettenwart-cancellation",
       bookingId: booking.id,

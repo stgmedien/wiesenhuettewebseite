@@ -25,7 +25,7 @@ import MemberWelcomeEmail from "@/lib/mail/templates/member-welcome";
 import MemberJoinedInternalEmail from "@/lib/mail/templates/member-joined-internal";
 import { addContactToMembersList } from "@/lib/brevo";
 import { promoteToMemberRole } from "@/lib/membership-role";
-import { HUETTENWART_EMAIL } from "@/lib/huettenwart";
+import { HUETTENWART_EMAIL, HUETTENWART_CC } from "@/lib/huettenwart";
 import HuettenwartNewBookingEmail from "@/lib/mail/templates/huettenwart-booking-new";
 import { formatDateLong } from "@/lib/utils";
 import { createInvoiceForBooking } from "@/lib/invoice";
@@ -410,6 +410,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       try {
         await sendMail({
           to: HUETTENWART_EMAIL,
+          bcc: HUETTENWART_CC,
           subject: `Neue Buchung eingegangen — ${booking.bookingNumber} (${formatDateLong(booking.arrival)})`,
           template: "huettenwart-booking-new",
           bookingId,
