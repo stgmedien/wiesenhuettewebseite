@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { bookings, customers, payments, notes, mailTemplates } from "@/lib/db/schema";
+import { bookings, customers, payments, notes, mailTemplates, emailLog } from "@/lib/db/schema";
 import { eq, desc, and, isNotNull, asc } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -8,6 +8,7 @@ import { formatDateLong } from "@/lib/utils";
 import { StatusPill } from "@/components/manager/StatusPill";
 import { StatusActions } from "./StatusActions";
 import { ManualPaymentForm } from "./ManualPaymentForm";
+import { AvsCheckinForm } from "./AvsCheckinForm";
 import { PaymentsTable } from "./PaymentsTable";
 import { PersonsPriceEditor } from "./PersonsPriceEditor";
 import { ManagerMessage } from "./ManagerMessage";
@@ -48,6 +49,15 @@ export default async function BookingDetail({ params }: Props) {
     .orderBy(desc(notes.createdAt));
 
   const existingInvoice = await getInvoiceForBooking(id);
+
+  // Letzter Versand des AVS-SelfCheck-in-Links (digitaler Meldeschein/Kurkarten)
+  const avsSent = await db
+    .select({ sentAt: emailLog.sentAt })
+    .from(emailLog)
+    .where(and(eq(emailLog.bookingId, id), eq(emailLog.template, "avs-selfcheckin")))
+    .orderBy(desc(emailLog.sentAt))
+    .limit(1);
+  const avsLastSentAt = avsSent[0] ? new Date(avsSent[0].sentAt).toLocaleString("de-DE") : null;
 
   // Verfuegbare Mail-Templates fuer den ManagerMessage-Picker (nur die mit aktiver Version)
   const availableTemplates = await db
@@ -224,6 +234,16 @@ export default async function BookingDetail({ params }: Props) {
             )}
             <ManualPaymentForm bookingId={b.id} />
           </Section>
+
+          {customer && b.status !== "storniert" && (
+            <Section title="Digitaler Check-in (AVS-Kurkarten)">
+              <AvsCheckinForm
+                bookingId={b.id}
+                guestEmail={customer.email}
+                lastSentAt={avsLastSentAt}
+              />
+            </Section>
+          )}
         </div>
 
         <aside>

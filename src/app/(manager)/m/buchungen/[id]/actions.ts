@@ -15,6 +15,7 @@ import ReviewApprovedEmail from "@/lib/mail/templates/review-approved";
 import ReviewRejectedEmail from "@/lib/mail/templates/review-rejected";
 import BookingConfirmedEmail from "@/lib/mail/templates/booking-confirmed";
 import BookingCancelledEmail from "@/lib/mail/templates/booking-cancelled";
+import AvsSelfCheckinEmail from "@/lib/mail/templates/avs-selfcheckin";
 import { formatDateLong } from "@/lib/utils";
 import { formatEuro, calculatePrice, type Persons } from "@/lib/pricing";
 import { resolveTariffs } from "@/lib/pricing-tariffs";
@@ -821,4 +822,82 @@ export async function refundBookingDifference(
 
   revalidatePath(`/m/buchungen/${bookingId}`);
   return { ok: true };
+}
+
+// =============================================================
+// AVS-SelfCheck-in-Link an den Gast senden (Vorstands-Workflow, 02.07.2026).
+// Der Link wird im AVS-Portal (meldeschein.avs.de → Link-Generator) individuell
+// pro Buchung erzeugt und hier eingefügt — die Plattform verschickt dann die
+// Check-in-Mail an den Buchenden. Ersetzt die frühere automatische
+// Kurtaxe-Info-Mail aus dem Stripe-Webhook.
+// =============================================================
+
+const avsLinkSchema = z.object({
+  bookingId: z.string().uuid(),
+  link: z.string().trim().min(10).max(2000),
+});
+
+export async function sendAvsCheckinLink(
+  raw: z.infer<typeof avsLinkSchema>
+): Promise<{ ok: true; sentTo: string } | { ok: false; error: string }> {
+  let session: Awaited<ReturnType<typeof requireManager>>;
+  try {
+    session = await requireManager();
+  } catch {
+    return { ok: false, error: "Nicht autorisiert" };
+  }
+  const parsed = avsLinkSchema.safeParse(raw);
+  if (!parsed.success) return { ok: false, error: "Ungültige Eingabe." };
+  const { bookingId, link } = parsed.data;
+
+  // Nur echte AVS-Links akzeptieren — schützt vor Tippfehlern/falschem Paste.
+  let url: URL;
+  try {
+    url = new URL(link);
+  } catch {
+    return { ok: false, error: "Das ist keine gültige URL — bitte den Link komplett kopieren." };
+  }
+  if (url.protocol !== "https:" || !(url.hostname === "avs.de" || url.hostname.endsWith(".avs.de"))) {
+    return {
+      ok: false,
+      error: "Der Link muss ein AVS-Link sein (https://…avs.de/…) — bitte aus dem Link-Generator kopieren.",
+    };
+  }
+
+  const booking = (await db.select().from(bookings).where(eq(bookings.id, bookingId)).limit(1))[0];
+  if (!booking) return { ok: false, error: "Buchung nicht gefunden." };
+  if (!booking.customerId) return { ok: false, error: "Buchung hat keinen Kunden." };
+  const customer = (
+    await db.select().from(customers).where(eq(customers.id, booking.customerId)).limit(1)
+  )[0];
+  if (!customer) return { ok: false, error: "Kunde nicht gefunden." };
+
+  const guestName = `${customer.firstName} ${customer.lastName}`.trim() || "Gast";
+  try {
+    await sendMail({
+      to: customer.email,
+      subject: "Euer digitaler Check-in für die Wiesenhütte — bitte vor der Anreise ausfüllen",
+      template: "avs-selfcheckin",
+      bookingId: booking.id,
+      react: AvsSelfCheckinEmail({
+        guestName,
+        bookingNumber: booking.bookingNumber,
+        arrival: formatDateLong(booking.arrival),
+        departure: formatDateLong(booking.departure),
+        checkinUrl: url.toString(),
+      }),
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Unbekannter Fehler";
+    return { ok: false, error: `Mail-Versand fehlgeschlagen: ${msg}` };
+  }
+
+  await db.insert(activityLog).values({
+    who: session.user?.name ?? session.user?.email ?? "Manager",
+    what: `AVS-SelfCheck-in-Link an ${customer.email} verschickt (digitaler Meldeschein/Kurkarten).`,
+    bookingId: booking.id,
+  });
+
+  revalidatePath(`/m/buchungen/${bookingId}`);
+  return { ok: true, sentTo: customer.email };
 }

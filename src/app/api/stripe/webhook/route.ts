@@ -18,7 +18,6 @@ import { BOOKING_BLOCKS_TAG } from "@/lib/availability";
 import { sendMail } from "@/lib/mail/send";
 import BookingConfirmedEmail from "@/lib/mail/templates/booking-confirmed";
 import BookingInternalEmail from "@/lib/mail/templates/booking-internal";
-import KurtaxeInfoEmail from "@/lib/mail/templates/kurtaxe-info";
 import MietvertragEmail from "@/lib/mail/templates/mietvertrag";
 import VoucherPurchaseEmail from "@/lib/mail/templates/voucher-purchase";
 import VoucherGiftEmail from "@/lib/mail/templates/voucher-gift";
@@ -369,27 +368,10 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       }
     }
 
-    // Kurtaxe-Info — Abrechnung läuft noch NICHT automatisiert; der Gast
-    // bekommt nur den Hinweis, dass wir uns separat persönlich melden.
-    const adultsForKurtaxe = booking.adults + booking.members + booking.teachers;
-    if (adultsForKurtaxe > 0 && !(await wasMailSent(bookingId, "kurtaxe-info"))) {
-      try {
-        await sendMail({
-          to: customer.email,
-          subject: `Kurtaxe Hochsauerland — wir melden uns bei Euch (Buchung ${booking.bookingNumber})`,
-          template: "kurtaxe-info",
-          bookingId,
-          react: KurtaxeInfoEmail({
-            guestName,
-            bookingNumber: booking.bookingNumber,
-            arrival: formatDateLong(booking.arrival),
-            departure: formatDateLong(booking.departure),
-          }),
-        });
-      } catch (err) {
-        console.error("[webhook] kurtaxe mail failed", err);
-      }
-    }
+    // Kurtaxe/Meldeschein: KEINE automatische Mail mehr (Vorstand 02.07.2026).
+    // Stattdessen verschickt der Vorstand den individuellen AVS-SelfCheck-in-Link
+    // über das Buchungsdetail im Manager (sendAvsCheckinLink) — die Plattform
+    // mailt den Link dann an den Gast.
 
     const internalTo = process.env.MAIL_INTERNAL_TO;
     if (internalTo && !(await wasMailSent(bookingId, "booking-internal"))) {
