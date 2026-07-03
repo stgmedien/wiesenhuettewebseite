@@ -10,7 +10,7 @@ export function CleanupButton() {
   function handleClick() {
     if (
       !window.confirm(
-        "Alle Anfragen ohne Anzahlung (Status: Angefragt, 0 € bezahlt) werden unwiderruflich gelöscht. Fortfahren?"
+        "Alle stornierten Buchungen ohne Zahlung (Status: Storniert, 0 € bezahlt) werden unwiderruflich gelöscht. Fortfahren?"
       )
     )
       return;

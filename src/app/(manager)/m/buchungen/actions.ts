@@ -12,7 +12,7 @@ export async function deleteUnpaidRequests() {
 
   const deleted = await db
     .delete(bookings)
-    .where(and(eq(bookings.status, "angefragt"), eq(bookings.paidCents, 0)))
+    .where(and(eq(bookings.status, "storniert"), eq(bookings.paidCents, 0)))
     .returning({ id: bookings.id });
 
   revalidatePath("/m/buchungen");
