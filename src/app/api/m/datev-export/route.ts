@@ -108,11 +108,13 @@ export async function GET(req: NextRequest) {
   }
   const invMap = new Map<string, string>();
   if (bookingIds.length > 0) {
-    const { inArray } = await import("drizzle-orm");
+    const { inArray, ne, and: andOp } = await import("drizzle-orm");
+    // Nur aktive Rechnungen mappen — nach einer Neuausstellung existieren
+    // storniert + neu nebeneinander, die Zahlung gehoert zur aktiven Nummer.
     const invs = await db
       .select({ bookingId: invoices.bookingId, number: invoices.invoiceNumber })
       .from(invoices)
-      .where(inArray(invoices.bookingId, bookingIds));
+      .where(andOp(inArray(invoices.bookingId, bookingIds), ne(invoices.status, "storniert")));
     for (const i of invs) if (i.bookingId) invMap.set(i.bookingId, i.number);
   }
 

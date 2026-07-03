@@ -1,8 +1,12 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { FileText, Loader2, ExternalLink, Check } from "lucide-react";
-import { createInvoiceForBookingAction, type InvoiceRow } from "./invoice-actions";
+import { FileText, Loader2, ExternalLink, Check, RefreshCw } from "lucide-react";
+import {
+  createInvoiceForBookingAction,
+  reissueInvoiceForBookingAction,
+  type InvoiceRow,
+} from "./invoice-actions";
 
 type Props = {
   bookingId: string;
@@ -14,6 +18,7 @@ export function InvoiceControl({ bookingId, existing }: Props) {
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [justCreated, setJustCreated] = useState(false);
+  const [reissueInfo, setReissueInfo] = useState<string | null>(null);
 
   const create = () => {
     setError(null);
@@ -30,6 +35,34 @@ export function InvoiceControl({ bookingId, existing }: Props) {
         issueDate: new Date().toISOString().slice(0, 10),
       });
       if (res.isNew) setJustCreated(true);
+    });
+  };
+
+  const reissue = () => {
+    if (
+      !window.confirm(
+        `Rechnung ${invoice?.invoiceNumber} wird storniert und mit dem aktuellen Buchungsstand (Personen, Preise) neu ausgestellt — mit neuer Rechnungsnummer. Fortfahren?`
+      )
+    )
+      return;
+    setError(null);
+    setReissueInfo(null);
+    start(async () => {
+      const res = await reissueInvoiceForBookingAction(bookingId);
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      setInvoice({
+        id: res.invoiceId,
+        invoiceNumber: res.invoiceNumber,
+        status: "ausgestellt",
+        issueDate: new Date().toISOString().slice(0, 10),
+      });
+      setJustCreated(true);
+      if (res.cancelledNumbers.length > 0) {
+        setReissueInfo(`${res.cancelledNumbers.join(", ")} storniert.`);
+      }
     });
   };
 
@@ -66,6 +99,25 @@ export function InvoiceControl({ bookingId, existing }: Props) {
               <ExternalLink size={11} />
             </a>
           )}
+          <div>
+            <button
+              type="button"
+              onClick={reissue}
+              disabled={pending}
+              className="inline-flex items-center gap-1.5 text-xs text-[var(--color-wh-fg-muted)] underline underline-offset-2 hover:no-underline cursor-pointer bg-transparent border-0 p-0 disabled:opacity-60"
+            >
+              {pending ? (
+                <Loader2 size={12} className="animate-spin" />
+              ) : (
+                <RefreshCw size={12} />
+              )}
+              Rechnung neu erstellen (alte wird storniert)
+            </button>
+          </div>
+          {reissueInfo && (
+            <p className="text-xs text-[var(--color-wh-fg-muted)] m-0">{reissueInfo}</p>
+          )}
+          {error && <p className="text-xs text-[var(--color-wh-sunset)] m-0">{error}</p>}
         </div>
       ) : (
         <div className="space-y-2">
