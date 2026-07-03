@@ -288,7 +288,6 @@ export async function sendBookingMessage(
       react: ManagerMessageEmail({
         guestName: `${customer.firstName} ${customer.lastName}`.trim(),
         bookingNumber: booking.bookingNumber,
-        managerName: session.user?.name ?? "Wiesenhütte-Team",
         bodyText: data.body,
         paymentLinkUrl: paymentUrl,
         paymentAmountFormatted: amountCents ? formatEuro(amountCents) : undefined,
