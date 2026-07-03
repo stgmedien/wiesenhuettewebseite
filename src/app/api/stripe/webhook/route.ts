@@ -317,8 +317,20 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     if (!(await wasMailSent(bookingId, "mietvertrag"))) {
       try {
         const subtotal = booking.subtotalCents;
-        const prepayment = Math.round(subtotal * 0.5);
-        const remainder = subtotal - prepayment;
+        // Tatsaechlichen Zahlungs-Split aus den Payment-Zeilen uebernehmen —
+        // der ist je nach Fall 50 % (Standard), 10 % (Schulgruppen) oder
+        // 100 % (Anreise < 14 Tage). Hartes 50/50 waere fuer die letzten
+        // beiden Faelle falsch. Fallback 50/50, falls Zeilen fehlen.
+        const pmtRows = await db
+          .select({ kind: payments.kind, amountCents: payments.amountCents })
+          .from(payments)
+          .where(eq(payments.bookingId, bookingId));
+        const firstPayment = pmtRows.find(
+          (p) => p.kind === "anzahlung" || p.kind === "vollzahlung"
+        );
+        const restRow = pmtRows.find((p) => p.kind === "restzahlung");
+        const prepayment = firstPayment?.amountCents ?? Math.round(subtotal * 0.5);
+        const remainder = restRow?.amountCents ?? subtotal - prepayment;
         await sendMail({
           to: customer.email,
           subject: `Mietvertrag Wiesenhütte — Buchung ${booking.bookingNumber}`,
