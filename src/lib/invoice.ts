@@ -9,6 +9,8 @@
 import { db } from "@/lib/db";
 import { invoices, bookings, customers, payments } from "@/lib/db/schema";
 import { sql, eq } from "drizzle-orm";
+import { resolveTariffs } from "@/lib/pricing-tariffs";
+import { PRICES } from "@/lib/pricing";
 
 export const allocateInvoiceNumber = async (): Promise<{ number: string; n: number }> => {
   const r = await db.execute(sql`SELECT nextval('invoice_seq') AS n`);
@@ -51,11 +53,28 @@ export const createInvoiceForBooking = async (
   // Line items snapshot
   const lineItems: { label: string; qty: number; unitCents: number; totalCents: number }[] = [];
   if (booking.accommodationCents > 0) {
-    lineItems.push({
-      label: `Übernachtung — ${booking.persons} Personen × ${booking.nights} Nächte`,
-      qty: booking.persons * booking.nights,
-      unitCents: Math.round(booking.accommodationCents / Math.max(1, booking.persons * booking.nights)),
-      totalCents: booking.accommodationCents,
+    const tariffs = await resolveTariffs(booking.arrival);
+    const nights = booking.nights;
+    const categories = [
+      { count: booking.adults,   unitCents: tariffs.nichtmitglied ?? PRICES.adultNonMemberCents, label: "Übernachtung — Erwachsene" },
+      { count: booking.members,  unitCents: tariffs.mitglied      ?? PRICES.adultMemberCents,     label: "Übernachtung — Mitglied (−50 %)" },
+      { count: booking.children, unitCents: tariffs.kind          ?? PRICES.childCents,            label: "Übernachtung — Kinder/Schüler bis 16 J." },
+      { count: booking.pupils,   unitCents: tariffs.schueler      ?? PRICES.pupilCents,            label: "Übernachtung — Schüler Mitglied (−50 %)" },
+      { count: booking.teachers, unitCents: tariffs.lehrer        ?? PRICES.adultNonMemberCents,   label: "Übernachtung — Lehrkräfte" },
+    ] as const;
+
+    let remainingCents = booking.accommodationCents;
+    const activeCats = categories.filter((c) => c.count > 0);
+    activeCats.forEach((cat, idx) => {
+      const isLast = idx === activeCats.length - 1;
+      const total = isLast ? remainingCents : cat.count * cat.unitCents * nights;
+      remainingCents -= total;
+      lineItems.push({
+        label: `${cat.label} × ${nights} Nächte`,
+        qty: cat.count * nights,
+        unitCents: cat.unitCents,
+        totalCents: total,
+      });
     });
   }
   if (booking.energyFlatCents > 0) {
