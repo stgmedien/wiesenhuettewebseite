@@ -1,10 +1,11 @@
 "use server";
 
-import { db } from "@/lib/db";
-import { invoices } from "@/lib/db/schema";
-import { eq, and, ne, desc } from "drizzle-orm";
 import { auth } from "@/lib/auth";
-import { createInvoiceForBooking, reissueInvoiceForBooking } from "@/lib/invoice";
+import {
+  createInvoiceForBooking,
+  reissueInvoiceForBooking,
+  getActiveInvoiceForBooking,
+} from "@/lib/invoice";
 import { revalidatePath } from "next/cache";
 
 const requireManager = async () => {
@@ -47,18 +48,7 @@ export type InvoiceRow = {
 export async function getInvoiceForBooking(
   bookingId: string
 ): Promise<InvoiceRow | null> {
-  const rows = await db
-    .select({
-      id: invoices.id,
-      invoiceNumber: invoices.invoiceNumber,
-      status: invoices.status,
-      issueDate: invoices.issueDate,
-    })
-    .from(invoices)
-    .where(and(eq(invoices.bookingId, bookingId), ne(invoices.status, "storniert")))
-    .orderBy(desc(invoices.createdAt))
-    .limit(1);
-  return rows[0] ?? null;
+  return getActiveInvoiceForBooking(bookingId);
 }
 
 export type ReissueInvoiceResult =

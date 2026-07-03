@@ -8,7 +8,8 @@ import { revalidatePath } from "next/cache";
 
 export async function deleteUnpaidRequests() {
   const session = await auth();
-  if (!session?.user) throw new Error("Nicht angemeldet");
+  const role = (session?.user as { role?: string } | undefined)?.role;
+  if (role !== "manager" && role !== "admin") throw new Error("Unauthorized");
 
   const deleted = await db
     .delete(bookings)

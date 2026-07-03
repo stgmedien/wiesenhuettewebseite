@@ -5,10 +5,11 @@
  */
 
 import { db } from "@/lib/db";
-import { bookings, customers, invoices } from "@/lib/db/schema";
+import { bookings, customers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { formatEuro } from "@/lib/pricing";
 import { formatDateLong } from "@/lib/utils";
+import { getActiveInvoiceForBooking } from "@/lib/invoice";
 
 const baseUrl = () =>
   process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.xn--wiesenhtte-geb.com";
@@ -33,11 +34,9 @@ export const buildBookingVars = async (
     ? (await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1))[0]
     : null;
 
-  const invRow = await db
-    .select({ number: invoices.invoiceNumber })
-    .from(invoices)
-    .where(eq(invoices.bookingId, b.id))
-    .limit(1);
+  // Kanonischer Lookup: nach einer Neuausstellung darf hier nie die
+  // stornierte Rechnungsnummer in Gast-Mails landen.
+  const activeInvoice = await getActiveInvoiceForBooking(b.id);
 
   const remainder = Math.max(0, b.subtotalCents - Math.min(b.paidCents, b.subtotalCents));
   const guestFirst = customer?.firstName ?? "";
@@ -66,7 +65,7 @@ export const buildBookingVars = async (
     paidAmount: formatEuro(b.paidCents),
     remainderAmount: formatEuro(remainder),
     depositAmount: formatEuro(b.depositCents),
-    invoiceNumber: invRow[0]?.number ?? "",
+    invoiceNumber: activeInvoice?.invoiceNumber ?? "",
   };
 };
 
