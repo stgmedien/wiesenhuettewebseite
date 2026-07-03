@@ -34,54 +34,105 @@ export default async function Dashboard() {
   in30d.setDate(in30d.getDate() + 30);
   const in30dIso = in30d.toISOString().slice(0, 10);
 
-  // Anreisen + Abreisen in 7 Tagen
-  const [arrivalsSoon, departuresSoon] = await Promise.all([
-    db
-      .select({
-        id: bookings.id,
-        bookingNumber: bookings.bookingNumber,
-        arrival: bookings.arrival,
-        departure: bookings.departure,
-        persons: bookings.persons,
-        customerId: bookings.customerId,
-      })
-      .from(bookings)
-      .where(and(gte(bookings.arrival, todayIso), lte(bookings.arrival, in7dIso), ne(bookings.status, "storniert")))
-      .orderBy(bookings.arrival)
-      .limit(10),
+  // Alle unabhaengigen Queries parallel (Issue #86) — nur openPaymentBookings
+  // und die Customer-Namen brauchen Ergebnisse aus dieser Stufe.
+  const [arrivalsSoon, departuresSoon, allBookings, openPaymentRows, openInquiries, recentBookings, kurtaxeSoon] =
+    await Promise.all([
+      // Anreisen in 7 Tagen
+      db
+        .select({
+          id: bookings.id,
+          bookingNumber: bookings.bookingNumber,
+          arrival: bookings.arrival,
+          departure: bookings.departure,
+          persons: bookings.persons,
+          customerId: bookings.customerId,
+        })
+        .from(bookings)
+        .where(and(gte(bookings.arrival, todayIso), lte(bookings.arrival, in7dIso), ne(bookings.status, "storniert")))
+        .orderBy(bookings.arrival)
+        .limit(10),
 
-    db
-      .select({
-        id: bookings.id,
-        bookingNumber: bookings.bookingNumber,
-        arrival: bookings.arrival,
-        departure: bookings.departure,
-        persons: bookings.persons,
-        customerId: bookings.customerId,
-      })
-      .from(bookings)
-      .where(and(gte(bookings.departure, todayIso), lte(bookings.departure, in7dIso), ne(bookings.status, "storniert")))
-      .orderBy(bookings.departure)
-      .limit(10),
-  ]);
+      // Abreisen in 7 Tagen
+      db
+        .select({
+          id: bookings.id,
+          bookingNumber: bookings.bookingNumber,
+          arrival: bookings.arrival,
+          departure: bookings.departure,
+          persons: bookings.persons,
+          customerId: bookings.customerId,
+        })
+        .from(bookings)
+        .where(and(gte(bookings.departure, todayIso), lte(bookings.departure, in7dIso), ne(bookings.status, "storniert")))
+        .orderBy(bookings.departure)
+        .limit(10),
+
+      // KPIs
+      db
+        .select({ id: bookings.id, status: bookings.status, paidCents: bookings.paidCents })
+        .from(bookings),
+
+      // Offene Zahlungen
+      db
+        .select({ bookingId: payments.bookingId, amountCents: payments.amountCents })
+        .from(payments)
+        .where(and(eq(payments.status, "offen"), ne(payments.kind, "kaution"), ne(payments.kind, "rueckerstattung"))),
+
+      // Offene Anfragen (Inquiries)
+      db
+        .select()
+        .from(inquiries)
+        .where(eq(inquiries.status, "new"))
+        .orderBy(desc(inquiries.createdAt))
+        .limit(10),
+
+      // Neue Buchungen — letzte 5 nach Buchungsdatum
+      db
+        .select({
+          id: bookings.id,
+          bookingNumber: bookings.bookingNumber,
+          status: bookings.status,
+          arrival: bookings.arrival,
+          persons: bookings.persons,
+          createdAt: bookings.createdAt,
+          customerId: bookings.customerId,
+        })
+        .from(bookings)
+        .where(ne(bookings.status, "storniert"))
+        .orderBy(desc(bookings.createdAt))
+        .limit(5),
+
+      // Kurtaxe — Anreisen in den nächsten 14 Tagen (bezahlt oder bestätigt)
+      db
+        .select({
+          id: bookings.id,
+          bookingNumber: bookings.bookingNumber,
+          arrival: bookings.arrival,
+          departure: bookings.departure,
+          persons: bookings.persons,
+          customerId: bookings.customerId,
+        })
+        .from(bookings)
+        .where(
+          and(
+            gte(bookings.arrival, todayIso),
+            lte(bookings.arrival, in14dIso),
+            sql`${bookings.status} IN ('bezahlt', 'bestaetigt')`
+          )
+        )
+        .orderBy(bookings.arrival)
+        .limit(10),
+    ]);
 
   const arrivalsToday = arrivalsSoon.filter((b) => b.arrival === todayIso);
   const departuresToday = departuresSoon.filter((b) => b.departure === todayIso);
 
-  // KPIs
-  const allBookings = await db
-    .select({ id: bookings.id, status: bookings.status, paidCents: bookings.paidCents })
-    .from(bookings);
   const totalRevenueCents = allBookings
     .filter((b) => ["bezahlt", "angereist", "abgereist"].includes(b.status))
     .reduce((acc, b) => acc + b.paidCents, 0);
   const openRequests = allBookings.filter((b) => b.status === "angefragt").length;
 
-  // Offene Zahlungen
-  const openPaymentRows = await db
-    .select({ bookingId: payments.bookingId, amountCents: payments.amountCents })
-    .from(payments)
-    .where(and(eq(payments.status, "offen"), ne(payments.kind, "kaution"), ne(payments.kind, "rueckerstattung")));
   const openPaymentTotalCents = openPaymentRows.reduce((a, p) => a + Math.max(0, p.amountCents), 0);
   const openPaymentBookingIds = Array.from(new Set(openPaymentRows.map((p) => p.bookingId)));
   const openPaymentBookings = openPaymentBookingIds.length
@@ -99,51 +150,6 @@ export default async function Dashboard() {
         .orderBy(bookings.arrival)
         .limit(10)
     : [];
-
-  // Offene Anfragen (Inquiries)
-  const openInquiries = await db
-    .select()
-    .from(inquiries)
-    .where(eq(inquiries.status, "new"))
-    .orderBy(desc(inquiries.createdAt))
-    .limit(10);
-
-  // Neue Buchungen — letzte 5 nach Buchungsdatum
-  const recentBookings = await db
-    .select({
-      id: bookings.id,
-      bookingNumber: bookings.bookingNumber,
-      status: bookings.status,
-      arrival: bookings.arrival,
-      persons: bookings.persons,
-      createdAt: bookings.createdAt,
-      customerId: bookings.customerId,
-    })
-    .from(bookings)
-    .where(ne(bookings.status, "storniert"))
-    .orderBy(desc(bookings.createdAt))
-    .limit(5);
-
-  // Kurtaxe — Anreisen in den nächsten 14 Tagen (bezahlt oder bestätigt)
-  const kurtaxeSoon = await db
-    .select({
-      id: bookings.id,
-      bookingNumber: bookings.bookingNumber,
-      arrival: bookings.arrival,
-      departure: bookings.departure,
-      persons: bookings.persons,
-      customerId: bookings.customerId,
-    })
-    .from(bookings)
-    .where(
-      and(
-        gte(bookings.arrival, todayIso),
-        lte(bookings.arrival, in14dIso),
-        sql`${bookings.status} IN ('bezahlt', 'bestaetigt')`
-      )
-    )
-    .orderBy(bookings.arrival)
-    .limit(10);
 
   // Customer-Namen für alle relevanten Buchungen laden
   const allCustomerIds = Array.from(
