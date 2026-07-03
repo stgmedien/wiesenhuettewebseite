@@ -32,43 +32,43 @@ export default async function BookingDetail({ params }: Props) {
   const b = found[0];
   if (!b) notFound();
 
-  const customer = b.customerId
-    ? (await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1))[0]
-    : null;
-
-  const pmts = await db
-    .select()
-    .from(payments)
-    .where(eq(payments.bookingId, id))
-    .orderBy(desc(payments.createdAt));
-
-  const bookingNotes = await db
-    .select()
-    .from(notes)
-    .where(and(eq(notes.scope, "booking"), eq(notes.refId, id)))
-    .orderBy(desc(notes.createdAt));
-
-  const existingInvoice = await getInvoiceForBooking(id);
-
-  // Letzter Versand des AVS-SelfCheck-in-Links (digitaler Meldeschein/Kurkarten)
-  const avsSent = await db
-    .select({ sentAt: emailLog.sentAt })
-    .from(emailLog)
-    .where(and(eq(emailLog.bookingId, id), eq(emailLog.template, "avs-selfcheckin")))
-    .orderBy(desc(emailLog.sentAt))
-    .limit(1);
+  // Alle Folge-Queries sind unabhaengig voneinander → parallel (Issue #86)
+  const [customerRows, pmts, bookingNotes, existingInvoice, avsSent, availableTemplates] =
+    await Promise.all([
+      b.customerId
+        ? db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1)
+        : Promise.resolve([]),
+      db
+        .select()
+        .from(payments)
+        .where(eq(payments.bookingId, id))
+        .orderBy(desc(payments.createdAt)),
+      db
+        .select()
+        .from(notes)
+        .where(and(eq(notes.scope, "booking"), eq(notes.refId, id)))
+        .orderBy(desc(notes.createdAt)),
+      getInvoiceForBooking(id),
+      // Letzter Versand des AVS-SelfCheck-in-Links (digitaler Meldeschein/Kurkarten)
+      db
+        .select({ sentAt: emailLog.sentAt })
+        .from(emailLog)
+        .where(and(eq(emailLog.bookingId, id), eq(emailLog.template, "avs-selfcheckin")))
+        .orderBy(desc(emailLog.sentAt))
+        .limit(1),
+      // Verfuegbare Mail-Templates fuer den ManagerMessage-Picker (nur die mit aktiver Version)
+      db
+        .select({
+          id: mailTemplates.id,
+          key: mailTemplates.key,
+          name: mailTemplates.name,
+        })
+        .from(mailTemplates)
+        .where(isNotNull(mailTemplates.activeVersionId))
+        .orderBy(asc(mailTemplates.name)),
+    ]);
+  const customer = customerRows[0] ?? null;
   const avsLastSentAt = avsSent[0] ? new Date(avsSent[0].sentAt).toLocaleString("de-DE") : null;
-
-  // Verfuegbare Mail-Templates fuer den ManagerMessage-Picker (nur die mit aktiver Version)
-  const availableTemplates = await db
-    .select({
-      id: mailTemplates.id,
-      key: mailTemplates.key,
-      name: mailTemplates.name,
-    })
-    .from(mailTemplates)
-    .where(isNotNull(mailTemplates.activeVersionId))
-    .orderBy(asc(mailTemplates.name));
 
   return (
     <div className="px-4 sm:px-8 py-8 sm:py-10 max-w-[1200px]">
