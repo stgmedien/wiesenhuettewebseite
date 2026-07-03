@@ -5,6 +5,7 @@ import Link from "next/link";
 import { formatEuro } from "@/lib/pricing";
 import { StatusPill } from "@/components/manager/StatusPill";
 import { BookingsFilter } from "@/components/manager/BookingsFilter";
+import { CleanupButton } from "@/components/manager/CleanupButton";
 import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";
@@ -75,6 +76,7 @@ export default async function BookingsListPage({
               Gebucht am
             </Link>
           </div>
+          <CleanupButton />
           <Link
             href="/m/manuell"
             className="inline-flex h-10 px-5 items-center justify-center rounded-[var(--radius-btn)] bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] no-underline font-semibold shrink-0"

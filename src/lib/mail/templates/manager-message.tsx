@@ -12,7 +12,6 @@ import {
 type Props = {
   guestName: string;
   bookingNumber: string;
-  managerName: string;
   bodyText: string;
   paymentLinkUrl?: string;
   paymentAmountFormatted?: string;
@@ -79,7 +78,6 @@ const button = {
 export default function ManagerMessageEmail({
   guestName,
   bookingNumber,
-  managerName,
   bodyText,
   paymentLinkUrl,
   paymentAmountFormatted,
@@ -130,7 +128,7 @@ export default function ManagerMessageEmail({
             </Section>
           ) : null}
 
-          <Text style={muted}>Viele Grüße — {managerName}, Wiesenhütte</Text>
+          <Text style={muted}>Viele Grüße — Dein Wiesenhütten Team</Text>
         </Container>
       </Body>
     </Html>
