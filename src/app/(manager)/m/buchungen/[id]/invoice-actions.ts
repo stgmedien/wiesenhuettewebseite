@@ -2,9 +2,9 @@
 
 import { db } from "@/lib/db";
 import { invoices } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and, ne, desc } from "drizzle-orm";
 import { auth } from "@/lib/auth";
-import { createInvoiceForBooking } from "@/lib/invoice";
+import { createInvoiceForBooking, reissueInvoiceForBooking } from "@/lib/invoice";
 import { revalidatePath } from "next/cache";
 
 const requireManager = async () => {
@@ -43,7 +43,7 @@ export type InvoiceRow = {
   issueDate: string | null;
 };
 
-/** Gibt die vorhandene Rechnung einer Buchung zurück, falls vorhanden. */
+/** Gibt die aktive (nicht stornierte) Rechnung einer Buchung zurück, falls vorhanden. */
 export async function getInvoiceForBooking(
   bookingId: string
 ): Promise<InvoiceRow | null> {
@@ -55,7 +55,33 @@ export async function getInvoiceForBooking(
       issueDate: invoices.issueDate,
     })
     .from(invoices)
-    .where(eq(invoices.bookingId, bookingId))
+    .where(and(eq(invoices.bookingId, bookingId), ne(invoices.status, "storniert")))
+    .orderBy(desc(invoices.createdAt))
     .limit(1);
   return rows[0] ?? null;
+}
+
+export type ReissueInvoiceResult =
+  | { ok: true; invoiceId: string; invoiceNumber: string; cancelledNumbers: string[] }
+  | { ok: false; error: string };
+
+/**
+ * Storniert die bestehende Rechnung und stellt eine neue mit aktuellem
+ * Buchungsstand aus (neue laufende Nummer, GoBD-konform).
+ */
+export async function reissueInvoiceForBookingAction(
+  bookingId: string
+): Promise<ReissueInvoiceResult> {
+  await requireManager();
+  try {
+    const { id, invoiceNumber, cancelledNumbers } = await reissueInvoiceForBooking(bookingId);
+    revalidatePath(`/m/buchungen/${bookingId}`);
+    return { ok: true, invoiceId: id, invoiceNumber, cancelledNumbers };
+  } catch (e) {
+    console.error("[invoice-actions] reissue failed", e);
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Rechnung konnte nicht neu erstellt werden.",
+    };
+  }
 }

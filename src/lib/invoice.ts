@@ -8,7 +8,7 @@
 
 import { db } from "@/lib/db";
 import { invoices, bookings, customers, payments } from "@/lib/db/schema";
-import { sql, eq } from "drizzle-orm";
+import { sql, eq, and, ne, desc } from "drizzle-orm";
 import { resolveTariffs } from "@/lib/pricing-tariffs";
 import { PRICES } from "@/lib/pricing";
 
@@ -28,11 +28,14 @@ export const allocateInvoiceNumber = async (): Promise<{ number: string; n: numb
 export const createInvoiceForBooking = async (
   bookingId: string
 ): Promise<{ id: string; invoiceNumber: string; isNew: boolean }> => {
-  // Existing invoice?
+  // Existing invoice? Stornierte zaehlen nicht — nach einer Neuausstellung
+  // (reissueInvoiceForBooking) muss hier die aktive Rechnung gefunden bzw.
+  // eine neue erstellt werden.
   const existing = await db
     .select({ id: invoices.id, invoiceNumber: invoices.invoiceNumber })
     .from(invoices)
-    .where(eq(invoices.bookingId, bookingId))
+    .where(and(eq(invoices.bookingId, bookingId), ne(invoices.status, "storniert")))
+    .orderBy(desc(invoices.createdAt))
     .limit(1);
   if (existing[0]) {
     return { id: existing[0].id, invoiceNumber: existing[0].invoiceNumber, isNew: false };
@@ -151,4 +154,40 @@ export const createInvoiceForBooking = async (
     .returning({ id: invoices.id });
 
   return { id: inserted[0].id, invoiceNumber, isNew: true };
+};
+
+/**
+ * Stellt die Rechnung einer Buchung neu aus (GoBD-konform):
+ * Die bestehende Rechnung wird storniert (bleibt als Beleg erhalten),
+ * anschliessend wird eine neue Rechnung mit neuer laufender Nummer und
+ * aktuellem Buchungsstand (Personen, Preise, Adresse) erzeugt.
+ *
+ * Reihenfolge ist bewusst Storno-zuerst: schlaegt die Neuerstellung fehl,
+ * existiert keine aktive Rechnung mehr und der Manager kann einfach erneut
+ * "Rechnung erstellen" klicken — kein inkonsistenter Doppel-Zustand.
+ */
+export const reissueInvoiceForBooking = async (
+  bookingId: string
+): Promise<{ id: string; invoiceNumber: string; cancelledNumbers: string[] }> => {
+  const active = await db
+    .select({ id: invoices.id, invoiceNumber: invoices.invoiceNumber, notes: invoices.notes })
+    .from(invoices)
+    .where(and(eq(invoices.bookingId, bookingId), ne(invoices.status, "storniert")));
+
+  const cancelledNumbers: string[] = [];
+  const today = new Date().toISOString().slice(0, 10);
+  for (const inv of active) {
+    await db
+      .update(invoices)
+      .set({
+        status: "storniert",
+        updatedAt: new Date(),
+        notes: `${inv.notes ? inv.notes + "\n\n" : ""}STORNIERT am ${today} — ersetzt durch Neuausstellung.`,
+      })
+      .where(eq(invoices.id, inv.id));
+    cancelledNumbers.push(inv.invoiceNumber);
+  }
+
+  const created = await createInvoiceForBooking(bookingId);
+  return { id: created.id, invoiceNumber: created.invoiceNumber, cancelledNumbers };
 };
