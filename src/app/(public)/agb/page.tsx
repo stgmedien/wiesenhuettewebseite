@@ -87,23 +87,34 @@ export default async function AGB() {
 
         <Block title="§ 5 Stornobedingungen">
           <p>
-            Bei Rücktritt durch den Mieter werden folgende Stornogebühren auf die Buchungssumme
-            (ohne Kaution) erhoben:
+            Bei Rücktritt durch den Mieter werden folgende Stornogebühren auf den reinen
+            Übernachtungspreis erhoben. Endreinigung und Kaution werden im Stornofall nicht
+            fällig bzw. vollständig zurückerstattet:
           </p>
           <ul>
             <li>mehr als 30 Tage vor Anreise: <strong>0 %</strong></li>
-            <li>29 – 14 Tage vor Anreise: <strong>30 %</strong></li>
-            <li>13 – 7 Tage vor Anreise: <strong>60 %</strong></li>
-            <li>weniger als 7 Tage vor Anreise: <strong>90 %</strong></li>
+            <li>30 – 14 Tage vor Anreise: <strong>50 %</strong></li>
+            <li>weniger als 14 Tage vor Anreise: <strong>100 %</strong></li>
           </ul>
           <p>
-            Die Kaution wird im Stornofall vollständig zurückerstattet. Maßgeblich ist der Zeitpunkt
-            des Eingangs der schriftlichen Stornierung beim Vermieter. Eine Umbuchung auf einen
-            anderen Zeitraum ist nach Verfügbarkeit möglich und wird wie eine Neubuchung behandelt;
-            ggf. anfallende Stornogebühren werden auf die neue Buchung angerechnet.
+            Maßgeblich ist der Zeitpunkt des Eingangs der schriftlichen Stornierung beim
+            Vermieter. Eine Umbuchung auf einen anderen Zeitraum ist nach Verfügbarkeit möglich
+            und wird wie eine Neubuchung behandelt; ggf. anfallende Stornogebühren werden auf
+            die neue Buchung angerechnet.
+          </p>
+          <p>
+            Eine nachträgliche Verringerung der gebuchten Personenzahl ist nicht möglich; der
+            vereinbarte Übernachtungspreis bleibt auch bei kurzfristigem Ausfall einzelner
+            Teilnehmer geschuldet. Eine Erhöhung der Personenzahl ist bis 15 Tage vor Anreise
+            über das Gäste-Konto möglich.
           </p>
           <p>
             Wir empfehlen ausdrücklich den Abschluss einer privaten Reiserücktrittsversicherung.
+          </p>
+          <p>
+            Für Buchungen, die vor dem 05.07.2026 abgeschlossen wurden, gelten die zum
+            Buchungszeitpunkt vereinbarten Stornobedingungen (0/30/60/90 % der Buchungssumme
+            ohne Kaution).
           </p>
         </Block>
 

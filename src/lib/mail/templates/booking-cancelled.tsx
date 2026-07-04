@@ -15,7 +15,8 @@ type Props = {
   bookingNumber: string;
   feePercent: number;
   feeCents: number;
-  subtotalCents: number;
+  baseCents: number;
+  baseLabel: string;
 };
 
 const main = { backgroundColor: "#F7F7F2", padding: "40px 0" };
@@ -59,7 +60,8 @@ export default function BookingCancelledEmail({
   bookingNumber,
   feePercent,
   feeCents,
-  subtotalCents,
+  baseCents,
+  baseLabel,
 }: Props) {
   return (
     <Html>
@@ -84,16 +86,17 @@ export default function BookingCancelledEmail({
             }}
           >
             <Text style={{ ...text, margin: 0 }}>
-              Buchungssumme (ohne Kaution): <strong>{eur(subtotalCents)}</strong>
+              {baseLabel}: <strong>{eur(baseCents)}</strong>
               <br />
               Storno-Gebühr ({feePercent}%): <strong>{eur(feeCents)}</strong>
               <br />
-              Erstattungsbetrag: <strong>{eur(subtotalCents - feeCents)}</strong>
+              Erstattung auf diesen Anteil: <strong>{eur(Math.max(0, baseCents - feeCents))}</strong>
             </Text>
           </Section>
           <Text style={text}>
-            Bereits gezahlte Beträge erstatten wir innerhalb von 14 Tagen über den ursprünglichen
-            Zahlweg. Die Kaution (sofern eingezogen) wird ebenfalls vollständig zurückgebucht.
+            Bereits gezahlte Beträge erstatten wir abzüglich der Storno-Gebühr innerhalb von
+            14 Tagen über den ursprünglichen Zahlweg. Endreinigung und Kaution (sofern
+            eingezogen) werden vollständig zurückgebucht.
           </Text>
           <Hr style={{ borderColor: "#C8CEC4", margin: "32px 0 16px" }} />
           <Text style={muted}>

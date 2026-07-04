@@ -1,16 +1,13 @@
 /**
- * Storno-Regelwerk. Konfiguriert global, kann perspektivisch über site-settings
- * laufen — aktuell hartkodiert als sinnvolle Defaults.
+ * Storno-Regelwerk für die UI-Anzeige (Buchungsflow). Muss inhaltlich zur
+ * verbindlichen Staffel in pricing.ts (CANCELLATION_TIERS) und den AGB § 5
+ * passen — Vorstandsbeschluss 04.07.2026.
  *
- * Logik (von Anreise rückwärts gerechnet):
- *  - ≥ 60 Tage vorher: 100% Rückerstattung
- *  - 30 - 59 Tage:     50% Rückerstattung
- *  - 14 - 29 Tage:     25% Rückerstattung
- *  -  <14 Tage:         0% (Buchung verfällt)
- *
- * Anwendung sowohl im /buchen-Flow (UI-Hinweis vor Checkout) als auch im
- * Kunden-Konto bei Buchungs-Detail (aktuelle Storno-Quote sichtbar) und
- * in der Buchungs-Confirmation-Mail.
+ * Logik (von Anreise rückwärts gerechnet, Basis: reiner Übernachtungspreis;
+ * Endreinigung und Kaution werden im Stornofall nicht fällig):
+ *  - > 30 Tage vorher: 100 % Rückerstattung (kostenlos)
+ *  - 30 - 14 Tage:      50 % Rückerstattung
+ *  -  < 14 Tage:         0 % (Übernachtungspreis verfällt)
  */
 
 import type { Locale } from "@/lib/i18n-shared";
@@ -21,32 +18,28 @@ export type CancellationTier = {
   label: string;
 };
 
-const TIER_LABELS: Record<Locale, [string, string, string, string]> = {
+const TIER_LABELS: Record<Locale, [string, string, string]> = {
   de: [
-    "60 Tage oder mehr vorher",
-    "30 bis 59 Tage vorher",
-    "14 bis 29 Tage vorher",
+    "Mehr als 30 Tage vorher",
+    "30 bis 14 Tage vorher",
     "Weniger als 14 Tage vorher",
   ],
   en: [
-    "60 days or more in advance",
-    "30 to 59 days in advance",
-    "14 to 29 days in advance",
+    "More than 30 days in advance",
+    "30 to 14 days in advance",
     "Less than 14 days in advance",
   ],
   nl: [
-    "60 dagen of meer vooraf",
-    "30 tot 59 dagen vooraf",
-    "14 tot 29 dagen vooraf",
+    "Meer dan 30 dagen vooraf",
+    "30 tot 14 dagen vooraf",
     "Minder dan 14 dagen vooraf",
   ],
 };
 
 const buildTiers = (locale: Locale): CancellationTier[] => [
-  { daysBeforeArrival: 60, refundPercent: 100, label: TIER_LABELS[locale][0] },
-  { daysBeforeArrival: 30, refundPercent: 50, label: TIER_LABELS[locale][1] },
-  { daysBeforeArrival: 14, refundPercent: 25, label: TIER_LABELS[locale][2] },
-  { daysBeforeArrival: 0, refundPercent: 0, label: TIER_LABELS[locale][3] },
+  { daysBeforeArrival: 30, refundPercent: 100, label: TIER_LABELS[locale][0] },
+  { daysBeforeArrival: 14, refundPercent: 50, label: TIER_LABELS[locale][1] },
+  { daysBeforeArrival: 0, refundPercent: 0, label: TIER_LABELS[locale][2] },
 ];
 
 /** Backwards-compatible Default-Export (DE). */

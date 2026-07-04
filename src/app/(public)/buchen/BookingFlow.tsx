@@ -179,7 +179,7 @@ const BF_COPY = {
     stornoVerfaellt: "— Buchung verfällt.",
     stornoBody: "Vollständige Stornogebühren-Staffel (gerechnet von der Anreise rückwärts):",
     stornoRefund: "Rückerstattung",
-    stornoNote: "Die Kaution wird unabhängig davon immer voll erstattet (sofern keine Schäden). Stornierungen müssen schriftlich erfolgen.",
+    stornoNote: "Gerechnet auf den reinen Übernachtungspreis — Endreinigung und Kaution werden im Stornofall nicht fällig. Stornierungen müssen schriftlich erfolgen.",
     next: "Weiter",
     back: "Zurück",
     overview: "Übersicht",
@@ -234,6 +234,8 @@ const BF_COPY = {
     memberConfirmLabel:
       "Ich bestätige, dass alle zum Mitgliedstarif gebuchten Personen aktive Mitglieder des Skifreunde Gütersloh e.V. sind.",
     valMemberConfirm: "Bitte bestätige die Mitgliedschaft der zum Mitgliedstarif gebuchten Personen.",
+    personsNoReduceNote:
+      "Wichtig: Die Personenzahl kann nach der Buchung nur noch erhöht, nicht verringert werden. Auch bei kurzfristigem Ausfall einzelner Teilnehmer bleibt der volle Übernachtungspreis fällig. Tipp: Lieber knapp kalkulieren — Personen könnt ihr später jederzeit bequem über euer Konto nachbuchen.",
     ariaLess: "Weniger",
     ariaMore: "Mehr",
     // PriceSummary
@@ -345,7 +347,7 @@ const BF_COPY = {
     stornoVerfaellt: "— booking forfeits.",
     stornoBody: "Full cancellation tiers (counted backwards from arrival):",
     stornoRefund: "refund",
-    stornoNote: "The damage deposit is always refunded in full (provided no damage). Cancellations must be made in writing.",
+    stornoNote: "Based on the accommodation price only — final cleaning and deposit are not charged if you cancel. Cancellations must be made in writing.",
     next: "Next",
     back: "Back",
     overview: "Summary",
@@ -398,6 +400,8 @@ const BF_COPY = {
     memberConfirmLabel:
       "I confirm that all persons booked at the member rate are active members of Skifreunde Gütersloh e.V.",
     valMemberConfirm: "Please confirm the membership of all persons booked at the member rate.",
+    personsNoReduceNote:
+      "Important: after booking, the number of guests can only be increased, never reduced. The full accommodation price remains due even if individual participants drop out at short notice. Tip: book conservatively — you can add guests any time via your account.",
     ariaLess: "Less",
     ariaMore: "More",
     priceSummaryH: "Price summary",
@@ -507,7 +511,7 @@ const BF_COPY = {
     stornoVerfaellt: "— boeking vervalt.",
     stornoBody: "Volledige annuleringsstaffel (gerekend terug vanaf aankomst):",
     stornoRefund: "terugbetaling",
-    stornoNote: "De borg wordt altijd volledig terugbetaald (mits geen schade). Annuleringen moeten schriftelijk gebeuren.",
+    stornoNote: "Alleen gerekend over de overnachtingsprijs — eindschoonmaak en borg vervallen bij annulering. Annuleringen moeten schriftelijk gebeuren.",
     next: "Volgende",
     back: "Terug",
     overview: "Overzicht",
@@ -560,6 +564,8 @@ const BF_COPY = {
     memberConfirmLabel:
       "Ik bevestig dat alle personen met ledentarief actieve leden van Skifreunde Gütersloh e.V. zijn.",
     valMemberConfirm: "Bevestig het lidmaatschap van alle personen met ledentarief.",
+    personsNoReduceNote:
+      "Belangrijk: na de boeking kan het aantal personen alleen worden verhoogd, nooit verlaagd. Ook bij kortetermijnuitval van deelnemers blijft de volledige overnachtingsprijs verschuldigd. Tip: boek liever krap — personen bijboeken kan altijd via je account.",
     ariaLess: "Minder",
     ariaMore: "Meer",
     priceSummaryH: "Prijsoverzicht",
@@ -1330,6 +1336,11 @@ const PersonsEditor = ({
   tt: BfCopy;
 }) => (
   <div className="bg-[var(--color-wh-snow)] border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-4">
+    {/* Vorstandsbeschluss 04.07.2026: keine nachträgliche Reduzierung —
+        deutlich sichtbar VOR der Personenwahl. */}
+    <p className="text-sm font-bold text-[var(--color-wh-deep-green)] bg-[var(--color-wh-beige)] rounded-md p-3 mt-0 mb-3">
+      {tt.personsNoReduceNote}
+    </p>
     <PersonRow
       label={tt.adultsLabel}
       hint={tt.adultsHint}

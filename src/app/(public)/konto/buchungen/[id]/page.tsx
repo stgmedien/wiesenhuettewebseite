@@ -3,7 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { bookings, customers, payments, invoices } from "@/lib/db/schema";
 import { eq, and, desc, ne } from "drizzle-orm";
-import { formatEuro, cancellationFee, RULES } from "@/lib/pricing";
+import { formatEuro, cancellationFeeForBooking, RULES } from "@/lib/pricing";
 import { formatDateLong } from "@/lib/utils";
 import { CancelBookingButton } from "./CancelBookingButton";
 import { AddPersonsForm } from "./AddPersonsForm";
@@ -56,7 +56,7 @@ export default async function BuchungDetailPage({ params }: Props) {
     .limit(1);
   const invoice = invRow[0];
 
-  const fee = cancellationFee(booking.subtotalCents, booking.arrival);
+  const fee = cancellationFeeForBooking(booking);
   const canCancel =
     booking.status !== "storniert" &&
     booking.status !== "abgereist" &&
@@ -250,15 +250,18 @@ export default async function BuchungDetailPage({ params }: Props) {
               bookingNumber={booking.bookingNumber}
               feePercent={fee.percent}
               feeCents={fee.feeCents}
-              subtotalCents={booking.subtotalCents}
+              baseCents={fee.baseCents}
+              isLegacy={fee.isLegacy}
             />
           )}
         </div>
         {canCancel && (
           <p className="text-xs text-[var(--color-wh-black)]/60 mt-3">
-            Bei Stornierung jetzt: <strong>{fee.percent}%</strong> Storno-Gebühr ={" "}
+            Bei Stornierung jetzt: <strong>{fee.percent}%</strong> Storno-Gebühr
+            {fee.isLegacy ? " (auf die Zwischensumme)" : " (auf den Übernachtungspreis)"} ={" "}
             <strong>{formatEuro(fee.feeCents)}</strong>. Erstattung:{" "}
-            <strong>{formatEuro(booking.subtotalCents - fee.feeCents)}</strong> + volle Kaution.
+            <strong>{formatEuro(Math.max(0, fee.baseCents - fee.feeCents))}</strong>
+            {fee.isLegacy ? "" : " + Endreinigung"} + volle Kaution.
           </p>
         )}
       </section>

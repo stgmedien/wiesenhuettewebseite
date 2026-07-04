@@ -6,7 +6,7 @@ import { bookings, customers, activityLog, payments } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
-import { cancellationFee, formatEuro, calculatePrice, RULES, type Persons } from "@/lib/pricing";
+import { cancellationFeeForBooking, formatEuro, calculatePrice, RULES, type Persons } from "@/lib/pricing";
 import { resolveTariffs } from "@/lib/pricing-tariffs";
 import { formatDateLong } from "@/lib/utils";
 import { sendMail } from "@/lib/mail/send";
@@ -60,7 +60,7 @@ export async function cancelOwnBooking(formData: FormData) {
     return { ok: false, error: "Diese Buchung kann nicht mehr storniert werden." };
   }
 
-  const fee = cancellationFee(booking.subtotalCents, booking.arrival);
+  const fee = cancellationFeeForBooking(booking);
 
   await db
     .update(bookings)
@@ -104,7 +104,8 @@ export async function cancelOwnBooking(formData: FormData) {
         bookingNumber: booking.bookingNumber,
         feePercent: fee.percent,
         feeCents: fee.feeCents,
-        subtotalCents: booking.subtotalCents,
+        baseCents: fee.baseCents,
+        baseLabel: fee.isLegacy ? "Buchungssumme (ohne Kaution)" : "Übernachtungspreis",
       }),
       bcc: process.env.MAIL_INTERNAL_TO ?? undefined,
     });
