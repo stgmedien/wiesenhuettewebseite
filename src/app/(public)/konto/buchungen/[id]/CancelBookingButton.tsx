@@ -9,7 +9,8 @@ type Props = {
   bookingNumber: string;
   feePercent: number;
   feeCents: number;
-  subtotalCents: number;
+  baseCents: number;
+  isLegacy: boolean;
 };
 
 export function CancelBookingButton({
@@ -17,7 +18,8 @@ export function CancelBookingButton({
   bookingNumber,
   feePercent,
   feeCents,
-  subtotalCents,
+  baseCents,
+  isLegacy,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -60,8 +62,9 @@ export function CancelBookingButton({
               <strong>
                 {feePercent}% = {formatEuro(feeCents)}
               </strong>{" "}
-              an. Du bekommst <strong>{formatEuro(subtotalCents - feeCents)}</strong> + die volle
-              Kaution erstattet.
+              {isLegacy ? "auf die Buchungssumme" : "auf den Übernachtungspreis"} an. Du bekommst{" "}
+              <strong>{formatEuro(Math.max(0, baseCents - feeCents))}</strong>
+              {isLegacy ? "" : " + Endreinigung"} + die volle Kaution erstattet.
             </p>
 
             <form action={submit} className="space-y-3">

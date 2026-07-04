@@ -157,7 +157,8 @@ const jobs: { name: string; subject: string; react: React.ReactElement }[] = [
       bookingNumber: "WH-TEST-0001",
       feePercent: 50,
       feeCents: 57500,
-      subtotalCents: 115000,
+      baseCents: 115000,
+      baseLabel: "Übernachtungspreis",
     }),
   },
   {

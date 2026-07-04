@@ -108,7 +108,8 @@ export async function setBookingStatus(
               bookingNumber: b.bookingNumber,
               feePercent: 0,
               feeCents: 0,
-              subtotalCents: b.subtotalCents,
+              baseCents: b.subtotalCents,
+              baseLabel: "Buchungssumme (ohne Kaution)",
             }),
           });
         }

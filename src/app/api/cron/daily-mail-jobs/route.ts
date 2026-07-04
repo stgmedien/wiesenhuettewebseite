@@ -34,7 +34,7 @@ import {
   SCHOOL_WARNING_2_DAYS,
   SCHOOL_CANCEL_DAYS,
 } from "@/lib/school-deposit";
-import { cancellationFee, formatEuro } from "@/lib/pricing";
+import { cancellationFeeForBooking, formatEuro } from "@/lib/pricing";
 import { revalidateTag } from "next/cache";
 import { BOOKING_BLOCKS_TAG } from "@/lib/availability";
 import { formatDateLong } from "@/lib/utils";
@@ -479,7 +479,7 @@ export async function GET(req: Request) {
       const checkout = await getOrCreateDepositCheckout(b, customer.email);
       if (!checkout) continue;
       const deadlineIso = minusDaysIso(b.arrival, SCHOOL_CANCEL_DAYS);
-      const fee = cancellationFee(b.subtotalCents, b.arrival);
+      const fee = cancellationFeeForBooking(b);
       try {
         await sendMail({
           to: customer.email,
@@ -524,7 +524,7 @@ export async function GET(req: Request) {
     // aufgefordert haben (sonst nie ohne Vorwarnung stornieren).
     if (!(await alreadySent(b.id, "school_deposit_due"))) continue;
     if (await alreadySent(b.id, "school_cancelled")) continue;
-    const fee = cancellationFee(b.subtotalCents, b.arrival);
+    const fee = cancellationFeeForBooking(b);
     await db
       .update(bookings)
       .set({ status: "storniert", updatedAt: new Date() })

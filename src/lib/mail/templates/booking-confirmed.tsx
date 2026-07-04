@@ -147,26 +147,45 @@ export default function BookingConfirmedEmail({
             diese Mail.
           </Text>
 
+          <Section
+            style={{
+              backgroundColor: "#EFE6D8",
+              borderLeft: "4px solid #2F4A35",
+              padding: "16px 20px",
+              borderRadius: "12px",
+              margin: "20px 0",
+            }}
+          >
+            <Text style={{ ...text, fontWeight: 700, margin: "0 0 8px 0" }}>
+              Wichtig: Die Personenzahl kann nur noch erhöht, nicht verringert werden.
+            </Text>
+            <Text style={{ ...text, margin: 0 }}>
+              Auch wenn einzelne Teilnehmer kurzfristig ausfallen, bleibt der volle
+              Übernachtungspreis fällig. Unser Tipp: Kalkuliert lieber knapp — zusätzliche
+              Personen könnt ihr bis 15 Tage vor Anreise jederzeit bequem selbst über euer
+              Konto nachbuchen und direkt bezahlen:{" "}
+              <a href={`${baseUrl}/konto`} style={{ color: "#2F4A35" }}>
+                {baseUrl}/konto
+              </a>
+            </Text>
+          </Section>
+
           <Heading as="h3" style={{ ...heading, fontSize: "20px", margin: "24px 0 8px 0" }}>
             Falls ihr stornieren müsst
           </Heading>
           <Text style={text}>
-            Wir verstehen, dass sich Pläne ändern. Die Storno-Staffel (vom Anreisetag rückwärts gerechnet):
+            Wir verstehen, dass sich Pläne ändern. Die Storno-Staffel gilt für den reinen
+            Übernachtungspreis (vom Anreisetag rückwärts gerechnet) — Endreinigung und Kaution
+            werden im Stornofall nicht fällig:
           </Text>
           <Text style={{ ...text, margin: "0 0 4px 0" }}>
-            • <strong>60 Tage oder mehr vorher:</strong> 100 % Rückerstattung
+            • <strong>Mehr als 30 Tage vorher:</strong> kostenlos
           </Text>
           <Text style={{ ...text, margin: "0 0 4px 0" }}>
-            • <strong>30 bis 59 Tage vorher:</strong> 50 % Rückerstattung
-          </Text>
-          <Text style={{ ...text, margin: "0 0 4px 0" }}>
-            • <strong>14 bis 29 Tage vorher:</strong> 25 % Rückerstattung
+            • <strong>30 bis 14 Tage vorher:</strong> 50 % Stornogebühr
           </Text>
           <Text style={{ ...text, margin: "0 0 12px 0" }}>
-            • <strong>Weniger als 14 Tage vorher:</strong> 0 % Rückerstattung
-          </Text>
-          <Text style={text}>
-            Die Kaution wird unabhängig davon immer voll erstattet, sofern keine Schäden vorliegen.
+            • <strong>Weniger als 14 Tage vorher:</strong> 100 % Stornogebühr
           </Text>
 
           <Hr style={{ borderColor: "#C8CEC4", margin: "32px 0 16px 0" }} />
