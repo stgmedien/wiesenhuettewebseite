@@ -918,6 +918,12 @@ export default async function LagePage() {
             <IllustratedMap />
           </ScrollReveal>
 
+          <ScrollReveal delay={250}>
+            <div className="mt-6">
+              <GrundstueckMap locale={locale} />
+            </div>
+          </ScrollReveal>
+
           <ScrollReveal delay={300}>
             <div className="mt-6 flex flex-wrap gap-2 sm:gap-3 items-center">
               <span className="text-[11px] uppercase tracking-[0.25em] font-bold text-[var(--color-wh-deep-green)]/60 mr-2">
@@ -1522,6 +1528,234 @@ const IllustratedMap = () => (
     </svg>
   </div>
 );
+
+// Detail-Ortskarte: Grundstück (ca. 3.000 m², Hanglage) + Fußweg zum
+// Spielplatz Delleweg — gleicher Illustrations-Stil wie IllustratedMap.
+// Geometrie schematisch nach Luftbild (nicht maßstabsgetreu).
+const GRUNDSTUECK_LABELS: Record<Locale, {
+  aria: string;
+  grundstueck: string;
+  hanglage: string;
+  spielplatz: string;
+  fussweg: string;
+  stempel: string;
+}> = {
+  de: {
+    aria: "Ortskarte Langewiese: Grundstück der Wiesenhütte und Fußweg zum Spielplatz",
+    grundstueck: "GRUNDSTÜCK · CA. 3.000 M²",
+    hanglage: "im Wesentlichen Hanglage",
+    spielplatz: "Spielplatz Delleweg",
+    fussweg: "400 m · ca. 6 min zu Fuß",
+    stempel: "LANGEWIESE · ORTSDETAIL",
+  },
+  en: {
+    aria: "Village map of Langewiese: Wiesenhütte grounds and footpath to the playground",
+    grundstueck: "GROUNDS · APPROX. 3,000 M²",
+    hanglage: "mainly hillside",
+    spielplatz: "Playground Delleweg",
+    fussweg: "400 m · approx. 6 min on foot",
+    stempel: "LANGEWIESE · VILLAGE DETAIL",
+  },
+  nl: {
+    aria: "Dorpskaart Langewiese: terrein van de Wiesenhütte en voetpad naar de speeltuin",
+    grundstueck: "TERREIN · CA. 3.000 M²",
+    hanglage: "grotendeels helling",
+    spielplatz: "Speeltuin Delleweg",
+    fussweg: "400 m · ca. 6 min te voet",
+    stempel: "LANGEWIESE · DORPSDETAIL",
+  },
+};
+
+const GrundstueckMap = ({ locale }: { locale: Locale }) => {
+  const L = GRUNDSTUECK_LABELS[locale];
+  return (
+    <div className="relative aspect-[16/9] sm:aspect-[16/8] rounded-3xl overflow-hidden border border-[var(--color-wh-winter-grey)] shadow-[0_20px_60px_rgba(47,74,53,0.12)] bg-[#f5efe2]">
+      <svg
+        viewBox="0 0 1200 600"
+        preserveAspectRatio="xMidYMid slice"
+        className="w-full h-full"
+        role="img"
+        aria-label={L.aria}
+      >
+        <defs>
+          <linearGradient id="ortBg" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#f5efe2" />
+            <stop offset="100%" stopColor="#e6ddc8" />
+          </linearGradient>
+          <radialGradient id="ortForest" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#6FA05F" stopOpacity="0.22" />
+            <stop offset="100%" stopColor="#2F4A35" stopOpacity="0.12" />
+          </radialGradient>
+          <radialGradient id="ortPulse" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#B85C38" stopOpacity="0.45" />
+            <stop offset="70%" stopColor="#B85C38" stopOpacity="0.15" />
+            <stop offset="100%" stopColor="#B85C38" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+
+        <rect width="1200" height="600" fill="url(#ortBg)" />
+
+        {/* Höhenlinien — der Hang fällt zur Hütte hin ab */}
+        <g stroke="#bfa980" strokeWidth="0.8" fill="none" opacity="0.35">
+          <path d="M-50,220 Q400,190 800,230 T1250,210" />
+          <path d="M-50,300 Q400,270 800,310 T1250,290" />
+          <path d="M-50,380 Q400,350 800,390 T1250,370" />
+          <path d="M-50,460 Q400,430 800,470 T1250,450" />
+        </g>
+
+        {/* Wiesen/Wald */}
+        <ellipse cx="950" cy="140" rx="220" ry="100" fill="url(#ortForest)" />
+        <ellipse cx="1080" cy="480" rx="160" ry="100" fill="url(#ortForest)" />
+        {[
+          [1020, 130], [960, 170], [1100, 170], [900, 110],
+          [1060, 460], [1120, 500], [1000, 510],
+          [520, 555], [70, 540], [130, 500],
+        ].map(([x, y], i) => (
+          <g key={i} transform={`translate(${x},${y}) scale(0.9)`}>
+            <path d="M0,-10 L7,4 L-7,4 Z" fill="#3a5a3f" opacity="0.7" />
+            <path d="M0,-3 L9,10 L-9,10 Z" fill="#2F4A35" opacity="0.78" />
+            <rect x="-1.5" y="9" width="3" height="4" fill="#5a4830" />
+          </g>
+        ))}
+
+        {/* === STRASSEN === */}
+        {/* Bundesstraße: von unten links diagonal nach oben links */}
+        <path
+          d="M 320,600 Q 280,480 250,380 Q 220,280 200,190 Q 190,130 190,40"
+          stroke="#d9cdb2" strokeWidth="16" fill="none" strokeLinecap="round"
+        />
+        <path
+          d="M 320,600 Q 280,480 250,380 Q 220,280 200,190 Q 190,130 190,40"
+          stroke="#5a4830" strokeWidth="1.4" fill="none" opacity="0.4" strokeDasharray="8 8"
+        />
+        <text x="236" y="470" fontSize="12" fontFamily="ui-monospace,monospace" fill="#5a4830" opacity="0.7" fontWeight="600" letterSpacing="1.5" transform="rotate(72 236 470)">
+          Bundesstraße
+        </text>
+
+        {/* Alter Weg: zweigt von der Bundesstraße nach Nordosten ab */}
+        <path
+          d="M 214,240 Q 300,210 370,170 Q 430,135 470,105"
+          stroke="#d9cdb2" strokeWidth="11" fill="none" strokeLinecap="round"
+        />
+        <text x="290" y="185" fontSize="11" fontFamily="ui-monospace,monospace" fill="#5a4830" opacity="0.65" letterSpacing="1" transform="rotate(-24 290 185)">
+          Alter Weg
+        </text>
+
+        {/* Delleweg: oben nach rechts zum Spielplatz */}
+        <path
+          d="M 470,105 Q 560,80 660,85 Q 720,88 770,100"
+          stroke="#d9cdb2" strokeWidth="10" fill="none" strokeLinecap="round"
+        />
+        <text x="560" y="72" fontSize="11" fontFamily="ui-monospace,monospace" fill="#5a4830" opacity="0.65" letterSpacing="1">
+          Delleweg
+        </text>
+
+        {/* === GRUNDSTÜCK — Hangwiese nördlich hinter der Hütte === */}
+        <g>
+          <path
+            d="M 520,420 L 980,380 L 990,290 L 540,320 Z"
+            fill="#6FA05F" fillOpacity="0.18"
+            stroke="#2F4A35" strokeWidth="2.5" strokeDasharray="9 6" strokeLinejoin="round"
+          />
+          {/* Hang-Schraffur */}
+          <g stroke="#2F4A35" strokeWidth="1" opacity="0.25">
+            <path d="M 580,335 L 570,405" />
+            <path d="M 660,330 L 650,400" />
+            <path d="M 740,325 L 730,395" />
+            <path d="M 820,318 L 810,390" />
+            <path d="M 900,312 L 890,385" />
+          </g>
+          <text x="755" y="352" textAnchor="middle" fontSize="14" fontFamily="var(--font-display, sans-serif)" fill="#2F4A35" fontWeight="700" letterSpacing="1.5">
+            {L.grundstueck}
+          </text>
+          <text x="755" y="372" textAnchor="middle" fontSize="11" fontFamily="var(--font-display, serif)" fill="#2F4A35" opacity="0.75" fontStyle="italic">
+            {L.hanglage}
+          </text>
+        </g>
+
+        {/* === FUSSWEG zum Spielplatz (gepunktet) === */}
+        <path
+          d="M 545,455 Q 420,440 330,415 Q 280,330 240,250 Q 300,215 370,172 Q 430,135 475,108 Q 560,84 660,88 Q 720,90 765,102"
+          stroke="#B85C38" strokeWidth="2.5" strokeDasharray="2 7" fill="none" strokeLinecap="round" opacity="0.85"
+        />
+        <g transform="translate(305,300)">
+          <rect x="-78" y="-14" width="156" height="24" rx="12" fill="#F7F7F2" stroke="#B85C38" strokeWidth="1" opacity="0.95" />
+          <text x="0" y="2" textAnchor="middle" fontSize="11" fontFamily="ui-monospace,monospace" fill="#B85C38" fontWeight="700" letterSpacing="0.5">
+            {L.fussweg}
+          </text>
+        </g>
+
+        {/* === SPIELPLATZ — kleine Schaukel-Illustration === */}
+        <g transform="translate(800,115)">
+          <circle cx="0" cy="0" r="26" fill="#F7F7F2" stroke="#2F4A35" strokeWidth="1.5" opacity="0.95" />
+          {/* Schaukel */}
+          <g stroke="#2F4A35" strokeWidth="2" fill="none" strokeLinecap="round">
+            <path d="M -12,10 L -6,-9 L 6,-9 L 12,10" />
+            <path d="M -3,-8 L -3,5" />
+            <path d="M 3,-8 L 3,5" />
+          </g>
+          <rect x="-6" y="4" width="12" height="3" rx="1.5" fill="#B85C38" />
+          <text x="0" y="46" textAnchor="middle" fontSize="12" fontFamily="var(--font-display, sans-serif)" fill="#2F4A35" fontWeight="700">
+            {L.spielplatz}
+          </text>
+        </g>
+
+        {/* Nachbar-Pins */}
+        <SvgPin x={465} y={45} label="Gasthof zur Post" />
+        <SvgPin x={150} y={150} label="Landgasthof Gilsbach" />
+
+        {/* === WIESENHÜTTE === */}
+        <g transform="translate(575,470)">
+          <circle cx="0" cy="0" r="50" fill="url(#ortPulse)">
+            <animate attributeName="r" values="35;60;35" dur="3.5s" repeatCount="indefinite" />
+            <animate attributeName="opacity" values="0.7;0.1;0.7" dur="3.5s" repeatCount="indefinite" />
+          </circle>
+          <circle cx="0" cy="0" r="16" fill="#B85C38" />
+          <circle cx="0" cy="0" r="16" fill="none" stroke="#fff" strokeWidth="3" />
+          <circle cx="0" cy="0" r="5" fill="#fff" />
+          <g transform="translate(0,38)">
+            <rect x="-65" y="-2" width="130" height="22" rx="3" fill="#2F4A35" />
+            <text x="0" y="14" textAnchor="middle" fontSize="12" fontFamily="var(--font-display, sans-serif)" fill="#F7F7F2" fontWeight="700" letterSpacing="1">
+              WIESENHÜTTE
+            </text>
+          </g>
+        </g>
+
+        {/* Kompass */}
+        <g transform="translate(1110, 80)">
+          <circle cx="0" cy="0" r="32" fill="#F7F7F2" stroke="#2F4A35" strokeOpacity="0.4" strokeWidth="1.2" />
+          <path d="M 0,-22 L 6,4 L 0,-2 L -6,4 Z" fill="#B85C38" />
+          <path d="M 0,22 L 6,-4 L 0,2 L -6,-4 Z" fill="#2F4A35" opacity="0.4" />
+          <text x="0" y="-28" textAnchor="middle" fontSize="11" fontFamily="var(--font-display, sans-serif)" fill="#2F4A35" fontWeight="700">
+            N
+          </text>
+        </g>
+
+        {/* Maßstab (Orts-Detail: 0–100–200 m) */}
+        <g transform="translate(60, 540)">
+          <rect x="0" y="0" width="80" height="6" fill="#2F4A35" opacity="0.7" />
+          <rect x="80" y="0" width="80" height="6" fill="none" stroke="#2F4A35" strokeWidth="1.2" opacity="0.7" />
+          <text x="0" y="22" fontSize="10" fontFamily="ui-monospace,monospace" fill="#2F4A35" opacity="0.65" letterSpacing="1">
+            0
+          </text>
+          <text x="70" y="22" fontSize="10" fontFamily="ui-monospace,monospace" fill="#2F4A35" opacity="0.65" letterSpacing="1">
+            100
+          </text>
+          <text x="144" y="22" fontSize="10" fontFamily="ui-monospace,monospace" fill="#2F4A35" opacity="0.65" letterSpacing="1">
+            200 m
+          </text>
+        </g>
+
+        {/* Stempel */}
+        <g transform="translate(60, 70)" opacity="0.6">
+          <text x="0" y="0" fontSize="9" fontFamily="ui-monospace,monospace" fill="#2F4A35" letterSpacing="2" fontWeight="700">
+            {L.stempel}
+          </text>
+        </g>
+      </svg>
+    </div>
+  );
+};
 
 // SVG-Pin (kleiner) fuer Nachbarorte — NICHT der MapPin aus lucide-react!
 const SvgPin = ({ x, y, label, sublabel }: { x: number; y: number; label: string; sublabel?: string }) => (
