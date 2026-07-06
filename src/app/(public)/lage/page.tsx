@@ -21,6 +21,7 @@ import {
   Backpack,
 } from "lucide-react";
 import { ScrollReveal } from "@/components/public/ScrollReveal";
+import { LageDetailMap } from "@/components/public/LageDetailMap";
 import { KomootEmbed } from "@/components/public/huette/KomootEmbed";
 import { getServerLocale } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n-shared";
@@ -916,6 +917,14 @@ export default async function LagePage() {
 
           <ScrollReveal delay={150}>
             <IllustratedMap />
+          </ScrollReveal>
+
+          {/* Detailkarte: amtlicher Grundstücks-Umriss + Fußweg zum
+              Spielplatz — echte OSM-Karte, DSGVO via ConsentGate. */}
+          <ScrollReveal delay={250}>
+            <div className="mt-6">
+              <LageDetailMap locale={locale} />
+            </div>
           </ScrollReveal>
 
           <ScrollReveal delay={300}>
