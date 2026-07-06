@@ -31,6 +31,18 @@ const FAQS: QA[] = [
   },
   {
     q: {
+      de: "Wie groß ist das Grundstück?",
+      en: "How big is the grounds?",
+      nl: "Hoe groot is het terrein?",
+    },
+    a: {
+      de: "Das Grundstück ist ca. 3.000 m² groß, besteht aber im Wesentlichen aus einer Hanglage.",
+      en: "The grounds cover approx. 3,000 m², but consist mainly of a hillside slope.",
+      nl: "Het terrein is ca. 3.000 m² groot, maar bestaat grotendeels uit een helling.",
+    },
+  },
+  {
+    q: {
       de: "Was kostet eine Übernachtung?",
       en: "What does a night cost?",
       nl: "Wat kost een overnachting?",
