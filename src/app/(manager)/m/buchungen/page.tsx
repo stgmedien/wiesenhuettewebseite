@@ -120,7 +120,11 @@ export default async function BookingsListPage({
                   </Link>
                 </Td>
                 <Td>
-                  <StatusPill status={r.status} />
+                  <StatusPill
+                    status={r.status}
+                    paidCents={r.paidCents}
+                    dueCents={r.totalCents + r.depositCents}
+                  />
                 </Td>
                 <Td>
                   <div>{new Date(r.arrival).toLocaleDateString("de-DE")}</div>
