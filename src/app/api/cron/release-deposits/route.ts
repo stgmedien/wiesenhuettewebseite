@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { warmUpDb } from "@/lib/db/warmup";
 import { bookings, customers, payments, activityLog } from "@/lib/db/schema";
 import { and, eq, lte, gt, sql } from "drizzle-orm";
 import { stripe } from "@/lib/stripe";
@@ -34,6 +35,11 @@ export async function GET(req: NextRequest) {
   if (!expected || authHeader !== `Bearer ${expected}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  // Neon-Kaltstart abfedern: Verbindung mit Retries aufbauen, bevor
+  // Kautionen erstattet werden (in Prod beobachtete CONNECT_TIMEOUTs
+  // ließen ganze Läufe stumm ausfallen).
+  await warmUpDb();
 
   const cutoff = new Date();
   cutoff.setHours(0, 0, 0, 0);
