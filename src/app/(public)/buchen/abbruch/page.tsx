@@ -1,28 +1,33 @@
 import Link from "next/link";
 import { getServerLocale } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n-shared";
+import { releaseAbortedBooking } from "@/lib/booking-release";
 
 const COPY: Record<Locale, {
   title: string;
   body: string;
+  released: string;
   cta1: string;
   cta2: string;
 }> = {
   de: {
     title: "Buchung abgebrochen.",
     body: "Es wurde keine Zahlung durchgeführt. Falls Du wieder weiter machen willst, kannst Du den Buchungsvorgang einfach neu starten.",
+    released: "Die angefragten Termine sind wieder freigegeben — es bleibt nichts blockiert.",
     cta1: "Neue Buchung starten",
     cta2: "Zur Startseite",
   },
   en: {
     title: "Booking cancelled.",
     body: "No payment was taken. If you'd like to continue, just start the booking process again.",
+    released: "The requested dates have been released again — nothing stays blocked.",
     cta1: "Start a new booking",
     cta2: "Back to homepage",
   },
   nl: {
     title: "Boeking geannuleerd.",
     body: "Er is geen betaling uitgevoerd. Wil je verder gaan? Start de boeking gewoon opnieuw.",
+    released: "De aangevraagde data zijn weer vrijgegeven — er blijft niets geblokkeerd.",
     cta1: "Nieuwe boeking starten",
     cta2: "Naar de startpagina",
   },
@@ -31,15 +36,36 @@ const COPY: Record<Locale, {
 export const metadata = { title: "Buchung abgebrochen · Wiesenhütte" };
 export const dynamic = "force-dynamic";
 
-export default async function AbbruchPage() {
+export default async function AbbruchPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ bn?: string }>;
+}) {
   const locale = await getServerLocale();
   const c = COPY[locale];
+
+  // Stripe leitet mit ?bn=<Buchungsnummer> hierher (cancel_url). Die
+  // abgebrochene Buchung sofort freigeben, statt sie 24 h als "angefragt"
+  // den Kalender blockieren zu lassen.
+  const { bn } = await searchParams;
+  let released = false;
+  if (bn && /^WH-\d{4}-\d{4}$/.test(bn)) {
+    try {
+      released = await releaseAbortedBooking(bn);
+    } catch (err) {
+      // Freigabe ist Best-Effort — Webhook/Cron räumen sonst später auf.
+      console.error("[abbruch] Sofort-Freigabe fehlgeschlagen:", err);
+    }
+  }
 
   return (
     <div className="bg-[var(--color-wh-snow)] min-h-[60vh] px-8 py-24">
       <div className="max-w-[680px] mx-auto bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-10 text-center">
         <h1 className="text-[40px]">{c.title}</h1>
-        <p className="text-[var(--color-wh-fg-muted)]">{c.body}</p>
+        <p className="text-[var(--color-wh-fg-muted)]">
+          {c.body}
+          {released ? ` ${c.released}` : null}
+        </p>
         <div className="mt-8 flex gap-3 justify-center">
           <Link
             href="/buchen"
