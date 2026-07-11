@@ -1,7 +1,7 @@
 /**
  * Kuratierte Empfehlungs-Daten — hardcoded statt Backend-driven.
  *
- * Diese Liste wurde vom Vorstand zusammengestellt: 18 Picks rund um die
+ * Diese Liste wurde vom Vorstand zusammengestellt: 19 Picks rund um die
  * Wiesenhütte in Langewiese. Bewusst nicht ueber DB pflegbar — die Seite
  * ist editorial gemeint, jede Karte hat eine eigene Geschichte.
  *
@@ -110,25 +110,55 @@ export const RECOMMENDATIONS: Recommendation[] = [
     imageAttribution: "Foto: Hodathoka · CC BY-SA 4.0 · Wikimedia Commons",
   },
   {
-    id: "barfusspfad",
+    id: "skywalk-willingen",
     category: "highlights",
-    name: "Barfußpfad & Kneipp-Tretbecken Langewiese",
+    name: "Skywalk Willingen",
     tagline: {
-      de: "600 m Sinnespfad direkt am Rothaarsteig",
-      en: "600 m sensory trail right on the Rothaarsteig",
-      nl: "600 m zintuigenpad direct aan de Rothaarsteig",
+      de: "Deutschlands längste Hängebrücke — 665 m",
+      en: "Germany's longest suspension bridge — 665 m",
+      nl: "De langste hangbrug van Duitsland — 665 m",
     },
     description: {
-      de: "Direkt im Ortskern: Ein kurzer, intensiver Pfad über Rinde, Kies, Sand, Tannenzapfen — die Füße riechen plötzlich wieder etwas. Mit Kneipp-Becken am Ende, eisig kalt, herzgesund. Im Sommer ein perfekter Halt nach dem Frühstück.",
-      en: "Right in the village centre: a short, intense path over bark, gravel, sand, pine cones — feet suddenly notice things. With a Kneipp basin at the end, ice-cold, heart-healthy. A perfect post-breakfast stop in summer.",
-      nl: "Pal in het dorp: een kort, intens pad over schors, grind, zand, dennenappels — je voeten merken plotseling weer iets. Met een Kneipp-bassin aan het einde, ijskoud, hartversterkend. Een perfecte stop na het ontbijt in de zomer.",
+      de: "665 Meter Stahlseil, bis zu 100 Meter über dem Strycktal: Deutschlands längste Fußgänger-Hängebrücke schwankt sanft unter den Füßen — Nervenkitzel und Panorama in einem. Direkt daneben liegt die Mühlenkopfschanze, die größte Großschanze der Welt.",
+      en: "665 metres of steel cable, up to 100 metres above the Stryck valley: Germany's longest pedestrian suspension bridge sways gently underfoot — thrill and panorama in one. Right next to it sits the Mühlenkopfschanze, the world's largest ski jumping hill.",
+      nl: "665 meter staalkabel, tot 100 meter boven het Stryckdal: de langste voetgangers-hangbrug van Duitsland deint zachtjes onder je voeten — spanning en panorama ineen. Er pal naast ligt de Mühlenkopfschanze, de grootste skischans ter wereld.",
+    },
+    insiderTip: {
+      de: "Tickets online vorbuchen — an schönen Wochenenden bilden sich Schlangen an der Kasse.",
+      en: "Book tickets online — queues form at the counter on fine weekends.",
+      nl: "Boek tickets online — op mooie weekenden staan er rijen bij de kassa.",
+    },
+    address: "Mühlenkopfschanze, 34508 Willingen (Upland)",
+    distanceMinutesByCar: 30,
+    googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=Skywalk+Willingen",
+    websiteUrl: "https://www.skywalk-willingen.de",
+    season: "all",
+    gradient: "from-sky-300/30 via-indigo-200/20 to-emerald-200/10",
+    emoji: "🌉",
+    imageUrl:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Skywalk_Willingen_Gesamtansicht.jpg/1280px-Skywalk_Willingen_Gesamtansicht.jpg",
+    imageAttribution: "Foto: Aholtman · CC BY-SA 4.0 · Wikimedia Commons",
+  },
+  {
+    id: "wassertretbecken",
+    category: "highlights",
+    name: "Kneipp-Wassertretbecken Langewiese",
+    tagline: {
+      de: "Eiskaltes Tretbecken direkt am Rothaarsteig",
+      en: "Ice-cold Kneipp basin right on the Rothaarsteig",
+      nl: "IJskoud Kneipp-bassin direct aan de Rothaarsteig",
+    },
+    description: {
+      de: "Direkt im Ortskern: Schuhe aus, Hosenbeine hoch und im Storchengang durchs eiskalte Quellwasser — das macht müde Wanderbeine wieder frisch und ist obendrein herzgesund. Im Sommer ein perfekter Halt nach dem Frühstück.",
+      en: "Right in the village centre: shoes off, trousers rolled up, and stork-step through the ice-cold spring water — it revives tired hiking legs and is heart-healthy on top. A perfect post-breakfast stop in summer.",
+      nl: "Pal in het dorp: schoenen uit, broekspijpen omhoog en in ooievaarspas door het ijskoude bronwater — dat maakt vermoeide wandelbenen weer fris en is bovendien goed voor het hart. Een perfecte stop na het ontbijt in de zomer.",
     },
     address: "Bundesstraße, 59955 Winterberg-Langewiese",
     distanceMinutesByCar: 2,
     googleMapsUrl: "https://www.google.com/maps/place/?q=place_id:ChIJb_8FX9CMu0cReR9cr1pfJlY",
     season: "summer",
     gradient: "from-lime-300/30 via-emerald-200/20 to-teal-200/10",
-    emoji: "🌿",
+    emoji: "💧",
   },
   {
     id: "tourist-info",
