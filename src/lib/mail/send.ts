@@ -46,11 +46,35 @@ export type SendMailArgs = {
   attachments?: MailAttachment[];
 };
 
+// Vorlagen mit Login-/Verifizierungs-Links werden NIE ins Archiv kopiert:
+// eine BCC-Kopie eines Magic-Links wäre ein fertiger Konto-Zugang für jeden
+// mit Zugriff auf das Archiv-Postfach.
+const ARCHIVE_EXCLUDED_TEMPLATES = new Set([
+  "magic_link",
+  "welcome",
+  "welcome_with_booking",
+  "user-welcome",
+  "member-welcome",
+  "email-verification",
+  "email_verification",
+  "rad-verify",
+]);
+
 export const sendMail = async (args: SendMailArgs): Promise<void> => {
   const html = await render(args.react);
   const text = await render(args.react, { plainText: true });
 
   const from = process.env.MAIL_FROM ?? "Wiesenhütte <noreply@wiesenhuette.de>";
+
+  // Optionales Versand-Archiv: Wenn MAIL_BCC_ARCHIVE gesetzt ist (z. B. ein
+  // Vereins-Postfach), bekommt es jede ausgehende Mail als Blindkopie — so
+  // ist im Postfach nachvollziehbar, was das System verschickt hat. SMTP
+  // legt sonst keine Kopie in einem "Gesendet"-Ordner ab.
+  const archiveBcc =
+    process.env.MAIL_BCC_ARCHIVE && !ARCHIVE_EXCLUDED_TEMPLATES.has(args.template)
+      ? process.env.MAIL_BCC_ARCHIVE
+      : undefined;
+  const bcc = [args.bcc, archiveBcc].filter((v): v is string => Boolean(v));
 
   try {
     const info = await getTransporter().sendMail({
@@ -60,7 +84,7 @@ export const sendMail = async (args: SendMailArgs): Promise<void> => {
       html,
       text,
       replyTo: args.replyTo,
-      bcc: args.bcc,
+      bcc: bcc.length > 0 ? bcc : undefined,
       attachments: args.attachments,
     });
 
