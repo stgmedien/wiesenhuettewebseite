@@ -32,7 +32,7 @@ export function lodgingBusinessSchema(input: LodgingSchemaInput = {}): Record<st
     "@id": `${SITE_URL}/#lodging`,
     name: "Wiesenhütte · Skifreunde Gütersloh e.V.",
     description:
-      "Selbstversorgerhütte in Langewiese im Hochsauerland — 33 Schlafplätze in 5 Zimmern, direkt am Rodelhang und an der Loipe. Ideal für Vereine, Schulklassen, Familien­feiern und Gruppen.",
+      "Selbstversorgerhütte in Langewiese im Hochsauerland — 33 Schlafplätze in 5 Zimmern, mitten im Wander- und Wintersportgebiet rund um den Kahlen Asten. Ideal für Vereine, Schulklassen, Familien­feiern und Gruppen.",
     url: SITE_URL,
     image: abs("/media/video/hero-poster.jpg"),
     address: {

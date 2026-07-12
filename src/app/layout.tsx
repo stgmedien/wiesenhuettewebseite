@@ -22,7 +22,7 @@ const caveat = Caveat({
 
 const SITE_NAME = "Wiesenhütte · Skifreunde Gütersloh e.V.";
 const SITE_DESCRIPTION =
-  "Selbstversorgerhütte in Langewiese, Hochsauerland. 33 Schlafplätze, direkt am Rodelhang und an der Loipe. Hier buchen.";
+  "Selbstversorgerhütte in Langewiese, Hochsauerland. 33 Schlafplätze, mitten im Wander- und Wintersportgebiet rund um den Kahlen Asten. Hier buchen.";
 
 export const metadata: Metadata = {
   // Kein title-Template: Unterseiten tragen ihren „· Wiesenhütte"-Suffix bereits
