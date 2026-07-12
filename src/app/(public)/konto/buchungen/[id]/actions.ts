@@ -229,9 +229,13 @@ async function computeIncrease(
     return { ok: false, error: "Die Teilnehmerzahl kann online nur erhöht werden. Zum Verringern kontaktiert uns bitte direkt." };
   }
 
-  // Mitglieder-Tarif nur für verifizierte Vereinsmitglieder erweiterbar.
+  // Mitglieder-Tarif (Erwachsene UND Kinder/Schüler · Mitglied) nur für
+  // verifizierte Vereinsmitglieder erweiterbar.
   const memberAllowed = customer.membershipStatus === "verified";
-  if (newPersons.members > booking.members && !memberAllowed) {
+  if (
+    (newPersons.members > booking.members || newPersons.pupils > booking.pupils) &&
+    !memberAllowed
+  ) {
     return { ok: false, error: "Zusätzliche Personen zum Mitgliedstarif können nur verifizierte Vereinsmitglieder anmelden." };
   }
 
