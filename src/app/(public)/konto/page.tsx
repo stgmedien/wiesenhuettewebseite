@@ -183,7 +183,9 @@ export default async function KontoPage({ searchParams }: Props) {
                           </p>
                         </div>
                         <div className="text-right">
-                          <span className={statusPill(b.status)}>{statusLabel(b.status)}</span>
+                          <span className={statusPill(b.status, b.paidCents, b.subtotalCents + b.depositCents)}>
+                            {statusLabel(b.status, b.paidCents, b.subtotalCents + b.depositCents)}
+                          </span>
                           <p className="text-sm font-mono text-[var(--color-wh-deep-green)] mt-2">
                             {formatEuro(b.totalCents)}
                           </p>
@@ -275,7 +277,20 @@ function membershipBadgeFor(status: string) {
   return null;
 }
 
-function statusLabel(status: string): string {
+// Der Webhook setzt Buchungen schon nach der 50%-Anzahlung auf "bezahlt" —
+// solange die Restzahlung offen ist, zeigt der Gast "Angezahlt" statt
+// "Bezahlt" (spiegelt die Manager-Ansicht, siehe components/manager/StatusPill).
+function isPartiallyPaid(status: string, paidCents?: number, dueCents?: number): boolean {
+  return (
+    status === "bezahlt" &&
+    typeof paidCents === "number" &&
+    typeof dueCents === "number" &&
+    paidCents < dueCents
+  );
+}
+
+function statusLabel(status: string, paidCents?: number, dueCents?: number): string {
+  if (isPartiallyPaid(status, paidCents, dueCents)) return "Angezahlt";
   return (
     {
       angefragt: "Angefragt",
@@ -289,8 +304,10 @@ function statusLabel(status: string): string {
   );
 }
 
-function statusPill(status: string): string {
+function statusPill(status: string, paidCents?: number, dueCents?: number): string {
   const base = "px-3 py-1 rounded-full text-xs font-medium";
+  if (isPartiallyPaid(status, paidCents, dueCents))
+    return `${base} bg-lime-50 border border-lime-200 text-lime-800`;
   if (status === "bezahlt" || status === "angereist" || status === "abgereist")
     return `${base} bg-emerald-50 border border-emerald-200 text-emerald-800`;
   if (status === "bestaetigt") return `${base} bg-blue-50 border border-blue-200 text-blue-800`;

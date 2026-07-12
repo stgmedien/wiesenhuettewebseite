@@ -108,7 +108,9 @@ export default async function BuchungDetailPage({ params }: Props) {
             {booking.purpose && ` · ${booking.purpose}`}
           </p>
         </div>
-        <span className={statusPill(booking.status)}>{statusLabel(booking.status)}</span>
+        <span className={statusPill(booking.status, booking.paidCents, booking.subtotalCents + booking.depositCents)}>
+          {statusLabel(booking.status, booking.paidCents, booking.subtotalCents + booking.depositCents)}
+        </span>
       </div>
 
       {/* Teilnehmer nachmelden — gut sichtbar vor der Preisübersicht (Issue #60) */}
@@ -289,7 +291,20 @@ function Row({
   );
 }
 
-function statusLabel(s: string): string {
+// Der Webhook setzt Buchungen schon nach der 50%-Anzahlung auf "bezahlt" —
+// solange die Restzahlung offen ist, zeigt der Gast "Angezahlt" statt
+// "Bezahlt" (spiegelt die Manager-Ansicht, siehe components/manager/StatusPill).
+function isPartiallyPaid(status: string, paidCents?: number, dueCents?: number): boolean {
+  return (
+    status === "bezahlt" &&
+    typeof paidCents === "number" &&
+    typeof dueCents === "number" &&
+    paidCents < dueCents
+  );
+}
+
+function statusLabel(s: string, paidCents?: number, dueCents?: number): string {
+  if (isPartiallyPaid(s, paidCents, dueCents)) return "Angezahlt";
   return (
     {
       angefragt: "Angefragt",
@@ -303,8 +318,10 @@ function statusLabel(s: string): string {
   );
 }
 
-function statusPill(status: string): string {
+function statusPill(status: string, paidCents?: number, dueCents?: number): string {
   const base = "px-3 py-1 rounded-full text-xs font-medium";
+  if (isPartiallyPaid(status, paidCents, dueCents))
+    return `${base} bg-lime-50 border border-lime-200 text-lime-800`;
   if (status === "bezahlt" || status === "angereist" || status === "abgereist")
     return `${base} bg-emerald-50 border border-emerald-200 text-emerald-800`;
   if (status === "bestaetigt") return `${base} bg-blue-50 border border-blue-200 text-blue-800`;
