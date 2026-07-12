@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { warmUpDb } from "@/lib/db/warmup";
 import {
   bookings,
   customers,
@@ -105,6 +106,10 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
   }
+
+  // Neon-Kaltstart abfedern: Verbindung mit Retries aufbauen, bevor Mails
+  // rausgehen (in Prod beobachtete CONNECT_TIMEOUTs ließen Läufe ausfallen).
+  await warmUpDb();
 
   const stats = {
     paymentReminderSent: 0,

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { warmUpDb } from "@/lib/db/warmup";
 import { users, customers, magicLinkTokens, activityLog, bookings, payments } from "@/lib/db/schema";
 import { eq, and, lt, isNotNull } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
@@ -41,6 +42,10 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
   }
+
+  // Neon-Kaltstart abfedern: Verbindung mit Retries aufbauen, bevor die
+  // eigentliche Arbeit beginnt (in Prod beobachtete CONNECT_TIMEOUTs).
+  await warmUpDb();
 
   const stats = {
     magicLinksDeleted: 0,
