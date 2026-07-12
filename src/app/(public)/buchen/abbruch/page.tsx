@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { getServerLocale } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n-shared";
-import { releaseAbortedBooking } from "@/lib/booking-release";
 
 const COPY: Record<Locale, {
   title: string;
@@ -39,24 +38,16 @@ export const dynamic = "force-dynamic";
 export default async function AbbruchPage({
   searchParams,
 }: {
-  searchParams: Promise<{ bn?: string }>;
+  searchParams: Promise<{ freigegeben?: string }>;
 }) {
   const locale = await getServerLocale();
   const c = COPY[locale];
 
-  // Stripe leitet mit ?bn=<Buchungsnummer> hierher (cancel_url). Die
-  // abgebrochene Buchung sofort freigeben, statt sie 24 h als "angefragt"
-  // den Kalender blockieren zu lassen.
-  const { bn } = await searchParams;
-  let released = false;
-  if (bn && /^WH-\d{4}-\d{4}$/.test(bn)) {
-    try {
-      released = await releaseAbortedBooking(bn);
-    } catch (err) {
-      // Freigabe ist Best-Effort — Webhook/Cron räumen sonst später auf.
-      console.error("[abbruch] Sofort-Freigabe fehlgeschlagen:", err);
-    }
-  }
+  // Die eigentliche Sofort-Freigabe passiert in /api/buchen/abbruch (Stripes
+  // cancel_url) — revalidateTag darf nicht im Seiten-Rendering laufen. Die
+  // Route leitet mit ?freigegeben=1 hierher, wenn die Tage frei sind.
+  const { freigegeben } = await searchParams;
+  const released = freigegeben === "1";
 
   return (
     <div className="bg-[var(--color-wh-snow)] min-h-[60vh] px-8 py-24">

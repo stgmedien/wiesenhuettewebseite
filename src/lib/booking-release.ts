@@ -7,17 +7,27 @@ import { stripe } from "@/lib/stripe";
 
 /**
  * Sofort-Freigabe einer Buchung, deren Stripe-Checkout der Gast abgebrochen
- * hat (cancel_url → /buchen/abbruch). Ohne diesen Pfad blieben die Tage bis
- * zum Ablauf der Checkout-Session (24 h, checkout.session.expired-Webhook)
- * als "angefragt" blockiert.
+ * hat (cancel_url → /api/buchen/abbruch). Ohne diesen Pfad blieben die Tage
+ * bis zum Ablauf der Checkout-Session (24 h, checkout.session.expired-
+ * Webhook) als "angefragt" blockiert.
  *
  * Spiegelt die Freigabe-Logik des expired-Webhooks und ist idempotent:
  * Webhook und Cron-Safety-Net finden danach eine bereits stornierte Buchung
  * vor und fassen sie nicht mehr an. Schul-Aufschub (payment_mode
  * "school_deferred") und Vorstands-Review (requiresReview) haben einen
  * eigenen Lebenszyklus und werden — wie im Webhook — NICHT freigegeben.
+ *
+ * `token` muss dem Anfang der Buchungs-UUID entsprechen (steckt in der
+ * cancel_url, die nur der Gast kennt) — Buchungsnummern allein sind
+ * erratbar (WH-JJJJ-1000…9999) und dürfen keine Storno-Berechtigung sein.
+ *
+ * Nur aus Route-Handlern/Server-Actions aufrufen — revalidateTag ist
+ * während des Seiten-Renderings verboten.
  */
-export async function releaseAbortedBooking(bookingNumber: string): Promise<boolean> {
+export async function releaseAbortedBooking(
+  bookingNumber: string,
+  token: string
+): Promise<boolean> {
   const found = await db
     .select()
     .from(bookings)
@@ -25,6 +35,7 @@ export async function releaseAbortedBooking(bookingNumber: string): Promise<bool
     .limit(1);
   const booking = found[0];
   if (!booking) return false;
+  if (!token || !booking.id.startsWith(token)) return false;
   if (
     booking.status !== "angefragt" ||
     booking.paidCents > 0 ||
