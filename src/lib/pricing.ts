@@ -123,14 +123,27 @@ export const RULES = {
   // (site_settings-Tabelle, abrufbar über getSiteSettings()). Default = 1.
 } as const;
 
-// Cancellation tiers (vom subtotal exkl. Kaution)
-// > 30 Tage 0 %, 29–14 Tage 30 %, 13–7 Tage 60 %, < 7 Tage 90 %
+// Storno-Staffel (Vorstandsbeschluss 04.07.2026) — gerechnet auf den REINEN
+// ÜBERNACHTUNGSPREIS (accommodationCents). Endreinigung und Kaution werden
+// im Stornofall gar nicht erst fällig.
+// > 30 Tage 0 %, 30–14 Tage 50 %, < 14 Tage 100 %
 export const CANCELLATION_TIERS = [
+  { minDaysBefore: 30, percent: 0 },
+  { minDaysBefore: 14, percent: 50 },
+  { minDaysBefore: 0, percent: 100 },
+] as const;
+
+// Alt-Staffel für Buchungen VOR dem Stichtag (haben die alten AGB
+// akzeptiert): gerechnet auf die Zwischensumme inkl. Endreinigung.
+export const CANCELLATION_TIERS_LEGACY = [
   { minDaysBefore: 30, percent: 0 },
   { minDaysBefore: 14, percent: 30 },
   { minDaysBefore: 7, percent: 60 },
   { minDaysBefore: 0, percent: 90 },
 ] as const;
+
+// Stichtag: Buchungen ab diesem Zeitpunkt fallen unter die neue Staffel.
+export const CANCELLATION_POLICY_CUTOFF = new Date("2026-07-05T00:00:00+02:00");
 
 export type Persons = {
   adults: number;       // Erwachsene Nichtmitglieder ab 16
@@ -411,17 +424,45 @@ export const formatEuro = (cents: number, locale: Locale = "de"): string => {
   });
 };
 
-export const cancellationFee = (
-  subtotalCents: number,
-  arrival: Date | string
+const feeFromTiers = (
+  baseCents: number,
+  arrival: Date | string,
+  tiers: readonly { minDaysBefore: number; percent: number }[]
 ): { percent: number; feeCents: number } => {
   const days = Math.ceil(
     (toDate(arrival).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
   );
-  for (const tier of CANCELLATION_TIERS) {
+  for (const tier of tiers) {
     if (days >= tier.minDaysBefore) {
-      return { percent: tier.percent, feeCents: Math.round((subtotalCents * tier.percent) / 100) };
+      return { percent: tier.percent, feeCents: Math.round((baseCents * tier.percent) / 100) };
     }
   }
-  return { percent: 90, feeCents: Math.round((subtotalCents * 90) / 100) };
+  const last = tiers[tiers.length - 1];
+  return { percent: last.percent, feeCents: Math.round((baseCents * last.percent) / 100) };
+};
+
+/** @deprecated Nur noch für Alt-Aufrufe — neue Callsites nutzen cancellationFeeForBooking. */
+export const cancellationFee = (
+  subtotalCents: number,
+  arrival: Date | string
+): { percent: number; feeCents: number } =>
+  feeFromTiers(subtotalCents, arrival, CANCELLATION_TIERS_LEGACY);
+
+/**
+ * Storno-Gebühr für eine konkrete Buchung — wählt Staffel UND Basis nach
+ * Buchungsdatum: Neubuchungen (ab Stichtag) zahlen die neue Staffel auf den
+ * reinen Übernachtungspreis; Bestandsbuchungen die Alt-Staffel auf die
+ * Zwischensumme (so wie in den damals akzeptierten AGB).
+ */
+export const cancellationFeeForBooking = (booking: {
+  accommodationCents: number;
+  subtotalCents: number;
+  arrival: Date | string;
+  createdAt: Date;
+}): { percent: number; feeCents: number; baseCents: number; isLegacy: boolean } => {
+  const isLegacy = booking.createdAt < CANCELLATION_POLICY_CUTOFF;
+  const baseCents = isLegacy ? booking.subtotalCents : booking.accommodationCents;
+  const tiers = isLegacy ? CANCELLATION_TIERS_LEGACY : CANCELLATION_TIERS;
+  const { percent, feeCents } = feeFromTiers(baseCents, booking.arrival, tiers);
+  return { percent, feeCents, baseCents, isLegacy };
 };

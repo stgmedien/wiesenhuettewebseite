@@ -81,14 +81,14 @@ export async function startMembershipJoin(formData: FormData) {
     // Nur fehlende Daten ergänzen, nichts überschreiben. userId verknüpfen,
     // wenn eingeloggt: getBookingPrefill() löst Mitgliederpreise über
     // customers.userId auf — ohne Verknüpfung griffe die Mitgliedschaft
-    // beim Buchen nicht.
-    await db
-      .update(customers)
-      .set({
-        ...(customer.phone ? {} : { phone }),
-        ...(customer.userId || !sessionUserId ? {} : { userId: sessionUserId }),
-      })
-      .where(eq(customers.id, customer.id));
+    // beim Buchen nicht. Drizzle wirft bei leerem set({}) "No values to set"
+    // — deshalb nur updaten, wenn es tatsächlich etwas zu ergänzen gibt.
+    const updates: Partial<typeof customers.$inferInsert> = {};
+    if (!customer.phone && phone) updates.phone = phone;
+    if (!customer.userId && sessionUserId) updates.userId = sessionUserId;
+    if (Object.keys(updates).length > 0) {
+      await db.update(customers).set(updates).where(eq(customers.id, customer.id));
+    }
   } else {
     const inserted = await db
       .insert(customers)
@@ -107,9 +107,14 @@ export async function startMembershipJoin(formData: FormData) {
 
   let checkoutUrl: string | null = null;
   try {
-    const checkout = await stripe.checkout.sessions.create({
+    // SEPA-Lastschrift muss im Stripe-Dashboard aktiviert sein — ist sie es
+    // (noch) nicht, lehnt Stripe die ganze Session ab ("sepa_debit is
+    // invalid"). Fallback: Checkout nur mit Karte erstellen, damit der
+    // Beitritt nicht an der Dashboard-Konfiguration scheitert.
+    const createSession = (methods: ("card" | "sepa_debit")[]) =>
+      stripe.checkout.sessions.create({
       mode: "subscription",
-      payment_method_types: ["card", "sepa_debit"],
+      payment_method_types: methods,
       line_items: [
         {
           quantity: 1,
@@ -140,6 +145,16 @@ export async function startMembershipJoin(formData: FormData) {
       success_url: `${BASE_URL}/mitglied-werden/danke?session_id={CHECKOUT_SESSION_ID}${nextQs}`,
       cancel_url: `${BASE_URL}/mitglied-werden?status=abgebrochen${nextQs}`,
     });
+
+    let checkout;
+    try {
+      checkout = await createSession(["card", "sepa_debit"]);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "";
+      if (!msg.includes("sepa_debit")) throw e;
+      console.warn("[mitglied-werden] sepa_debit im Stripe-Dashboard nicht aktiviert — Fallback auf Karte");
+      checkout = await createSession(["card"]);
+    }
     checkoutUrl = checkout.url;
 
     await db.insert(activityLog).values({

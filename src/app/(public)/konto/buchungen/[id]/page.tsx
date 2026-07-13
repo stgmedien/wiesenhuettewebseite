@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { bookings, customers, payments } from "@/lib/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { getActiveInvoiceForBooking } from "@/lib/invoice";
-import { formatEuro, cancellationFee, RULES } from "@/lib/pricing";
+import { formatEuro, cancellationFeeForBooking, RULES } from "@/lib/pricing";
 import { formatDateLong } from "@/lib/utils";
 import { CancelBookingButton } from "./CancelBookingButton";
 import { AddPersonsForm } from "./AddPersonsForm";
@@ -51,7 +51,7 @@ export default async function BuchungDetailPage({ params }: Props) {
   // ersetzte) Rechnungen sollen dem Gast nicht mehr verlinkt werden.
   const invoice = await getActiveInvoiceForBooking(booking.id);
 
-  const fee = cancellationFee(booking.subtotalCents, booking.arrival);
+  const fee = cancellationFeeForBooking(booking);
   const canCancel =
     booking.status !== "storniert" &&
     booking.status !== "abgereist" &&
@@ -103,7 +103,9 @@ export default async function BuchungDetailPage({ params }: Props) {
             {booking.purpose && ` · ${booking.purpose}`}
           </p>
         </div>
-        <span className={statusPill(booking.status)}>{statusLabel(booking.status)}</span>
+        <span className={statusPill(booking.status, booking.paidCents, booking.subtotalCents + booking.depositCents)}>
+          {statusLabel(booking.status, booking.paidCents, booking.subtotalCents + booking.depositCents)}
+        </span>
       </div>
 
       {/* Teilnehmer nachmelden — gut sichtbar vor der Preisübersicht (Issue #60) */}
@@ -245,15 +247,18 @@ export default async function BuchungDetailPage({ params }: Props) {
               bookingNumber={booking.bookingNumber}
               feePercent={fee.percent}
               feeCents={fee.feeCents}
-              subtotalCents={booking.subtotalCents}
+              baseCents={fee.baseCents}
+              isLegacy={fee.isLegacy}
             />
           )}
         </div>
         {canCancel && (
           <p className="text-xs text-[var(--color-wh-black)]/60 mt-3">
-            Bei Stornierung jetzt: <strong>{fee.percent}%</strong> Storno-Gebühr ={" "}
+            Bei Stornierung jetzt: <strong>{fee.percent}%</strong> Storno-Gebühr
+            {fee.isLegacy ? " (auf die Zwischensumme)" : " (auf den Übernachtungspreis)"} ={" "}
             <strong>{formatEuro(fee.feeCents)}</strong>. Erstattung:{" "}
-            <strong>{formatEuro(booking.subtotalCents - fee.feeCents)}</strong> + volle Kaution.
+            <strong>{formatEuro(Math.max(0, fee.baseCents - fee.feeCents))}</strong>
+            {fee.isLegacy ? "" : " + Endreinigung"} + volle Kaution.
           </p>
         )}
       </section>
@@ -281,7 +286,20 @@ function Row({
   );
 }
 
-function statusLabel(s: string): string {
+// Der Webhook setzt Buchungen schon nach der 50%-Anzahlung auf "bezahlt" —
+// solange die Restzahlung offen ist, zeigt der Gast "Angezahlt" statt
+// "Bezahlt" (spiegelt die Manager-Ansicht, siehe components/manager/StatusPill).
+function isPartiallyPaid(status: string, paidCents?: number, dueCents?: number): boolean {
+  return (
+    status === "bezahlt" &&
+    typeof paidCents === "number" &&
+    typeof dueCents === "number" &&
+    paidCents < dueCents
+  );
+}
+
+function statusLabel(s: string, paidCents?: number, dueCents?: number): string {
+  if (isPartiallyPaid(s, paidCents, dueCents)) return "Angezahlt";
   return (
     {
       angefragt: "Angefragt",
@@ -295,8 +313,10 @@ function statusLabel(s: string): string {
   );
 }
 
-function statusPill(status: string): string {
+function statusPill(status: string, paidCents?: number, dueCents?: number): string {
   const base = "px-3 py-1 rounded-full text-xs font-medium";
+  if (isPartiallyPaid(status, paidCents, dueCents))
+    return `${base} bg-lime-50 border border-lime-200 text-lime-800`;
   if (status === "bezahlt" || status === "angereist" || status === "abgereist")
     return `${base} bg-emerald-50 border border-emerald-200 text-emerald-800`;
   if (status === "bestaetigt") return `${base} bg-blue-50 border border-blue-200 text-blue-800`;

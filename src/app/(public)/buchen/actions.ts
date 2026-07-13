@@ -741,7 +741,10 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
         kind: "anzahlung",
       },
       success_url: `${baseUrl}/buchen/erfolg?bn=${bookingNumber}`,
-      cancel_url: `${baseUrl}/buchen/abbruch?bn=${bookingNumber}`,
+      // Route-Handler statt Seite: gibt die Buchung sofort frei (Tage wieder
+      // buchbar) und leitet auf /buchen/abbruch weiter. `t` = UUID-Prefix als
+      // Berechtigungs-Token gegen Durchprobieren von Buchungsnummern.
+      cancel_url: `${baseUrl}/api/buchen/abbruch?bn=${bookingNumber}&t=${bookingId.slice(0, 8)}`,
     });
   } catch (err) {
     // Diagnose-Logging: schreibe den exakten Stripe-Error in activity_log

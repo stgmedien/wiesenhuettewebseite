@@ -118,21 +118,23 @@ export function AddPersonsForm({ bookingId, booked, memberAllowed, deadlineLabel
             min={booked.children}
             onChange={(v) => update("children", v)}
           />
-          {(booked.pupils > 0 || booked.teachers > 0) && (
-            <>
-              <Stepper
-                label="Schüler:innen"
-                value={counts.pupils}
-                min={booked.pupils}
-                onChange={(v) => update("pupils", v)}
-              />
-              <Stepper
-                label="Begleitpersonen / Lehrkräfte"
-                value={counts.teachers}
-                min={booked.teachers}
-                onChange={(v) => update("teachers", v)}
-              />
-            </>
+          {(memberAllowed || booked.pupils > 0) && (
+            <Stepper
+              label="Kinder/Schüler bis 16 · Mitglied"
+              hint={memberAllowed ? "−50 % · Skifreunde Gütersloh e.V." : "nur für verifizierte Mitglieder erweiterbar"}
+              value={counts.pupils}
+              min={booked.pupils}
+              onChange={(v) => update("pupils", v)}
+              disabled={!memberAllowed}
+            />
+          )}
+          {booked.teachers > 0 && (
+            <Stepper
+              label="Begleitpersonen / Lehrkräfte"
+              value={counts.teachers}
+              min={booked.teachers}
+              onChange={(v) => update("teachers", v)}
+            />
           )}
 
           {total(counts) > maxPersons && (

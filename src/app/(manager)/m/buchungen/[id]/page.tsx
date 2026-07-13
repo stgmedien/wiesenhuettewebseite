@@ -83,7 +83,11 @@ export default async function BookingDetail({ params }: Props) {
           <div className="eyebrow">Buchung</div>
           <h1 className="text-[40px] mt-2 mb-1">{b.bookingNumber}</h1>
           <div className="flex items-center gap-3 mt-2">
-            <StatusPill status={b.status} />
+            <StatusPill
+              status={b.status}
+              paidCents={b.paidCents}
+              dueCents={b.subtotalCents + b.depositCents}
+            />
             <span className="text-[var(--color-wh-fg-muted)]">
               {formatDateLong(b.arrival)} → {formatDateLong(b.departure)} · {b.nights} Nächte
             </span>

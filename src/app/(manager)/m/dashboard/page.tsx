@@ -97,6 +97,9 @@ export default async function Dashboard() {
           persons: bookings.persons,
           createdAt: bookings.createdAt,
           customerId: bookings.customerId,
+          paidCents: bookings.paidCents,
+          subtotalCents: bookings.subtotalCents,
+          depositCents: bookings.depositCents,
         })
         .from(bookings)
         .where(ne(bookings.status, "storniert"))
@@ -254,7 +257,13 @@ export default async function Dashboard() {
                   date={b.createdAt.toISOString().slice(0, 10)}
                   title={c ? `${c.firstName} ${c.lastName}` : "—"}
                   subtitle={`${b.bookingNumber} · Anreise ${new Date(b.arrival).toLocaleDateString("de-DE", { day: "2-digit", month: "short" })} · ${b.persons} P.`}
-                  badge={<StatusPill status={b.status} />}
+                  badge={
+                    <StatusPill
+                      status={b.status}
+                      paidCents={b.paidCents}
+                      dueCents={b.subtotalCents + b.depositCents}
+                    />
+                  }
                 />
               );
             })

@@ -7,11 +7,11 @@ import { editBookingPersons, refundBookingDifference } from "./actions";
 type P = { adults: number; members: number; children: number; pupils: number; teachers: number };
 
 const FIELDS: { key: keyof P; label: string }[] = [
-  { key: "members", label: "Mitglieder" },
+  { key: "members", label: "Mitglieder (Erw., −50 %)" },
   { key: "adults", label: "Erwachsene (Nichtmitgl.)" },
   { key: "children", label: "Kinder (4–15)" },
-  { key: "pupils", label: "Schüler" },
-  { key: "teachers", label: "Lehrkräfte" },
+  { key: "pupils", label: "Kinder/Sch. bis 16 (Mitgl., −50 %)" },
+  { key: "teachers", label: "Lehrkräfte (wie Erw.)" },
 ];
 
 const euro = (cents: number) =>

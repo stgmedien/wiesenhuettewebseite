@@ -31,6 +31,18 @@ const FAQS: QA[] = [
   },
   {
     q: {
+      de: "Wie groß ist das Grundstück?",
+      en: "How big is the grounds?",
+      nl: "Hoe groot is het terrein?",
+    },
+    a: {
+      de: "Das Grundstück ist ca. 3.000 m² groß, besteht aber im Wesentlichen aus einer Hanglage.",
+      en: "The grounds cover approx. 3,000 m², but consist mainly of a hillside slope.",
+      nl: "Het terrein is ca. 3.000 m² groot, maar bestaat grotendeels uit een helling.",
+    },
+  },
+  {
+    q: {
       de: "Was kostet eine Übernachtung?",
       en: "What does a night cost?",
       nl: "Wat kost een overnachting?",
@@ -84,9 +96,9 @@ const FAQS: QA[] = [
       nl: "Kan ik gratis annuleren?",
     },
     a: {
-      de: "Bis 30 Tage vor Anreise kostenlos. Danach gestaffelt: 30–14 Tage 30 %, 13–7 Tage 60 %, weniger als 7 Tage 90 % des Buchungsbetrags (ohne Kaution). Maßgeblich ist der Eingang der Stornierung.",
-      en: "Free up to 30 days before arrival. After that, tiered: 30–14 days 30%, 13–7 days 60%, less than 7 days 90% of the booking amount (excl. deposit). The date the cancellation is received applies.",
-      nl: "Gratis tot 30 dagen voor aankomst. Daarna getrapt: 30–14 dagen 30%, 13–7 dagen 60%, minder dan 7 dagen 90% van het boekingsbedrag (excl. borg). De ontvangstdatum van de annulering geldt.",
+      de: "Bis 30 Tage vor Anreise kostenlos. Danach gestaffelt: 30–14 Tage 50 %, weniger als 14 Tage 100 % des Übernachtungspreises. Endreinigung und Kaution werden im Stornofall nicht fällig. Maßgeblich ist der Eingang der Stornierung.",
+      en: "Free up to 30 days before arrival. After that, tiered: 30–14 days 50%, less than 14 days 100% of the accommodation price. Final cleaning and deposit are not charged if you cancel. The date the cancellation is received applies.",
+      nl: "Gratis tot 30 dagen voor aankomst. Daarna getrapt: 30–14 dagen 50%, minder dan 14 dagen 100% van de overnachtingsprijs. Eindschoonmaak en borg vervallen bij annulering. De ontvangstdatum van de annulering geldt.",
     },
   },
   {
