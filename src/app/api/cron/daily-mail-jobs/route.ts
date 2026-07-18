@@ -28,6 +28,7 @@ import HuettenwartNoticeEmail from "@/lib/mail/templates/huettenwart-notice";
 import { HUETTENWART_EMAIL } from "@/lib/huettenwart";
 import RestzahlungRequestEmail from "@/lib/mail/templates/restzahlung-request";
 import { MANUAL_REST_MARKER, MANUAL_REST_SENT_MARKER } from "@/lib/payment-markers";
+import AvsReminderInternalEmail from "@/lib/mail/templates/avs-reminder-internal";
 import {
   getOrCreateDepositCheckout,
   SCHOOL_DEPOSIT_DUE_DAYS,
@@ -124,6 +125,7 @@ export async function GET(req: Request) {
     schoolCancelled: 0,
     radMatches: 0,
     manualRestSent: 0,
+    avsReminderSent: 0,
   };
 
   // ---------- T-21: Zahlungserinnerung (1 Woche vor Auto-Einzug bei T-14) ----------
@@ -163,6 +165,64 @@ export async function GET(req: Request) {
       stats.paymentReminderSent++;
     } catch (err) {
       console.error("[cron] payment_reminder failed:", err);
+    }
+  }
+
+  // ---------- T-21: Interne Erinnerung — AVS-Meldeschein-Link fehlt noch ----------
+  // Der AVS-Link kann nicht automatisch erzeugt werden (Winterberg-Portal ist
+  // manuell, keine API — Stand Telefonat mit Anika Emde, Juli 2026). Diese
+  // Mail ersetzt die Automatisierung NICHT, sondern erinnert Dana + Johannes
+  // rechtzeitig (3 Wochen vor Anreise), damit der Link manuell erzeugt und
+  // in der Buchung eingetragen wird, bevor T-14 die Restzahlung anstößt.
+  const avsCandidates = await db
+    .select()
+    .from(bookings)
+    .where(
+      and(
+        eq(bookings.arrival, t21),
+        sql`${bookings.status} IN ('bestaetigt', 'bezahlt')`
+      )
+    );
+  const avsMissing: { bookingId: string; bookingNumber: string; guestName: string; arrival: string }[] = [];
+  for (const b of avsCandidates) {
+    if (!b.customerId) continue;
+    if (await alreadySent(b.id, "avs-selfcheckin")) continue;
+    if (await alreadySent(b.id, "avs-reminder-internal")) continue;
+    const customer = (
+      await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1)
+    )[0];
+    if (!customer) continue;
+    avsMissing.push({
+      bookingId: b.id,
+      bookingNumber: b.bookingNumber,
+      guestName: `${customer.firstName} ${customer.lastName}`.trim() || "Gast",
+      arrival: formatDateLong(b.arrival),
+    });
+  }
+  if (avsMissing.length > 0) {
+    const internalTo = process.env.MAIL_INTERNAL_TO;
+    if (internalTo) {
+      try {
+        await sendMail({
+          to: internalTo,
+          bcc: "johannesleiskau@gmail.com",
+          subject: `AVS-Meldeschein-Link fehlt noch: ${avsMissing.length} ${avsMissing.length === 1 ? "Buchung" : "Buchungen"} (Anreise in 3 Wochen)`,
+          template: "avs-reminder-internal",
+          react: AvsReminderInternalEmail({ bookings: avsMissing, baseUrl: BASE_URL }),
+        });
+        for (const b of avsMissing) {
+          await db.insert(emailLog).values({
+            bookingId: b.bookingId,
+            to: internalTo,
+            subject: "AVS-Meldeschein-Link fehlt noch",
+            template: "avs-reminder-internal",
+            status: "sent",
+          });
+        }
+        stats.avsReminderSent = avsMissing.length;
+      } catch (err) {
+        console.error("[cron] avs-reminder-internal failed:", err);
+      }
     }
   }
 
