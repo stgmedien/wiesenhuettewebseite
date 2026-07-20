@@ -78,7 +78,7 @@ export default function ReviewRejectedEmail({
           </Text>
 
           <Text style={muted}>
-            Bei Rückfragen gerne direkt an den Vorstand: hello@wiesenhütte.com. Wir wünschen Euch
+            Bei Rückfragen gerne direkt an den Vorstand: hello@wiesenhuette.de. Wir wünschen Euch
             trotzdem eine schöne Zeit.
           </Text>
         </Container>

@@ -91,7 +91,7 @@ export default function ReviewPendingGuestEmail({
 
           <Text style={muted}>
             Bei Rückfragen einfach auf diese Mail antworten — oder direkt an
-            hello@wiesenhütte.com.
+            hello@wiesenhuette.de.
           </Text>
         </Container>
       </Body>

@@ -404,7 +404,7 @@ export const DOC_SECTIONS: DocSection[] = [
         </P>
 
         <Tip>
-          Die Mail wird über <Code>hello@wiesenhütte.com</Code> versendet, mit{" "}
+          Die Mail wird über <Code>hello@wiesenhuette.de</Code> versendet, mit{" "}
           <strong>Reply-To auf Deine Manager-Mail</strong> — Antworten landen
           direkt bei Dir.
         </Tip>
@@ -526,7 +526,7 @@ export const DOC_SECTIONS: DocSection[] = [
             ],
             [
               "2 · Mail-Benachrichtigung",
-              "Manager bekommt Mail an hello@wiesenhütte.com mit Antrags-Daten + Notiz; Antragsteller bekommt Bestätigungs-Mail",
+              "Manager bekommt Mail an hello@wiesenhuette.de mit Antrags-Daten + Notiz; Antragsteller bekommt Bestätigungs-Mail",
             ],
             [
               "3 · Prüfung",

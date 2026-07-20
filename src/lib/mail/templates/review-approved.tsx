@@ -96,7 +96,7 @@ export default function ReviewApprovedEmail({
 
           <Text style={muted}>
             Buchungsnummer: <strong>{bookingNumber}</strong>. Bei Rückfragen einfach auf diese
-            Mail antworten oder an hello@wiesenhütte.com.
+            Mail antworten oder an hello@wiesenhuette.de.
           </Text>
         </Container>
       </Body>

@@ -95,7 +95,7 @@ export default function SchoolBookingCancelledEmail({
           </Text>
           <Hr style={{ borderColor: "#C8CEC4", margin: "32px 0 16px" }} />
           <Text style={muted}>
-            Fragen? Antwortet einfach auf diese Mail oder schreibt an hello@wiesenhütte.com.
+            Fragen? Antwortet einfach auf diese Mail oder schreibt an hello@wiesenhuette.de.
           </Text>
         </Container>
       </Body>

@@ -12,7 +12,7 @@ import { formatDateLong } from "@/lib/utils";
 import { getActiveInvoiceForBooking } from "@/lib/invoice";
 
 const baseUrl = () =>
-  process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.xn--wiesenhtte-geb.com";
+  process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.wiesenhuette.de";
 
 const fmtShort = (iso: string | Date) => {
   const d = typeof iso === "string" ? new Date(iso) : iso;
