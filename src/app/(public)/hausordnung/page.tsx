@@ -35,11 +35,20 @@ export default async function HausordnungPage() {
         </Block>
 
         <Block title="Vor Eurer Anreise">
-          <p>
-            Bitte teilt spätestens 2 Tage vor Anreise dem Hüttenwart Toni Klauke telefonisch
-            Eure genaue Ankunftszeit mit. Er nimmt Euch an der Hütte in Empfang und überreicht
-            die Schlüssel. Eure Kurkarten erhaltet Ihr vorab automatisch per E-Mail.
-          </p>
+          <ol className="list-decimal list-inside marker:font-semibold marker:text-[var(--color-wh-deep-green)] space-y-2">
+            <li>
+              <strong>Spätestens 14 Tage vor Anreise:</strong> Kurkarten anfordern — füllt den
+              digitalen Meldeschein aus (den Link dafür bekommt Ihr von uns per E-Mail). Das ist
+              gesetzlich vorgeschrieben (Meldepflicht und Kurbeitrag der Stadt Winterberg, Pflicht
+              ab 16 Jahren). Eure Kurkarten schickt Euch AVS anschließend automatisch per E-Mail —
+              bitte zur Anreise mitbringen, digital oder ausgedruckt.
+            </li>
+            <li>
+              <strong>Spätestens 2 Tage vor Anreise:</strong> teilt dem Hüttenwart Toni Klauke
+              telefonisch Eure genaue Ankunftszeit mit. Er nimmt Euch an der Hütte in Empfang und
+              überreicht die Schlüssel.
+            </li>
+          </ol>
           <Address />
           <ul>
             <li>
@@ -58,7 +67,11 @@ export default async function HausordnungPage() {
               sind nicht erlaubt — die Hütte ist eine ruhige Gruppenunterkunft im Dorf, mit
               Nachbarn ringsum.
             </li>
-            <li>Tiere aller Art sind zu keiner Zeit erlaubt.</li>
+            <li>
+              <strong>Das Haus ist eine Nichtraucher-Unterkunft.</strong> Um auch Allergikern
+              einen unbeschwerten Aufenthalt zu garantieren, sind Haustiere bei uns nicht
+              gestattet. Vielen Dank für Eure Rücksichtnahme.
+            </li>
             <li>Alle Räume bitte nur mit Hausschuhen begehen.</li>
             <li>Mit Skischuhen ausschließlich den Kellereingang benutzen.</li>
             <li>
