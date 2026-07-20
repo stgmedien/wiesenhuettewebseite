@@ -19,13 +19,24 @@ export default async function MailTemplatesPage() {
 
   return (
     <div className="px-4 sm:px-8 py-8 sm:py-10 max-w-[1100px]">
-      <div className="eyebrow">Manager · Kommunikation</div>
-      <h1 className="text-[36px] mt-2 mb-1">Mail-Templates.</h1>
-      <p className="text-[var(--color-wh-fg-muted)] m-0 mb-8">
-        Versionierte Vorlagen mit Markdown-Body und{" "}
-        <code className="text-xs">{`{{variable}}`}</code>-Substitution. Jede Änderung erzeugt eine
-        neue Version; alte Versionen bleiben für Audit + Rollback erhalten.
-      </p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <div className="eyebrow">Manager · Kommunikation</div>
+          <h1 className="text-[36px] mt-2 mb-1">Mail-Templates.</h1>
+          <p className="text-[var(--color-wh-fg-muted)] m-0 max-w-2xl">
+            Versionierte Vorlagen mit Markdown-Body und{" "}
+            <code className="text-xs">{`{{variable}}`}</code>-Substitution. Jede Änderung erzeugt
+            eine neue Version; alte Versionen bleiben für Audit + Rollback erhalten.
+          </p>
+        </div>
+        <Link
+          href="/m/mail-templates/automatisch"
+          className="inline-flex items-center h-10 px-4 rounded-[var(--radius-btn)] border border-[var(--color-wh-deep-green)] text-[var(--color-wh-deep-green)] text-sm font-semibold no-underline whitespace-nowrap"
+        >
+          Automatische Mails ansehen
+        </Link>
+      </div>
+      <div className="mb-8" />
 
       {/* Liste */}
       <section className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] mb-8">

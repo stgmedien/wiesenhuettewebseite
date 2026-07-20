@@ -97,7 +97,7 @@ export async function cancelOwnBooking(formData: FormData) {
     await sendMail({
       to: customer.email,
       subject: `Stornierung bestätigt — Buchung ${booking.bookingNumber}`,
-      template: "booking_cancelled",
+      template: "booking-cancelled",
       bookingId: booking.id,
       react: BookingCancelledEmail({
         firstName: customer.firstName,
