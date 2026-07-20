@@ -94,7 +94,7 @@ export default function VoucherPurchaseEmail({
           ) : (
             <Text style={text}>
               Lade Dir den Gutschein als PDF herunter und überreich ihn persönlich. Mit dem Code
-              kann der Aufenthalt online unter <a href="https://www.xn--wiesenhtte-geb.com/buchen">/buchen</a> gebucht werden.
+              kann der Aufenthalt online unter <a href="https://www.wiesenhuette.de/buchen">/buchen</a> gebucht werden.
             </Text>
           )}
           <Text style={small}>

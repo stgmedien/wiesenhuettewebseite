@@ -76,7 +76,7 @@ export async function fetchWeather(): Promise<WeatherResult> {
   try {
     const res = await fetch(url.toString(), {
       next: { revalidate: 1800 }, // 30 Min Cache
-      headers: { "user-agent": "wiesenhuette.com weather widget" },
+      headers: { "user-agent": "wiesenhuette.de weather widget" },
     });
     if (!res.ok) return { ok: false, error: `HTTP ${res.status}` };
     const json = (await res.json()) as {

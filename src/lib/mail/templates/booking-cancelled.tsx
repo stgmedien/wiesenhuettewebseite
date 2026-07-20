@@ -100,7 +100,7 @@ export default function BookingCancelledEmail({
           </Text>
           <Hr style={{ borderColor: "#C8CEC4", margin: "32px 0 16px" }} />
           <Text style={muted}>
-            Du hast Fragen? Schreib einfach auf hello@wiesenhütte.com — wir helfen weiter.
+            Du hast Fragen? Schreib einfach auf hello@wiesenhuette.de — wir helfen weiter.
           </Text>
         </Container>
       </Body>

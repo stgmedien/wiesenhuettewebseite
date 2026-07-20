@@ -40,7 +40,7 @@ const COPY: Record<Locale, Copy> = {
       {
         category: "Anleitung",
         title: "Mitgliedschaft beantragen — Kurzanleitung",
-        desc: "In 3 Schritten zur Vereinsmitgliedschaft beim ersten Buchen über wiesenhütte.com — inkl. 50 % Mitglieder-Rabatt. Mit Screenshots.",
+        desc: "In 3 Schritten zur Vereinsmitgliedschaft beim ersten Buchen über wiesenhuette.de — inkl. 50 % Mitglieder-Rabatt. Mit Screenshots.",
         meta: "PDF · 2 Seiten · ca. 0,3 MB",
         file: PDF_MITGLIEDSCHAFT,
       },
@@ -63,7 +63,7 @@ const COPY: Record<Locale, Copy> = {
       {
         category: "Guide",
         title: "Applying for membership — quick guide",
-        desc: "Become a club member in 3 steps when booking via wiesenhütte.com — including the 50 % member discount. With screenshots.",
+        desc: "Become a club member in 3 steps when booking via wiesenhuette.de — including the 50 % member discount. With screenshots.",
         meta: "PDF · 2 pages · approx. 0.3 MB",
         file: PDF_MITGLIEDSCHAFT,
       },
@@ -86,7 +86,7 @@ const COPY: Record<Locale, Copy> = {
       {
         category: "Handleiding",
         title: "Lidmaatschap aanvragen — korte handleiding",
-        desc: "In 3 stappen lid worden bij het eerste boeken via wiesenhütte.com — inclusief 50 % ledenkorting. Met screenshots.",
+        desc: "In 3 stappen lid worden bij het eerste boeken via wiesenhuette.de — inclusief 50 % ledenkorting. Met screenshots.",
         meta: "PDF · 2 pagina's · ca. 0,3 MB",
         file: PDF_MITGLIEDSCHAFT,
       },

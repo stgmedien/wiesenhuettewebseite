@@ -77,7 +77,7 @@ export async function setBookingStatus(
       )[0];
       if (c?.email) {
         const baseUrl =
-          process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.xn--wiesenhtte-geb.com";
+          process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.wiesenhuette.de";
         if (status === "bestaetigt") {
           await sendMail({
             to: c.email,
@@ -373,7 +373,7 @@ export async function reviewApproveBooking(
   const prepaymentCents = Math.round((b.subtotalCents * 50) / 100);
   const remainderCents = b.subtotalCents - prepaymentCents;
   const baseUrl =
-    process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.xn--wiesenhtte-geb.com";
+    process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.wiesenhuette.de";
 
   let checkoutUrl: string | null = null;
   let checkoutSessionId: string | null = null;

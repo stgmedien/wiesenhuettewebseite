@@ -14,7 +14,7 @@ import MagicLinkEmail from "@/lib/mail/templates/magic-link";
 const emailSchema = z.string().email().max(255);
 
 const baseUrl = () =>
-  process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.xn--wiesenhtte-geb.com";
+  process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.wiesenhuette.de";
 
 // =============================================================
 // MAGIC LINK

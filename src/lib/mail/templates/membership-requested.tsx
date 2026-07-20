@@ -90,7 +90,7 @@ export default function MembershipRequestedEmail({ firstName, memberId }: Props)
           <Hr style={{ borderColor: "#C8CEC4", margin: "32px 0 16px" }} />
           <Text style={muted}>
             Du kannst Deinen Antrag jederzeit im{" "}
-            <a href="https://www.wiesenhütte.com/konto/profil" style={{ color: "#2F4A35" }}>
+            <a href="https://www.wiesenhuette.de/konto/profil" style={{ color: "#2F4A35" }}>
               Konto-Profil
             </a>{" "}
             zurückziehen.

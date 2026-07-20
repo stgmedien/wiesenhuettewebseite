@@ -112,7 +112,7 @@ export async function GET() {
       "- email_log.json — Mail-Versand-Log zu Deinen Buchungen",
       "- activity_log.json — Audit-Log Deiner Aktionen",
       "",
-      "Bei Fragen: hello@wiesenhütte.com",
+      "Bei Fragen: hello@wiesenhuette.de",
     ].join("\n")
   );
   zip.file("user.json", JSON.stringify(safeUser, null, 2));

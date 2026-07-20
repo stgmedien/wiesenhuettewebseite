@@ -3,7 +3,7 @@
  *
  * Wird unter /api/ical/<token> ausgeliefert und z. B. von gruppenhaus.de
  * importiert, damit dort dieselben Tage als belegt erscheinen wie auf
- * wiesenhütte.com (Buchungen + Reinigungstage + Sperrzeiten/Wartung).
+ * wiesenhuette.de (Buchungen + Reinigungstage + Sperrzeiten/Wartung).
  *
  * Bewusst ohne Gästedaten — der Feed zeigt nur, WANN belegt ist, nicht WER.
  * Keine externe Dependency.

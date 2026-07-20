@@ -41,7 +41,7 @@ async function requireCustomer() {
 }
 
 const baseUrl = () =>
-  process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.xn--wiesenhtte-geb.com";
+  process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.wiesenhuette.de";
 
 // =============================================================
 // Profil: Adresse / Telefon / Name

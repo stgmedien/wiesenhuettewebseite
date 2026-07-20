@@ -131,7 +131,7 @@ export default function ArrivalInfoEmail({
           <Text style={muted}>
             Schlüsselübergabe regeln wir persönlich mit dem Hüttenwart Toni Klauke — er nimmt
             Euch an der Hütte in Empfang. Notfall-Telefon Toni Klauke: 01516 7448273. Bei
-            Fragen: hello@wiesenhütte.com.
+            Fragen: hello@wiesenhuette.de.
           </Text>
         </Container>
       </Body>
