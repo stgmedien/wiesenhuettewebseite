@@ -411,6 +411,7 @@ export async function GET(req: Request) {
             departure: formatDateLong(b.departure),
             persons: b.persons,
             nights: b.nights,
+            baseUrl: BASE_URL,
           }),
         });
         stats.arrivalInfoSent++;
