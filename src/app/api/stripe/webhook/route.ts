@@ -6,7 +6,6 @@ import {
   customers,
   payments,
   activityLog,
-  emailLog,
   stripeWebhookEvents,
   vouchers,
   membershipTiers,
@@ -16,47 +15,19 @@ import { and, eq } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
 import { BOOKING_BLOCKS_TAG } from "@/lib/availability";
 import { sendMail } from "@/lib/mail/send";
-import BookingConfirmedEmail from "@/lib/mail/templates/booking-confirmed";
-import BookingInternalEmail from "@/lib/mail/templates/booking-internal";
-import MietvertragEmail from "@/lib/mail/templates/mietvertrag";
 import VoucherPurchaseEmail from "@/lib/mail/templates/voucher-purchase";
 import VoucherGiftEmail from "@/lib/mail/templates/voucher-gift";
 import MemberWelcomeEmail from "@/lib/mail/templates/member-welcome";
 import MemberJoinedInternalEmail from "@/lib/mail/templates/member-joined-internal";
 import { addContactToMembersList } from "@/lib/brevo";
 import { promoteToMemberRole } from "@/lib/membership-role";
-import { HUETTENWART_EMAIL, HUETTENWART_CC } from "@/lib/huettenwart";
-import HuettenwartNewBookingEmail from "@/lib/mail/templates/huettenwart-booking-new";
-import { buildIcalInvite } from "@/lib/mail/ical";
-import { formatDateLong } from "@/lib/utils";
-import { createInvoiceForBooking } from "@/lib/invoice";
+import { confirmDepositPayment } from "@/lib/booking-payment-confirmation";
 import type Stripe from "stripe";
 
 export const runtime = "nodejs"; // raw body needed
 export const dynamic = "force-dynamic";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
-
-/**
- * Idempotenz-Helper: prueft, ob fuer (bookingId, template) bereits eine
- * erfolgreich versendete Mail im emailLog steht. Schuetzt vor doppelten
- * Mails bei Stripe-Webhook-Retries oder bei mehreren Stripe-Events
- * (checkout.session.completed + async_payment_succeeded).
- */
-async function wasMailSent(bookingId: string, template: string): Promise<boolean> {
-  const r = await db
-    .select({ id: emailLog.id })
-    .from(emailLog)
-    .where(
-      and(
-        eq(emailLog.bookingId, bookingId),
-        eq(emailLog.template, template),
-        eq(emailLog.status, "sent")
-      )
-    )
-    .limit(1);
-  return !!r[0];
-}
 
 export async function POST(req: NextRequest) {
   const sig = req.headers.get("stripe-signature");
@@ -226,231 +197,15 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     return;
   }
 
-  // Anzahlung (initiale Buchung): Buchung auf "bezahlt" setzen + offene Zahlungen markieren
-  await db
-    .update(bookings)
-    .set({
-      status: "bezahlt",
-      paidCents: amountCents,
-      stripePaymentIntentId: (session.payment_intent as string | null) ?? null,
-      updatedAt: new Date(),
-    })
-    .where(eq(bookings.id, bookingId));
-
-  await db
-    .update(payments)
-    .set({
-      status: "erhalten",
-      receivedAt: new Date(),
-      stripePaymentIntentId: (session.payment_intent as string | null) ?? null,
-    })
-    .where(eq(payments.bookingId, bookingId));
-
-  await db.insert(activityLog).values({
-    who: "Stripe",
-    what: `Anzahlung erhalten — Buchung ${booking.bookingNumber} bestätigt (${(amountCents / 100).toFixed(2)} €)`,
+  // Anzahlung (initiale Buchung): Buchung → "bezahlt" + volle Folge-Automatik
+  // (Rechnung, Gast-/Huettenwart-Mails). Geteilt mit der manuellen
+  // Zahlungsbestaetigung im Manager, damit beide Wege identisch funktionieren.
+  await confirmDepositPayment({
     bookingId,
+    amountCents,
+    source: "Stripe",
+    stripePaymentIntentId: (session.payment_intent as string | null) ?? null,
   });
-
-  // Geschenk-Gutschein einlösen, falls bei der Buchung verwendet
-  if (booking.voucherId && booking.voucherDiscountCents > 0) {
-    try {
-      const { markVoucherRedeemed } = await import("@/lib/voucher-redeem");
-      await markVoucherRedeemed(booking.voucherId, booking.id, booking.voucherDiscountCents);
-      await db.insert(activityLog).values({
-        who: "Stripe",
-        what: `Gutschein eingelöst — ${(booking.voucherDiscountCents / 100).toFixed(2)} € für Buchung ${booking.bookingNumber}`,
-        bookingId,
-      });
-    } catch (err) {
-      console.error("[webhook] voucher redemption tracking failed (non-blocking):", err);
-    }
-  }
-
-  // GoBD-Rechnung anlegen (atomare Nummer via Postgres-Sequence)
-  try {
-    const inv = await createInvoiceForBooking(bookingId);
-    if (inv.isNew) {
-      await db.insert(activityLog).values({
-        who: "System",
-        what: `Rechnung ${inv.invoiceNumber} ausgestellt`,
-        bookingId,
-      });
-    }
-  } catch (err) {
-    console.error("[webhook] invoice creation failed (non-blocking):", err);
-  }
-
-  // Send mails
-  const customer = booking.customerId
-    ? (await db.select().from(customers).where(eq(customers.id, booking.customerId)).limit(1))[0]
-    : null;
-
-  if (customer) {
-    const guestName = `${customer.firstName} ${customer.lastName}`.trim();
-    if (!(await wasMailSent(bookingId, "booking-confirmed"))) {
-      try {
-        await sendMail({
-          to: customer.email,
-          subject: `Eure Buchung ${booking.bookingNumber} ist bestätigt`,
-          template: "booking-confirmed",
-          bookingId,
-          react: BookingConfirmedEmail({
-            bookingNumber: booking.bookingNumber,
-            guestName,
-            arrival: formatDateLong(booking.arrival),
-            departure: formatDateLong(booking.departure),
-            nights: booking.nights,
-            persons: booking.persons,
-            totalCents: booking.subtotalCents,
-            depositCents: booking.depositCents,
-            paidCents: amountCents,
-            baseUrl,
-          }),
-        });
-      } catch (err) {
-        console.error("[webhook] customer mail failed", err);
-      }
-    }
-
-    // Mietvertrag — automatisch generiert aus Buchungsdaten
-    if (!(await wasMailSent(bookingId, "mietvertrag"))) {
-      try {
-        const subtotal = booking.subtotalCents;
-        // Tatsaechlichen Zahlungs-Split aus den Payment-Zeilen uebernehmen —
-        // der ist je nach Fall 50 % (Standard), 10 % (Schulgruppen) oder
-        // 100 % (Anreise < 14 Tage). Hartes 50/50 waere fuer die letzten
-        // beiden Faelle falsch. Fallback 50/50, falls Zeilen fehlen.
-        const pmtRows = await db
-          .select({ kind: payments.kind, amountCents: payments.amountCents })
-          .from(payments)
-          .where(eq(payments.bookingId, bookingId));
-        const firstPayment = pmtRows.find(
-          (p) => p.kind === "anzahlung" || p.kind === "vollzahlung"
-        );
-        const restRow = pmtRows.find((p) => p.kind === "restzahlung");
-        const prepayment = firstPayment?.amountCents ?? Math.round(subtotal * 0.5);
-        const remainder = restRow?.amountCents ?? subtotal - prepayment;
-        await sendMail({
-          to: customer.email,
-          subject: `Mietvertrag Wiesenhütte — Buchung ${booking.bookingNumber}`,
-          template: "mietvertrag",
-          bookingId,
-        react: MietvertragEmail({
-          bookingNumber: booking.bookingNumber,
-          arrival: formatDateLong(booking.arrival),
-          departure: formatDateLong(booking.departure),
-          nights: booking.nights,
-          customer: {
-            firstName: customer.firstName,
-            lastName: customer.lastName,
-            company: customer.company,
-            email: customer.email,
-            phone: customer.phone,
-            street: customer.street,
-            zip: customer.zip,
-            city: customer.city,
-          },
-          persons: {
-            adults: booking.adults,
-            members: booking.members,
-            children: booking.children,
-            pupils: booking.pupils,
-            teachers: booking.teachers,
-            total: booking.persons,
-          },
-          pricing: {
-            accommodationCents: booking.accommodationCents,
-            energyFlatCents: booking.energyFlatCents,
-            cleaningCents: booking.cleaningCents,
-            soloSurchargeCents: booking.soloSurchargeCents,
-            minOccupancySurchargeCents: booking.minOccupancySurchargeCents,
-            subtotalCents: subtotal,
-            depositCents: booking.depositCents,
-            prepaymentCents: prepayment,
-            remainderCents: remainder,
-          },
-          signedAt: new Date().toISOString(),
-          contractDate: new Date().toLocaleDateString("de-DE", {
-            day: "2-digit",
-            month: "long",
-            year: "numeric",
-          }),
-        }),
-      });
-      } catch (err) {
-        console.error("[webhook] mietvertrag mail failed", err);
-      }
-    }
-
-    // Kurtaxe/Meldeschein: KEINE automatische Mail mehr (Vorstand 02.07.2026).
-    // Stattdessen verschickt der Vorstand den individuellen AVS-SelfCheck-in-Link
-    // über das Buchungsdetail im Manager (sendAvsCheckinLink) — die Plattform
-    // mailt den Link dann an den Gast.
-
-    const internalTo = process.env.MAIL_INTERNAL_TO;
-    if (internalTo && !(await wasMailSent(bookingId, "booking-internal"))) {
-      try {
-        await sendMail({
-          to: internalTo,
-          subject: `📌 Neue Buchung ${booking.bookingNumber} — ${guestName}`,
-          template: "booking-internal",
-          bookingId,
-          react: BookingInternalEmail({
-            bookingNumber: booking.bookingNumber,
-            guestName,
-            guestEmail: customer.email,
-            guestPhone: customer.phone,
-            arrival: formatDateLong(booking.arrival),
-            departure: formatDateLong(booking.departure),
-            nights: booking.nights,
-            persons: booking.persons,
-            customerType: customer.type,
-            totalCents: booking.subtotalCents,
-            paidCents: amountCents,
-            managerUrl: `${baseUrl}/m/buchungen/${bookingId}`,
-            notes: booking.customerMessage ?? undefined,
-          }),
-        });
-      } catch (err) {
-        console.error("[webhook] internal mail failed", err);
-      }
-    }
-
-    // Hüttenwart sofort bei Anzahlungseingang informieren (Issue #68) —
-    // damit Toni die Buchung fest einplanen kann (bisher erst T-7).
-    if (!(await wasMailSent(bookingId, "huettenwart-booking-new"))) {
-      try {
-        await sendMail({
-          to: HUETTENWART_EMAIL,
-          bcc: HUETTENWART_CC,
-          subject: `Neue Buchung eingegangen — ${booking.bookingNumber} (${formatDateLong(booking.arrival)})`,
-          template: "huettenwart-booking-new",
-          bookingId,
-          attachments: [buildIcalInvite({
-            bookingId,
-            bookingNumber: booking.bookingNumber,
-            guestName,
-            arrival: booking.arrival,
-            departure: booking.departure,
-            persons: booking.persons,
-          })],
-          react: HuettenwartNewBookingEmail({
-            bookingNumber: booking.bookingNumber,
-            guestName,
-            arrival: formatDateLong(booking.arrival),
-            departure: formatDateLong(booking.departure),
-            nights: booking.nights,
-            persons: booking.persons,
-            purpose: booking.purpose,
-            managerUrl: `${baseUrl}/m/buchungen/${bookingId}`,
-          }),
-        });
-      } catch (err) {
-        console.error("[webhook] huettenwart mail failed", err);
-      }
-    }
-  }
 }
 
 async function handleCheckoutFailed(session: Stripe.Checkout.Session) {
