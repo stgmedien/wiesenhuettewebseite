@@ -236,7 +236,7 @@ export default async function BookingDetail({ params }: Props) {
                 }))}
               />
             )}
-            <ManualPaymentForm bookingId={b.id} />
+            <ManualPaymentForm bookingId={b.id} bookingStatus={b.status} />
           </Section>
 
           {customer && b.status !== "storniert" && (

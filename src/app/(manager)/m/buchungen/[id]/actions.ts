@@ -25,6 +25,7 @@ import { resolveTariffs } from "@/lib/pricing-tariffs";
 import { mailTemplates, mailTemplateVersions } from "@/lib/db/schema";
 import { substituteVars } from "@/lib/mail-render";
 import { buildBookingVars } from "@/lib/mail-template-vars";
+import { confirmDepositPayment } from "@/lib/booking-payment-confirmation";
 
 async function requireManager() {
   const session = await auth();
@@ -557,6 +558,11 @@ const recordPaymentSchema = z.object({
   // kind=restzahlung, status="offen") → T-14-Cron fordert den Rest per Stripe an.
   // Zählt NICHT zu paidCents (noch nicht erhalten). Verhindert Tippfehler.
   altsystemRest: z.boolean().optional(),
+  // Bestätigung statt nur Erfassung: löst dieselbe Automatik aus wie eine
+  // Online-Zahlung (Rechnung, Gast-Bestätigung + Mietvertrag, Hüttenwart-
+  // Info mit iCal). Für Gäste, die per Überweisung direkt an den Verein
+  // gezahlt haben (kein Stripe möglich) — z. B. Vereine ohne eigene Karte.
+  confirmAndNotify: z.boolean().optional(),
 });
 
 export type RecordPaymentResult = { ok: true } | { ok: false; error: string };
@@ -581,10 +587,46 @@ export async function recordManualPayment(
   const b = (await db.select().from(bookings).where(eq(bookings.id, data.bookingId)).limit(1))[0];
   if (!b) return { ok: false, error: "Buchung nicht gefunden." };
 
+  const isAltRest = data.altsystemRest === true;
+  const who = session.user?.name ?? session.user?.email ?? "Manager";
+
+  // Bestätigung + volle Automatik — nur sinnvoll für die initiale Zahlung
+  // (Anzahlung/Vollzahlung) einer Buchung, die noch nicht als bezahlt gilt.
+  if (data.confirmAndNotify && !isAltRest && (data.kind === "anzahlung" || data.kind === "vollzahlung")) {
+    if (b.status !== "angefragt" && b.status !== "bestaetigt") {
+      return {
+        ok: false,
+        error: `Buchung ist bereits „${b.status}" — Bestätigung mit Automatik ist nur vor dem ersten Zahlungseingang sinnvoll. Nutze stattdessen „Nur erfassen".`,
+      };
+    }
+    try {
+      await confirmDepositPayment({
+        bookingId: data.bookingId,
+        amountCents,
+        source: who,
+        stripePaymentIntentId: null,
+        sendInternalNotice: false,
+        fallbackPaymentMethod: data.method,
+      });
+    } catch (err) {
+      return {
+        ok: false,
+        error: err instanceof Error ? err.message : "Bestätigung fehlgeschlagen.",
+      };
+    }
+    await db.insert(activityLog).values({
+      who,
+      what: `Zahlung manuell bestätigt (${data.method}): ${formatEuro(amountCents)} — Buchung auf „bezahlt" gesetzt, Gast- und Hüttenwart-Mail verschickt`,
+      bookingId: data.bookingId,
+    });
+    revalidatePath(`/m/buchungen/${data.bookingId}`);
+    revalidatePath("/m/dashboard");
+    return { ok: true };
+  }
+
   // Preset "Altsystem-Restzahlung": offener Marker für den T-14-Cron —
   // exakter method-String, kind=restzahlung, status="offen", KEINE Erhöhung
   // von paidCents (der Rest ist noch nicht bezahlt).
-  const isAltRest = data.altsystemRest === true;
   const kind = isAltRest ? "restzahlung" : data.kind;
   const status = isAltRest ? "offen" : "erhalten";
   const method = isAltRest ? MANUAL_REST_MARKER : data.method;
@@ -607,7 +649,7 @@ export async function recordManualPayment(
   }
 
   await db.insert(activityLog).values({
-    who: session.user?.name ?? session.user?.email ?? "Manager",
+    who,
     what: isAltRest
       ? `Altsystem-Restzahlungs-Marker angelegt: ${formatEuro(amountCents)} offen → T-14-Cron`
       : `Manuelle Zahlung erfasst: ${formatEuro(amountCents)} (${data.kind}, ${data.method})`,

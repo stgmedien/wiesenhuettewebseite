@@ -15,15 +15,27 @@ const KINDS = [
 const inputCls =
   "w-full rounded-lg border border-[var(--color-wh-winter-grey)] bg-white px-3 py-2 text-sm focus:border-[var(--color-wh-deep-green)] focus:outline-none";
 
-export function ManualPaymentForm({ bookingId }: { bookingId: string }) {
+export function ManualPaymentForm({
+  bookingId,
+  bookingStatus,
+}: {
+  bookingId: string;
+  bookingStatus: string;
+}) {
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState("");
   const [method, setMethod] = useState("Banküberweisung");
   const [kind, setKind] = useState<string>("anzahlung");
   const [altRest, setAltRest] = useState(false);
+  const [confirmAndNotify, setConfirmAndNotify] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [pending, start] = useTransition();
   const router = useRouter();
+
+  const canConfirmAndNotify =
+    !altRest &&
+    (kind === "anzahlung" || kind === "vollzahlung") &&
+    (bookingStatus === "angefragt" || bookingStatus === "bestaetigt");
 
   const submit = () => {
     setErr(null);
@@ -39,11 +51,13 @@ export function ManualPaymentForm({ bookingId }: { bookingId: string }) {
         method: altRest ? MANUAL_REST_MARKER : method.trim() || "Manuell",
         kind: altRest ? "restzahlung" : (kind as "anzahlung" | "restzahlung" | "vollzahlung" | "kaution"),
         altsystemRest: altRest,
+        confirmAndNotify: canConfirmAndNotify && confirmAndNotify,
       });
       if (r.ok) {
         setOpen(false);
         setAmount("");
         setAltRest(false);
+        setConfirmAndNotify(false);
         router.refresh();
       } else {
         setErr(r.error);
@@ -125,6 +139,24 @@ export function ManualPaymentForm({ bookingId }: { bookingId: string }) {
         </label>
       </div>
 
+      {canConfirmAndNotify && (
+        <label className="flex items-start gap-2.5 mt-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={confirmAndNotify}
+            onChange={(e) => setConfirmAndNotify(e.target.checked)}
+            className="mt-0.5 w-4 h-4 accent-[var(--color-wh-deep-green)]"
+          />
+          <span className="text-[13px] leading-snug text-[var(--color-wh-black)]">
+            <strong>Buchung bestätigen und Automatik auslösen</strong> — setzt die Buchung auf
+            „Bezahlt", erstellt die Rechnung und verschickt Bestätigungsmail + Mietvertrag an den
+            Gast sowie die Info-Mail mit Kalendereintrag an den Hüttenservice. Für Zahlungen per
+            Überweisung direkt an den Verein (z. B. wenn der Gast keine Stripe-fähige
+            Zahlungsmethode hat).
+          </span>
+        </label>
+      )}
+
       {err && <p className="text-[13px] text-[#7a3a20] mt-2">{err}</p>}
 
       <div className="flex gap-2 mt-3">
@@ -134,7 +166,11 @@ export function ManualPaymentForm({ bookingId }: { bookingId: string }) {
           disabled={pending}
           className="inline-flex items-center justify-center h-10 px-5 rounded-[var(--radius-btn)] bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] text-sm font-semibold hover:bg-[var(--color-wh-green)] transition-colors cursor-pointer disabled:opacity-50"
         >
-          {pending ? "Wird gespeichert …" : "Zahlung speichern"}
+          {pending
+            ? "Wird gespeichert …"
+            : canConfirmAndNotify && confirmAndNotify
+              ? "Bestätigen & Mails senden"
+              : "Zahlung speichern"}
         </button>
         <button
           type="button"
