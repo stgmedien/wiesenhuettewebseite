@@ -138,6 +138,7 @@ const jobs: { name: string; subject: string; react: React.ReactElement }[] = [
       departure: "23.02.2026",
       persons: 18,
       nights: 3,
+      baseUrl: BASE,
     }),
   },
   {

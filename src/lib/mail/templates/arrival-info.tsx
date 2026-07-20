@@ -17,6 +17,7 @@ type Props = {
   departure: string;
   persons: number;
   nights: number;
+  baseUrl: string;
 };
 
 const main = { backgroundColor: "#F7F7F2", padding: "40px 0" };
@@ -59,6 +60,7 @@ export default function ArrivalInfoEmail({
   departure,
   persons,
   nights,
+  baseUrl,
 }: Props) {
   return (
     <Html>
@@ -125,6 +127,46 @@ export default function ArrivalInfoEmail({
           <Text style={text}>
             Bettwäsche oder Schlafsack, Handtücher, Hausschuhe, Lebensmittel für die Selbstversorgung,
             Spülmittel, Geschirrtücher, Müllsäcke. Brennholz ist vor Ort.
+          </Text>
+
+          <Heading
+            style={{ ...heading, fontSize: "20px", marginTop: 28, marginBottom: 8 }}
+          >
+            Wichtig vor der Anreise
+          </Heading>
+          <Section
+            style={{
+              backgroundColor: "#EFE6D8",
+              borderLeft: "4px solid #2F4A35",
+              padding: "16px 20px",
+              borderRadius: "12px",
+              margin: "0 0 16px 0",
+            }}
+          >
+            <Text style={{ ...text, margin: "0 0 8px 0" }}>
+              <strong>Kurkarten:</strong> Solltet Ihr den digitalen Meldeschein noch nicht
+              ausgefüllt haben — bitte jetzt nachholen (Link kam per separater Mail von uns). Das
+              ist gesetzlich vorgeschrieben (Meldepflicht und Kurbeitrag der Stadt Winterberg,
+              Pflicht ab 16 Jahren). Eure Kurkarten kommen anschließend automatisch von AVS —
+              bitte zur Anreise mitbringen, digital oder ausgedruckt.
+            </Text>
+            <Text style={{ ...text, margin: "0 0 8px 0" }}>
+              <strong>Spätestens 2 Tage vor Anreise:</strong> teilt Toni Klauke telefonisch Eure
+              genaue Ankunftszeit mit (01516 7448273) — er nimmt Euch an der Hütte in Empfang und
+              überreicht die Schlüssel.
+            </Text>
+            <Text style={{ ...text, margin: 0 }}>
+              <strong>Das Haus ist eine Nichtraucher-Unterkunft, Haustiere sind nicht gestattet.</strong>{" "}
+              Ab 22:00 Uhr gilt Ruhezeit im Ort. Die Hütte ist kein Partyort — übermäßiger
+              Alkoholkonsum und laute private Feiern sind nicht erlaubt.
+            </Text>
+          </Section>
+          <Text style={muted}>
+            Die vollständige Hausordnung (inkl. Abreise-Checkliste) findet Ihr unter{" "}
+            <a href={`${baseUrl}/hausordnung`} style={{ color: "#2F4A35" }}>
+              {baseUrl.replace(/^https?:\/\//, "")}/hausordnung
+            </a>
+            .
           </Text>
 
           <Hr style={{ borderColor: "#C8CEC4", margin: "32px 0 16px" }} />
