@@ -16,7 +16,7 @@ type Copy = {
   vorstand: { eyebrow: string; line: string };
   cards: {
     booking: { label: string; info: string; cta: string };
-    fragen: { label: string; info: string };
+    fragen: { label: string; info: string; oldDomainNote: string };
     huettenwart: { label: string; address: string; info: string };
   };
   notes: {
@@ -40,6 +40,7 @@ const COPY: Record<Locale, Copy> = {
       fragen: {
         label: "Fragen",
         info: "Für Fragen, die auf unserer Webseite noch nicht beantwortet sind.",
+        oldDomainNote: "Bitte nicht mehr an die alte Adresse @wiesenhuette.com schreiben — die wird nicht mehr betreut.",
       },
       huettenwart: {
         label: "Hüttenwart vor Ort",
@@ -70,6 +71,7 @@ const COPY: Record<Locale, Copy> = {
       fragen: {
         label: "Questions",
         info: "For questions not yet answered on our website.",
+        oldDomainNote: "Please don't use the old @wiesenhuette.com address anymore — it's no longer monitored.",
       },
       huettenwart: {
         label: "On-site cabin keeper",
@@ -100,6 +102,7 @@ const COPY: Record<Locale, Copy> = {
       fragen: {
         label: "Vragen",
         info: "Voor vragen die nog niet op onze website beantwoord zijn.",
+        oldDomainNote: "Gebruik het oude adres @wiesenhuette.com niet meer — dat wordt niet meer bijgehouden.",
       },
       huettenwart: {
         label: "Hutwacht ter plaatse",
@@ -176,6 +179,7 @@ export default async function KontaktPage() {
             secondary={[
               { kind: "mail", value: "hello@wiesenhuette.de" },
               { kind: "info", value: c.cards.fragen.info },
+              { kind: "info", value: c.cards.fragen.oldDomainNote },
             ]}
           />
           <Card
