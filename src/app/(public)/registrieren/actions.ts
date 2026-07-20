@@ -11,7 +11,7 @@ import { sendMail } from "@/lib/mail/send";
 import WelcomeEmail from "@/lib/mail/templates/welcome";
 
 const baseUrl = () =>
-  process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.xn--wiesenhtte-geb.com";
+  process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.wiesenhuette.de";
 
 const signupSchema = z
   .object({

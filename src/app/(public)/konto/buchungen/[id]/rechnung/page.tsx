@@ -91,7 +91,7 @@ export default async function QuittungPage({ params }: Props) {
             </h1>
             <p className="text-xs text-[#555]">Skifreunde Gütersloh e.V.</p>
             <p className="text-xs text-[#555]">Wiesenhütte 1, 59955 Winterberg-Langewiese</p>
-            <p className="text-xs text-[#555]">hello@wiesenhütte.com</p>
+            <p className="text-xs text-[#555]">hello@wiesenhuette.de</p>
           </div>
           <div className="text-right">
             <p className="text-xs uppercase tracking-wider text-[#555]">Buchungsbestätigung</p>

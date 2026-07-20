@@ -167,7 +167,7 @@ export function PacklistePdf({
 
         <View style={styles.footer}>
           <Text>
-            Wiesenhütte Langewiese · Skifreunde Gütersloh e.V. · wiesenhütte.com/packliste
+            Wiesenhütte Langewiese · Skifreunde Gütersloh e.V. · wiesenhuette.de/packliste
           </Text>
         </View>
       </Page>

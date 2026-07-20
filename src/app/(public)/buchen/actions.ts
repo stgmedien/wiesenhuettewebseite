@@ -606,7 +606,7 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
   // =====================================================================
   if (isPrivatePartyReview) {
     const baseUrlReview =
-      process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.xn--wiesenhtte-geb.com";
+      process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.wiesenhuette.de";
     const partyTypeLabel = data.purposeSubtypeLabel?.trim() || "Private Feier";
     const reasonText = data.purposeReason?.trim() || "(keine Beschreibung angegeben)";
 
@@ -834,7 +834,7 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
   // Magic-Link-Login schicken, damit der Kunde sofort sein Konto uebernehmen kann.
   if (isNewAccount && resolvedUserId) {
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.xn--wiesenhtte-geb.com";
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.wiesenhuette.de";
       const tokenRes = await createMagicLinkToken(effectiveEmail);
       const loginUrl =
         "rateLimited" in tokenRes

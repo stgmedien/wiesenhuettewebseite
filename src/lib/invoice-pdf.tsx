@@ -237,7 +237,7 @@ export function InvoicePdf({
             <Text style={styles.companyName}>Wiesenhütte</Text>
             <Text style={styles.companyMeta}>Skifreunde Gütersloh e.V.</Text>
             <Text style={styles.companyMeta}>Wiesenhütte 1, 59955 Winterberg-Langewiese</Text>
-            <Text style={styles.companyMeta}>hello@wiesenhütte.com · www.wiesenhütte.com</Text>
+            <Text style={styles.companyMeta}>hello@wiesenhuette.de · www.wiesenhuette.de</Text>
             <Text style={styles.companyMeta}>
               Gemeinnütziger Verein · Vereinsregister Gütersloh VR 312
             </Text>
@@ -360,7 +360,7 @@ export function InvoicePdf({
 
         {/* Footer */}
         <Text style={styles.footer} fixed>
-          Skifreunde Gütersloh e.V. · Wiesenhütte 1, 59955 Winterberg-Langewiese · hello@wiesenhütte.com
+          Skifreunde Gütersloh e.V. · Wiesenhütte 1, 59955 Winterberg-Langewiese · hello@wiesenhuette.de
           {"\n"}
           Vereinsregister Gütersloh VR 312 · Gemeinnützig anerkannt · Keine USt nach §4 UStG
         </Text>

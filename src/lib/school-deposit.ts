@@ -42,7 +42,7 @@ export const SCHOOL_DEPOSIT_WINDOW_DAYS =
   SCHOOL_DEPOSIT_DUE_DAYS - SCHOOL_CANCEL_DAYS; // 14
 
 const BASE_URL =
-  process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.xn--wiesenhtte-geb.com";
+  process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.wiesenhuette.de";
 
 /** 50 %-Anzahlung (gerundet) aus dem Subtotal. */
 export const schoolPrepaymentCents = (subtotalCents: number): number =>

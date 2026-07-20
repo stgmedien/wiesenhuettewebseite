@@ -141,7 +141,7 @@ export default function PaymentReminderEmail({
 
           <Hr style={{ borderColor: "#C8CEC4", margin: "32px 0 16px" }} />
           <Text style={muted}>
-            Fragen? Schreib einfach auf hello@wiesenhütte.com — wir helfen.
+            Fragen? Schreib einfach auf hello@wiesenhuette.de — wir helfen.
           </Text>
         </Container>
       </Body>

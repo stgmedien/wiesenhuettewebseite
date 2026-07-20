@@ -142,7 +142,7 @@ export default function MembershipRequestedInternalEmail({
           <Text style={muted}>
             Diese Benachrichtigung wurde automatisch erstellt, weil ein Mitgliedschafts-Antrag
             eingegangen ist. Du erreichst das Manager-Backend unter
-            wiesenhütte.com/m/mitgliedschaften.
+            wiesenhuette.de/m/mitgliedschaften.
           </Text>
         </Container>
       </Body>

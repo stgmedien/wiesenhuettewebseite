@@ -70,7 +70,7 @@ export default function MagicLinkEmail({ url, expiresMinutes }: Props) {
           <Text style={eyebrow}>Wiesenhütte · Login</Text>
           <Heading style={heading}>Klick zum Anmelden.</Heading>
           <Text style={text}>
-            Du hast Dich gerade auf wiesenhütte.com eingeloggt. Klick auf den Button, um die Anmeldung
+            Du hast Dich gerade auf wiesenhuette.de eingeloggt. Klick auf den Button, um die Anmeldung
             abzuschließen — kein Passwort nötig.
           </Text>
           <Section style={{ margin: "28px 0" }}>

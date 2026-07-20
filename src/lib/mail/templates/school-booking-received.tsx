@@ -91,7 +91,7 @@ export default function SchoolBookingReceivedEmail({
           </Text>
 
           <Text style={muted}>
-            Bei Fragen einfach auf diese Mail antworten oder an hello@wiesenhütte.com.
+            Bei Fragen einfach auf diese Mail antworten oder an hello@wiesenhuette.de.
           </Text>
         </Container>
       </Body>
