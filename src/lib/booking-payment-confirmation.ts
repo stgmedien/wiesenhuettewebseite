@@ -42,6 +42,10 @@ export type ConfirmDepositParams = {
    * legt die Funktion selbst eine neue "erhalten"-Zeile an, damit jeder Euro
    * einen Zahlungs-Eintrag hat. */
   fallbackPaymentMethod?: string;
+  /** Art dieser Fallback-Zeile — "anzahlung" (Standard) oder "vollzahlung"
+   * (z. B. kurzfristige Buchung < 14 Tage vor Anreise). Nur relevant im
+   * Fallback-Insert-Fall, siehe fallbackPaymentMethod. */
+  fallbackPaymentKind?: "anzahlung" | "vollzahlung";
 };
 
 /**
@@ -61,6 +65,7 @@ export async function confirmDepositPayment(params: ConfirmDepositParams): Promi
     stripePaymentIntentId = null,
     sendInternalNotice = true,
     fallbackPaymentMethod = "Manuell bestätigt",
+    fallbackPaymentKind = "anzahlung",
   } = params;
 
   const booking = (await db.select().from(bookings).where(eq(bookings.id, bookingId)).limit(1))[0];
@@ -102,7 +107,7 @@ export async function confirmDepositPayment(params: ConfirmDepositParams): Promi
     // Euro im System einen nachvollziehbaren Ursprung hat.
     await db.insert(payments).values({
       bookingId,
-      kind: "anzahlung",
+      kind: fallbackPaymentKind,
       status: "erhalten",
       amountCents,
       method: fallbackPaymentMethod,
