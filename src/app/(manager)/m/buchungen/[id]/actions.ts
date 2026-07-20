@@ -607,6 +607,7 @@ export async function recordManualPayment(
         stripePaymentIntentId: null,
         sendInternalNotice: false,
         fallbackPaymentMethod: data.method,
+        fallbackPaymentKind: data.kind === "vollzahlung" ? "vollzahlung" : "anzahlung",
       });
     } catch (err) {
       return {
