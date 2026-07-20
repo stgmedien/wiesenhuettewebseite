@@ -17,6 +17,7 @@ import { InvoiceControl } from "./InvoiceControl";
 import { getInvoiceForBooking } from "./invoice-actions";
 import { Kundenakte } from "./Kundenakte";
 import { ReviewActions } from "./ReviewActions";
+import { findMailTemplateMeta } from "@/lib/automatic-mail-templates";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +34,7 @@ export default async function BookingDetail({ params }: Props) {
   if (!b) notFound();
 
   // Alle Folge-Queries sind unabhaengig voneinander → parallel (Issue #86)
-  const [customerRows, pmts, bookingNotes, existingInvoice, avsSent, availableTemplates] =
+  const [customerRows, pmts, bookingNotes, existingInvoice, avsSent, availableTemplates, mailHistory] =
     await Promise.all([
       b.customerId
         ? db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1)
@@ -66,6 +67,22 @@ export default async function BookingDetail({ params }: Props) {
         .from(mailTemplates)
         .where(isNotNull(mailTemplates.activeVersionId))
         .orderBy(asc(mailTemplates.name)),
+      // Mail-Verlauf: alle bisher fuer diese Buchung geloggten Sendeversuche
+      // (System-Mails via emailLog — die freien Manager-Nachrichten aus
+      // ManagerMessage tauchen hier ebenfalls auf, template="manager-message*").
+      db
+        .select({
+          id: emailLog.id,
+          to: emailLog.to,
+          subject: emailLog.subject,
+          template: emailLog.template,
+          status: emailLog.status,
+          error: emailLog.error,
+          sentAt: emailLog.sentAt,
+        })
+        .from(emailLog)
+        .where(eq(emailLog.bookingId, id))
+        .orderBy(desc(emailLog.sentAt)),
     ]);
   const customer = customerRows[0] ?? null;
   const avsLastSentAt = avsSent[0] ? new Date(avsSent[0].sentAt).toLocaleString("de-DE") : null;
@@ -342,6 +359,63 @@ export default async function BookingDetail({ params }: Props) {
             <InvoiceControl bookingId={b.id} existing={existingInvoice} />
           </Section>
         </aside>
+      </div>
+
+      <div className="mt-8 bg-white border border-[var(--color-wh-winter-grey)] rounded-2xl p-5">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--color-wh-fg-muted)] mb-3">
+          Mail-Verlauf ({mailHistory.length})
+        </h2>
+        {mailHistory.length === 0 ? (
+          <p className="text-sm text-[var(--color-wh-fg-muted)]">
+            Für diese Buchung wurde noch keine Mail protokolliert.
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-xs uppercase tracking-wider text-[var(--color-wh-fg-muted)] border-b border-[var(--color-wh-winter-grey)]">
+                  <th className="py-2 pr-3 font-medium">Zeitpunkt</th>
+                  <th className="py-2 pr-3 font-medium">Was</th>
+                  <th className="py-2 pr-3 font-medium">An</th>
+                  <th className="py-2 pr-3 font-medium">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {mailHistory.map((m) => {
+                  const meta = findMailTemplateMeta(m.template);
+                  return (
+                    <tr key={m.id} className="border-b border-[var(--color-wh-winter-grey)]/50 last:border-0">
+                      <td className="py-2 pr-3 whitespace-nowrap text-[var(--color-wh-fg-muted)]">
+                        {new Date(m.sentAt).toLocaleString("de-DE")}
+                      </td>
+                      <td className="py-2 pr-3">
+                        <div className="font-medium">{meta?.label ?? m.subject}</div>
+                        <div className="text-xs text-[var(--color-wh-fg-muted)]">
+                          {meta ? m.subject : m.template}
+                        </div>
+                      </td>
+                      <td className="py-2 pr-3 text-[var(--color-wh-fg-muted)]">{m.to}</td>
+                      <td className="py-2 pr-3">
+                        {m.status === "sent" ? (
+                          <span className="inline-flex items-center rounded-full bg-[var(--color-wh-green-soft)]/40 text-[var(--color-wh-deep-green)] px-2 py-0.5 text-xs font-medium">
+                            Gesendet
+                          </span>
+                        ) : (
+                          <span
+                            className="inline-flex items-center rounded-full bg-red-50 text-red-700 px-2 py-0.5 text-xs font-medium"
+                            title={m.error ?? undefined}
+                          >
+                            Fehlgeschlagen
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       <Kundenakte
