@@ -1,8 +1,9 @@
 import { auth } from "@/lib/auth";
 import { redirect, notFound } from "next/navigation";
 import { db } from "@/lib/db";
-import { bookings, customers, payments, invoices } from "@/lib/db/schema";
-import { eq, and, desc, ne } from "drizzle-orm";
+import { bookings, customers, payments } from "@/lib/db/schema";
+import { eq, and, desc } from "drizzle-orm";
+import { getActiveInvoiceForBooking } from "@/lib/invoice";
 import { formatEuro, cancellationFeeForBooking, RULES } from "@/lib/pricing";
 import { formatDateLong } from "@/lib/utils";
 import { CancelBookingButton } from "./CancelBookingButton";
@@ -48,13 +49,7 @@ export default async function BuchungDetailPage({ params }: Props) {
 
   // Nur die aktive Rechnung zeigen — stornierte (durch Neuausstellung
   // ersetzte) Rechnungen sollen dem Gast nicht mehr verlinkt werden.
-  const invRow = await db
-    .select({ id: invoices.id, invoiceNumber: invoices.invoiceNumber })
-    .from(invoices)
-    .where(and(eq(invoices.bookingId, booking.id), ne(invoices.status, "storniert")))
-    .orderBy(desc(invoices.createdAt))
-    .limit(1);
-  const invoice = invRow[0];
+  const invoice = await getActiveInvoiceForBooking(booking.id);
 
   const fee = cancellationFeeForBooking(booking);
   const canCancel =

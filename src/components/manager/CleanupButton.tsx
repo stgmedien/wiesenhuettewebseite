@@ -15,6 +15,7 @@ export function CleanupButton() {
     )
       return;
 
+    setResult(null);
     startTransition(async () => {
       const { deleted } = await deleteUnpaidRequests();
       setResult(deleted);
