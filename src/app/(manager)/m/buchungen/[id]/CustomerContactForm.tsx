@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { updateCustomerContact } from "./notes-actions";
 
 type Props = {
@@ -29,6 +30,7 @@ export function CustomerContactForm(props: Props) {
   const [city, setCity] = useState(props.city ?? "");
   const [err, setErr] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  const router = useRouter();
 
   if (!open) {
     return (
@@ -58,6 +60,7 @@ export function CustomerContactForm(props: Props) {
       });
       if (r.ok) {
         setOpen(false);
+        router.refresh();
       } else {
         setErr(r.error);
       }
