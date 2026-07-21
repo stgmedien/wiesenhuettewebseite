@@ -62,7 +62,7 @@ const CHECKOUT_LINES: Record<Locale, {
   de: {
     depositName: (a, d) => `Anzahlung 50 % — Wiesenhütte ${a} bis ${d}`,
     depositDescription: (p, n, bn, disc, rem) =>
-      `${p} Personen · ${n} Nächte · Buchung ${bn}${disc ? ` · Rabatt ${disc}` : ""} · Restzahlung ${rem} folgt 14 Tage vor Anreise.`,
+      `${p} Personen · ${n} Nächte · Buchung ${bn}${disc ? ` · Rabatt ${disc}` : ""} · Restzahlung ${rem} (inkl. Kaution) folgt 14 Tage vor Anreise.`,
     fullName: (a, d) => `Gesamtbetrag — Wiesenhütte ${a} bis ${d}`,
     fullDescription: (p, n, bn, disc) =>
       `${p} Personen · ${n} Nächte · Buchung ${bn}${disc ? ` · Rabatt ${disc}` : ""} · Komplettzahlung, da Anreise in weniger als 14 Tagen.`,
@@ -72,7 +72,7 @@ const CHECKOUT_LINES: Record<Locale, {
   en: {
     depositName: (a, d) => `Deposit 50 % — Wiesenhütte ${a} to ${d}`,
     depositDescription: (p, n, bn, disc, rem) =>
-      `${p} guests · ${n} nights · Booking ${bn}${disc ? ` · Discount ${disc}` : ""} · Remaining ${rem} due 14 days before arrival.`,
+      `${p} guests · ${n} nights · Booking ${bn}${disc ? ` · Discount ${disc}` : ""} · Remaining ${rem} (incl. deposit) due 14 days before arrival.`,
     fullName: (a, d) => `Full amount — Wiesenhütte ${a} to ${d}`,
     fullDescription: (p, n, bn, disc) =>
       `${p} guests · ${n} nights · Booking ${bn}${disc ? ` · Discount ${disc}` : ""} · Paid in full because arrival is less than 14 days away.`,
@@ -82,7 +82,7 @@ const CHECKOUT_LINES: Record<Locale, {
   nl: {
     depositName: (a, d) => `Aanbetaling 50 % — Wiesenhütte ${a} t/m ${d}`,
     depositDescription: (p, n, bn, disc, rem) =>
-      `${p} personen · ${n} nachten · Boeking ${bn}${disc ? ` · Korting ${disc}` : ""} · Restbedrag ${rem} 14 dagen vóór aankomst.`,
+      `${p} personen · ${n} nachten · Boeking ${bn}${disc ? ` · Korting ${disc}` : ""} · Restbedrag ${rem} (incl. borg) 14 dagen vóór aankomst.`,
     fullName: (a, d) => `Totaalbedrag — Wiesenhütte ${a} t/m ${d}`,
     fullDescription: (p, n, bn, disc) =>
       `${p} personen · ${n} nachten · Boeking ${bn}${disc ? ` · Korting ${disc}` : ""} · Volledige betaling, want aankomst is binnen 14 dagen.`,
@@ -711,22 +711,32 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
                     breakdown.nights,
                     bookingNumber,
                     discountSnippet,
-                    formatEuro(effectiveRemainder, locale)
+                    // Angezeigter Betrag ist die tatsaechliche T-14-Abbuchung:
+                    // Miet-Restzahlung + Kaution (siehe Kommentar unten).
+                    formatEuro(effectiveRemainder + breakdown.depositCents, locale)
                   ),
             },
           },
         },
-        {
-          quantity: 1,
-          price_data: {
-            currency: "eur",
-            unit_amount: breakdown.depositCents,
-            product_data: {
-              name: CL.kautionName,
-              description: CL.kautionDescription,
-            },
-          },
-        },
+        // Kaution: nur JETZT einziehen, wenn es keine spaetere Restzahlung
+        // gibt (Anreise < 14 Tage → Komplettzahlung sofort). Im Normalfall
+        // wird die Kaution zusammen mit der Restzahlung bei T-14 eingezogen
+        // (Vorstandsbeschluss) — siehe daily-mail-jobs T-14-Cron.
+        ...(fullPaymentRequired
+          ? [
+              {
+                quantity: 1,
+                price_data: {
+                  currency: "eur" as const,
+                  unit_amount: breakdown.depositCents,
+                  product_data: {
+                    name: CL.kautionName,
+                    description: CL.kautionDescription,
+                  },
+                },
+              },
+            ]
+          : []),
       ],
       // Stripe-Customer und Payment-Method speichern fuer spaetere
       // Off-Session-Restzahlung (Cron T-7 vor Anreise).
@@ -782,9 +792,9 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
     .set({ stripeSessionId: checkoutSession.id, updatedAt: new Date() })
     .where(eq(bookings.id, bookingId));
 
-  // Open payment rows: (Voll- bzw. An-)Zahlung + Kaution jetzt fällig.
-  // Restzahlung-Zeile nur, wenn es überhaupt eine gibt (entfällt bei
-  // Komplettzahlung < 14 Tage vor Anreise).
+  // Open payment rows: (Voll- bzw. An-)Zahlung jetzt fällig. Kaution nur bei
+  // Komplettzahlung (kein spaeterer T-14-Termin) schon jetzt faellig — im
+  // Normalfall wird sie zusammen mit der Restzahlung bei T-14 eingezogen.
   await db.insert(payments).values([
     {
       bookingId,
@@ -793,13 +803,17 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
       amountCents: effectivePrepayment,
       method: "Stripe Checkout",
     },
-    {
-      bookingId,
-      kind: "kaution",
-      status: "offen",
-      amountCents: breakdown.depositCents,
-      method: "Stripe Checkout",
-    },
+    ...(fullPaymentRequired
+      ? [
+          {
+            bookingId,
+            kind: "kaution" as const,
+            status: "offen" as const,
+            amountCents: breakdown.depositCents,
+            method: "Stripe Checkout",
+          },
+        ]
+      : []),
     ...(effectiveRemainder > 0
       ? [
           {

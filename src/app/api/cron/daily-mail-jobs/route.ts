@@ -226,25 +226,44 @@ export async function GET(req: Request) {
     }
   }
 
-  // ---------- T-14: Off-Session-Charge der Restzahlung ----------
+  // ---------- T-14: Off-Session-Charge der Restzahlung (+ Kaution) ----------
+  // Kaution wird nicht mehr bei Buchung eingezogen, sondern hier zusammen mit
+  // der Restzahlung faellig (Vorstandsbeschluss). Kurzfristige Buchungen
+  // (< 14 Tage vor Anreise) zahlen die Kaution schon bei Buchung komplett mit
+  // und laufen wegen der Anreise-Distanz nie durch diesen Cron-Block.
   const t14 = isoDayOffset(14);
   const t14Bookings = await db
     .select()
     .from(bookings)
     .where(and(eq(bookings.arrival, t14), eq(bookings.status, "bezahlt")));
   for (const b of t14Bookings) {
-    const remainderCents = Math.max(
-      0,
-      b.subtotalCents - Math.min(b.paidCents, b.subtotalCents)
-    );
-    if (remainderCents > 0 && b.stripePaymentIntentId) {
-      const restPmts = await db
-        .select()
-        .from(payments)
-        .where(and(eq(payments.bookingId, b.id), eq(payments.kind, "restzahlung")));
-      const alreadyPaid = restPmts.some((p) => p.status === "erhalten");
-      const alreadyAttempted = restPmts.some((p) => p.method === "Stripe Off-Session attempt");
-      if (alreadyPaid || alreadyAttempted) continue;
+    const restPmts = await db
+      .select()
+      .from(payments)
+      .where(and(eq(payments.bookingId, b.id), eq(payments.kind, "restzahlung")));
+    const alreadyPaid = restPmts.some((p) => p.status === "erhalten");
+    const alreadyAttempted = restPmts.some((p) => p.method === "Stripe Off-Session attempt");
+    if (alreadyPaid || alreadyAttempted) continue;
+
+    // Die bei Buchung angelegte "offene" Restzahlungs-Zeile traegt den
+    // korrekten reinen Mietrest (ohne Kaution) — die nutzen statt neu zu
+    // berechnen. subtotalCents - paidCents waere falsch, sobald paidCents
+    // schon eine (kurzfristig sofort bezahlte) Kaution enthaelt.
+    const originalRestRow = restPmts.find((p) => p.status === "offen");
+    const rentRemainderCents = originalRestRow
+      ? originalRestRow.amountCents
+      : Math.max(0, b.subtotalCents - Math.min(b.paidCents, b.subtotalCents));
+
+    const kautionPmts = await db
+      .select()
+      .from(payments)
+      .where(and(eq(payments.bookingId, b.id), eq(payments.kind, "kaution")));
+    const kautionAlreadyPaid = kautionPmts.some((p) => p.status === "erhalten");
+    const kautionCents = kautionAlreadyPaid ? 0 : b.depositCents;
+
+    const chargeCents = rentRemainderCents + kautionCents;
+
+    if (chargeCents > 0 && b.stripePaymentIntentId) {
       try {
         const originalPi = await stripe.paymentIntents.retrieve(b.stripePaymentIntentId);
         const stripeCustomer = originalPi.customer as string | null;
@@ -254,35 +273,66 @@ export async function GET(req: Request) {
           continue;
         }
         const newPi = await stripe.paymentIntents.create({
-          amount: remainderCents,
+          amount: chargeCents,
           currency: "eur",
           customer: stripeCustomer,
           payment_method: stripePaymentMethod,
           off_session: true,
           confirm: true,
           metadata: { bookingId: b.id, bookingNumber: b.bookingNumber, kind: "restzahlung" },
-          description: `Restzahlung Wiesenhütte ${b.bookingNumber}`,
-        });
-        await db.insert(payments).values({
-          bookingId: b.id,
-          kind: "restzahlung",
-          status: newPi.status === "succeeded" ? "erhalten" : "offen",
-          amountCents: remainderCents,
-          method: newPi.status === "succeeded" ? "Stripe Off-Session" : "Stripe Off-Session attempt",
-          stripePaymentIntentId: newPi.id,
-          receivedAt: newPi.status === "succeeded" ? new Date() : null,
+          description: `Restzahlung${kautionCents > 0 ? " inkl. Kaution" : ""} Wiesenhütte ${b.bookingNumber}`,
         });
         if (newPi.status === "succeeded") {
+          if (originalRestRow) {
+            await db
+              .update(payments)
+              .set({
+                status: "erhalten",
+                method: "Stripe Off-Session",
+                stripePaymentIntentId: newPi.id,
+                receivedAt: new Date(),
+              })
+              .where(eq(payments.id, originalRestRow.id));
+          } else {
+            await db.insert(payments).values({
+              bookingId: b.id,
+              kind: "restzahlung",
+              status: "erhalten",
+              amountCents: rentRemainderCents,
+              method: "Stripe Off-Session",
+              stripePaymentIntentId: newPi.id,
+              receivedAt: new Date(),
+            });
+          }
+          if (kautionCents > 0) {
+            await db.insert(payments).values({
+              bookingId: b.id,
+              kind: "kaution",
+              status: "erhalten",
+              amountCents: kautionCents,
+              method: "Stripe Off-Session",
+              stripePaymentIntentId: newPi.id,
+              receivedAt: new Date(),
+            });
+          }
           await db.update(bookings)
-            .set({ paidCents: b.paidCents + remainderCents, updatedAt: new Date() })
+            .set({ paidCents: b.paidCents + chargeCents, updatedAt: new Date() })
             .where(eq(bookings.id, b.id));
           stats.autoChargeSucceeded++;
         } else {
+          await db.insert(payments).values({
+            bookingId: b.id,
+            kind: "restzahlung",
+            status: "offen",
+            amountCents: chargeCents,
+            method: "Stripe Off-Session attempt",
+            stripePaymentIntentId: newPi.id,
+          });
           stats.autoChargeFailed++;
         }
         await db.insert(activityLog).values({
           who: "Cron",
-          what: `Restzahlungs-Off-Session-Charge (T-14): ${(remainderCents / 100).toFixed(2)} € — ${newPi.status}`,
+          what: `Restzahlungs-Off-Session-Charge (T-14): ${(chargeCents / 100).toFixed(2)} € (davon ${(kautionCents / 100).toFixed(2)} € Kaution) — ${newPi.status}`,
           bookingId: b.id,
         });
       } catch (err) {
@@ -292,7 +342,7 @@ export async function GET(req: Request) {
           bookingId: b.id,
           kind: "restzahlung",
           status: "fehlgeschlagen",
-          amountCents: remainderCents,
+          amountCents: chargeCents,
           method: "Stripe Off-Session attempt",
           stripePaymentIntentId: null,
         });

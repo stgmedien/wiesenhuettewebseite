@@ -23,6 +23,10 @@ type Props = {
   totalCents: number;
   depositCents: number;
   paidCents: number;
+  /** true bei kurzfristigen Buchungen (< 14 Tage vor Anreise) — dort ist die
+   * Kaution bereits mit bezahlt; sonst wird sie erst bei der Restzahlung
+   * (14 Tage vor Anreise) eingezogen. */
+  kautionDueNow: boolean;
   baseUrl: string;
 };
 
@@ -78,6 +82,7 @@ export default function BookingConfirmedEmail({
   totalCents,
   depositCents,
   paidCents,
+  kautionDueNow,
   baseUrl,
 }: Props) {
   return (
@@ -130,6 +135,9 @@ export default function BookingConfirmedEmail({
               <Column>
                 <Text style={label}>Kaution</Text>
                 <Text style={value}>{formatEuro(depositCents)}</Text>
+                <Text style={{ ...muted, fontSize: "12px", margin: "2px 0 0 0" }}>
+                  {kautionDueNow ? "heute bezahlt" : "fällig mit Restzahlung"}
+                </Text>
               </Column>
               <Column>
                 <Text style={label}>Bereits bezahlt</Text>

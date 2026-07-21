@@ -156,6 +156,12 @@ export async function confirmDepositPayment(params: ConfirmDepositParams): Promi
   if (!customer) return;
   const guestName = `${customer.firstName} ${customer.lastName}`.trim();
 
+  const pmtRows = await db
+    .select({ kind: payments.kind, amountCents: payments.amountCents })
+    .from(payments)
+    .where(eq(payments.bookingId, bookingId));
+  const kautionDueNow = pmtRows.some((p) => p.kind === "kaution");
+
   if (!(await wasMailSent(bookingId, "booking-confirmed"))) {
     try {
       await sendMail({
@@ -173,6 +179,7 @@ export async function confirmDepositPayment(params: ConfirmDepositParams): Promi
           totalCents: booking.subtotalCents,
           depositCents: booking.depositCents,
           paidCents: amountCents,
+          kautionDueNow,
           baseUrl,
         }),
       });
@@ -184,10 +191,6 @@ export async function confirmDepositPayment(params: ConfirmDepositParams): Promi
   if (!(await wasMailSent(bookingId, "mietvertrag"))) {
     try {
       const subtotal = booking.subtotalCents;
-      const pmtRows = await db
-        .select({ kind: payments.kind, amountCents: payments.amountCents })
-        .from(payments)
-        .where(eq(payments.bookingId, bookingId));
       const firstPayment = pmtRows.find((p) => p.kind === "anzahlung" || p.kind === "vollzahlung");
       const restRow = pmtRows.find((p) => p.kind === "restzahlung");
       const prepayment = firstPayment?.amountCents ?? Math.round(subtotal * 0.5);
@@ -231,6 +234,7 @@ export async function confirmDepositPayment(params: ConfirmDepositParams): Promi
             prepaymentCents: prepayment,
             remainderCents: remainder,
           },
+          kautionDueNow,
           signedAt: new Date().toISOString(),
           contractDate: new Date().toLocaleDateString("de-DE", {
             day: "2-digit",

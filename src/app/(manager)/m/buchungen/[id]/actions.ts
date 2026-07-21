@@ -80,6 +80,10 @@ export async function setBookingStatus(
         const baseUrl =
           process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.wiesenhuette.de";
         if (status === "bestaetigt") {
+          const kautionRows = await db
+            .select({ kind: payments.kind })
+            .from(payments)
+            .where(eq(payments.bookingId, bookingId));
           await sendMail({
             to: c.email,
             subject: `Eure Buchung ${b.bookingNumber} ist bestätigt`,
@@ -95,6 +99,7 @@ export async function setBookingStatus(
               totalCents: b.subtotalCents,
               depositCents: b.depositCents,
               paidCents: b.paidCents,
+              kautionDueNow: kautionRows.some((p) => p.kind === "kaution"),
               baseUrl,
             }),
           });

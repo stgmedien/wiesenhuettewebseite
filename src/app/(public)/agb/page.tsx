@@ -66,7 +66,7 @@ export default async function AGB() {
             <li>Übernachtungspreis je Person und Nacht (gestaffelt nach Personentyp, inkl. Energie-/Verbrauchskosten)</li>
             <li>Endreinigung (Pflicht, einmalig)</li>
             <li>Ggf. Aufschlag Allein-/Exklusivnutzung</li>
-            <li>Kaution (separat, bei Anreise zu hinterlegen, Erstattung 14 Tage nach mangelfreier Abreise)</li>
+            <li>Kaution (separat, wird zusammen mit der Restzahlung 14 Tage vor Anreise per Stripe eingezogen — bei kurzfristigen Buchungen unter 14 Tagen bereits sofort bei Buchung; Erstattung 14 Tage nach mangelfreier Abreise)</li>
           </ul>
           <p>
             Die jeweils gültigen Tarife werden im Buchungsvorgang transparent angezeigt
@@ -80,8 +80,10 @@ export default async function AGB() {
           </p>
           <p>
             Die Bezahlung erfolgt in zwei Raten: <strong>50 % Anzahlung</strong> bei Buchung,{" "}
-            <strong>50 % Restzahlung</strong> spätestens 14 Tage vor Anreise (Auto-Einzug per Stripe, separate Zahlungsaufforderung kommt vorher per Mail). Bei Anzahlung wird
-            zudem die Kaution mit eingezogen. Zahlungsabwicklung über Stripe (Kreditkarte / SEPA).
+            <strong>50 % Restzahlung</strong> spätestens 14 Tage vor Anreise (Auto-Einzug per Stripe, separate Zahlungsaufforderung kommt vorher per Mail). Die Kaution wird
+            zusammen mit der Restzahlung eingezogen. Bei Buchungen weniger als 14 Tage vor Anreise ist
+            die vollständige Zahlung inklusive Kaution sofort bei Buchung fällig. Zahlungsabwicklung über
+            Stripe (Kreditkarte / SEPA).
           </p>
         </Block>
 
