@@ -6,6 +6,7 @@ import { notes, customers, activityLog } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { resendBookingConfirmationMails } from "@/lib/booking-payment-confirmation";
 
 async function requireManager() {
   const session = await auth();
@@ -156,4 +157,34 @@ export async function updateCustomerContact(
 
   revalidatePath(`/m/buchungen/${d.bookingId}`);
   return { ok: true };
+}
+
+/**
+ * Verschickt Buchungsbestaetigung + Mietvertrag erneut mit den aktuellen
+ * Kunden-/Buchungsdaten — z. B. nachdem eine falsche E-Mail-Adresse korrigiert
+ * wurde und die urspruenglichen Mails deshalb gebounced sind.
+ */
+export async function resendGuestMails(
+  bookingId: string
+): Promise<{ ok: true; sent: string[] } | { ok: false; error: string }> {
+  const me = await requireManager();
+  const parsedId = z.string().uuid().safeParse(bookingId);
+  if (!parsedId.success) return { ok: false, error: "Ungültige Buchung." };
+
+  const { sent, errors } = await resendBookingConfirmationMails(parsedId.data);
+
+  await db.insert(activityLog).values({
+    who: me,
+    what: `Mails erneut gesendet: ${sent.length ? sent.join(", ") : "keine"}${
+      errors.length ? " — Fehler: " + errors.join("; ") : ""
+    }`,
+    bookingId: parsedId.data,
+  });
+
+  revalidatePath(`/m/buchungen/${parsedId.data}`);
+
+  if (sent.length === 0) {
+    return { ok: false, error: errors.join("; ") || "Unbekannter Fehler." };
+  }
+  return { ok: true, sent };
 }
