@@ -10,11 +10,7 @@ import {
   feedbackEntries,
   discountCodes,
 } from "@/lib/db/schema";
-import { and, eq, gte, lte, sql, isNotNull } from "drizzle-orm";
-import { rideInterests, rideMatches } from "@/lib/db/schema-rad";
-import { upcomingWeekends, formatSlotLabel, RAD_MATCH_THRESHOLD } from "@/lib/rad";
-import RadMatchEmail from "@/lib/mail/templates/rad-match";
-import RadMatchInternalEmail from "@/lib/mail/templates/rad-match-internal";
+import { and, eq, gte, lte, sql } from "drizzle-orm";
 import { stripe } from "@/lib/stripe";
 import { sendMail } from "@/lib/mail/send";
 import PaymentReminderEmail from "@/lib/mail/templates/payment-reminder";
@@ -126,7 +122,6 @@ export async function GET(req: Request) {
     schoolDepositDueSent: 0,
     schoolWarningSent: 0,
     schoolCancelled: 0,
-    radMatches: 0,
     manualRestSent: 0,
     avsReminderSent: 0,
     mailFailureDigestSent: 0,
@@ -873,91 +868,6 @@ export async function GET(req: Request) {
     }
   } catch (err) {
     console.error("[cron] birthday query failed:", err);
-  }
-
-  // ---------- Radtouren-Matching: Slots mit ≥ 8 bestätigten Interessierten ----------
-  try {
-    const slots = upcomingWeekends();
-    const interests = await db
-      .select()
-      .from(rideInterests)
-      .where(isNotNull(rideInterests.verifiedAt));
-    const matchedRows = await db.select({ slot: rideMatches.slot }).from(rideMatches);
-    const alreadyMatched = new Set(matchedRows.map((r) => r.slot));
-
-    for (const slot of slots) {
-      if (alreadyMatched.has(slot.id)) continue;
-      const group = interests.filter((i) => (i.slots ?? []).includes(slot.id));
-      // Eine Person zählt pro Slot nur einmal (Dedupe über E-Mail).
-      const byEmail = new Map<string, (typeof group)[number]>();
-      for (const g of group) byEmail.set(g.email, g);
-      if (byEmail.size < RAD_MATCH_THRESHOLD) continue;
-
-      const members = [...byEmail.values()];
-      const emails = members.map((m) => m.email);
-      const lunchCount = members.filter((m) => m.lunch).length;
-      const label = formatSlotLabel(slot, "de");
-
-      // Slot ATOMAR claimen, BEVOR Mails rausgehen. Der PK-Konflikt (slot)
-      // verhindert, dass ein Parallellauf (Vercel-Cron + manueller Aufruf)
-      // oder ein Re-Run dieselben Match-Mails ein zweites Mal verschickt.
-      const claimed = await db
-        .insert(rideMatches)
-        .values({ slot: slot.id, participantCount: emails.length, lunchCount })
-        .onConflictDoNothing()
-        .returning({ slot: rideMatches.slot });
-      if (claimed.length === 0) continue; // bereits von anderem Lauf vergeben
-
-      for (const m of members) {
-        try {
-          await sendMail({
-            to: m.email,
-            subject: `🚴 Euer Rad-Wochenende ${label} — Ihr seid ${emails.length}!`,
-            template: "rad-match",
-            react: RadMatchEmail({
-              name: m.name,
-              slotLabel: label,
-              participantCount: emails.length,
-              participantEmails: emails,
-              lunchCount,
-              bookUrl: `${BASE_URL}/buchen`,
-            }),
-          });
-        } catch (err) {
-          console.error(`[cron] rad-match mail failed for ${m.email}:`, err);
-        }
-      }
-
-      // Interne Info — u. a. damit die Bäckerei Gerke (02758 280) rechtzeitig
-      // über das Lunchpaket informiert werden kann. Eigenes internes Template.
-      const internal = process.env.MAIL_INTERNAL_TO;
-      if (internal) {
-        try {
-          await sendMail({
-            to: internal,
-            subject: `Radtouren-Match: ${label} — ${emails.length} Personen (${lunchCount}× Lunchpaket)`,
-            template: "rad-match-internal",
-            react: RadMatchInternalEmail({
-              slotLabel: label,
-              participantCount: emails.length,
-              participantEmails: emails,
-              lunchCount,
-              managerUrl: `${BASE_URL}/m/radtouren`,
-            }),
-          });
-        } catch (err) {
-          console.error("[cron] rad-match internal mail failed:", err);
-        }
-      }
-
-      await db.insert(activityLog).values({
-        who: "System (Radtouren-Cron)",
-        what: `Radtouren-Match für ${label}: ${emails.length} Personen, ${lunchCount}× Lunchpaket`,
-      });
-      stats.radMatches++;
-    }
-  } catch (err) {
-    console.error("[cron] rad-matching failed:", err);
   }
 
   return NextResponse.json({ ok: true, date: isoDayOffset(0), stats });

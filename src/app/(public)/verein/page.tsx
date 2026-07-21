@@ -71,12 +71,6 @@ type Copy = {
     walkH3: string;
     walkBody: string;
   };
-  rad: {
-    eyebrow: string;
-    h2: string;
-    body: string;
-    cta: string;
-  };
   profile: {
     eyebrow: string;
     h2: string;
@@ -146,13 +140,6 @@ const COPY: Record<Locale, Copy> = {
       walkH3: "Grünkohlwanderung",
       walkBody:
         "Die traditionelle Winterwanderung mit gemeinsamem Essen: Jahr für Jahr geht es zum Gasthof Hesse nach Versmold — munteres Beisammensein, gute Stimmung und beim Grünkohl gute Gespräche.",
-    },
-    rad: {
-      eyebrow: "Radtouren",
-      h2: "Gemeinsam aufs Rad.",
-      body:
-        "Das Hochsauerland rund um Langewiese gehört zu den schönsten Radrevieren NRWs — Hügel, Wälder, stille Straßen. Die Wiesenhütte ist das ideale Basislager. Über unser Matching-System findet Ihr Mitfahrende für gemeinsame Wochenenden: Wunsch-Termin eintragen, auf acht Mitfahrende warten, loslegen. Auf Wunsch mit Lunchpaket der Bäckerei Gerke.",
-      cta: "Radtouren-Matching →",
     },
     profile: {
       eyebrow: "Vereinsprofil",
@@ -239,13 +226,6 @@ const COPY: Record<Locale, Copy> = {
       walkBody:
         "The traditional winter hike with a shared meal: year after year the route leads to Gasthof Hesse in Versmold — great company, good spirits and good conversations over dinner.",
     },
-    rad: {
-      eyebrow: "Bike tours",
-      h2: "Ride together.",
-      body:
-        "The Hochsauerland around Langewiese is one of NRW's finest cycling regions — hills, forests, quiet roads. The Wiesenhütte is the perfect base camp. Our matching system connects you with fellow riders for joint weekends: enter your preferred dates, wait for eight participants, and off you go.",
-      cta: "Bike-tour matching →",
-    },
     profile: {
       eyebrow: "Club profile",
       h2: "Nature. Movement. Community.",
@@ -328,13 +308,6 @@ const COPY: Record<Locale, Copy> = {
       walkH3: "Grünkohl-wandeling",
       walkBody:
         "De traditionele winterwandeling met gezamenlijke maaltijd: jaar na jaar gaat het naar Gasthof Hesse in Versmold — gezellig samenzijn, goede sfeer en goede gesprekken aan tafel.",
-    },
-    rad: {
-      eyebrow: "Fietstochten",
-      h2: "Samen op de fiets.",
-      body:
-        "Het Hochsauerland rond Langewiese is een van de mooiste fietsgebieden van NRW — heuvels, bossen, stille wegen. De Wiesenhütte is het ideale basiskamp. Via ons matching-systeem vind je mederiijders voor gezamenlijke weekenden: gewenste datum invoeren, op acht deelnemers wachten, en rijden maar.",
-      cta: "Fietstochtmatching →",
     },
     profile: {
       eyebrow: "Verenigingsprofiel",
@@ -560,29 +533,6 @@ export default async function VereinPage() {
                 <h3 className="text-[20px] mt-0 mb-2">{c.events.adventH3}</h3>
                 <p className="text-[var(--color-wh-fg-muted)] m-0">{c.events.adventBody}</p>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* RADTOUREN TEASER */}
-      <section className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-20">
-        <div className="max-w-[1080px] mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-8 items-center">
-            <div>
-              <div className="eyebrow text-[var(--color-wh-green)]">{c.rad.eyebrow}</div>
-              <h2 className="text-[32px] sm:text-[40px] mt-3 mb-4">{c.rad.h2}</h2>
-              <p className="text-[17px] leading-relaxed text-[var(--color-wh-fg-muted)] max-w-2xl m-0">
-                {c.rad.body}
-              </p>
-            </div>
-            <div className="md:shrink-0">
-              <Link
-                href="/radtouren"
-                className="inline-flex items-center gap-2 bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] px-6 py-3 rounded-full font-semibold text-[15px] no-underline hover:opacity-90 whitespace-nowrap"
-              >
-                {c.rad.cta}
-              </Link>
             </div>
           </div>
         </div>

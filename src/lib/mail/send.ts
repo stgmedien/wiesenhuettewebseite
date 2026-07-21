@@ -57,7 +57,6 @@ const ARCHIVE_EXCLUDED_TEMPLATES = new Set([
   "member-welcome",
   "email-verification",
   "email_verification",
-  "rad-verify",
 ]);
 
 export const sendMail = async (args: SendMailArgs): Promise<void> => {
