@@ -44,9 +44,13 @@ export const SCHOOL_DEPOSIT_WINDOW_DAYS =
 const BASE_URL =
   process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.wiesenhuette.de";
 
-/** 50 %-Anzahlung (gerundet) aus dem Subtotal. */
+/**
+ * 10 %-Anzahlung (gerundet) aus dem Subtotal — Schulgruppen zahlen 10 %,
+ * nicht die 50 % des Standardflows (siehe prepayPercent in buchen/actions.ts).
+ * War hier bis zur Behebung faelschlich auf 50 % hartcodiert.
+ */
 export const schoolPrepaymentCents = (subtotalCents: number): number =>
-  Math.round((subtotalCents * 50) / 100);
+  Math.round((subtotalCents * 10) / 100);
 
 /**
  * Stripe-expires_at fuer den Anzahlungs-Link: bis zum Auto-Storno-Tag (A-16),
@@ -72,9 +76,10 @@ export type DepositCheckout = {
 /**
  * Liefert einen gueltigen Anzahlungs-Checkout-Link fuer eine Schul-Buchung —
  * wiederverwendet eine bereits offene Session (fuer die Warn-Mails) oder
- * erzeugt eine neue. Spiegelt die Konfiguration des normalen Initial-Checkouts
- * (Anzahlung + Kaution, setup_future_usage fuer die spaetere Restzahlung,
- * metadata.kind="anzahlung" → Webhook setzt Status "bezahlt").
+ * erzeugt eine neue. Nur die 10 %-Anzahlung wird jetzt eingezogen (Kaution
+ * folgt bei T-14 zusammen mit der Restzahlung — Vorstandsbeschluss),
+ * setup_future_usage speichert die Karte fuer beides.
+ * metadata.kind="anzahlung" → Webhook setzt Status "bezahlt".
  *
  * Idempotent: legt Payment-Zeilen nur an, wenn noch keine existieren.
  */
@@ -114,19 +119,10 @@ export async function getOrCreateDepositCheckout(
             currency: "eur",
             unit_amount: prepaymentCents,
             product_data: {
-              name: `Anzahlung 50 % — Wiesenhütte ${booking.arrival} bis ${booking.departure}`,
-              description: `Buchung ${booking.bookingNumber} · ${booking.persons} Personen · ${booking.nights} Nächte. Restzahlung ${(remainderCents / 100).toFixed(2)} € wird 14 Tage vor Anreise automatisch eingezogen.`,
-            },
-          },
-        },
-        {
-          quantity: 1,
-          price_data: {
-            currency: "eur",
-            unit_amount: booking.depositCents,
-            product_data: {
-              name: "Kaution",
-              description: "Wird innerhalb 14 Tage nach mangelfreier Abreise zurückerstattet.",
+              name: `Anzahlung 10 % — Wiesenhütte ${booking.arrival} bis ${booking.departure}`,
+              // Kaution wird NICHT hier eingezogen, sondern zusammen mit der
+              // Restzahlung bei T-14 (Vorstandsbeschluss) — siehe daily-mail-jobs.
+              description: `Buchung ${booking.bookingNumber} · ${booking.persons} Personen · ${booking.nights} Nächte. Restzahlung ${((remainderCents + booking.depositCents) / 100).toFixed(2)} € (inkl. ${(booking.depositCents / 100).toFixed(2)} € Kaution) wird 14 Tage vor Anreise automatisch eingezogen.`,
             },
           },
         },
@@ -166,7 +162,6 @@ export async function getOrCreateDepositCheckout(
   if (existingPayments.length === 0) {
     await db.insert(payments).values([
       { bookingId: booking.id, kind: "anzahlung", status: "offen", amountCents: prepaymentCents, method: "Stripe Checkout (Schul-Aufschub)" },
-      { bookingId: booking.id, kind: "kaution", status: "offen", amountCents: booking.depositCents, method: "Stripe Checkout (Schul-Aufschub)" },
       { bookingId: booking.id, kind: "restzahlung", status: "offen", amountCents: remainderCents, method: "Stripe Off-Session (auto T-14)" },
     ]);
   }

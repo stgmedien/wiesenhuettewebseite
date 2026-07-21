@@ -48,6 +48,9 @@ type Props = {
     prepaymentCents: number;
     remainderCents: number;
   };
+  /** true bei kurzfristigen Buchungen (< 14 Tage vor Anreise) — dort wird die
+   * Kaution sofort mit eingezogen; sonst erst bei der Restzahlung (T-14). */
+  kautionDueNow: boolean;
   signedAt: string; // ISO date — Vertragsabschluss
   contractDate: string; // formatted German
 };
@@ -110,6 +113,7 @@ export default function MietvertragEmail({
   customer,
   persons,
   pricing,
+  kautionDueNow,
   signedAt,
   contractDate,
 }: Props) {
@@ -231,23 +235,35 @@ export default function MietvertragEmail({
 
           <Heading as="h3" style={h2}>§ 5 Zahlungen & Kaution</Heading>
           <Text style={text}>
-            Die Mietzahlung wird in zwei Raten eingezogen: <strong>50 % Anzahlung</strong> bei
-            Buchung, <strong>50 % Restzahlung</strong> spätestens 14 Tage vor Anreise. Die Kaution
-            wird mit der Anzahlung mitvoraussetzt und nach mangelfreier Abreise innerhalb von 14
-            Tagen erstattet.
+            Die Mietzahlung wird in zwei Raten eingezogen: eine <strong>Anzahlung</strong> bei
+            Buchung sowie die <strong>Restzahlung</strong> spätestens 14 Tage vor Anreise
+            (Auto-Einzug per Stripe). {kautionDueNow
+              ? "Die Kaution ist bereits mit der Anzahlung fällig"
+              : "Die Kaution wird zusammen mit der Restzahlung eingezogen"}{" "}
+            und nach mangelfreier Abreise innerhalb von 14 Tagen erstattet.
           </Text>
           <Section style={{ backgroundColor: "#F7F7F2", padding: "16px", borderRadius: "10px" }}>
             <Row>
               <Column><Text style={tableLabel}>Anzahlung (heute fällig)</Text></Column>
               <Column><Text style={tableValue}>{formatEuro(pricing.prepaymentCents)}</Text></Column>
             </Row>
+            {kautionDueNow && (
+              <Row>
+                <Column><Text style={tableLabel}>Kaution (heute fällig)</Text></Column>
+                <Column><Text style={tableValue}>{formatEuro(pricing.depositCents)}</Text></Column>
+              </Row>
+            )}
             <Row>
-              <Column><Text style={tableLabel}>Kaution (heute fällig)</Text></Column>
-              <Column><Text style={tableValue}>{formatEuro(pricing.depositCents)}</Text></Column>
-            </Row>
-            <Row>
-              <Column><Text style={tableLabel}>Restzahlung (vor Anreise)</Text></Column>
-              <Column><Text style={tableValue}>{formatEuro(pricing.remainderCents)}</Text></Column>
+              <Column>
+                <Text style={tableLabel}>
+                  Restzahlung (vor Anreise){!kautionDueNow && " inkl. Kaution"}
+                </Text>
+              </Column>
+              <Column>
+                <Text style={tableValue}>
+                  {formatEuro(pricing.remainderCents + (kautionDueNow ? 0 : pricing.depositCents))}
+                </Text>
+              </Column>
             </Row>
           </Section>
           <Text style={muted}>
@@ -257,18 +273,15 @@ export default function MietvertragEmail({
 
           <Heading as="h3" style={h2}>§ 6 Stornobedingungen</Heading>
           <Text style={text}>
-            Bei Rücktritt durch den Mieter werden folgende Stornogebühren auf die Buchungssumme
-            (ohne Kaution) erhoben:
+            Bei Rücktritt durch den Mieter werden folgende Stornogebühren auf den reinen
+            Übernachtungspreis erhoben. Endreinigung und Kaution werden im Stornofall nicht
+            fällig bzw. vollständig zurückerstattet:
           </Text>
           <ul style={{ margin: "0 0 8px 18px", padding: 0, color: "#111", fontFamily: "Inter, sans-serif", fontSize: "14px", lineHeight: 1.55 }}>
             <li>mehr als 30 Tage vor Anreise: 0 %</li>
-            <li>29 – 14 Tage vor Anreise: 30 %</li>
-            <li>13 – 7 Tage vor Anreise: 60 %</li>
-            <li>weniger als 7 Tage vor Anreise: 90 %</li>
+            <li>30 – 14 Tage vor Anreise: 50 %</li>
+            <li>weniger als 14 Tage vor Anreise: 100 %</li>
           </ul>
-          <Text style={muted}>
-            Die Kaution wird im Stornofall vollständig zurückerstattet.
-          </Text>
 
           <Heading as="h3" style={h2}>§ 7 Hausordnung</Heading>
           <Text style={text}>
