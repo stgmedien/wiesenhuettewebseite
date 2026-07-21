@@ -29,7 +29,6 @@ import {
   Send,
   MapPin,
   ThumbsUp,
-  Bike,
   Flame,
   type LucideIcon,
 } from "lucide-react";
@@ -57,7 +56,6 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/m/kalender", label: "Kalender", Icon: CalendarDays },
       { href: "/m/manuell", label: "Manuelle Buchung", Icon: PlusCircle },
       { href: "/m/sperrzeiten", label: "Sperrzeiten", Icon: Lock },
-      { href: "/m/radtouren", label: "Radtouren", Icon: Bike },
       { href: "/m/wapelbad", label: "Wapelbad", Icon: Flame },
     ],
   },

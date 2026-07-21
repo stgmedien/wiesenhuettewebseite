@@ -76,10 +76,6 @@ export const Footer = ({ locale }: { locale: Locale }) => (
         <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/schulprojekt">
           {t("footer.verein.schulprojekt", locale)}
         </Link>
-        {/* Radtouren bewusst hier unter „Verein" (nicht unter „Hütte") — Übersetzungsschlüssel bleibt aus Kompatibilität footer.huette.radtouren */}
-        <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/radtouren">
-          {t("footer.huette.radtouren", locale)}
-        </Link>
         <Link className="text-[var(--color-wh-snow)] no-underline hover:underline" href="/blog">
           {t("footer.verein.blog", locale)}
         </Link>

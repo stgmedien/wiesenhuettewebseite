@@ -194,7 +194,6 @@ const COPY: Record<Locale, Copy> = {
           "Von Winterberg rund 8 km — stetig bergauf, sportlich lohnend",
           "Räder stehen sicher im abschließbaren Rad- und Skikeller (Zugang von außen)",
           "Hochheide, Kahler Asten und Rothaarsteig-Panoramen direkt vor der Tür",
-          "Gemeinsame Rad-Wochenenden ab 8 Personen — über unser Radtouren-Matching",
         ],
       },
       arrival: {
@@ -368,7 +367,6 @@ const COPY: Record<Locale, Copy> = {
           "From Winterberg about 8 km — a steady, rewarding climb",
           "Bikes are stored safely in the lockable bike and ski cellar (outside access)",
           "High moor, Kahler Asten and Rothaarsteig panoramas right outside the door",
-          "Group bike weekends from 8 people — via our bike-tour matching",
         ],
       },
       arrival: {
@@ -511,7 +509,6 @@ const COPY: Record<Locale, Copy> = {
           "Vanaf Winterberg zo'n 8 km — gestaag bergop, sportief de moeite waard",
           "Fietsen staan veilig in de afsluitbare fietsen- en skikelder (toegang van buiten)",
           "Hoogveen, Kahler Asten en Rothaarsteig-panorama's voor de deur",
-          "Gezamenlijke fietsweekenden vanaf 8 personen — via onze fietstocht-matching",
         ],
       },
       arrival: {
@@ -822,14 +819,6 @@ export default async function LagePage() {
                 imgSrc="/media/photos/nature-1.jpg"
                 imgAlt="Radrevier Hochsauerland rund um Langewiese"
                 imgRight={false}
-                ctaHref="/radtouren"
-                ctaLabel={
-                  locale === "de"
-                    ? "Zum Radtouren-Matching"
-                    : locale === "nl"
-                      ? "Naar de fietstocht-matching"
-                      : "To bike-tour matching"
-                }
               />
             </ScrollReveal>
 

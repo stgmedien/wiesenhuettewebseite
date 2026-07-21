@@ -1,7 +1,7 @@
 /**
  * Wapelbad-Anmeldungen — Tabelle.
  *
- * Bewusst in einer eigenen Datei (nicht in schema.ts), analog zu schema-rad.ts.
+ * Bewusst in einer eigenen Datei (nicht in schema.ts) — nicht drizzle-kit-verwaltet.
  * Die Tabelle wird per SQL-Migration angelegt (siehe drizzle/wapelbad.sql).
  */
 import {
