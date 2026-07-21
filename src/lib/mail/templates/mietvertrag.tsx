@@ -45,11 +45,14 @@ type Props = {
     minOccupancySurchargeCents: number;
     subtotalCents: number;
     depositCents: number;
+    kurtaxePersons: number;
+    kurtaxeCents: number;
     prepaymentCents: number;
     remainderCents: number;
   };
-  /** true bei kurzfristigen Buchungen (< 14 Tage vor Anreise) — dort wird die
-   * Kaution sofort mit eingezogen; sonst erst bei der Restzahlung (T-14). */
+  /** true bei kurzfristigen Buchungen (< 14 Tage vor Anreise) — dort werden
+   * Kaution und Kurtaxe sofort mit eingezogen; sonst erst bei der
+   * Restzahlung (T-14). */
   kautionDueNow: boolean;
   signedAt: string; // ISO date — Vertragsabschluss
   contractDate: string; // formatted German
@@ -233,14 +236,15 @@ export default function MietvertragEmail({
             </Row>
           </Section>
 
-          <Heading as="h3" style={h2}>§ 5 Zahlungen & Kaution</Heading>
+          <Heading as="h3" style={h2}>§ 5 Zahlungen, Kaution & Kurtaxe</Heading>
           <Text style={text}>
             Die Mietzahlung wird in zwei Raten eingezogen: eine <strong>Anzahlung</strong> bei
             Buchung sowie die <strong>Restzahlung</strong> spätestens 14 Tage vor Anreise
             (Auto-Einzug per Stripe). {kautionDueNow
-              ? "Die Kaution ist bereits mit der Anzahlung fällig"
-              : "Die Kaution wird zusammen mit der Restzahlung eingezogen"}{" "}
-            und nach mangelfreier Abreise innerhalb von 14 Tagen erstattet.
+              ? "Kaution und Kurtaxe sind bereits mit der Anzahlung fällig"
+              : "Kaution und Kurtaxe werden zusammen mit der Restzahlung eingezogen"}. Die
+            Kaution wird nach mangelfreier Abreise innerhalb von 14 Tagen erstattet; die Kurtaxe
+            führt der Verein an die Kurverwaltung Winterberg ab.
           </Text>
           <Section style={{ backgroundColor: "#F7F7F2", padding: "16px", borderRadius: "10px" }}>
             <Row>
@@ -253,23 +257,35 @@ export default function MietvertragEmail({
                 <Column><Text style={tableValue}>{formatEuro(pricing.depositCents)}</Text></Column>
               </Row>
             )}
+            {kautionDueNow && pricing.kurtaxeCents > 0 && (
+              <Row>
+                <Column><Text style={tableLabel}>Kurtaxe (heute fällig)</Text></Column>
+                <Column><Text style={tableValue}>{formatEuro(pricing.kurtaxeCents)}</Text></Column>
+              </Row>
+            )}
             <Row>
               <Column>
                 <Text style={tableLabel}>
-                  Restzahlung (vor Anreise){!kautionDueNow && " inkl. Kaution"}
+                  Restzahlung (vor Anreise){!kautionDueNow && " inkl. Kaution + Kurtaxe"}
                 </Text>
               </Column>
               <Column>
                 <Text style={tableValue}>
-                  {formatEuro(pricing.remainderCents + (kautionDueNow ? 0 : pricing.depositCents))}
+                  {formatEuro(
+                    pricing.remainderCents +
+                      (kautionDueNow ? 0 : pricing.depositCents + pricing.kurtaxeCents)
+                  )}
                 </Text>
               </Column>
             </Row>
           </Section>
-          <Text style={muted}>
-            Die Kurtaxe Hochsauerland ist nicht im Mietpreis enthalten und wird vom Mieter direkt
-            über das offizielle Kurtaxen-Portal des Hochsauerlandkreises angemeldet und bezahlt.
-          </Text>
+          {pricing.kurtaxeCents > 0 && (
+            <Text style={muted}>
+              Kurtaxe Hochsauerland: {pricing.kurtaxePersons} Personen (ab 16 Jahren) ×{" "}
+              {formatEuro(270)} = {formatEuro(pricing.kurtaxeCents)}. Der Verein zieht sie ein
+              und führt sie an die Kurverwaltung Winterberg ab.
+            </Text>
+          )}
 
           <Heading as="h3" style={h2}>§ 6 Stornobedingungen</Heading>
           <Text style={text}>

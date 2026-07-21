@@ -103,7 +103,7 @@ export default async function BookingDetail({ params }: Props) {
             <StatusPill
               status={b.status}
               paidCents={b.paidCents}
-              dueCents={b.subtotalCents + b.depositCents}
+              dueCents={b.subtotalCents + b.depositCents + b.kurtaxeCents}
             />
             <span className="text-[var(--color-wh-fg-muted)]">
               {formatDateLong(b.arrival)} → {formatDateLong(b.departure)} · {b.nights} Nächte
@@ -292,12 +292,6 @@ export default async function BookingDetail({ params }: Props) {
                   <Dd className="text-right">{formatEuro(b.minOccupancySurchargeCents)}</Dd>
                 </>
               )}
-              {b.kurtaxeCents > 0 && (
-                <>
-                  <Dt>Kurtaxe (Altbestand)</Dt>
-                  <Dd className="text-right">{formatEuro(b.kurtaxeCents)}</Dd>
-                </>
-              )}
             </dl>
             <div className="border-t border-[var(--color-wh-winter-grey)] mt-3 pt-3 flex justify-between font-semibold">
               <span>Zwischensumme</span>
@@ -307,17 +301,23 @@ export default async function BookingDetail({ params }: Props) {
               <span>+ Kaution</span>
               <span>{formatEuro(b.depositCents)}</span>
             </div>
+            {b.kurtaxeCents > 0 && (
+              <div className="flex justify-between text-sm text-[var(--color-wh-fg-muted)] mt-1">
+                <span>+ Kurtaxe (an Winterberg abzuführen)</span>
+                <span>{formatEuro(b.kurtaxeCents)}</span>
+              </div>
+            )}
             <div className="flex justify-between text-base mt-3 pt-3 border-t border-[var(--color-wh-winter-grey)] font-bold">
               <span>Gesamt</span>
               <span className="text-[var(--color-wh-deep-green)]">
-                {formatEuro(b.subtotalCents + b.depositCents)}
+                {formatEuro(b.subtotalCents + b.depositCents + b.kurtaxeCents)}
               </span>
             </div>
             <div className="flex justify-between text-sm mt-3">
               <span>Bezahlt</span>
               <span
                 className={
-                  b.paidCents >= b.subtotalCents + b.depositCents
+                  b.paidCents >= b.subtotalCents + b.depositCents + b.kurtaxeCents
                     ? "text-[var(--color-wh-deep-green)] font-semibold"
                     : "text-[var(--color-wh-sunset)] font-semibold"
                 }

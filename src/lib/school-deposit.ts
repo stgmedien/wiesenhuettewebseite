@@ -120,9 +120,11 @@ export async function getOrCreateDepositCheckout(
             unit_amount: prepaymentCents,
             product_data: {
               name: `Anzahlung 10 % — Wiesenhütte ${booking.arrival} bis ${booking.departure}`,
-              // Kaution wird NICHT hier eingezogen, sondern zusammen mit der
-              // Restzahlung bei T-14 (Vorstandsbeschluss) — siehe daily-mail-jobs.
-              description: `Buchung ${booking.bookingNumber} · ${booking.persons} Personen · ${booking.nights} Nächte. Restzahlung ${((remainderCents + booking.depositCents) / 100).toFixed(2)} € (inkl. ${(booking.depositCents / 100).toFixed(2)} € Kaution) wird 14 Tage vor Anreise automatisch eingezogen.`,
+              // Kaution + Kurtaxe werden NICHT hier eingezogen, sondern
+              // zusammen mit der Restzahlung bei T-14 (Kaution: Vorstands-
+              // beschluss; Kurtaxe: zieht der Verein ein, AVS kassiert selbst
+              // nichts) — siehe daily-mail-jobs.
+              description: `Buchung ${booking.bookingNumber} · ${booking.persons} Personen · ${booking.nights} Nächte. Restzahlung ${((remainderCents + booking.depositCents + booking.kurtaxeCents) / 100).toFixed(2)} € (inkl. ${(booking.depositCents / 100).toFixed(2)} € Kaution + ${(booking.kurtaxeCents / 100).toFixed(2)} € Kurtaxe) wird 14 Tage vor Anreise automatisch eingezogen.`,
             },
           },
         },

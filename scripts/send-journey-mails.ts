@@ -9,13 +9,12 @@
  *   2. magic-link         – Login-Link fürs Kundenkonto
  *   3. booking-confirmed  – Buchungsbestätigung nach Zahlung
  *   4. mietvertrag        – Mietvertrag (PDF-Ersatz im Body)
- *   5. kurtaxe-info       – Kurtaxe-Hinweis (wir melden uns separat)
- *   6. payment-reminder   – Erinnerung Restzahlung
- *   7. arrival-info       – Anreise-Infos
- *   8. feedback-request   – Feedback nach dem Aufenthalt
- *   9. booking-cancelled  – Stornierung
- *  10. deposit-hold       – Kaution einbehalten
- *  11. deposit-refunded   – Kaution zurückerstattet
+ *   5. payment-reminder   – Erinnerung Restzahlung
+ *   6. arrival-info       – Anreise-Infos
+ *   7. feedback-request   – Feedback nach dem Aufenthalt
+ *   8. booking-cancelled  – Stornierung
+ *   9. deposit-hold       – Kaution einbehalten
+ *  10. deposit-refunded   – Kaution zurückerstattet
  */
 
 import { sendMail } from "@/lib/mail/send";
@@ -23,7 +22,6 @@ import WelcomeEmail from "@/lib/mail/templates/welcome";
 import MagicLinkEmail from "@/lib/mail/templates/magic-link";
 import BookingConfirmedEmail from "@/lib/mail/templates/booking-confirmed";
 import MietvertragEmail from "@/lib/mail/templates/mietvertrag";
-import KurtaxeInfoEmail from "@/lib/mail/templates/kurtaxe-info";
 import PaymentReminderEmail from "@/lib/mail/templates/payment-reminder";
 import ArrivalInfoEmail from "@/lib/mail/templates/arrival-info";
 import FeedbackRequestEmail from "@/lib/mail/templates/feedback-request";
@@ -76,6 +74,7 @@ const jobs: { name: string; subject: string; react: React.ReactElement }[] = [
       persons: 18,
       totalCents: 115000,
       depositCents: 30000,
+      kurtaxeCents: 14 * 3 * 270,
       paidCents: 57500,
       kautionDueNow: false,
       baseUrl: BASE,
@@ -99,22 +98,14 @@ const jobs: { name: string; subject: string; react: React.ReactElement }[] = [
         minOccupancySurchargeCents: 0,
         subtotalCents: 115000,
         depositCents: 30000,
+        kurtaxePersons: 14,
+        kurtaxeCents: 14 * 3 * 270,
         prepaymentCents: 57500,
         remainderCents: 57500,
       },
       kautionDueNow: false,
       signedAt: new Date().toISOString(),
       contractDate: "16. Mai 2026",
-    }),
-  },
-  {
-    name: "kurtaxe-info",
-    subject: `${P} Kurtaxe-Hinweis WH-TEST-0001`,
-    react: KurtaxeInfoEmail({
-      guestName: "Max Mustermann",
-      bookingNumber: "WH-TEST-0001",
-      arrival: "20.02.2026",
-      departure: "23.02.2026",
     }),
   },
   {

@@ -42,6 +42,7 @@ export const paymentKindEnum = pgEnum("payment_kind", [
   "restzahlung",
   "vollzahlung",
   "kaution",
+  "kurtaxe",
   "rueckerstattung",
 ]);
 

@@ -167,6 +167,14 @@ export default async function QuittungPage({ params }: Props) {
                 {formatEuro(booking.depositCents)}
               </td>
             </tr>
+            {booking.kurtaxeCents > 0 && (
+              <tr className="text-[#555]">
+                <td className="py-2 text-xs">Kurtaxe Hochsauerland (separat, an Winterberg abgeführt)</td>
+                <td className="py-2 text-right font-mono text-xs">
+                  {formatEuro(booking.kurtaxeCents)}
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
 
@@ -236,13 +244,13 @@ export default async function QuittungPage({ params }: Props) {
         {/* Hinweise */}
         <section className="text-xs text-[#555] border-t border-[#ddd] pt-4">
           <p className="mb-2">
-            <strong>Hinweis Kurtaxe:</strong> Die Kurtaxe Hochsauerland (Langewiese: 2,20 € pro Person und Nacht) wird seit Mai 2026 nicht
-            mehr über die Wiesenhütte abgerechnet. Du erhältst nach Buchung eine separate E-Mail
-            mit dem Link zum offiziellen Kurtaxen-Portal.
+            <strong>Hinweis Kurtaxe:</strong> Die Kurtaxe Hochsauerland (Langewiese: 2,70 € pro
+            Person ab 16 Jahren und Nacht) wird von der Wiesenhütte zusammen mit der Restzahlung
+            eingezogen und an die Kurverwaltung Winterberg abgeführt.
           </p>
           <p className="mb-2">
-            <strong>Stornierungs­bedingungen:</strong> &gt; 30 Tage 0% / 29–14 Tage 30% / 13–7
-            Tage 60% / &lt; 7 Tage 90% (auf Zwischensumme).
+            <strong>Stornierungs­bedingungen:</strong> &gt; 30 Tage 0% / 30–14 Tage 50% / &lt; 14
+            Tage 100% (auf den reinen Übernachtungspreis).
           </p>
           <p>
             <strong>Aufbewahrung:</strong> Diese Quittung dient als steuerlicher Beleg. Bitte

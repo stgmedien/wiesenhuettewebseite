@@ -58,36 +58,44 @@ const CHECKOUT_LINES: Record<Locale, {
   ) => string;
   kautionName: string;
   kautionDescription: string;
+  kurtaxeName: string;
+  kurtaxeDescription: (persons: number, nights: number) => string;
 }> = {
   de: {
     depositName: (a, d) => `Anzahlung 50 % — Wiesenhütte ${a} bis ${d}`,
     depositDescription: (p, n, bn, disc, rem) =>
-      `${p} Personen · ${n} Nächte · Buchung ${bn}${disc ? ` · Rabatt ${disc}` : ""} · Restzahlung ${rem} (inkl. Kaution) folgt 14 Tage vor Anreise.`,
+      `${p} Personen · ${n} Nächte · Buchung ${bn}${disc ? ` · Rabatt ${disc}` : ""} · Restzahlung ${rem} (inkl. Kaution + Kurtaxe) folgt 14 Tage vor Anreise.`,
     fullName: (a, d) => `Gesamtbetrag — Wiesenhütte ${a} bis ${d}`,
     fullDescription: (p, n, bn, disc) =>
       `${p} Personen · ${n} Nächte · Buchung ${bn}${disc ? ` · Rabatt ${disc}` : ""} · Komplettzahlung, da Anreise in weniger als 14 Tagen.`,
     kautionName: "Kaution",
     kautionDescription: "Erstattung innerhalb 14 Tagen nach mangelfreier Abreise.",
+    kurtaxeName: "Kurtaxe Hochsauerland",
+    kurtaxeDescription: (p, n) => `${p} Personen (ab 16 J.) × ${n} Nächte. Wird vom Verein an Winterberg abgeführt.`,
   },
   en: {
     depositName: (a, d) => `Deposit 50 % — Wiesenhütte ${a} to ${d}`,
     depositDescription: (p, n, bn, disc, rem) =>
-      `${p} guests · ${n} nights · Booking ${bn}${disc ? ` · Discount ${disc}` : ""} · Remaining ${rem} (incl. deposit) due 14 days before arrival.`,
+      `${p} guests · ${n} nights · Booking ${bn}${disc ? ` · Discount ${disc}` : ""} · Remaining ${rem} (incl. deposit + tourist tax) due 14 days before arrival.`,
     fullName: (a, d) => `Full amount — Wiesenhütte ${a} to ${d}`,
     fullDescription: (p, n, bn, disc) =>
       `${p} guests · ${n} nights · Booking ${bn}${disc ? ` · Discount ${disc}` : ""} · Paid in full because arrival is less than 14 days away.`,
     kautionName: "Damage deposit",
     kautionDescription: "Refunded within 14 days of a clean departure.",
+    kurtaxeName: "Hochsauerland tourist tax",
+    kurtaxeDescription: (p, n) => `${p} guests (16+) × ${n} nights. Remitted by the club to Winterberg.`,
   },
   nl: {
     depositName: (a, d) => `Aanbetaling 50 % — Wiesenhütte ${a} t/m ${d}`,
     depositDescription: (p, n, bn, disc, rem) =>
-      `${p} personen · ${n} nachten · Boeking ${bn}${disc ? ` · Korting ${disc}` : ""} · Restbedrag ${rem} (incl. borg) 14 dagen vóór aankomst.`,
+      `${p} personen · ${n} nachten · Boeking ${bn}${disc ? ` · Korting ${disc}` : ""} · Restbedrag ${rem} (incl. borg + toeristenbelasting) 14 dagen vóór aankomst.`,
     fullName: (a, d) => `Totaalbedrag — Wiesenhütte ${a} t/m ${d}`,
     fullDescription: (p, n, bn, disc) =>
       `${p} personen · ${n} nachten · Boeking ${bn}${disc ? ` · Korting ${disc}` : ""} · Volledige betaling, want aankomst is binnen 14 dagen.`,
     kautionName: "Borg",
     kautionDescription: "Terugbetaling binnen 14 dagen na schadevrije afreis.",
+    kurtaxeName: "Toeristenbelasting Hochsauerland",
+    kurtaxeDescription: (p, n) => `${p} personen (16+) × ${n} nachten. Wordt door de vereniging afgedragen aan Winterberg.`,
   },
 };
 
@@ -557,7 +565,7 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
       persons: totalPersons,
       purpose: data.purpose ?? null,
       accommodationCents: breakdown.accommodationCents,
-      kurtaxeCents: 0, // Kurtaxe nicht mehr Teil der Buchung — separates Portal
+      kurtaxeCents: breakdown.kurtaxeCents,
       energyFlatCents: breakdown.energyFlatCents,
       cleaningCents: breakdown.cleaningCents,
       soloSurchargeCents: breakdown.soloSurchargeCents,
@@ -712,16 +720,21 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
                     bookingNumber,
                     discountSnippet,
                     // Angezeigter Betrag ist die tatsaechliche T-14-Abbuchung:
-                    // Miet-Restzahlung + Kaution (siehe Kommentar unten).
-                    formatEuro(effectiveRemainder + breakdown.depositCents, locale)
+                    // Miet-Restzahlung + Kaution + Kurtaxe (siehe Kommentar unten).
+                    formatEuro(
+                      effectiveRemainder + breakdown.depositCents + breakdown.kurtaxeCents,
+                      locale
+                    )
                   ),
             },
           },
         },
-        // Kaution: nur JETZT einziehen, wenn es keine spaetere Restzahlung
-        // gibt (Anreise < 14 Tage → Komplettzahlung sofort). Im Normalfall
-        // wird die Kaution zusammen mit der Restzahlung bei T-14 eingezogen
-        // (Vorstandsbeschluss) — siehe daily-mail-jobs T-14-Cron.
+        // Kaution + Kurtaxe: nur JETZT einziehen, wenn es keine spaetere
+        // Restzahlung gibt (Anreise < 14 Tage → Komplettzahlung sofort). Im
+        // Normalfall werden beide zusammen mit der Restzahlung bei T-14
+        // eingezogen (Kaution: Vorstandsbeschluss; Kurtaxe: der Verein zieht
+        // sie ein und fuehrt sie an Winterberg ab, AVS kassiert selbst
+        // nichts) — siehe daily-mail-jobs T-14-Cron.
         ...(fullPaymentRequired
           ? [
               {
@@ -735,6 +748,21 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
                   },
                 },
               },
+              ...(breakdown.kurtaxeCents > 0
+                ? [
+                    {
+                      quantity: 1,
+                      price_data: {
+                        currency: "eur" as const,
+                        unit_amount: breakdown.kurtaxeCents,
+                        product_data: {
+                          name: CL.kurtaxeName,
+                          description: CL.kurtaxeDescription(breakdown.kurtaxePersons, breakdown.nights),
+                        },
+                      },
+                    },
+                  ]
+                : []),
             ]
           : []),
       ],
@@ -792,9 +820,9 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
     .set({ stripeSessionId: checkoutSession.id, updatedAt: new Date() })
     .where(eq(bookings.id, bookingId));
 
-  // Open payment rows: (Voll- bzw. An-)Zahlung jetzt fällig. Kaution nur bei
-  // Komplettzahlung (kein spaeterer T-14-Termin) schon jetzt faellig — im
-  // Normalfall wird sie zusammen mit der Restzahlung bei T-14 eingezogen.
+  // Open payment rows: (Voll- bzw. An-)Zahlung jetzt fällig. Kaution + Kurtaxe
+  // nur bei Komplettzahlung (kein spaeterer T-14-Termin) schon jetzt faellig
+  // — im Normalfall werden beide zusammen mit der Restzahlung bei T-14 eingezogen.
   await db.insert(payments).values([
     {
       bookingId,
@@ -810,6 +838,17 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
             kind: "kaution" as const,
             status: "offen" as const,
             amountCents: breakdown.depositCents,
+            method: "Stripe Checkout",
+          },
+        ]
+      : []),
+    ...(fullPaymentRequired && breakdown.kurtaxeCents > 0
+      ? [
+          {
+            bookingId,
+            kind: "kurtaxe" as const,
+            status: "offen" as const,
+            amountCents: breakdown.kurtaxeCents,
             method: "Stripe Checkout",
           },
         ]
@@ -838,7 +877,7 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
       fullPaymentRequired
         ? `Komplettzahlung ${formatEuro(effectivePrepayment)} (Anreise < 14 Tage)`
         : `Anzahlung ${formatEuro(effectivePrepayment)}; Restzahlung ${formatEuro(effectiveRemainder)} offen`
-    } + Kaution ${formatEuro(breakdown.depositCents)} via Stripe${
+    } + Kaution ${formatEuro(breakdown.depositCents)} + Kurtaxe ${formatEuro(breakdown.kurtaxeCents)} via Stripe${
       discountCents > 0 ? ` · Rabatt ${formatEuro(discountCents)} (${appliedDiscountCode})` : ""
     }${isNewAccount ? " (Konto automatisch angelegt)" : ""}`,
     bookingId,

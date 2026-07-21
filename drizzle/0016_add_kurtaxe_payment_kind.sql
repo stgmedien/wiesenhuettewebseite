@@ -1,0 +1,1 @@
+ALTER TYPE "public"."payment_kind" ADD VALUE 'kurtaxe' BEFORE 'rueckerstattung';

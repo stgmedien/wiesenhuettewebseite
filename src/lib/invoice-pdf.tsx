@@ -200,6 +200,9 @@ export type InvoicePdfProps = {
   lineItems: { label: string; qty: number; unitCents: number; totalCents: number }[];
   subtotalCents: number;
   depositCents: number;
+  kurtaxeCents: number;
+  /** Buchung vor dem Storno-Stichtag (05.07.2026) — zeigt die Alt-Staffel. */
+  isLegacy: boolean;
   payments: {
     kind: string;
     method?: string | null;
@@ -221,6 +224,8 @@ export function InvoicePdf({
   lineItems,
   subtotalCents,
   depositCents,
+  kurtaxeCents,
+  isLegacy,
   payments,
   notes,
 }: InvoicePdfProps) {
@@ -319,6 +324,14 @@ export function InvoicePdf({
               <Text style={styles.depositValue}>{formatEuro(depositCents)}</Text>
             </View>
           )}
+          {kurtaxeCents > 0 && (
+            <View style={styles.depositRow}>
+              <Text style={styles.depositLabel}>
+                Kurtaxe Hochsauerland (separat, an Winterberg abgeführt){" "}
+              </Text>
+              <Text style={styles.depositValue}>{formatEuro(kurtaxeCents)}</Text>
+            </View>
+          )}
         </View>
 
         {/* Zahlungen */}
@@ -353,8 +366,10 @@ export function InvoicePdf({
             <Text style={{ marginTop: 6, color: C.textMuted }}>{notes}</Text>
           )}
           <Text style={{ marginTop: 8 }}>
-            <Text style={{ fontWeight: 700 }}>Stornierungsbedingungen:</Text> {">"} 30 Tage vor
-            Anreise 0 % · 29–14 Tage 30 % · 13–7 Tage 60 % · {"<"} 7 Tage 90 % der Zwischensumme.
+            <Text style={{ fontWeight: 700 }}>Stornierungsbedingungen:</Text>{" "}
+            {isLegacy
+              ? <>{">"} 30 Tage vor Anreise 0 % · 29–14 Tage 30 % · 13–7 Tage 60 % · {"<"} 7 Tage 90 % der Zwischensumme (ohne Kaution).</>
+              : <>{">"} 30 Tage vor Anreise 0 % · 30–14 Tage 50 % · {"<"} 14 Tage 100 % des reinen Übernachtungspreises.</>}
           </Text>
         </View>
 

@@ -894,11 +894,11 @@ export const DOC_SECTIONS: DocSection[] = [
           rows={[
             [
               "Bei Buchung",
-              "Stripe-Checkout für 50% Anzahlung + 300 € Kaution. Stripe-Customer wird angelegt, Payment-Method gespeichert für späteren Off-Session-Charge.",
+              "Stripe-Checkout für 50% Anzahlung. Stripe-Customer wird angelegt, Payment-Method gespeichert für späteren Off-Session-Charge. Kaution (300 €) und Kurtaxe (2,70 €/Person ab 16 J./Nacht) werden NICHT jetzt eingezogen — nur bei kurzfristigen Buchungen (< 14 Tage vor Anreise) sofort mit.",
             ],
             [
               "Anzahlung-Webhook",
-              "checkout.session.completed → Booking auf 'bezahlt'. Bestätigungs-, Mietvertrags-, Kurtaxe-Mails versendet (idempotent). GoBD-Rechnung wird via Postgres-SEQUENCE erzeugt.",
+              "checkout.session.completed → Booking auf 'bezahlt'. Bestätigungs- und Mietvertrags-Mail versendet (idempotent). GoBD-Rechnung wird via Postgres-SEQUENCE erzeugt.",
             ],
             [
               "T-21 vor Anreise",
@@ -906,7 +906,7 @@ export const DOC_SECTIONS: DocSection[] = [
             ],
             [
               "T-14 vor Anreise",
-              "Cron triggert Off-Session-Charge der Restzahlung über Stripe (gleiche Karte wie Anzahlung). Bei Erfolg: payment-row 'erhalten'. Bei Fehler: payment-row 'fehlgeschlagen' + Manager muss manuell nachfassen.",
+              "Cron triggert Off-Session-Charge der Restzahlung + Kaution + Kurtaxe über Stripe (gleiche Karte wie Anzahlung). Bei Erfolg: payment-rows 'erhalten'. Bei Fehler: payment-row 'fehlgeschlagen' + Manager muss manuell nachfassen.",
             ],
             [
               "T-7 vor Anreise",

@@ -226,11 +226,13 @@ export async function GET(req: Request) {
     }
   }
 
-  // ---------- T-14: Off-Session-Charge der Restzahlung (+ Kaution) ----------
-  // Kaution wird nicht mehr bei Buchung eingezogen, sondern hier zusammen mit
-  // der Restzahlung faellig (Vorstandsbeschluss). Kurzfristige Buchungen
-  // (< 14 Tage vor Anreise) zahlen die Kaution schon bei Buchung komplett mit
-  // und laufen wegen der Anreise-Distanz nie durch diesen Cron-Block.
+  // ---------- T-14: Off-Session-Charge der Restzahlung (+ Kaution + Kurtaxe) ----------
+  // Kaution UND Kurtaxe werden nicht mehr bei Buchung eingezogen, sondern hier
+  // zusammen mit der Restzahlung faellig (Kaution: Vorstandsbeschluss; Kurtaxe:
+  // AVS/Winterberg zieht beim Gast nichts ein, die Rechnung geht an den
+  // Verein, der sie eintreiben muss). Kurzfristige Buchungen (< 14 Tage vor
+  // Anreise) zahlen beides schon bei Buchung komplett mit und laufen wegen
+  // der Anreise-Distanz nie durch diesen Cron-Block.
   const t14 = isoDayOffset(14);
   const t14Bookings = await db
     .select()
@@ -261,7 +263,14 @@ export async function GET(req: Request) {
     const kautionAlreadyPaid = kautionPmts.some((p) => p.status === "erhalten");
     const kautionCents = kautionAlreadyPaid ? 0 : b.depositCents;
 
-    const chargeCents = rentRemainderCents + kautionCents;
+    const kurtaxePmts = await db
+      .select()
+      .from(payments)
+      .where(and(eq(payments.bookingId, b.id), eq(payments.kind, "kurtaxe")));
+    const kurtaxeAlreadyPaid = kurtaxePmts.some((p) => p.status === "erhalten");
+    const kurtaxeCents = kurtaxeAlreadyPaid ? 0 : b.kurtaxeCents;
+
+    const chargeCents = rentRemainderCents + kautionCents + kurtaxeCents;
 
     if (chargeCents > 0 && b.stripePaymentIntentId) {
       try {
@@ -280,7 +289,11 @@ export async function GET(req: Request) {
           off_session: true,
           confirm: true,
           metadata: { bookingId: b.id, bookingNumber: b.bookingNumber, kind: "restzahlung" },
-          description: `Restzahlung${kautionCents > 0 ? " inkl. Kaution" : ""} Wiesenhütte ${b.bookingNumber}`,
+          description: `Restzahlung${
+            kautionCents > 0 || kurtaxeCents > 0
+              ? ` inkl. ${[kautionCents > 0 && "Kaution", kurtaxeCents > 0 && "Kurtaxe"].filter(Boolean).join(" + ")}`
+              : ""
+          } Wiesenhütte ${b.bookingNumber}`,
         });
         if (newPi.status === "succeeded") {
           if (originalRestRow) {
@@ -315,6 +328,17 @@ export async function GET(req: Request) {
               receivedAt: new Date(),
             });
           }
+          if (kurtaxeCents > 0) {
+            await db.insert(payments).values({
+              bookingId: b.id,
+              kind: "kurtaxe",
+              status: "erhalten",
+              amountCents: kurtaxeCents,
+              method: "Stripe Off-Session",
+              stripePaymentIntentId: newPi.id,
+              receivedAt: new Date(),
+            });
+          }
           await db.update(bookings)
             .set({ paidCents: b.paidCents + chargeCents, updatedAt: new Date() })
             .where(eq(bookings.id, b.id));
@@ -332,7 +356,7 @@ export async function GET(req: Request) {
         }
         await db.insert(activityLog).values({
           who: "Cron",
-          what: `Restzahlungs-Off-Session-Charge (T-14): ${(chargeCents / 100).toFixed(2)} € (davon ${(kautionCents / 100).toFixed(2)} € Kaution) — ${newPi.status}`,
+          what: `Restzahlungs-Off-Session-Charge (T-14): ${(chargeCents / 100).toFixed(2)} € (davon ${(kautionCents / 100).toFixed(2)} € Kaution, ${(kurtaxeCents / 100).toFixed(2)} € Kurtaxe) — ${newPi.status}`,
           bookingId: b.id,
         });
       } catch (err) {
@@ -359,9 +383,14 @@ export async function GET(req: Request) {
   // ---------- Altsystem-Restzahlung: T-14 Stripe-Link-Mail ----------
   // Buchungen, die im ALTEN System mit 100 € angezahlt wurden (Anzahlung manuell
   // verbucht). Marker: payments.method == MANUAL_REST_MARKER + status "offen";
-  // amountCents = geplanter Restbetrag (Summe + Kaution − 100). 14 Tage vor
-  // Anreise: Stripe-Checkout-Link für den Rest + Mail. Eng begrenzt auf die
-  // markierten Zeilen — fasst die normale Stripe-Pipeline nicht an.
+  // amountCents = geplanter Restbetrag (Summe + Kaution − 100), MANUELL von
+  // Dana im ManualPaymentForm eingetragen. WICHTIG: Kurtaxe zieht AVS/Winterberg
+  // beim Gast NICHT ein (Rechnung geht an den Verein) — falls der Alt-Vertrag
+  // die Kurtaxe "versteckt" in der Summe enthielt, MUSS dieser Betrag mit im
+  // Restbetrag bleiben (nicht rausrechnen, sonst zahlt der Verein sie aus
+  // eigener Tasche). 14 Tage vor Anreise: Stripe-Checkout-Link für den Rest +
+  // Mail. Eng begrenzt auf die markierten Zeilen — fasst die normale
+  // Stripe-Pipeline nicht an.
   const today0 = isoDayOffset(0);
   const in14 = isoDayOffset(14);
   const manualRest = await db

@@ -103,8 +103,8 @@ export default async function BuchungDetailPage({ params }: Props) {
             {booking.purpose && ` · ${booking.purpose}`}
           </p>
         </div>
-        <span className={statusPill(booking.status, booking.paidCents, booking.subtotalCents + booking.depositCents)}>
-          {statusLabel(booking.status, booking.paidCents, booking.subtotalCents + booking.depositCents)}
+        <span className={statusPill(booking.status, booking.paidCents, booking.subtotalCents + booking.depositCents + booking.kurtaxeCents)}>
+          {statusLabel(booking.status, booking.paidCents, booking.subtotalCents + booking.depositCents + booking.kurtaxeCents)}
         </span>
       </div>
 
@@ -150,6 +150,9 @@ export default async function BuchungDetailPage({ params }: Props) {
           <div className="border-t border-[var(--color-wh-winter-grey)]/30 pt-2 mt-2">
             <Row label="Zwischensumme" value={booking.subtotalCents} bold />
             <Row label="Kaution (separat)" value={booking.depositCents} muted />
+            {booking.kurtaxeCents > 0 && (
+              <Row label="Kurtaxe Hochsauerland (separat)" value={booking.kurtaxeCents} muted />
+            )}
           </div>
           <div className="border-t border-[var(--color-wh-winter-grey)]/30 pt-2 mt-2">
             <Row label="Bisher bezahlt" value={booking.paidCents} muted />
