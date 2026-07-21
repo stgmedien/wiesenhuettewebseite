@@ -102,7 +102,7 @@ async function ensureBooking(opts: {
       persons: totalPersons,
       purpose: opts.purpose,
       accommodationCents: breakdown.accommodationCents,
-      kurtaxeCents: 0,
+      kurtaxeCents: breakdown.kurtaxeCents,
       energyFlatCents: breakdown.energyFlatCents,
       cleaningCents: breakdown.cleaningCents,
       soloSurchargeCents: breakdown.soloSurchargeCents,

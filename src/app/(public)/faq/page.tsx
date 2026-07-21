@@ -144,9 +144,9 @@ const FAQS: QA[] = [
       nl: "Hoe zit het met de toeristenbelasting (Kurtaxe)?",
     },
     a: {
-      de: "Die Kurtaxe wird nicht über die Hütte abgerechnet. Nach der Buchung erhältst Du eine separate E-Mail mit einem Link zum offiziellen Kurtaxen-Portal Hochsauerland.",
-      en: "The guest tax is not billed via the cabin. After booking you receive a separate email with a link to the official Hochsauerland guest-tax portal.",
-      nl: "De toeristenbelasting loopt niet via de hut. Na de boeking ontvang je een aparte e-mail met een link naar het officiële Hochsauerland-portaal.",
+      de: "Die Kurtaxe Hochsauerland (2,70 € pro Person ab 16 Jahren und Nacht) wird zusammen mit der Restzahlung eingezogen und von uns an die Kurverwaltung Winterberg abgeführt — Du musst Dich um nichts Extra kümmern.",
+      en: "The Hochsauerland guest tax (€2.70 per guest aged 16+ per night) is collected together with the remaining payment and remitted by us to the Winterberg tourist office — nothing extra for you to do.",
+      nl: "De toeristenbelasting Hochsauerland (€ 2,70 per persoon vanaf 16 jaar per nacht) wordt samen met de restbetaling geïncasseerd en door ons afgedragen aan de Kurverwaltung Winterberg — jij hoeft verder niets te doen.",
     },
   },
 ];

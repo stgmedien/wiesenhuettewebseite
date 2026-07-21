@@ -138,12 +138,12 @@ const BF_COPY = {
     institutionHint: "Name der Schule, des Vereins oder der Firma",
     schoolPayTitle: "Anzahlung erst später — Schulgruppen-Aufschub",
     schoolPayBody:
-      "Ihr müsst jetzt nichts zahlen. Wir reservieren den Zeitraum verbindlich. Die Anzahlung (10 %) wird automatisch rund 30 Tage vor Anreise per E-Mail mit Zahlungslink fällig, die Restzahlung inkl. Kaution 14 Tage vor Anreise. Wird die Anzahlung nicht fristgerecht (innerhalb von 14 Tagen) beglichen, fällt eine Stornogebühr an und die Buchung wird storniert.",
+      "Ihr müsst jetzt nichts zahlen. Wir reservieren den Zeitraum verbindlich. Die Anzahlung (10 %) wird automatisch rund 30 Tage vor Anreise per E-Mail mit Zahlungslink fällig, die Restzahlung inkl. Kaution + Kurtaxe 14 Tage vor Anreise. Wird die Anzahlung nicht fristgerecht (innerhalb von 14 Tagen) beglichen, fällt eine Stornogebühr an und die Buchung wird storniert.",
     schoolSubmit: "Reservierung verbindlich anfragen",
     schoolImmediateNote:
       "Da Eure Anreise weniger als 30 Tage entfernt ist, ist die Anzahlung sofort online zu leisten — ein Zahlungsaufschub ist so kurzfristig nicht möglich.",
     fullPaymentNote:
-      "Da die Anreise in weniger als 14 Tagen ist, wird der gesamte Betrag (Miete + Kaution) jetzt sofort fällig.",
+      "Da die Anreise in weniger als 14 Tagen ist, wird der gesamte Betrag (Miete + Kaution + Kurtaxe) jetzt sofort fällig.",
     fullAmountLabel: "Mietpreis (komplett)",
     street: "Straße",
     zip: "PLZ",
@@ -170,9 +170,10 @@ const BF_COPY = {
     bookingTotalAfter: "50 % der Buchungssumme",
     afterDiscount: "nach Rabatt",
     kaution: "Kaution",
+    kurtaxeLabel: "Kurtaxe",
     restzahlung: "Restzahlung von",
-    restzahlungBody: "(inkl. Kaution) wird 14 Tage vor Anreise automatisch eingezogen — separate Zahlungsaufforderung kommt vorher per Mail. Die Kaution wird innerhalb von 14 Tagen nach mangelfreier Abreise zurückerstattet.",
-    kurtaxeNote: "Hinweis: Die Kurtaxe Hochsauerland wird separat abgerechnet — wir melden uns nach der Buchung dazu. Aktueller Tarif Langewiese: 2,20 € pro Person und Nacht.",
+    restzahlungBody: "(inkl. Kaution + Kurtaxe) wird 14 Tage vor Anreise automatisch eingezogen — separate Zahlungsaufforderung kommt vorher per Mail. Die Kaution wird innerhalb von 14 Tagen nach mangelfreier Abreise zurückerstattet.",
+    kurtaxeNote: "Hinweis: Die Kurtaxe Hochsauerland (2,70 € pro Person ab 16 Jahren und Nacht) ist in der Restzahlung enthalten — wir führen sie an die Kurverwaltung Winterberg ab.",
     stornoH: "Stornierungs-Regelwerk",
     stornoToday: (d: number, p: number) => `Bei Storno heute (${d} Tage vor Anreise): ${p}% Rückerstattung`,
     stornoTodayNoDays: (p: number) => `Bei Storno heute: ${p}% Rückerstattung`,
@@ -248,11 +249,10 @@ const BF_COPY = {
     prepayment50: "Anzahlung 50 %",
     plusKaution: "+ Kaution",
     todayToPay: "Heute zu zahlen",
-    remainderBefore: "Restzahlung (14 Tage vor Anreise, inkl. Kaution)",
-    kurtaxeShort: "Kurtaxe wird separat über das Hochsauerland-Portal abgerechnet.",
+    remainderBefore: "Restzahlung (14 Tage vor Anreise, inkl. Kaution + Kurtaxe)",
     depositDueLater: "Anzahlung (~30 Tage vor Anreise)",
     schoolSummaryNote:
-      "Du zahlst heute nichts. Die Anzahlung (10 %) wird rund 30 Tage vor Anreise per Zahlungslink fällig, die Restzahlung inkl. Kaution 14 Tage vor Anreise.",
+      "Du zahlst heute nichts. Die Anzahlung (10 %) wird rund 30 Tage vor Anreise per Zahlungslink fällig, die Restzahlung inkl. Kaution + Kurtaxe 14 Tage vor Anreise.",
     // ReviewBlock
     zeitraum: "Zeitraum",
     bucher: "Bucher",
@@ -306,12 +306,12 @@ const BF_COPY = {
     institutionHint: "Name of the school, club or company",
     schoolPayTitle: "Deposit due later — school-group deferral",
     schoolPayBody:
-      "You don't need to pay anything now. We hold the dates for you. The deposit (10 %) automatically becomes due about 30 days before arrival via an email payment link; the remainder incl. damage deposit 14 days before arrival. If the deposit isn't paid on time (within 14 days), a cancellation fee applies and the booking is cancelled.",
+      "You don't need to pay anything now. We hold the dates for you. The deposit (10 %) automatically becomes due about 30 days before arrival via an email payment link; the remainder incl. damage deposit + tourist tax 14 days before arrival. If the deposit isn't paid on time (within 14 days), a cancellation fee applies and the booking is cancelled.",
     schoolSubmit: "Request reservation (binding)",
     schoolImmediateNote:
       "As your arrival is less than 30 days away, the deposit must be paid online now — deferred payment isn't possible at such short notice.",
     fullPaymentNote:
-      "As arrival is less than 14 days away, the full amount (rent + damage deposit) is due now.",
+      "As arrival is less than 14 days away, the full amount (rent + damage deposit + tourist tax) is due now.",
     fullAmountLabel: "Full rental price",
     street: "Street",
     zip: "ZIP",
@@ -338,9 +338,10 @@ const BF_COPY = {
     bookingTotalAfter: "50 % of booking total",
     afterDiscount: "after discount",
     kaution: "Damage deposit",
+    kurtaxeLabel: "Tourist tax",
     restzahlung: "Remaining amount of",
-    restzahlungBody: "(incl. damage deposit) is charged automatically 14 days before arrival — a separate payment notice is emailed beforehand. The damage deposit is refunded within 14 days of a clean departure.",
-    kurtaxeNote: "Note: The Hochsauerland tourist tax is settled separately — we'll be in touch after your booking. Current rate for Langewiese: €2.20 per person per night.",
+    restzahlungBody: "(incl. damage deposit + tourist tax) is charged automatically 14 days before arrival — a separate payment notice is emailed beforehand. The damage deposit is refunded within 14 days of a clean departure.",
+    kurtaxeNote: "Note: The Hochsauerland tourist tax (€2.70 per guest aged 16+ per night) is included in the remaining payment — we remit it to the Winterberg tourist office.",
     stornoH: "Cancellation policy",
     stornoToday: (d: number, p: number) => `If cancelled today (${d} days before arrival): ${p}% refund`,
     stornoTodayNoDays: (p: number) => `If cancelled today: ${p}% refund`,
@@ -413,11 +414,10 @@ const BF_COPY = {
     prepayment50: "Deposit 50 %",
     plusKaution: "+ Damage deposit",
     todayToPay: "Due today",
-    remainderBefore: "Remaining amount (14 days before arrival, incl. damage deposit)",
-    kurtaxeShort: "Tourist tax is settled separately via the Hochsauerland portal.",
+    remainderBefore: "Remaining amount (14 days before arrival, incl. damage deposit + tourist tax)",
     depositDueLater: "Deposit (~30 days before arrival)",
     schoolSummaryNote:
-      "You pay nothing today. The deposit (10 %) falls due about 30 days before arrival via a payment link; the remainder incl. damage deposit 14 days before arrival.",
+      "You pay nothing today. The deposit (10 %) falls due about 30 days before arrival via a payment link; the remainder incl. damage deposit + tourist tax 14 days before arrival.",
     zeitraum: "Period",
     bucher: "Booker",
     totalSuffix: "total",
@@ -470,12 +470,12 @@ const BF_COPY = {
     institutionHint: "Naam van de school, vereniging of het bedrijf",
     schoolPayTitle: "Aanbetaling later — uitstel voor schoolgroepen",
     schoolPayBody:
-      "Jullie hoeven nu niets te betalen. We reserveren de periode vast. De aanbetaling (10 %) wordt automatisch ongeveer 30 dagen voor aankomst verschuldigd via een betaallink per e-mail; de restbetaling incl. borg 14 dagen voor aankomst. Wordt de aanbetaling niet op tijd (binnen 14 dagen) voldaan, dan volgt een annuleringskost en wordt de boeking geannuleerd.",
+      "Jullie hoeven nu niets te betalen. We reserveren de periode vast. De aanbetaling (10 %) wordt automatisch ongeveer 30 dagen voor aankomst verschuldigd via een betaallink per e-mail; de restbetaling incl. borg + toeristenbelasting 14 dagen voor aankomst. Wordt de aanbetaling niet op tijd (binnen 14 dagen) voldaan, dan volgt een annuleringskost en wordt de boeking geannuleerd.",
     schoolSubmit: "Reservering bindend aanvragen",
     schoolImmediateNote:
       "Omdat jullie aankomst minder dan 30 dagen weg is, moet de aanbetaling nu online gebeuren — uitstel is op zo'n korte termijn niet mogelijk.",
     fullPaymentNote:
-      "Omdat de aankomst binnen 14 dagen is, is het volledige bedrag (huur + borg) nu direct verschuldigd.",
+      "Omdat de aankomst binnen 14 dagen is, is het volledige bedrag (huur + borg + toeristenbelasting) nu direct verschuldigd.",
     fullAmountLabel: "Volledige huurprijs",
     street: "Straat",
     zip: "Postcode",
@@ -502,9 +502,10 @@ const BF_COPY = {
     bookingTotalAfter: "50 % van de boekingssom",
     afterDiscount: "na korting",
     kaution: "Borg",
+    kurtaxeLabel: "Toeristenbelasting",
     restzahlung: "Restbedrag van",
-    restzahlungBody: "(incl. borg) wordt 14 dagen vóór aankomst automatisch geïncasseerd — een apart betaalverzoek volgt vooraf per e-mail. De borg wordt binnen 14 dagen na schadevrije afreis terugbetaald.",
-    kurtaxeNote: "Let op: De toeristenbelasting Hochsauerland wordt apart afgerekend — we nemen na de boeking contact op. Actueel tarief Langewiese: € 2,20 per persoon per nacht.",
+    restzahlungBody: "(incl. borg + toeristenbelasting) wordt 14 dagen vóór aankomst automatisch geïncasseerd — een apart betaalverzoek volgt vooraf per e-mail. De borg wordt binnen 14 dagen na schadevrije afreis terugbetaald.",
+    kurtaxeNote: "Let op: De toeristenbelasting Hochsauerland (€ 2,70 per persoon vanaf 16 jaar per nacht) zit in de restbetaling — wij dragen deze af aan de Kurverwaltung Winterberg.",
     stornoH: "Annuleringsregeling",
     stornoToday: (d: number, p: number) => `Bij annulering vandaag (${d} dagen vóór aankomst): ${p}% terugbetaling`,
     stornoTodayNoDays: (p: number) => `Bij annulering vandaag: ${p}% terugbetaling`,
@@ -577,11 +578,10 @@ const BF_COPY = {
     prepayment50: "Aanbetaling 50 %",
     plusKaution: "+ Borg",
     todayToPay: "Vandaag te betalen",
-    remainderBefore: "Restbedrag (14 dagen vóór aankomst, incl. borg)",
-    kurtaxeShort: "Toeristenbelasting wordt apart afgerekend via het Hochsauerland-portaal.",
+    remainderBefore: "Restbedrag (14 dagen vóór aankomst, incl. borg + toeristenbelasting)",
     depositDueLater: "Aanbetaling (~30 dagen vóór aankomst)",
     schoolSummaryNote:
-      "Je betaalt vandaag niets. De aanbetaling (10 %) wordt ongeveer 30 dagen vóór aankomst via een betaallink verschuldigd; de restbetaling incl. borg 14 dagen vóór aankomst.",
+      "Je betaalt vandaag niets. De aanbetaling (10 %) wordt ongeveer 30 dagen vóór aankomst via een betaallink verschuldigd; de restbetaling incl. borg + toeristenbelasting 14 dagen vóór aankomst.",
     zeitraum: "Periode",
     bucher: "Boeker",
     totalSuffix: "totaal",
@@ -1137,9 +1137,10 @@ export const BookingFlow = ({
                 ? subAfter
                 : Math.round((subAfter * prepayPercent) / 100);
               const remainAfter = subAfter - prepayAfter;
-              const totalDueAfter = fullPaymentRequired
-                ? prepayAfter + breakdown.depositCents
-                : prepayAfter;
+              const extrasNow = fullPaymentRequired
+                ? breakdown.depositCents + breakdown.kurtaxeCents
+                : 0;
+              const totalDueAfter = prepayAfter + extrasNow;
               return (
                 <div className="bg-[var(--color-wh-beige)] rounded-[var(--radius-card)] p-5 text-sm text-[var(--color-wh-black)]">
                   <p className="m-0 font-semibold mb-2">{tt.dueToday}</p>
@@ -1151,6 +1152,12 @@ export const BookingFlow = ({
                       <>
                         {" + "}
                         <strong>{formatEuro(breakdown.depositCents, locale)}</strong> {tt.kaution}
+                        {breakdown.kurtaxeCents > 0 && (
+                          <>
+                            {" + "}
+                            <strong>{formatEuro(breakdown.kurtaxeCents, locale)}</strong> {tt.kurtaxeLabel}
+                          </>
+                        )}
                         {" = "}
                         <strong>{formatEuro(totalDueAfter, locale)}</strong>
                       </>
@@ -1159,13 +1166,17 @@ export const BookingFlow = ({
                   {remainAfter > 0 && (
                     <p className="m-0 mt-3">
                       {tt.restzahlung}{" "}
-                      <strong>{formatEuro(remainAfter + breakdown.depositCents, locale)}</strong>{" "}
+                      <strong>
+                        {formatEuro(remainAfter + breakdown.depositCents + breakdown.kurtaxeCents, locale)}
+                      </strong>{" "}
                       {tt.restzahlungBody}
                     </p>
                   )}
-                  <p className="m-0 mt-3 text-[var(--color-wh-fg-muted)]">
-                    {tt.kurtaxeNote}
-                  </p>
+                  {breakdown.kurtaxeCents > 0 && (
+                    <p className="m-0 mt-3 text-[var(--color-wh-fg-muted)]">
+                      {tt.kurtaxeNote}
+                    </p>
+                  )}
                 </div>
               );
             })()}
@@ -1199,7 +1210,9 @@ export const BookingFlow = ({
                   const prepayAfter = fullPaymentRequired
                     ? subAfter
                     : Math.round((subAfter * prepayPercent) / 100);
-                  const totalDueAfter = prepayAfter + breakdown.depositCents;
+                  const totalDueAfter = fullPaymentRequired
+                    ? prepayAfter + breakdown.depositCents + breakdown.kurtaxeCents
+                    : prepayAfter;
                   return `${tt.payNow} — ${formatEuro(totalDueAfter, locale)}`;
                 })()}
               </Button>
@@ -1558,16 +1571,24 @@ const PriceSummary = ({
               <span>{tt.plusKaution}</span>
               <span className="font-semibold">{formatEuro(breakdown.depositCents, locale)}</span>
             </div>
+            {breakdown.kurtaxeCents > 0 && (
+              <div className="flex justify-between">
+                <span>{tt.kurtaxeLabel}</span>
+                <span className="font-semibold">{formatEuro(breakdown.kurtaxeCents, locale)}</span>
+              </div>
+            )}
             <div className="flex justify-between text-base pt-2 border-t border-[var(--color-wh-winter-grey)]">
               <span className="font-bold">{tt.todayToPay}</span>
               <span className="font-bold text-[var(--color-wh-deep-green)]">
-                {formatEuro(breakdown.subtotalCents + breakdown.depositCents, locale)}
+                {formatEuro(
+                  breakdown.subtotalCents + breakdown.depositCents + breakdown.kurtaxeCents,
+                  locale
+                )}
               </span>
             </div>
           </div>
           <div className="border-t border-[var(--color-wh-winter-grey)] mt-4 pt-4 space-y-1 text-xs text-[var(--color-wh-fg-muted)]">
             <div>{tt.fullPaymentNote}</div>
-            <div>{tt.kurtaxeShort}</div>
           </div>
         </>
       ) : (
@@ -1589,12 +1610,14 @@ const PriceSummary = ({
               <span>{tt.remainderBefore}</span>
               <span>
                 {formatEuro(
-                  breakdown.subtotalCents - Math.round(breakdown.subtotalCents * prepayPercent / 100) + breakdown.depositCents,
+                  breakdown.subtotalCents -
+                    Math.round(breakdown.subtotalCents * prepayPercent / 100) +
+                    breakdown.depositCents +
+                    breakdown.kurtaxeCents,
                   locale
                 )}
               </span>
             </div>
-            <div>{tt.kurtaxeShort}</div>
           </div>
         </>
       )}

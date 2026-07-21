@@ -183,8 +183,8 @@ export default async function KontoPage({ searchParams }: Props) {
                           </p>
                         </div>
                         <div className="text-right">
-                          <span className={statusPill(b.status, b.paidCents, b.subtotalCents + b.depositCents)}>
-                            {statusLabel(b.status, b.paidCents, b.subtotalCents + b.depositCents)}
+                          <span className={statusPill(b.status, b.paidCents, b.subtotalCents + b.depositCents + b.kurtaxeCents)}>
+                            {statusLabel(b.status, b.paidCents, b.subtotalCents + b.depositCents + b.kurtaxeCents)}
                           </span>
                           <p className="text-sm font-mono text-[var(--color-wh-deep-green)] mt-2">
                             {formatEuro(b.totalCents)}

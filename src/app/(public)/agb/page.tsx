@@ -67,6 +67,7 @@ export default async function AGB() {
             <li>Endreinigung (Pflicht, einmalig)</li>
             <li>Ggf. Aufschlag Allein-/Exklusivnutzung</li>
             <li>Kaution (separat, wird zusammen mit der Restzahlung 14 Tage vor Anreise per Stripe eingezogen — bei kurzfristigen Buchungen unter 14 Tagen bereits sofort bei Buchung; Erstattung 14 Tage nach mangelfreier Abreise)</li>
+            <li>Kurtaxe Hochsauerland (separat, wird ebenfalls zusammen mit der Restzahlung eingezogen und vom Verein an die Kurverwaltung Winterberg abgeführt)</li>
           </ul>
           <p>
             Die jeweils gültigen Tarife werden im Buchungsvorgang transparent angezeigt
@@ -74,15 +75,16 @@ export default async function AGB() {
             Mitglieder-Tarife gelten ausschließlich für aktive Vereinsmitglieder; Buchungen, bei
             denen unwahre Angaben zur Vereinsmitgliedschaft gemacht wurden, können vom Verein
             storniert oder auf den regulären Tarif nachberechnet werden.
-            Die Kurtaxe Hochsauerland ist nicht im Mietpreis enthalten und wird vom Mieter direkt über
-            das offizielle Kurtaxen-Portal des Hochsauerlandkreises angemeldet und entrichtet. Aktueller
-            Tarif Langewiese: <strong>2,20 € pro Person und Nacht</strong>.
+            Die Kurtaxe Hochsauerland ist nicht im Übernachtungspreis enthalten, wird aber vom
+            Verein für den Aufenthalt eingezogen und an die Kurverwaltung Winterberg abgeführt
+            (nur Personen ab 16 Jahren). Aktueller Tarif Langewiese:{" "}
+            <strong>2,70 € pro Person und Nacht</strong>.
           </p>
           <p>
             Die Bezahlung erfolgt in zwei Raten: <strong>50 % Anzahlung</strong> bei Buchung,{" "}
-            <strong>50 % Restzahlung</strong> spätestens 14 Tage vor Anreise (Auto-Einzug per Stripe, separate Zahlungsaufforderung kommt vorher per Mail). Die Kaution wird
+            <strong>50 % Restzahlung</strong> spätestens 14 Tage vor Anreise (Auto-Einzug per Stripe, separate Zahlungsaufforderung kommt vorher per Mail). Kaution und Kurtaxe werden
             zusammen mit der Restzahlung eingezogen. Bei Buchungen weniger als 14 Tage vor Anreise ist
-            die vollständige Zahlung inklusive Kaution sofort bei Buchung fällig. Zahlungsabwicklung über
+            die vollständige Zahlung inklusive Kaution und Kurtaxe sofort bei Buchung fällig. Zahlungsabwicklung über
             Stripe (Kreditkarte / SEPA).
           </p>
         </Block>
@@ -90,8 +92,8 @@ export default async function AGB() {
         <Block title="§ 5 Stornobedingungen">
           <p>
             Bei Rücktritt durch den Mieter werden folgende Stornogebühren auf den reinen
-            Übernachtungspreis erhoben. Endreinigung und Kaution werden im Stornofall nicht
-            fällig bzw. vollständig zurückerstattet:
+            Übernachtungspreis erhoben. Endreinigung, Kaution und Kurtaxe werden im Stornofall
+            nicht fällig bzw. vollständig zurückerstattet:
           </p>
           <ul>
             <li>mehr als 30 Tage vor Anreise: <strong>0 %</strong></li>

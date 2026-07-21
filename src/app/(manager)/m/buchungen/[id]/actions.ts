@@ -98,6 +98,7 @@ export async function setBookingStatus(
               persons: b.persons,
               totalCents: b.subtotalCents,
               depositCents: b.depositCents,
+              kurtaxeCents: b.kurtaxeCents,
               paidCents: b.paidCents,
               kautionDueNow: kautionRows.some((p) => p.kind === "kaution"),
               baseUrl,

@@ -3,9 +3,13 @@
 // Stand: 01.07.2024 (gültig ab 01.01.2025)
 // Alle Preise in Cents (Integer) für GoBD/Buchhaltung.
 //
-// Hinweis: Kurtaxe wird seit Mai 2026 NICHT mehr über die Wiesenhütte
-// abgerechnet. Der Bucher erhält nach Buchung eine separate E-Mail mit
-// einem Link zum offiziellen Kurtaxen-Portal Hochsauerland.
+// Kurtaxe: AVS/Winterberg meldet nur den Aufenthalt, zieht beim Gast NICHTS
+// ein — die Rechnung geht an den Verein (unseren AVS-Zugang), der sie
+// bezahlen muss. Deshalb wird die Kurtaxe seit dieser Preis-Engine wieder
+// über die Wiesenhütte erhoben (zusammen mit Kaution/Restzahlung, siehe
+// daily-mail-jobs T-14-Cron) statt vom Gast "direkt" gezahlt.
+// Nur Personen ab 16 Jahren sind kurtaxenpflichtig (Winterbergs
+// Kurkarten-Pflichtgrenze, siehe adultsNonMember/members/teachers).
 // Endreinigung ist Pflicht.
 // =============================================================
 
@@ -105,6 +109,7 @@ export const PRICES = {
   cleaningCents: 19000,               // 190,00 € einmalig (PFLICHT)
   soloSurchargeCents: 5000,           // 50,00 € Aufschlag bei Allein-/Exklusivnutzung
   depositCents: 30000,                // 300,00 € Kaution (Erstattung in 14 Tagen)
+  kurtaxeRateCents: 270,               // 2,70 € pro Person (ab 16 J.) und Nacht — Winterberg/Langewiese
 } as const;
 
 export const RULES = {
@@ -171,11 +176,13 @@ export type PriceBreakdown = {
   /** Aufschlag bei Unterschreitung der Mindestbelegung (15 Personen). */
   minOccupancySurchargeCents: number;
   extrasCents: number;
-  subtotalCents: number;       // ohne Kaution
+  subtotalCents: number;       // ohne Kaution, ohne Kurtaxe
   depositCents: number;        // Kaution (separat)
+  kurtaxePersons: number;      // kurtaxenpflichtige Personen (ab 16 J.)
+  kurtaxeCents: number;        // Kurtaxe (separat) — Verein zieht sie ein, führt sie an Winterberg ab
   prepaymentCents: number;     // 50 % Anzahlung — heute zu zahlen
   remainderCents: number;      // 50 % Restzahlung — 14 Tage vor Anreise (Auto-Einzug per Cron)
-  totalDueCents: number;       // Anzahlung + (vorautorisierte) Kaution = heute fällig
+  totalDueCents: number;       // Anzahlung + (vorautorisierte) Kaution + Kurtaxe = heute fällig
   lines: PriceLine[];
 };
 
@@ -308,10 +315,14 @@ export const calculatePrice = (input: PriceInput): PriceBreakdown => {
     extrasCents;
 
   const depositCents = PRICES.depositCents;
+  // Kurtaxenpflichtig sind nur Personen ab 16 J. (Winterbergs Kurkarten-Grenze) —
+  // Lehrkräfte zählen wie Erwachsene, Kinder/Schüler (< 16) sind ausgenommen.
+  const kurtaxePersons = p.adults + p.members + p.teachers;
+  const kurtaxeCents = kurtaxePersons * nights * PRICES.kurtaxeRateCents;
   const prepaymentCents = Math.round((subtotalCents * RULES.prepaymentPercent) / 100);
   const remainderCents = subtotalCents - prepaymentCents;
-  // "Heute fällig": Anzahlung + Kaution
-  const totalDueCents = prepaymentCents + depositCents;
+  // "Heute fällig": Anzahlung + Kaution + Kurtaxe
+  const totalDueCents = prepaymentCents + depositCents + kurtaxeCents;
 
   const lines: PriceLine[] = [];
   if (adultsNonMember > 0) {
@@ -401,6 +412,8 @@ export const calculatePrice = (input: PriceInput): PriceBreakdown => {
     extrasCents,
     subtotalCents,
     depositCents,
+    kurtaxePersons,
+    kurtaxeCents,
     prepaymentCents,
     remainderCents,
     totalDueCents,

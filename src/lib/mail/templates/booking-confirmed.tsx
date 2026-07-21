@@ -22,10 +22,11 @@ type Props = {
   persons: number;
   totalCents: number;
   depositCents: number;
+  kurtaxeCents: number;
   paidCents: number;
-  /** true bei kurzfristigen Buchungen (< 14 Tage vor Anreise) — dort ist die
-   * Kaution bereits mit bezahlt; sonst wird sie erst bei der Restzahlung
-   * (14 Tage vor Anreise) eingezogen. */
+  /** true bei kurzfristigen Buchungen (< 14 Tage vor Anreise) — dort sind
+   * Kaution und Kurtaxe bereits mit bezahlt; sonst werden sie erst bei der
+   * Restzahlung (14 Tage vor Anreise) eingezogen. */
   kautionDueNow: boolean;
   baseUrl: string;
 };
@@ -81,6 +82,7 @@ export default function BookingConfirmedEmail({
   persons,
   totalCents,
   depositCents,
+  kurtaxeCents,
   paidCents,
   kautionDueNow,
   baseUrl,
@@ -139,6 +141,15 @@ export default function BookingConfirmedEmail({
                   {kautionDueNow ? "heute bezahlt" : "fällig mit Restzahlung"}
                 </Text>
               </Column>
+              {kurtaxeCents > 0 && (
+                <Column>
+                  <Text style={label}>Kurtaxe</Text>
+                  <Text style={value}>{formatEuro(kurtaxeCents)}</Text>
+                  <Text style={{ ...muted, fontSize: "12px", margin: "2px 0 0 0" }}>
+                    {kautionDueNow ? "heute bezahlt" : "fällig mit Restzahlung"}
+                  </Text>
+                </Column>
+              )}
               <Column>
                 <Text style={label}>Bereits bezahlt</Text>
                 <Text style={value}>{formatEuro(paidCents)}</Text>

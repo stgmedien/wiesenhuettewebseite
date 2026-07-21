@@ -356,7 +356,7 @@ export default async function Datenschutz() {
           />
           <Provider
             name="1&1 IONOS SE"
-            purpose="E-Mail-Versand (Buchungsbestätigung, Mietvertrag, Kurtaxe-Hinweis, Manager-Korrespondenz)"
+            purpose="E-Mail-Versand (Buchungsbestätigung, Mietvertrag, Manager-Korrespondenz)"
             location="Deutschland"
             avv="geschlossen"
             link="https://www.ionos.de/terms-gtc/datenschutzerklaerung/"

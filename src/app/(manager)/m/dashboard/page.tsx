@@ -100,6 +100,7 @@ export default async function Dashboard() {
           paidCents: bookings.paidCents,
           subtotalCents: bookings.subtotalCents,
           depositCents: bookings.depositCents,
+          kurtaxeCents: bookings.kurtaxeCents,
         })
         .from(bookings)
         .where(ne(bookings.status, "storniert"))
@@ -114,6 +115,7 @@ export default async function Dashboard() {
           arrival: bookings.arrival,
           departure: bookings.departure,
           persons: bookings.persons,
+          kurtaxeCents: bookings.kurtaxeCents,
           customerId: bookings.customerId,
         })
         .from(bookings)
@@ -261,7 +263,7 @@ export default async function Dashboard() {
                     <StatusPill
                       status={b.status}
                       paidCents={b.paidCents}
-                      dueCents={b.subtotalCents + b.depositCents}
+                      dueCents={b.subtotalCents + b.depositCents + b.kurtaxeCents}
                     />
                   }
                 />
@@ -281,14 +283,13 @@ export default async function Dashboard() {
               const nights = Math.round(
                 (new Date(b.departure).getTime() - new Date(b.arrival).getTime()) / 86400000
               );
-              const kurtaxe = b.persons * nights * 2.2;
               return (
                 <Row
                   key={b.id}
                   href={`/m/buchungen/${b.id}`}
                   date={b.arrival}
                   title={c ? `${c.firstName} ${c.lastName}` : "—"}
-                  subtitle={`${b.bookingNumber} · ${b.persons} P. · ${nights} N. · ca. ${formatEuro(Math.round(kurtaxe * 100))}`}
+                  subtitle={`${b.bookingNumber} · ${b.persons} P. · ${nights} N. · ${formatEuro(b.kurtaxeCents)}`}
                 />
               );
             })

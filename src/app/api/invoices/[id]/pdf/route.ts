@@ -5,6 +5,7 @@ import { invoices, customers, bookings, payments } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { InvoicePdf } from "@/lib/invoice-pdf";
+import { CANCELLATION_POLICY_CUTOFF } from "@/lib/pricing";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -107,6 +108,8 @@ export async function GET(req: NextRequest, ctx: Params) {
       }[],
       subtotalCents: invoice.subtotalCents,
       depositCents: booking.depositCents,
+      kurtaxeCents: booking.kurtaxeCents,
+      isLegacy: booking.createdAt < CANCELLATION_POLICY_CUTOFF,
       payments: pmts
         .filter((p) => p.status === "erhalten" || p.status === "erstattet")
         .map((p) => ({

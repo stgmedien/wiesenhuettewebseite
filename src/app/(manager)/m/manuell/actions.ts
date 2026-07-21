@@ -127,7 +127,7 @@ export async function createManualBooking(formData: FormData): Promise<{ ok: boo
       persons: totalPersons,
       purpose: d.purpose ?? null,
       accommodationCents: breakdown.accommodationCents,
-      kurtaxeCents: 0,
+      kurtaxeCents: breakdown.kurtaxeCents,
       energyFlatCents: breakdown.energyFlatCents,
       cleaningCents: breakdown.cleaningCents,
       soloSurchargeCents: breakdown.soloSurchargeCents,
