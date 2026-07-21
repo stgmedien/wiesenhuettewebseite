@@ -92,8 +92,9 @@ export default async function AGB() {
         <Block title="§ 5 Stornobedingungen">
           <p>
             Bei Rücktritt durch den Mieter werden folgende Stornogebühren auf den reinen
-            Übernachtungspreis erhoben. Endreinigung, Kaution und Kurtaxe werden im Stornofall
-            nicht fällig bzw. vollständig zurückerstattet:
+            Übernachtungspreis erhoben. Endreinigung und Kaution werden im Stornofall nicht
+            fällig bzw. vollständig zurückerstattet. Bereits gezahlte Kurtaxe wird nicht
+            zurückerstattet:
           </p>
           <ul>
             <li>mehr als 30 Tage vor Anreise: <strong>0 %</strong></li>
