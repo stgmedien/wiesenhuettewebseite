@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { invoices, customers, bookings, payments } from "@/lib/db/schema";
+import { invoices, customers, bookings } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { InvoicePdf } from "@/lib/invoice-pdf";
@@ -64,17 +64,12 @@ export async function GET(req: NextRequest, ctx: Params) {
     }
   }
 
-  // Booking + payments laden fuer den Zahlungs-Block
+  // Booking laden
   const bookingRows = invoice.bookingId
     ? await db.select().from(bookings).where(eq(bookings.id, invoice.bookingId)).limit(1)
     : [];
   const booking = bookingRows[0];
   if (!booking) return denied(404, "Buchung nicht gefunden");
-
-  const pmts = await db
-    .select()
-    .from(payments)
-    .where(eq(payments.bookingId, booking.id));
 
   const cs = invoice.customerSnapshot as {
     name: string;
@@ -109,16 +104,9 @@ export async function GET(req: NextRequest, ctx: Params) {
       subtotalCents: invoice.subtotalCents,
       depositCents: booking.depositCents,
       kurtaxeCents: booking.kurtaxeCents,
+      kurtaxePersons: booking.adults + booking.members + booking.teachers,
       isLegacy: booking.createdAt < CANCELLATION_POLICY_CUTOFF,
-      payments: pmts
-        .filter((p) => p.status === "erhalten" || p.status === "erstattet")
-        .map((p) => ({
-          kind: p.kind,
-          method: p.method ?? null,
-          receivedAt: p.receivedAt,
-          amountCents: p.amountCents,
-        })),
-        notes: invoice.notes ?? undefined,
+      notes: invoice.notes ?? undefined,
       })
     );
   } catch (err) {

@@ -38,29 +38,18 @@ export default async function QuittungPage({ params }: Props) {
   const booking = found[0];
   if (!booking) notFound();
 
-  // Quittung: nur tatsaechlich vereinnahmte / erstattete Zahlungen anzeigen.
-  // Offene Restzahlung oder fehlgeschlagene Charges duerfen NIEMALS auf einer
-  // Quittung als "bezahlt" erscheinen — das waere irrefuehrend.
+  // Offene/fehlgeschlagene Posten separat zur Info anzeigen — tatsaechlich
+  // vereinnahmte Zahlungen tauchen bewusst NICHT auf der Rechnung auf (nicht
+  // relevant fuer den Gast, siehe Feedback Johannes 21.07.2026).
   const allPayments = await db
     .select()
     .from(payments)
     .where(eq(payments.bookingId, booking.id))
     .orderBy(asc(payments.createdAt));
 
-  const bookingPayments = allPayments.filter(
-    (p) => p.status === "erhalten" || p.status === "erstattet"
-  );
   const openPayments = allPayments.filter(
     (p) => p.status === "offen" || p.status === "fehlgeschlagen"
   );
-
-  const totalReceived = bookingPayments
-    .filter((p) => p.status === "erhalten")
-    .reduce((sum, p) => sum + p.amountCents, 0);
-  const totalRefunded = bookingPayments
-    .filter((p) => p.status === "erstattet")
-    .reduce((sum, p) => sum + p.amountCents, 0); // negativ
-  const netReceived = totalReceived + totalRefunded;
 
   return (
     <div className="bg-white print:bg-white">
@@ -157,60 +146,45 @@ export default async function QuittungPage({ params }: Props) {
               <Line label="Aufschlag Mindestbelegung (15 Personen)" cents={booking.minOccupancySurchargeCents} />
             )}
             {booking.extrasCents > 0 && <Line label="Extras" cents={booking.extrasCents} />}
-            <tr className="border-t-2 border-[#111] font-bold">
+            <tr className="border-t-2 border-[#111] font-semibold">
               <td className="py-3">Zwischensumme</td>
               <td className="py-3 text-right font-mono">{formatEuro(booking.subtotalCents)}</td>
             </tr>
-            <tr className="text-[#555]">
-              <td className="py-2 text-xs">Kaution (separat, Erstattung 14 Tage nach Abreise)</td>
-              <td className="py-2 text-right font-mono text-xs">
-                {formatEuro(booking.depositCents)}
-              </td>
-            </tr>
             {booking.kurtaxeCents > 0 && (
-              <tr className="text-[#555]">
-                <td className="py-2 text-xs">Kurtaxe Hochsauerland (separat, an Winterberg abgeführt)</td>
-                <td className="py-2 text-right font-mono text-xs">
+              <tr>
+                <td className="py-2 text-[13px]">
+                  Kurtaxe Hochsauerland
+                  <div className="text-[10px] text-[#777]">
+                    {booking.adults + booking.members + booking.teachers} Personen ab 16 Jahren —
+                    wird an die Kurverwaltung Winterberg abgeführt
+                  </div>
+                </td>
+                <td className="py-2 text-right font-mono text-[13px] align-top">
                   {formatEuro(booking.kurtaxeCents)}
                 </td>
               </tr>
             )}
+            {booking.depositCents > 0 && (
+              <tr>
+                <td className="py-2 text-[13px]">
+                  Kaution
+                  <div className="text-[10px] text-[#777]">
+                    Erstattung 14 Tage nach mangelfreier Abreise
+                  </div>
+                </td>
+                <td className="py-2 text-right font-mono text-[13px] align-top">
+                  {formatEuro(booking.depositCents)}
+                </td>
+              </tr>
+            )}
+            <tr className="border-t-2 border-[#111] font-bold text-[15px]">
+              <td className="py-3">Gesamtbetrag</td>
+              <td className="py-3 text-right font-mono">
+                {formatEuro(booking.subtotalCents + booking.kurtaxeCents + booking.depositCents)}
+              </td>
+            </tr>
           </tbody>
         </table>
-
-        {/* Zahlungseingaenge — nur tatsaechlich vereinnahmt/erstattet */}
-        {bookingPayments.length > 0 && (
-          <section className="mb-8">
-            <p className="text-xs uppercase tracking-wider text-[#555] mb-2">
-              Zahlungseingänge
-            </p>
-            <table className="w-full text-xs border-collapse">
-              <tbody>
-                {bookingPayments.map((p) => (
-                  <tr key={p.id} className="border-b border-[#ddd] last:border-0">
-                    <td className="py-1 capitalize">{p.kind}</td>
-                    <td className="py-1 text-[#555]">{p.method ?? "—"}</td>
-                    <td className="py-1 text-[#555]">
-                      {p.receivedAt
-                        ? new Date(p.receivedAt).toLocaleDateString("de-DE")
-                        : "—"}
-                    </td>
-                    <td className="py-1 text-right font-mono">
-                      {p.amountCents >= 0 ? "+" : ""}
-                      {formatEuro(p.amountCents)}
-                    </td>
-                  </tr>
-                ))}
-                <tr className="border-t-2 border-[#111] font-bold">
-                  <td colSpan={3} className="py-2">
-                    Saldo erhalten
-                  </td>
-                  <td className="py-2 text-right font-mono">{formatEuro(netReceived)}</td>
-                </tr>
-              </tbody>
-            </table>
-          </section>
-        )}
 
         {/* Offene Posten — DEUTLICH abgegrenzt, NICHT als bezahlt */}
         {openPayments.length > 0 && (
