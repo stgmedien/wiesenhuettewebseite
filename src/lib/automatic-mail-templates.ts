@@ -161,6 +161,14 @@ export const AUTOMATIC_MAIL_TEMPLATES: AutomaticMailTemplate[] = [
     audience: "Dana (MAIL_INTERNAL_TO) + BCC johannesleiskau@gmail.com",
     file: "src/app/api/cron/daily-mail-jobs/route.ts",
   },
+  {
+    key: "mail-failure-digest",
+    label: "Fehlgeschlagene Mails — Sammel-Erinnerung",
+    category: "Buchung — Hüttenservice/intern",
+    trigger: "Täglich, wenn seit dem letzten erfolgreichen Versand fehlgeschlagene System-Mails offen sind (z. B. Tippfehler in der Adresse).",
+    audience: "Dana (MAIL_INTERNAL_TO) + BCC johannesleiskau@gmail.com",
+    file: "src/app/api/cron/daily-mail-jobs/route.ts",
+  },
 
   // ---------- Schulgruppen ----------
   {

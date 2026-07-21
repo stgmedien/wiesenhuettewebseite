@@ -5,6 +5,8 @@ import Link from "next/link";
 import { formatEuro } from "@/lib/pricing";
 import { formatDateLong } from "@/lib/utils";
 import { StatusPill } from "@/components/manager/StatusPill";
+import { getUnresolvedMailFailures } from "@/lib/mail-log";
+import { findMailTemplateMeta } from "@/lib/automatic-mail-templates";
 import {
   CalendarArrowDown,
   Mail,
@@ -12,6 +14,7 @@ import {
   CalendarClock,
   Waves,
   Sparkles,
+  MailWarning,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -33,6 +36,8 @@ export default async function Dashboard() {
   const in30d = new Date(today);
   in30d.setDate(in30d.getDate() + 30);
   const in30dIso = in30d.toISOString().slice(0, 10);
+
+  const mailFailuresPromise = getUnresolvedMailFailures();
 
   // Alle unabhaengigen Queries parallel (Issue #86) — nur openPaymentBookings
   // und die Customer-Namen brauchen Ergebnisse aus dieser Stufe.
@@ -129,6 +134,7 @@ export default async function Dashboard() {
         .orderBy(bookings.arrival)
         .limit(10),
     ]);
+  const mailFailures = await mailFailuresPromise;
 
   const arrivalsToday = arrivalsSoon.filter((b) => b.arrival === todayIso);
   const departuresToday = departuresSoon.filter((b) => b.departure === todayIso);
@@ -178,6 +184,33 @@ export default async function Dashboard() {
       <div className="eyebrow">Dashboard</div>
       <h1 className="text-[28px] sm:text-[40px] mt-2 mb-1">Heute auf der Wiesenhütte.</h1>
       <p className="text-[var(--color-wh-fg-muted)] m-0">{formatDateLong(today)}</p>
+
+      {/* Fehlgeschlagene Mails — nur sichtbar, wenn es welche gibt */}
+      {mailFailures.length > 0 && (
+        <section className="mt-8 sm:mt-10 rounded-[var(--radius-card)] border-2 border-[var(--color-wh-sunset)] bg-[var(--color-wh-beige)] p-5 sm:p-6">
+          <h3 className="text-[20px] m-0 mb-1 flex items-center gap-2 text-[var(--color-wh-sunset)]">
+            <MailWarning size={20} />
+            {mailFailures.length === 1 ? "Eine Mail konnte nicht zugestellt werden" : `${mailFailures.length} Mails konnten nicht zugestellt werden`}
+          </h3>
+          <p className="text-sm text-[var(--color-wh-fg-muted)] m-0 mb-4">
+            Meist ein Tippfehler in der E-Mail-Adresse. Kontaktdaten in der Buchung prüfen (ggf. anrufen), korrigieren und die Mails erneut senden.
+          </p>
+          <div>
+            {mailFailures.map((f) => {
+              const meta = findMailTemplateMeta(f.template);
+              return (
+                <Row
+                  key={f.id}
+                  href={f.bookingId ? `/m/buchungen/${f.bookingId}` : "#"}
+                  date={f.sentAt.toISOString().slice(0, 10)}
+                  title={f.guestName}
+                  subtitle={`${f.bookingNumber} · ${meta?.label ?? f.template} · an ${f.to}${f.error ? ` · ${f.error}` : ""}`}
+                />
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-8 sm:mt-10">

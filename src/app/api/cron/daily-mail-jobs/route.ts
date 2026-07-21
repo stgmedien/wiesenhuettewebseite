@@ -29,6 +29,9 @@ import { HUETTENWART_EMAIL } from "@/lib/huettenwart";
 import RestzahlungRequestEmail from "@/lib/mail/templates/restzahlung-request";
 import { MANUAL_REST_MARKER, MANUAL_REST_SENT_MARKER } from "@/lib/payment-markers";
 import AvsReminderInternalEmail from "@/lib/mail/templates/avs-reminder-internal";
+import MailFailureDigestEmail from "@/lib/mail/templates/mail-failure-digest";
+import { getUnresolvedMailFailures } from "@/lib/mail-log";
+import { findMailTemplateMeta } from "@/lib/automatic-mail-templates";
 import {
   getOrCreateDepositCheckout,
   SCHOOL_DEPOSIT_DUE_DAYS,
@@ -126,6 +129,7 @@ export async function GET(req: Request) {
     radMatches: 0,
     manualRestSent: 0,
     avsReminderSent: 0,
+    mailFailureDigestSent: 0,
   };
 
   // ---------- T-21: Zahlungserinnerung (1 Woche vor Auto-Einzug bei T-14) ----------
@@ -224,6 +228,40 @@ export async function GET(req: Request) {
         console.error("[cron] avs-reminder-internal failed:", err);
       }
     }
+  }
+
+  // ---------- Taegliche Sammel-Erinnerung: fehlgeschlagene Mails ----------
+  // Laeuft jeden Tag neu (kein alreadySent-Schutz, anders als die T-21-AVS-
+  // Erinnerung oben) — eine Faelle bleibt so lange in der Liste, bis eine
+  // spaetere erfolgreiche Mail derselben Vorlage an dieselbe Buchung
+  // nachgewiesen ist (siehe getUnresolvedMailFailures). Max. 1 Mail/Tag.
+  try {
+    const mailFailures = await getUnresolvedMailFailures();
+    if (mailFailures.length > 0) {
+      const internalTo = process.env.MAIL_INTERNAL_TO;
+      if (internalTo) {
+        await sendMail({
+          to: internalTo,
+          bcc: "johannesleiskau@gmail.com",
+          subject: `${mailFailures.length} ${mailFailures.length === 1 ? "Mail konnte" : "Mails konnten"} nicht zugestellt werden`,
+          template: "mail-failure-digest",
+          react: MailFailureDigestEmail({
+            failures: mailFailures.map((f) => ({
+              bookingId: f.bookingId,
+              bookingNumber: f.bookingNumber,
+              guestName: f.guestName,
+              templateLabel: findMailTemplateMeta(f.template)?.label ?? f.template,
+              to: f.to,
+              error: f.error,
+            })),
+            baseUrl: BASE_URL,
+          }),
+        });
+        stats.mailFailureDigestSent = mailFailures.length;
+      }
+    }
+  } catch (err) {
+    console.error("[cron] mail-failure-digest failed:", err);
   }
 
   // ---------- T-14: Off-Session-Charge der Restzahlung (+ Kaution + Kurtaxe) ----------
