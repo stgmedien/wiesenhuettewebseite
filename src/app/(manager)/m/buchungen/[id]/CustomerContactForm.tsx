@@ -29,18 +29,24 @@ export function CustomerContactForm(props: Props) {
   const [zip, setZip] = useState(props.zip ?? "");
   const [city, setCity] = useState(props.city ?? "");
   const [err, setErr] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [pending, start] = useTransition();
   const router = useRouter();
 
   if (!open) {
     return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="mt-2 text-xs font-semibold uppercase tracking-wider text-[var(--color-wh-deep-green)] hover:underline cursor-pointer"
-      >
-        Kontaktdaten bearbeiten
-      </button>
+      <div className="mt-2">
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="text-xs font-semibold uppercase tracking-wider text-[var(--color-wh-deep-green)] hover:underline cursor-pointer"
+        >
+          Kontaktdaten bearbeiten
+        </button>
+        {successMsg && (
+          <p className="text-[13px] text-[var(--color-wh-deep-green)] mt-1.5">{successMsg}</p>
+        )}
+      </div>
     );
   }
 
@@ -60,6 +66,11 @@ export function CustomerContactForm(props: Props) {
       });
       if (r.ok) {
         setOpen(false);
+        setSuccessMsg(
+          r.reissuedInvoiceNumber
+            ? `Gespeichert. Rechnung ${r.reissuedInvoiceNumber} wurde mit den korrigierten Daten neu ausgestellt.`
+            : "Gespeichert."
+        );
         router.refresh();
       } else {
         setErr(r.error);

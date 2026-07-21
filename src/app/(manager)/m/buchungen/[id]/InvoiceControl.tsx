@@ -20,6 +20,18 @@ export function InvoiceControl({ bookingId, existing }: Props) {
   const [justCreated, setJustCreated] = useState(false);
   const [reissueInfo, setReissueInfo] = useState<string | null>(null);
 
+  // `existing` kommt frisch vom Server, wenn die Seite nach einer Aktion
+  // eines GESCHWISTER-Elements (z. B. Kontaktdaten-Korrektur mit
+  // automatischer Neuausstellung) revalidiert/refresht wird — der lokale
+  // State oben uebernimmt Aenderungen an Props nach dem ersten Render sonst
+  // nicht automatisch. State-Anpassung waehrend des Renders (statt in einem
+  // Effect) ist hier das empfohlene React-Muster dafuer.
+  const [prevExisting, setPrevExisting] = useState(existing);
+  if (existing !== prevExisting) {
+    setPrevExisting(existing);
+    setInvoice(existing);
+  }
+
   const create = () => {
     setError(null);
     start(async () => {

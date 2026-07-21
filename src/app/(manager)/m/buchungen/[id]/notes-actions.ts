@@ -7,6 +7,7 @@ import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { resendBookingConfirmationMails } from "@/lib/booking-payment-confirmation";
+import { getActiveInvoiceForBooking, reissueInvoiceForBooking } from "@/lib/invoice";
 
 async function requireManager() {
   const session = await auth();
@@ -113,10 +114,16 @@ const contactSchema = z.object({
  * E-Mail-Adresse, der dazu fuehrt, dass Systemmails (Bestaetigung,
  * Mietvertrag, ...) unbemerkt bouncen. Bewusst kein Self-Service fuer
  * Gaeste — nur der Manager darf fremde Kundendaten aendern.
+ *
+ * Aendert sich dabei ein Feld, das auf der Rechnung steht (Name, E-Mail,
+ * Adresse), und existiert fuer diese Buchung bereits eine aktive Rechnung,
+ * wird sie automatisch neu ausgestellt (storno + Neuerstellung, GoBD-
+ * konform) — sonst wuerde die Rechnung dauerhaft die alten, falschen Daten
+ * zeigen.
  */
 export async function updateCustomerContact(
   raw: z.infer<typeof contactSchema>
-): Promise<{ ok: true } | { ok: false; error: string }> {
+): Promise<{ ok: true; reissuedInvoiceNumber?: string } | { ok: false; error: string }> {
   const me = await requireManager();
   const parsed = contactSchema.safeParse(raw);
   if (!parsed.success) {
@@ -148,6 +155,30 @@ export async function updateCustomerContact(
   if (`${before.firstName} ${before.lastName}` !== `${d.firstName} ${d.lastName}`) {
     changes.push(`Name: ${before.firstName} ${before.lastName} → ${d.firstName} ${d.lastName}`);
   }
+  if (before.street !== (d.street || null)) changes.push(`Straße geändert`);
+  if (before.zip !== (d.zip || null)) changes.push(`PLZ geändert`);
+  if (before.city !== (d.city || null)) changes.push(`Ort geändert`);
+
+  // Rechnungsrelevante Felder: Name, E-Mail, Adresse (nicht Telefon).
+  const invoiceRelevantChanged =
+    before.email !== d.email ||
+    before.firstName !== d.firstName ||
+    before.lastName !== d.lastName ||
+    before.street !== (d.street || null) ||
+    before.zip !== (d.zip || null) ||
+    before.city !== (d.city || null);
+
+  let reissuedInvoiceNumber: string | undefined;
+  if (invoiceRelevantChanged) {
+    const active = await getActiveInvoiceForBooking(d.bookingId);
+    if (active) {
+      const { invoiceNumber, cancelledNumbers } = await reissueInvoiceForBooking(d.bookingId);
+      reissuedInvoiceNumber = invoiceNumber;
+      changes.push(
+        `Rechnung ${cancelledNumbers.join(", ")} storniert, ${invoiceNumber} mit korrigierten Daten neu ausgestellt`
+      );
+    }
+  }
 
   await db.insert(activityLog).values({
     who: me,
@@ -156,7 +187,7 @@ export async function updateCustomerContact(
   });
 
   revalidatePath(`/m/buchungen/${d.bookingId}`);
-  return { ok: true };
+  return { ok: true, reissuedInvoiceNumber };
 }
 
 /**
