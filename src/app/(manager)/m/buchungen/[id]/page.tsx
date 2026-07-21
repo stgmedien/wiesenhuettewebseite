@@ -18,6 +18,7 @@ import { getInvoiceForBooking } from "./invoice-actions";
 import { Kundenakte } from "./Kundenakte";
 import { ReviewActions } from "./ReviewActions";
 import { findMailTemplateMeta } from "@/lib/automatic-mail-templates";
+import { CustomerContactForm } from "./CustomerContactForm";
 
 export const dynamic = "force-dynamic";
 
@@ -178,6 +179,19 @@ export default async function BookingDetail({ params }: Props) {
               </dl>
             ) : (
               <div className="text-[var(--color-wh-fg-muted)]">Kein Kundendatensatz</div>
+            )}
+            {customer && (
+              <CustomerContactForm
+                bookingId={b.id}
+                customerId={customer.id}
+                firstName={customer.firstName}
+                lastName={customer.lastName}
+                email={customer.email}
+                phone={customer.phone}
+                street={customer.street}
+                zip={customer.zip}
+                city={customer.city}
+              />
             )}
           </Section>
 

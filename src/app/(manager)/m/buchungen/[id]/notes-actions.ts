@@ -94,3 +94,66 @@ export async function updateCustomerTags(formData: FormData) {
   revalidatePath(`/m/buchungen`);
   return { ok: true as const };
 }
+
+const contactSchema = z.object({
+  customerId: z.string().uuid(),
+  bookingId: z.string().uuid(),
+  firstName: z.string().trim().min(1).max(120),
+  lastName: z.string().trim().min(1).max(120),
+  email: z.string().trim().email().max(255),
+  phone: z.string().trim().max(60).optional(),
+  street: z.string().trim().max(255).optional(),
+  zip: z.string().trim().max(20).optional(),
+  city: z.string().trim().max(120).optional(),
+});
+
+/**
+ * Korrigiert die Kontaktdaten eines Kunden — z. B. einen Tippfehler in der
+ * E-Mail-Adresse, der dazu fuehrt, dass Systemmails (Bestaetigung,
+ * Mietvertrag, ...) unbemerkt bouncen. Bewusst kein Self-Service fuer
+ * Gaeste — nur der Manager darf fremde Kundendaten aendern.
+ */
+export async function updateCustomerContact(
+  raw: z.infer<typeof contactSchema>
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const me = await requireManager();
+  const parsed = contactSchema.safeParse(raw);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues.map((i) => i.message).join(", ") };
+  }
+  const d = parsed.data;
+
+  const before = (
+    await db.select().from(customers).where(eq(customers.id, d.customerId)).limit(1)
+  )[0];
+  if (!before) return { ok: false, error: "Kunde nicht gefunden." };
+
+  await db
+    .update(customers)
+    .set({
+      firstName: d.firstName,
+      lastName: d.lastName,
+      email: d.email,
+      phone: d.phone || null,
+      street: d.street || null,
+      zip: d.zip || null,
+      city: d.city || null,
+    })
+    .where(eq(customers.id, d.customerId));
+
+  const changes: string[] = [];
+  if (before.email !== d.email) changes.push(`E-Mail: ${before.email} → ${d.email}`);
+  if (before.phone !== (d.phone || null)) changes.push(`Telefon geändert`);
+  if (`${before.firstName} ${before.lastName}` !== `${d.firstName} ${d.lastName}`) {
+    changes.push(`Name: ${before.firstName} ${before.lastName} → ${d.firstName} ${d.lastName}`);
+  }
+
+  await db.insert(activityLog).values({
+    who: me,
+    what: `Kontaktdaten korrigiert${changes.length ? " — " + changes.join(", ") : ""}`,
+    bookingId: d.bookingId,
+  });
+
+  revalidatePath(`/m/buchungen/${d.bookingId}`);
+  return { ok: true };
+}
