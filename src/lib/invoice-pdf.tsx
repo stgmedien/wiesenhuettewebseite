@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
   tdUnit: { width: 70, textAlign: "right", fontFamily: "Courier" },
   tdTotal: { width: 80, textAlign: "right", fontFamily: "Courier" },
   tdLabel: { flex: 1 },
-  totalsRow: {
+  subtotalRow: {
     flexDirection: "row",
     justifyContent: "flex-end",
     borderTopWidth: 1.4,
@@ -109,23 +109,39 @@ const styles = StyleSheet.create({
     paddingTop: 6,
     marginTop: 4,
   },
-  totalLabel: { fontWeight: 700, fontSize: 11 },
-  totalValue: {
+  subtotalLabel: { fontWeight: 700, fontSize: 10 },
+  subtotalValue: {
     fontWeight: 700,
-    fontSize: 11,
+    fontSize: 10,
     fontFamily: "Courier",
     width: 80,
     textAlign: "right",
   },
-  depositRow: {
+  extraRow: {
     flexDirection: "row",
     justifyContent: "flex-end",
-    paddingTop: 4,
+    paddingTop: 5,
   },
-  depositLabel: { fontSize: 9, color: C.textMuted },
-  depositValue: {
-    fontSize: 9,
-    color: C.textMuted,
+  extraLabel: { fontSize: 9.5 },
+  extraValue: {
+    fontSize: 9.5,
+    fontFamily: "Courier",
+    width: 80,
+    textAlign: "right",
+  },
+  extraDetail: { fontSize: 8, color: C.textMuted, marginTop: 1 },
+  totalsRow: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    borderTopWidth: 1.4,
+    borderTopColor: C.textBlack,
+    paddingTop: 6,
+    marginTop: 8,
+  },
+  totalLabel: { fontWeight: 700, fontSize: 12 },
+  totalValue: {
+    fontWeight: 700,
+    fontSize: 12,
     fontFamily: "Courier",
     width: 80,
     textAlign: "right",
@@ -150,22 +166,6 @@ const styles = StyleSheet.create({
     borderTopColor: C.border,
     paddingTop: 8,
   },
-  paymentTable: {
-    flexDirection: "column",
-    marginBottom: 16,
-    backgroundColor: "#F7F7F2",
-    padding: 10,
-    borderRadius: 4,
-  },
-  pmtRow: {
-    flexDirection: "row",
-    fontSize: 9,
-    paddingVertical: 2,
-  },
-  pmtKind: { flex: 1, textTransform: "capitalize" },
-  pmtMethod: { width: 100, color: C.textMuted },
-  pmtDate: { width: 70, color: C.textMuted },
-  pmtAmount: { width: 70, textAlign: "right", fontFamily: "Courier" },
 });
 
 const formatEuro = (cents: number): string =>
@@ -201,14 +201,9 @@ export type InvoicePdfProps = {
   subtotalCents: number;
   depositCents: number;
   kurtaxeCents: number;
+  kurtaxePersons: number;
   /** Buchung vor dem Storno-Stichtag (05.07.2026) — zeigt die Alt-Staffel. */
   isLegacy: boolean;
-  payments: {
-    kind: string;
-    method?: string | null;
-    receivedAt?: string | Date | null;
-    amountCents: number;
-  }[];
   notes?: string;
 };
 
@@ -225,8 +220,8 @@ export function InvoicePdf({
   subtotalCents,
   depositCents,
   kurtaxeCents,
+  kurtaxePersons,
   isLegacy,
-  payments,
   notes,
 }: InvoicePdfProps) {
   return (
@@ -312,46 +307,39 @@ export function InvoicePdf({
               <Text style={[styles.td, styles.tdTotal]}>{formatEuro(li.totalCents)}</Text>
             </View>
           ))}
-          <View style={styles.totalsRow}>
-            <Text style={styles.totalLabel}>Zwischensumme </Text>
-            <Text style={styles.totalValue}>{formatEuro(subtotalCents)}</Text>
+          <View style={styles.subtotalRow}>
+            <Text style={styles.subtotalLabel}>Zwischensumme </Text>
+            <Text style={styles.subtotalValue}>{formatEuro(subtotalCents)}</Text>
           </View>
-          {depositCents > 0 && (
-            <View style={styles.depositRow}>
-              <Text style={styles.depositLabel}>
-                Kaution (separat, Erstattung 14 Tage nach Abreise){" "}
-              </Text>
-              <Text style={styles.depositValue}>{formatEuro(depositCents)}</Text>
-            </View>
-          )}
           {kurtaxeCents > 0 && (
-            <View style={styles.depositRow}>
-              <Text style={styles.depositLabel}>
-                Kurtaxe Hochsauerland (separat, an Winterberg abgeführt){" "}
+            <View>
+              <View style={styles.extraRow}>
+                <Text style={styles.extraLabel}>Kurtaxe Hochsauerland </Text>
+                <Text style={styles.extraValue}>{formatEuro(kurtaxeCents)}</Text>
+              </View>
+              <Text style={[styles.extraDetail, { textAlign: "right" }]}>
+                {kurtaxePersons} Personen ab 16 Jahren — wird an die Kurverwaltung Winterberg abgeführt
               </Text>
-              <Text style={styles.depositValue}>{formatEuro(kurtaxeCents)}</Text>
             </View>
           )}
-        </View>
-
-        {/* Zahlungen */}
-        {payments.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Zahlungseingänge</Text>
-            <View style={styles.paymentTable}>
-              {payments.map((p, i) => (
-                <View key={i} style={styles.pmtRow}>
-                  <Text style={styles.pmtKind}>{p.kind}</Text>
-                  <Text style={styles.pmtMethod}>{p.method ?? "—"}</Text>
-                  <Text style={styles.pmtDate}>
-                    {p.receivedAt ? formatDate(p.receivedAt) : "—"}
-                  </Text>
-                  <Text style={styles.pmtAmount}>{formatEuro(p.amountCents)}</Text>
-                </View>
-              ))}
+          {depositCents > 0 && (
+            <View>
+              <View style={styles.extraRow}>
+                <Text style={styles.extraLabel}>Kaution </Text>
+                <Text style={styles.extraValue}>{formatEuro(depositCents)}</Text>
+              </View>
+              <Text style={[styles.extraDetail, { textAlign: "right" }]}>
+                Erstattung 14 Tage nach mangelfreier Abreise
+              </Text>
             </View>
+          )}
+          <View style={styles.totalsRow}>
+            <Text style={styles.totalLabel}>Gesamtbetrag </Text>
+            <Text style={styles.totalValue}>
+              {formatEuro(subtotalCents + kurtaxeCents + depositCents)}
+            </Text>
           </View>
-        )}
+        </View>
 
         {/* USt-Hinweis */}
         <View style={styles.notesBox}>
