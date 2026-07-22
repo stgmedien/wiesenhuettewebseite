@@ -93,6 +93,10 @@ export const sendMail = async (args: SendMailArgs): Promise<void> => {
       template: args.template,
       status: "sent",
       bookingId: args.bookingId,
+      // Bruecke zum Brevo-Zustell-Webhook — der referenziert Events ueber
+      // genau diese Message-ID (siehe /api/webhooks/brevo). Ohne spitze
+      // Klammern gespeichert, da Brevo sie im Webhook-Payload teils weglaesst.
+      messageId: info.messageId ? info.messageId.replace(/^<|>$/g, "") : null,
     });
 
     console.log(`[mail] ${args.template} → ${args.to} (${info.messageId})`);

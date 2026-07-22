@@ -351,9 +351,18 @@ export const emailLog = pgTable("email_log", {
   to: varchar("to", { length: 255 }).notNull(),
   subject: text("subject").notNull(),
   template: varchar("template", { length: 60 }).notNull(),
+  // "sent"/"failed" — Ergebnis der SMTP-UEBERGABE an Brevo, NICHT ob die Mail
+  // beim Empfaenger ankam. Siehe deliveryStatus fuer den echten Zustellstatus.
   status: varchar("status", { length: 30 }).notNull().default("sent"),
   error: text("error"),
   sentAt: timestamp("sent_at").notNull().defaultNow(),
+  // Nodemailer-Message-ID — Bruecke zum Brevo-Zustell-Webhook (matched dort
+  // per message-id im Event-Payload).
+  messageId: text("message_id"),
+  // Echter Zustellstatus von Brevo, asynchron per Webhook nachgetragen:
+  // "delivered" | "bounced" | "blocked" | "spam" | null (noch kein Event).
+  deliveryStatus: varchar("delivery_status", { length: 20 }),
+  deliveryStatusAt: timestamp("delivery_status_at"),
 });
 
 // =============================================================
