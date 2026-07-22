@@ -364,6 +364,22 @@ export const AUTOMATIC_MAIL_TEMPLATES: AutomaticMailTemplate[] = [
     file: "src/app/api/stripe/webhook/route.ts",
   },
   {
+    key: "donation-thank-you",
+    label: "Spenden-Dankesmail",
+    category: "Sonstiges",
+    trigger: "Stripe-Checkout für eine Spende (z. B. Zeltpodest) abgeschlossen.",
+    audience: "Spender:in",
+    file: "src/app/api/stripe/webhook/route.ts",
+  },
+  {
+    key: "donation-finance-notice",
+    label: "Spende > 300 € — förmliche Zuwendungsbestätigung nötig",
+    category: "Sonstiges",
+    trigger: "Gleichzeitig mit der Dankesmail, wenn die Spende 300 € übersteigt.",
+    audience: "Norbert Monscheidt (MAIL_FINANCE_TO)",
+    file: "src/app/api/stripe/webhook/route.ts",
+  },
+  {
     key: "wapelbad-confirm",
     label: "Wapelbad-Anmeldung bestätigt",
     category: "Sonstiges",
