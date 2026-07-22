@@ -190,6 +190,8 @@ const COPY: Record<Locale, Copy> = {
       customLabel: "Eigener Betrag in €",
       cta: "Jetzt spenden",
       secure: "Sichere Zahlung über Stripe · Empfänger: Skifreunde Gütersloh e.V. · Zweck: Zeltpodest",
+      receiptNote:
+        "Du bekommst automatisch eine Spendenquittung per E-Mail — bis 300 € unkompliziert, ab 300 € kümmert sich unser Vorstand persönlich um die förmliche Bestätigung. Herzlichen Dank für Deine Unterstützung!",
       thanks: "Danke für Deine Spende — das Zeltpodest rückt ein Stück näher!",
       error: "Bitte wähle einen Betrag zwischen 2 € und 5.000 €.",
     },
@@ -327,6 +329,8 @@ const COPY: Record<Locale, Copy> = {
       customLabel: "Custom amount in €",
       cta: "Donate now",
       secure: "Secure payment via Stripe · Recipient: Skifreunde Gütersloh e.V. · Purpose: tent deck",
+      receiptNote:
+        "You'll automatically receive a donation receipt by email — straightforward up to €300, and our board handles the formal certificate personally above that. Thank you so much for your support!",
       thanks: "Thank you for your donation — the tent deck just moved a step closer!",
       error: "Please choose an amount between €2 and €5,000.",
     },
@@ -464,6 +468,8 @@ const COPY: Record<Locale, Copy> = {
       customLabel: "Eigen bedrag in €",
       cta: "Nu doneren",
       secure: "Veilig betalen via Stripe · Ontvanger: Skifreunde Gütersloh e.V. · Doel: tentvlonder",
+      receiptNote:
+        "Je ontvangt automatisch een donatiebewijs per e-mail — tot € 300 zonder gedoe, boven dat bedrag regelt ons bestuur persoonlijk de officiële bevestiging. Hartelijk dank voor je steun!",
       thanks: "Bedankt voor je donatie — de vlonder komt een stap dichterbij!",
       error: "Kies een bedrag tussen € 2 en € 5.000.",
     },

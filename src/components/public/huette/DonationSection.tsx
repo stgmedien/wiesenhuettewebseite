@@ -13,6 +13,7 @@ export type DonationCopy = {
   customLabel: string;
   cta: string;
   secure: string;
+  receiptNote: string;
   thanks: string;
   error: string;
 };
@@ -122,6 +123,7 @@ export function DonationSection({
             <SubmitButton label={copy.cta} />
           </div>
           <p className="text-[12.5px] text-[var(--color-wh-snow)]/60 mt-4 m-0">{copy.secure}</p>
+          <p className="text-sm text-[var(--color-wh-snow)]/80 mt-2 m-0">{copy.receiptNote}</p>
         </form>
       </div>
     </section>
