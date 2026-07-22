@@ -9,6 +9,7 @@ import { StatusPill } from "@/components/manager/StatusPill";
 import { StatusActions } from "./StatusActions";
 import { ManualPaymentForm } from "./ManualPaymentForm";
 import { AvsCheckinForm } from "./AvsCheckinForm";
+import { KurkartenUploadForm } from "./KurkartenUploadForm";
 import { PaymentsTable } from "./PaymentsTable";
 import { PersonsPriceEditor } from "./PersonsPriceEditor";
 import { ManagerMessage } from "./ManagerMessage";
@@ -279,6 +280,7 @@ export default async function BookingDetail({ params }: Props) {
                 guestEmail={customer.email}
                 lastSentAt={avsLastSentAt}
               />
+              <KurkartenUploadForm bookingId={b.id} currentUrl={b.kurkartenPdfUrl} />
             </Section>
           )}
         </div>

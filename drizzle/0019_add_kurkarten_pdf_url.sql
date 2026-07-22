@@ -1,0 +1,1 @@
+ALTER TABLE "bookings" ADD COLUMN "kurkarten_pdf_url" text;

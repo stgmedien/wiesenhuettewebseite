@@ -302,6 +302,11 @@ export const bookings = pgTable(
     source: varchar("source", { length: 60 }).notNull().default("Portal"),
     keyMethod: varchar("key_method", { length: 60 }).default("Schlüsselsafe"),
 
+    // Von Dana hochgeladene AVS-Kurkarten-Sammel-PDF (nach Gruppenregistrierung
+    // im AVS-Portal erzeugt). Wird der Huettenwart-T-7-Mail an Toni automatisch
+    // als Anhang beigefuegt, damit er sie vor Anreise ausdrucken kann.
+    kurkartenPdfUrl: text("kurkarten_pdf_url"),
+
     internalNotes: text("internal_notes"),
     customerMessage: text("customer_message"),
 

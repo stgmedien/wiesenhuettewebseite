@@ -536,11 +536,33 @@ export async function GET(req: Request) {
     // Idempotenz. Enthält Portal-Link zur Buchung für Ansicht + Abnahme.
     if (!(await alreadySent(b.id, "huettenwart_notice"))) {
       try {
+        // Liegt bis T-7 schon eine hochgeladene Kurkarten-Sammel-PDF vor
+        // (AVS-Gruppenregistrierung), bekommt Toni sie direkt mit angehängt —
+        // dann muss niemand mehr manuell dran denken, sie ihm zuzuschicken.
+        let attachments: { filename: string; content: Buffer; contentType: string }[] | undefined;
+        if (b.kurkartenPdfUrl) {
+          try {
+            const pdfRes = await fetch(b.kurkartenPdfUrl);
+            if (pdfRes.ok) {
+              attachments = [
+                {
+                  filename: `Kurkarten-${b.bookingNumber}.pdf`,
+                  content: Buffer.from(await pdfRes.arrayBuffer()),
+                  contentType: "application/pdf",
+                },
+              ];
+            }
+          } catch (err) {
+            console.error("[cron] Kurkarten-PDF-Abruf fehlgeschlagen:", err);
+          }
+        }
+
         await sendMail({
           to: HUETTENWART_EMAIL,
           subject: `In 7 Tagen: Gruppe an der Wiesenhütte — ${b.bookingNumber}`,
           template: "huettenwart_notice",
           bookingId: b.id,
+          attachments,
           react: HuettenwartNoticeEmail({
             bookingNumber: b.bookingNumber,
             guestName: `${customer.firstName} ${customer.lastName}`.trim(),

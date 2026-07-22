@@ -31,7 +31,7 @@ const getTransporter = (): nodemailer.Transporter => {
 
 export type MailAttachment = {
   filename: string;
-  content: string;
+  content: string | Buffer;
   contentType: string;
 };
 
