@@ -37,13 +37,17 @@ export default async function Dashboard() {
   in30d.setDate(in30d.getDate() + 30);
   const in30dIso = in30d.toISOString().slice(0, 10);
 
+  const in60d = new Date(today);
+  in60d.setDate(in60d.getDate() + 60);
+  const in60dIso = in60d.toISOString().slice(0, 10);
+
   const mailFailuresPromise = getUnresolvedMailFailures();
 
   // Alle unabhaengigen Queries parallel (Issue #86) — nur openPaymentBookings
   // und die Customer-Namen brauchen Ergebnisse aus dieser Stufe.
   const [arrivalsSoon, departuresSoon, allBookings, openPaymentRows, openInquiries, recentBookings, kurtaxeSoon] =
     await Promise.all([
-      // Anreisen in 7 Tagen
+      // Anreisen in den nächsten 2 Monaten
       db
         .select({
           id: bookings.id,
@@ -54,9 +58,9 @@ export default async function Dashboard() {
           customerId: bookings.customerId,
         })
         .from(bookings)
-        .where(and(gte(bookings.arrival, todayIso), lte(bookings.arrival, in7dIso), ne(bookings.status, "storniert")))
+        .where(and(gte(bookings.arrival, todayIso), lte(bookings.arrival, in60dIso), ne(bookings.status, "storniert")))
         .orderBy(bookings.arrival)
-        .limit(10),
+        .limit(30),
 
       // Abreisen in 7 Tagen
       db
@@ -222,7 +226,7 @@ export default async function Dashboard() {
         />
         <Kpi
           icon={<CalendarArrowDown />}
-          label="Anreisen (7 T.)"
+          label="Anreisen (2 Mon.)"
           value={String(arrivalsSoon.length)}
         />
         <Kpi
@@ -369,9 +373,9 @@ export default async function Dashboard() {
         </Section>
       </div>
 
-      {/* Anreisen + Abreisen 7 Tage */}
+      {/* Anreisen 2 Monate + Abreisen 7 Tage */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-        <Section title="Anreisen — nächste 7 Tage">
+        <Section title="Anreisen — nächste 2 Monate">
           {arrivalsSoon.length === 0 ? (
             <p className="text-[var(--color-wh-fg-muted)] text-sm">Keine Anreisen.</p>
           ) : (
