@@ -368,7 +368,7 @@ export const AUTOMATIC_MAIL_TEMPLATES: AutomaticMailTemplate[] = [
     label: "Spenden-Dankesmail",
     category: "Sonstiges",
     trigger: "Stripe-Checkout für eine Spende (z. B. Zeltpodest) abgeschlossen.",
-    audience: "Spender:in",
+    audience: "Spender:in + BCC hello@wiesenhuette.de",
     file: "src/app/api/stripe/webhook/route.ts",
   },
   {

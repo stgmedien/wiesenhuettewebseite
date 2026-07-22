@@ -933,6 +933,7 @@ async function handleDonationPaid(session: Stripe.Checkout.Session) {
   try {
     await sendMail({
       to: donorEmail,
+      bcc: "hello@wiesenhuette.de",
       subject: "Danke für Eure Spende fürs Zeltpodest an der Wiesenhütte!",
       template: "donation-thank-you",
       react: DonationThankYouEmail({
