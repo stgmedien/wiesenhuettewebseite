@@ -82,9 +82,8 @@ export default function AvsSelfCheckinEmail({
           <Text style={text}>Hallo {guestName},</Text>
           <Text style={text}>
             vielen Dank für Eure Buchung <strong>{bookingNumber}</strong> ({arrival} bis{" "}
-            {departure})! Vor der Anreise füllt bitte <strong>unbedingt</strong> den digitalen
-            Meldeschein aus. Das Ausfüllen ist <strong>gesetzlich vorgeschrieben</strong>{" "}
-            (Meldepflicht und Kurbeitrag) und damit für jede Buchung verpflichtend — es dauert nur
+            {departure})! Bitte füllt vor der Anreise den digitalen Meldeschein aus — das ist{" "}
+            <strong>gesetzlich vorgeschrieben</strong> (Meldepflicht und Kurbeitrag) und dauert nur
             wenige Minuten:
           </Text>
           <Section style={{ textAlign: "center", margin: "28px 0" }}>
