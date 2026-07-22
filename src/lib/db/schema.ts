@@ -1006,6 +1006,23 @@ export const vouchers = pgTable(
 );
 
 // =============================================================
+// SPENDEN (z. B. Zeltpodest) — reine Aufzeichnung fuer Dankes-Mail/
+// Zuwendungsnachweis; die eigentliche Zahlungsabwicklung/Buchhaltung
+// bleibt bei Stripe (siehe huette/spenden-actions.ts).
+// =============================================================
+
+export const donations = pgTable("donations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  stripeSessionId: text("stripe_session_id").notNull().unique(),
+  stripePaymentIntentId: text("stripe_payment_intent_id"),
+  donorName: varchar("donor_name", { length: 255 }).notNull(),
+  donorEmail: varchar("donor_email", { length: 255 }).notNull(),
+  amountCents: integer("amount_cents").notNull(),
+  purpose: varchar("purpose", { length: 60 }).notNull().default("zeltpodest"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// =============================================================
 // WARTUNGS-TICKETS — Hüttenwart-Mängelliste
 // =============================================================
 

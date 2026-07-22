@@ -43,6 +43,16 @@ export async function createDonationCheckout(formData: FormData) {
         },
       ],
       metadata: { kind: "donation", purpose: "zeltpodest" },
+      // Name wird explizit abgefragt (nicht aus der Rechnungsadresse
+      // geraten) — steht so exakt auf der Dankes-Mail/dem Zuwendungsnachweis.
+      custom_fields: [
+        {
+          key: "donor_name",
+          label: { type: "custom", custom: "Name für die Spendenquittung" },
+          type: "text",
+          optional: false,
+        },
+      ],
       success_url: `${BASE_URL}/huette?spende=danke#spenden`,
       cancel_url: `${BASE_URL}/huette#spenden`,
     });

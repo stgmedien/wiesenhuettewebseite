@@ -10,6 +10,7 @@ import {
   vouchers,
   membershipTiers,
   users,
+  donations,
 } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
@@ -19,9 +20,12 @@ import VoucherPurchaseEmail from "@/lib/mail/templates/voucher-purchase";
 import VoucherGiftEmail from "@/lib/mail/templates/voucher-gift";
 import MemberWelcomeEmail from "@/lib/mail/templates/member-welcome";
 import MemberJoinedInternalEmail from "@/lib/mail/templates/member-joined-internal";
+import DonationThankYouEmail from "@/lib/mail/templates/donation-thank-you";
+import DonationFinanceNoticeEmail from "@/lib/mail/templates/donation-finance-notice";
 import { addContactToMembersList } from "@/lib/brevo";
 import { promoteToMemberRole } from "@/lib/membership-role";
 import { confirmDepositPayment } from "@/lib/booking-payment-confirmation";
+import { formatEuro } from "@/lib/pricing";
 import type Stripe from "stripe";
 
 export const runtime = "nodejs"; // raw body needed
@@ -137,9 +141,11 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     return;
   }
 
-  // Spenden (z. B. Zeltpodest): kein Folgeprozess nötig —
-  // Stripe selbst ist hier die Buchhaltung. Bewusst still erledigen.
+  // Spenden (z. B. Zeltpodest): Dankes-Mail + ggf. interner Hinweis an die
+  // Vereinsfinanzen (siehe handleDonationPaid). Stripe bleibt trotzdem die
+  // eigentliche Buchhaltung — donations ist nur fuer Quittung/Nachverfolgung.
   if (kind === "donation") {
+    await handleDonationPaid(session);
     return;
   }
 
@@ -873,6 +879,93 @@ async function handleGiftVoucherPaid(session: Stripe.Checkout.Session) {
       });
     } catch (err) {
       console.error("[webhook] voucher gift mail failed", err);
+    }
+  }
+}
+
+// Ab diesem Betrag reicht der vereinfachte Zuwendungsnachweis nicht mehr
+// (§ 50 Abs. 4 EStDV) — darüber braucht es die foermliche
+// Zuwendungsbestaetigung nach amtlichem Vordruck vom Vorstand.
+const FORMAL_RECEIPT_THRESHOLD_CENTS = 30_000;
+
+async function handleDonationPaid(session: Stripe.Checkout.Session) {
+  // Idempotent: bei Stripe-Retry keine zweite Zeile/Mail.
+  const existing = await db
+    .select({ id: donations.id })
+    .from(donations)
+    .where(eq(donations.stripeSessionId, session.id))
+    .limit(1);
+  if (existing[0]) return;
+
+  const donorEmail = session.customer_details?.email;
+  if (!donorEmail) {
+    console.warn(`[webhook] donation session ${session.id} ohne E-Mail`);
+    return;
+  }
+  const donorNameField = session.custom_fields?.find((f) => f.key === "donor_name");
+  const donorName = donorNameField?.text?.value?.trim() || "Spender:in";
+  const amountCents = session.amount_total ?? 0;
+  const purpose = session.metadata?.purpose ?? "zeltpodest";
+  const piId = (session.payment_intent as string | null) ?? null;
+
+  await db.insert(donations).values({
+    stripeSessionId: session.id,
+    stripePaymentIntentId: piId,
+    donorName,
+    donorEmail,
+    amountCents,
+    purpose,
+  });
+
+  await db.insert(activityLog).values({
+    who: "Stripe",
+    what: `Spende erhalten: ${formatEuro(amountCents)} von ${donorName} (${donorEmail}) — Zweck: ${purpose}`,
+  });
+
+  const amountFormatted = formatEuro(amountCents);
+  const dateFormatted = new Date().toLocaleDateString("de-DE", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+  const formalReceiptPending = amountCents > FORMAL_RECEIPT_THRESHOLD_CENTS;
+
+  try {
+    await sendMail({
+      to: donorEmail,
+      subject: "Danke für Eure Spende fürs Zeltpodest an der Wiesenhütte!",
+      template: "donation-thank-you",
+      react: DonationThankYouEmail({
+        donorName,
+        amountFormatted,
+        dateFormatted,
+        formalReceiptPending,
+      }),
+    });
+  } catch (err) {
+    console.error("[webhook] donation thank-you mail failed", err);
+  }
+
+  if (formalReceiptPending) {
+    const financeTo = process.env.MAIL_FINANCE_TO;
+    if (financeTo) {
+      try {
+        await sendMail({
+          to: financeTo,
+          subject: `Spende über ${amountFormatted} braucht eine förmliche Zuwendungsbestätigung`,
+          template: "donation-finance-notice",
+          react: DonationFinanceNoticeEmail({
+            donorName,
+            donorEmail,
+            amountFormatted,
+            dateFormatted,
+          }),
+        });
+      } catch (err) {
+        console.error("[webhook] donation finance-notice mail failed", err);
+      }
+    } else {
+      console.warn("[webhook] MAIL_FINANCE_TO nicht gesetzt — Hinweis zur Spende > 300 € nicht verschickt");
     }
   }
 }
