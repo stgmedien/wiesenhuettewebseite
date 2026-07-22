@@ -1,6 +1,15 @@
 import { db } from "@/lib/db";
 import { emailLog, bookings, customers } from "@/lib/db/schema";
-import { and, desc, eq, gte, inArray } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, or } from "drizzle-orm";
+
+const DELIVERY_FAILURE_STATUSES = ["bounced", "blocked", "spam", "invalid"] as const;
+
+const DELIVERY_STATUS_LABELS: Record<string, string> = {
+  bounced: "Bounce (Adresse nimmt nicht an)",
+  blocked: "Vom Empfänger-Server blockiert",
+  spam: "Als Spam eingestuft",
+  invalid: "Ungültige E-Mail-Adresse",
+};
 
 /**
  * Idempotenz-Helper: prueft, ob fuer (bookingId, template) bereits eine
@@ -36,7 +45,8 @@ export type MailFailure = {
 };
 
 /**
- * Fehlgeschlagene Mails der letzten `sinceDays` Tage, bei denen NICHT
+ * Fehlgeschlagene ODER nachweislich nicht zugestellte Mails (Bounce/Block/
+ * Spam laut Brevo-Webhook) der letzten `sinceDays` Tage, bei denen NICHT
  * danach schon ein erfolgreicher Versand derselben Vorlage an dieselbe
  * Buchung nachgewiesen ist (z. B. durch die Resend-Funktion nach einer
  * Adresskorrektur) — genau die Faelle, die noch echte Aufmerksamkeit
@@ -49,7 +59,15 @@ export async function getUnresolvedMailFailures(sinceDays = 14): Promise<MailFai
   const failed = await db
     .select()
     .from(emailLog)
-    .where(and(eq(emailLog.status, "failed"), gte(emailLog.sentAt, since)))
+    .where(
+      and(
+        gte(emailLog.sentAt, since),
+        or(
+          eq(emailLog.status, "failed"),
+          inArray(emailLog.deliveryStatus, [...DELIVERY_FAILURE_STATUSES])
+        )
+      )
+    )
     .orderBy(desc(emailLog.sentAt));
   if (failed.length === 0) return [];
 
@@ -93,6 +111,7 @@ export async function getUnresolvedMailFailures(sinceDays = 14): Promise<MailFai
   return unresolved.map((f) => {
     const b = f.bookingId ? bookingMap.get(f.bookingId) : undefined;
     const c = b?.customerId ? customerMap.get(b.customerId) : undefined;
+    const deliveryLabel = f.deliveryStatus ? DELIVERY_STATUS_LABELS[f.deliveryStatus] : null;
     return {
       id: f.id,
       bookingId: f.bookingId,
@@ -101,7 +120,7 @@ export async function getUnresolvedMailFailures(sinceDays = 14): Promise<MailFai
       to: f.to,
       template: f.template,
       subject: f.subject,
-      error: f.error,
+      error: f.error ?? deliveryLabel,
       sentAt: f.sentAt,
     };
   });

@@ -120,6 +120,13 @@
       "when": 1784621692333,
       "tag": "0016_add_kurtaxe_payment_kind",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1784704519352,
+      "tag": "0017_add_email_log_delivery_status",
+      "breakpoints": true
     }
   ]
 }
