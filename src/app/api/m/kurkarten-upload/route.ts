@@ -1,18 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { put } from "@vercel/blob";
+import { put, del } from "@vercel/blob";
 import { db } from "@/lib/db";
 import { bookings, customers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { buildKurkartenFilename } from "@/lib/kurkarten";
 
+async function requireManager() {
+  const session = await auth();
+  const role = (session?.user as { role?: string } | undefined)?.role;
+  return role === "manager" || role === "admin";
+}
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  const role = (session?.user as { role?: string } | undefined)?.role;
-  if (role !== "manager" && role !== "admin") {
+  if (!(await requireManager())) {
     return NextResponse.json({ error: "Nicht autorisiert" }, { status: 403 });
   }
 
@@ -53,4 +57,35 @@ export async function POST(req: NextRequest) {
     .where(eq(bookings.id, bookingId));
 
   return NextResponse.json({ url: blob.url });
+}
+
+export async function DELETE(req: NextRequest) {
+  if (!(await requireManager())) {
+    return NextResponse.json({ error: "Nicht autorisiert" }, { status: 403 });
+  }
+
+  const { bookingId } = (await req.json().catch(() => ({}))) as { bookingId?: string };
+  if (!bookingId) {
+    return NextResponse.json({ error: "bookingId erforderlich" }, { status: 400 });
+  }
+
+  const [booking] = await db
+    .select({ url: bookings.kurkartenPdfUrl })
+    .from(bookings)
+    .where(eq(bookings.id, bookingId))
+    .limit(1);
+  if (booking?.url) {
+    try {
+      await del(booking.url);
+    } catch (err) {
+      console.error("[kurkarten-upload] Blob-Löschung fehlgeschlagen:", err);
+    }
+  }
+
+  await db
+    .update(bookings)
+    .set({ kurkartenPdfUrl: null })
+    .where(eq(bookings.id, bookingId));
+
+  return NextResponse.json({ ok: true });
 }
