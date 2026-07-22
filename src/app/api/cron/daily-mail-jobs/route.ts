@@ -28,6 +28,7 @@ import AvsReminderInternalEmail from "@/lib/mail/templates/avs-reminder-internal
 import MailFailureDigestEmail from "@/lib/mail/templates/mail-failure-digest";
 import { getUnresolvedMailFailures } from "@/lib/mail-log";
 import { findMailTemplateMeta } from "@/lib/automatic-mail-templates";
+import { buildKurkartenFilename } from "@/lib/kurkarten";
 import {
   getOrCreateDepositCheckout,
   SCHOOL_DEPOSIT_DUE_DAYS,
@@ -546,7 +547,7 @@ export async function GET(req: Request) {
             if (pdfRes.ok) {
               attachments = [
                 {
-                  filename: `Kurkarten-${b.bookingNumber}.pdf`,
+                  filename: buildKurkartenFilename(customer.lastName, b.arrival),
                   content: Buffer.from(await pdfRes.arrayBuffer()),
                   contentType: "application/pdf",
                 },

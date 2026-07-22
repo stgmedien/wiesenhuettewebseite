@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { put } from "@vercel/blob";
 import { db } from "@/lib/db";
-import { bookings } from "@/lib/db/schema";
+import { bookings, customers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { buildKurkartenFilename } from "@/lib/kurkarten";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -25,7 +26,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Nur PDF-Dateien erlaubt." }, { status: 400 });
   }
 
-  const filename = `kurkarten/${bookingId}/${Date.now()}-gaestekarten.pdf`;
+  const [booking] = await db
+    .select({ arrival: bookings.arrival, customerId: bookings.customerId })
+    .from(bookings)
+    .where(eq(bookings.id, bookingId))
+    .limit(1);
+  if (!booking) {
+    return NextResponse.json({ error: "Buchung nicht gefunden" }, { status: 404 });
+  }
+  const [customer] = booking.customerId
+    ? await db.select({ lastName: customers.lastName }).from(customers).where(eq(customers.id, booking.customerId)).limit(1)
+    : [];
+
+  const displayName = buildKurkartenFilename(customer?.lastName ?? "Gast", booking.arrival);
+  const filename = `kurkarten/${bookingId}/${displayName}`;
 
   const blob = await put(filename, file, {
     access: "public",
