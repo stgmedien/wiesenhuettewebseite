@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { bookings, customers } from "@/lib/db/schema";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, asc, desc, and } from "drizzle-orm";
 import Link from "next/link";
 import { formatEuro } from "@/lib/pricing";
 import { StatusPill } from "@/components/manager/StatusPill";
@@ -48,7 +48,22 @@ export default async function BookingsListPage({
     .from(bookings)
     .leftJoin(customers, eq(customers.id, bookings.customerId))
     .where(where)
-    .orderBy(sortByBooked ? desc(bookings.createdAt) : desc(bookings.arrival));
+    .orderBy(sortByBooked ? desc(bookings.createdAt) : asc(bookings.arrival));
+
+  // Im Anreise-Modus: aktuelle/anstehende Buchungen (nächstes Datum zuerst)
+  // von laengst abgereisten trennen — sonst verschwindet "was ist als
+  // Naechstes dran" in einer langen Liste voller vergangener Aufenthalte.
+  // "Alt" = Abreise vor mehr als 7 Tagen. Im "Gebucht am"-Modus bleibt die
+  // Liste flach (da geht es um Verwaltungs-, nicht Reise-Chronologie).
+  const oldCutoff = new Date();
+  oldCutoff.setDate(oldCutoff.getDate() - 7);
+  const oldCutoffIso = oldCutoff.toISOString().slice(0, 10);
+  const currentRows = sortByBooked ? rows : rows.filter((r) => r.departure >= oldCutoffIso);
+  const oldRows = sortByBooked
+    ? []
+    : rows
+        .filter((r) => r.departure < oldCutoffIso)
+        .sort((a, b) => (a.departure < b.departure ? 1 : a.departure > b.departure ? -1 : 0));
 
   return (
     <div className="px-4 sm:px-8 py-8 sm:py-10 max-w-[1400px]">
@@ -87,85 +102,118 @@ export default async function BookingsListPage({
       </div>
 
       <div className="mt-8 bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] overflow-hidden">
-        <div className="overflow-x-auto">
-        <table className="w-full min-w-[720px] text-sm">
-          <thead className="bg-[var(--color-wh-snow)] border-b border-[var(--color-wh-winter-grey)]">
-            <tr className="text-left">
-              <Th>Nr.</Th>
-              <Th>Status</Th>
-              <Th>Zeitraum</Th>
-              <Th>Gast</Th>
-              <Th>Personen</Th>
-              <Th>Gebucht am</Th>
-              <Th>Summe</Th>
-              <Th>Bezahlt</Th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.length === 0 && (
-              <tr>
-                <td colSpan={8} className="px-4 py-8 text-center text-[var(--color-wh-fg-muted)]">
-                  Keine Buchungen gefunden.
-                </td>
-              </tr>
-            )}
-            {rows.map((r) => (
-              <tr
-                key={r.id}
-                className="border-b border-[var(--color-wh-winter-grey)] last:border-b-0 hover:bg-[var(--color-wh-green-soft)]/30 transition-colors cursor-pointer"
-              >
-                <Td>
-                  <Link href={`/m/buchungen/${r.id}`} className="no-underline text-[var(--color-wh-deep-green)] font-semibold">
-                    {r.bookingNumber}
-                  </Link>
-                </Td>
-                <Td>
-                  <StatusPill
-                    status={r.status}
-                    paidCents={r.paidCents}
-                    dueCents={r.totalCents + r.depositCents}
-                  />
-                </Td>
-                <Td>
-                  <div>{new Date(r.arrival).toLocaleDateString("de-DE")}</div>
-                  <div className="text-xs text-[var(--color-wh-fg-muted)]">
-                    bis {new Date(r.departure).toLocaleDateString("de-DE")} · {r.nights} N.
-                  </div>
-                </Td>
-                <Td>
-                  <div className="font-semibold">
-                    {r.customerFirst} {r.customerLast}
-                  </div>
-                  <div className="text-xs text-[var(--color-wh-fg-muted)]">{r.customerEmail}</div>
-                </Td>
-                <Td>{r.persons}</Td>
-                <Td>
-                  <div>{new Date(r.createdAt).toLocaleDateString("de-DE")}</div>
-                  <div className="text-xs text-[var(--color-wh-fg-muted)]">
-                    {new Date(r.createdAt).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })} Uhr
-                  </div>
-                </Td>
-                <Td>{formatEuro(r.totalCents + r.depositCents)}</Td>
-                <Td>
-                  <span
-                    className={
-                      r.paidCents >= r.totalCents + r.depositCents
-                        ? "text-[var(--color-wh-deep-green)] font-semibold"
-                        : "text-[var(--color-wh-sunset)] font-semibold"
-                    }
-                  >
-                    {formatEuro(r.paidCents)}
-                  </span>
-                </Td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        </div>
+        <BookingsTable rows={currentRows} emptyMessage="Keine Buchungen gefunden." />
       </div>
+
+      {oldRows.length > 0 && (
+        <details className="mt-6 group">
+          <summary className="cursor-pointer text-sm font-semibold text-[var(--color-wh-fg-muted)] hover:text-[var(--color-wh-deep-green)] list-none flex items-center gap-2">
+            <span className="inline-block transition-transform group-open:rotate-90">▶</span>
+            Ältere Buchungen — Abreise vor mehr als 7 Tagen ({oldRows.length})
+          </summary>
+          <div className="mt-4 bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] overflow-hidden">
+            <BookingsTable rows={oldRows} emptyMessage="" />
+          </div>
+        </details>
+      )}
     </div>
   );
 }
+
+type BookingRow = {
+  id: string;
+  bookingNumber: string;
+  status: string;
+  arrival: string;
+  departure: string;
+  nights: number;
+  persons: number;
+  totalCents: number;
+  paidCents: number;
+  depositCents: number;
+  createdAt: Date;
+  customerFirst: string | null;
+  customerLast: string | null;
+  customerEmail: string | null;
+};
+
+const BookingsTable = ({ rows, emptyMessage }: { rows: BookingRow[]; emptyMessage: string }) => (
+  <div className="overflow-x-auto">
+    <table className="w-full min-w-[720px] text-sm">
+      <thead className="bg-[var(--color-wh-snow)] border-b border-[var(--color-wh-winter-grey)]">
+        <tr className="text-left">
+          <Th>Nr.</Th>
+          <Th>Status</Th>
+          <Th>Zeitraum</Th>
+          <Th>Gast</Th>
+          <Th>Personen</Th>
+          <Th>Gebucht am</Th>
+          <Th>Summe</Th>
+          <Th>Bezahlt</Th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.length === 0 && emptyMessage && (
+          <tr>
+            <td colSpan={8} className="px-4 py-8 text-center text-[var(--color-wh-fg-muted)]">
+              {emptyMessage}
+            </td>
+          </tr>
+        )}
+        {rows.map((r) => (
+          <tr
+            key={r.id}
+            className="border-b border-[var(--color-wh-winter-grey)] last:border-b-0 hover:bg-[var(--color-wh-green-soft)]/30 transition-colors cursor-pointer"
+          >
+            <Td>
+              <Link href={`/m/buchungen/${r.id}`} className="no-underline text-[var(--color-wh-deep-green)] font-semibold">
+                {r.bookingNumber}
+              </Link>
+            </Td>
+            <Td>
+              <StatusPill
+                status={r.status}
+                paidCents={r.paidCents}
+                dueCents={r.totalCents + r.depositCents}
+              />
+            </Td>
+            <Td>
+              <div>{new Date(r.arrival).toLocaleDateString("de-DE")}</div>
+              <div className="text-xs text-[var(--color-wh-fg-muted)]">
+                bis {new Date(r.departure).toLocaleDateString("de-DE")} · {r.nights} N.
+              </div>
+            </Td>
+            <Td>
+              <div className="font-semibold">
+                {r.customerFirst} {r.customerLast}
+              </div>
+              <div className="text-xs text-[var(--color-wh-fg-muted)]">{r.customerEmail}</div>
+            </Td>
+            <Td>{r.persons}</Td>
+            <Td>
+              <div>{new Date(r.createdAt).toLocaleDateString("de-DE")}</div>
+              <div className="text-xs text-[var(--color-wh-fg-muted)]">
+                {new Date(r.createdAt).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })} Uhr
+              </div>
+            </Td>
+            <Td>{formatEuro(r.totalCents + r.depositCents)}</Td>
+            <Td>
+              <span
+                className={
+                  r.paidCents >= r.totalCents + r.depositCents
+                    ? "text-[var(--color-wh-deep-green)] font-semibold"
+                    : "text-[var(--color-wh-sunset)] font-semibold"
+                }
+              >
+                {formatEuro(r.paidCents)}
+              </span>
+            </Td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+);
 
 const Th = ({ children }: { children: React.ReactNode }) => (
   <th className="px-4 py-3 text-xs uppercase tracking-wider font-semibold text-[var(--color-wh-fg-muted)]">
