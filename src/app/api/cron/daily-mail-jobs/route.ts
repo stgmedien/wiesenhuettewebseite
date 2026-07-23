@@ -510,6 +510,39 @@ export async function GET(req: Request) {
       : null;
     if (!customer) continue;
 
+    // Kurkarten-Sammel-PDF + Feuerwehr-Meldeliste (falls bis T-7 hochgeladen/
+    // erzeugt) gehen an BEIDE: Toni (zum Ausdrucken) und den Gast (zum
+    // Aufhängen laut Hausordnung) — einmal zentral abrufen, zweimal anhängen.
+    const sharedAttachments: { filename: string; content: Buffer; contentType: string }[] = [];
+    if (b.kurkartenPdfUrl) {
+      try {
+        const pdfRes = await fetch(b.kurkartenPdfUrl);
+        if (pdfRes.ok) {
+          sharedAttachments.push({
+            filename: buildKurkartenFilename(customer.lastName, b.arrival),
+            content: Buffer.from(await pdfRes.arrayBuffer()),
+            contentType: "application/pdf",
+          });
+        }
+      } catch (err) {
+        console.error("[cron] Kurkarten-PDF-Abruf fehlgeschlagen:", err);
+      }
+    }
+    if (b.feuerwehrListePdfUrl) {
+      try {
+        const pdfRes = await fetch(b.feuerwehrListePdfUrl);
+        if (pdfRes.ok) {
+          sharedAttachments.push({
+            filename: `Feuerwehr-Meldeliste-${b.bookingNumber}.pdf`,
+            content: Buffer.from(await pdfRes.arrayBuffer()),
+            contentType: "application/pdf",
+          });
+        }
+      } catch (err) {
+        console.error("[cron] Feuerwehr-Meldeliste-Abruf fehlgeschlagen:", err);
+      }
+    }
+
     if (!(await alreadySent(b.id, "arrival_info"))) {
       try {
         await sendMail({
@@ -517,6 +550,7 @@ export async function GET(req: Request) {
           subject: `In 7 Tagen: Eure Anreise zur Wiesenhütte (${b.bookingNumber})`,
           template: "arrival_info",
           bookingId: b.id,
+          attachments: sharedAttachments.length > 0 ? sharedAttachments : undefined,
           react: ArrivalInfoEmail({
             firstName: customer.firstName,
             bookingNumber: b.bookingNumber,
@@ -537,33 +571,12 @@ export async function GET(req: Request) {
     // Idempotenz. Enthält Portal-Link zur Buchung für Ansicht + Abnahme.
     if (!(await alreadySent(b.id, "huettenwart_notice"))) {
       try {
-        // Liegt bis T-7 schon eine hochgeladene Kurkarten-Sammel-PDF vor
-        // (AVS-Gruppenregistrierung), bekommt Toni sie direkt mit angehängt —
-        // dann muss niemand mehr manuell dran denken, sie ihm zuzuschicken.
-        let attachments: { filename: string; content: Buffer; contentType: string }[] | undefined;
-        if (b.kurkartenPdfUrl) {
-          try {
-            const pdfRes = await fetch(b.kurkartenPdfUrl);
-            if (pdfRes.ok) {
-              attachments = [
-                {
-                  filename: buildKurkartenFilename(customer.lastName, b.arrival),
-                  content: Buffer.from(await pdfRes.arrayBuffer()),
-                  contentType: "application/pdf",
-                },
-              ];
-            }
-          } catch (err) {
-            console.error("[cron] Kurkarten-PDF-Abruf fehlgeschlagen:", err);
-          }
-        }
-
         await sendMail({
           to: HUETTENWART_EMAIL,
           subject: `In 7 Tagen: Gruppe an der Wiesenhütte — ${b.bookingNumber}`,
           template: "huettenwart_notice",
           bookingId: b.id,
-          attachments,
+          attachments: sharedAttachments.length > 0 ? sharedAttachments : undefined,
           react: HuettenwartNoticeEmail({
             bookingNumber: b.bookingNumber,
             guestName: `${customer.firstName} ${customer.lastName}`.trim(),

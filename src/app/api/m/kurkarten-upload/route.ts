@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { bookings, customers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { buildKurkartenFilename } from "@/lib/kurkarten";
+import { extractNamesFromKurkartenPdf } from "@/lib/kurkarten-names";
 
 async function requireManager() {
   const session = await auth();
@@ -51,12 +52,16 @@ export async function POST(req: NextRequest) {
     contentType: "application/pdf",
   });
 
+  // Namen als Vorschlag fuer die Feuerwehr-Meldeliste extrahieren — rein
+  // informativ, Dana prueft/korrigiert sie vor der eigentlichen PDF-Erzeugung.
+  const suggestedNames = await extractNamesFromKurkartenPdf(Buffer.from(await file.arrayBuffer()));
+
   await db
     .update(bookings)
-    .set({ kurkartenPdfUrl: blob.url })
+    .set({ kurkartenPdfUrl: blob.url, feuerwehrNames: suggestedNames })
     .where(eq(bookings.id, bookingId));
 
-  return NextResponse.json({ url: blob.url });
+  return NextResponse.json({ url: blob.url, suggestedNames });
 }
 
 export async function DELETE(req: NextRequest) {

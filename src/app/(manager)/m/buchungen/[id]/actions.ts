@@ -988,3 +988,79 @@ export async function sendAvsCheckinLink(
   revalidatePath(`/m/buchungen/${bookingId}`);
   return { ok: true, sentTo: customer.email };
 }
+
+// =============================================================
+// Feuerwehr-Meldeliste: aus der Kurkarten-PDF vorgeschlagene Namen (siehe
+// kurkarten-upload-Route) werden hier von Dana geprueft/korrigiert und erst
+// dann zu einer eigenen, auf Namen reduzierten PDF (kein Preis/QR) erzeugt.
+// =============================================================
+
+export async function generateFeuerwehrListe(
+  bookingId: string,
+  names: string[]
+): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
+  let session: Awaited<ReturnType<typeof requireManager>>;
+  try {
+    session = await requireManager();
+  } catch {
+    return { ok: false, error: "Nicht autorisiert" };
+  }
+
+  const cleanNames = names.map((n) => n.trim()).filter(Boolean);
+  if (cleanNames.length === 0) {
+    return { ok: false, error: "Mindestens ein Name erforderlich." };
+  }
+
+  const b = (await db.select().from(bookings).where(eq(bookings.id, bookingId)).limit(1))[0];
+  if (!b) return { ok: false, error: "Buchung nicht gefunden." };
+
+  const customerRows = b.customerId
+    ? await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1)
+    : [];
+  const customer = customerRows[0];
+  const groupName = customer
+    ? `${customer.firstName} ${customer.lastName}`.trim() || b.bookingNumber
+    : b.bookingNumber;
+
+  const { renderToBuffer } = await import("@react-pdf/renderer");
+  const { FeuerwehrListePdf } = await import("@/lib/feuerwehr-liste-pdf");
+  const { put, del } = await import("@vercel/blob");
+
+  const pdfBuffer = await renderToBuffer(
+    FeuerwehrListePdf({
+      bookingNumber: b.bookingNumber,
+      groupName,
+      arrival: formatDateLong(b.arrival),
+      departure: formatDateLong(b.departure),
+      names: cleanNames,
+    })
+  );
+
+  if (b.feuerwehrListePdfUrl) {
+    try {
+      await del(b.feuerwehrListePdfUrl);
+    } catch (err) {
+      console.error("[generateFeuerwehrListe] alte PDF-Löschung fehlgeschlagen:", err);
+    }
+  }
+
+  const blob = await put(`feuerwehrliste/${bookingId}/liste.pdf`, pdfBuffer, {
+    access: "public",
+    addRandomSuffix: false,
+    contentType: "application/pdf",
+  });
+
+  await db
+    .update(bookings)
+    .set({ feuerwehrNames: cleanNames, feuerwehrListePdfUrl: blob.url })
+    .where(eq(bookings.id, bookingId));
+
+  await db.insert(activityLog).values({
+    who: session.user?.name ?? session.user?.email ?? "Manager",
+    what: `Feuerwehr-Meldeliste erzeugt (${cleanNames.length} Namen).`,
+    bookingId,
+  });
+
+  revalidatePath(`/m/buchungen/${bookingId}`);
+  return { ok: true, url: blob.url };
+}

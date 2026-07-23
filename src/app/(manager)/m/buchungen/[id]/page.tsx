@@ -10,6 +10,7 @@ import { StatusActions } from "./StatusActions";
 import { ManualPaymentForm } from "./ManualPaymentForm";
 import { AvsCheckinForm } from "./AvsCheckinForm";
 import { KurkartenUploadForm } from "./KurkartenUploadForm";
+import { FeuerwehrListeForm } from "./FeuerwehrListeForm";
 import { PaymentsTable } from "./PaymentsTable";
 import { PersonsPriceEditor } from "./PersonsPriceEditor";
 import { ManagerMessage } from "./ManagerMessage";
@@ -281,6 +282,11 @@ export default async function BookingDetail({ params }: Props) {
                 lastSentAt={avsLastSentAt}
               />
               <KurkartenUploadForm bookingId={b.id} currentUrl={b.kurkartenPdfUrl} />
+              <FeuerwehrListeForm
+                bookingId={b.id}
+                suggestedNames={b.feuerwehrNames ?? []}
+                currentUrl={b.feuerwehrListePdfUrl}
+              />
             </Section>
           )}
         </div>
