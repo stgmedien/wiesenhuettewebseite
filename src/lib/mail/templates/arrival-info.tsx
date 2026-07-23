@@ -18,6 +18,7 @@ type Props = {
   persons: number;
   nights: number;
   baseUrl: string;
+  kurkartenAttached: boolean;
 };
 
 const main = { backgroundColor: "#F7F7F2", padding: "40px 0" };
@@ -61,6 +62,7 @@ export default function ArrivalInfoEmail({
   persons,
   nights,
   baseUrl,
+  kurkartenAttached,
 }: Props) {
   return (
     <Html>
@@ -69,7 +71,7 @@ export default function ArrivalInfoEmail({
       <Body style={main}>
         <Container style={container}>
           <Text style={eyebrow}>Wiesenhütte · Anreise-Info</Text>
-          <Heading style={heading}>Bald geht's los.</Heading>
+          <Heading style={heading}>Bald geht&apos;s los.</Heading>
           <Text style={text}>Hallo {firstName},</Text>
           <Text style={text}>
             in einer Woche fahrt Ihr zur Wiesenhütte. Hier alles Wichtige für die Anreise auf einen
@@ -116,7 +118,7 @@ export default function ArrivalInfoEmail({
           </Text>
           <Text style={text}>
             <strong>Mit dem ÖPNV:</strong> ZOB Winterberg, von dort Bus R28 nach Langewiese,
-            Haltestelle „Wiesenhütte".
+            Haltestelle „Wiesenhütte&rdquo;.
           </Text>
 
           <Heading
@@ -147,8 +149,20 @@ export default function ArrivalInfoEmail({
               <strong>Kurkarten:</strong> Solltet Ihr den digitalen Meldeschein noch nicht
               ausgefüllt haben — bitte jetzt nachholen (Link kam per separater Mail von uns). Das
               ist gesetzlich vorgeschrieben (Meldepflicht und Kurbeitrag der Stadt Winterberg,
-              Pflicht ab 16 Jahren). Eure Kurkarten kommen anschließend automatisch von AVS —
-              bitte zur Anreise mitbringen, digital oder ausgedruckt.
+              Pflicht ab 16 Jahren).{" "}
+              {kurkartenAttached ? (
+                <>
+                  Eure Kurkarten liegen dieser Mail als PDF bei — druckt sie gerne selbst aus oder
+                  zeigt sie digital am Handy vor.
+                </>
+              ) : (
+                <>
+                  Eure Kurkarten bekommt Ihr rechtzeitig vor Anreise von uns zugeschickt — bitte
+                  zur Anreise mitbringen, digital oder ausgedruckt.
+                </>
+              )}{" "}
+              Falls Euch kein Drucker zur Verfügung steht, bringt Toni Klauke sie Euch auf
+              Rückfrage auch gerne ausgedruckt mit.
             </Text>
             <Text style={{ ...text, margin: "0 0 8px 0" }}>
               <strong>Spätestens 2 Tage vor Anreise:</strong> teilt Toni Klauke telefonisch Eure
