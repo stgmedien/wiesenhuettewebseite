@@ -94,6 +94,11 @@ export default function PaymentReminderEmail({
             für Eure Buchung <strong>{bookingNumber}</strong> in Höhe von{" "}
             <strong>{eur(remainderCents)}</strong> fällig.
           </Text>
+          <Text style={muted}>
+            Kurzer Hinweis: Die Kurtaxe wurde von der Gemeinde zwischenzeitlich leicht angehoben —
+            dadurch kann die Abschlussrechnung geringfügig höher ausfallen, als bei der Buchung
+            ursprünglich berechnet.
+          </Text>
 
           {autoChargePlanned ? (
             <Section
