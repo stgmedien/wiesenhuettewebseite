@@ -95,11 +95,11 @@ export const createInvoiceForBooking = async (
     const tariffs = await resolveBookingTariffs(booking);
     const nights = booking.nights;
     const categories = [
-      { count: booking.adults,   unitCents: tariffs.nichtmitglied ?? PRICES.adultNonMemberCents, label: "Übernachtung — Erwachsene" },
+      // Lehrkräfte zaehlen als Erwachsene (gleicher Preis) — eine gemeinsame Zeile.
+      { count: booking.adults + booking.teachers, unitCents: tariffs.nichtmitglied ?? PRICES.adultNonMemberCents, label: "Übernachtung — Erwachsene" },
       { count: booking.members,  unitCents: tariffs.mitglied      ?? PRICES.adultMemberCents,     label: "Übernachtung — Mitglied (−50 %)" },
       { count: booking.children, unitCents: tariffs.kind          ?? PRICES.childCents,            label: "Übernachtung — Kinder/Schüler bis 16 J." },
       { count: booking.pupils,   unitCents: tariffs.schueler      ?? PRICES.pupilCents,            label: "Übernachtung — Schüler Mitglied (−50 %)" },
-      { count: booking.teachers, unitCents: tariffs.lehrer        ?? PRICES.adultNonMemberCents,   label: "Übernachtung — Lehrkräfte" },
     ] as const;
 
     // Konsistenz-Check statt stiller Rest-Korrektur: Nur wenn die aus den

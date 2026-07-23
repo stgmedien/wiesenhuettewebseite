@@ -4,14 +4,16 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { editBookingPersons, refundBookingDifference } from "./actions";
 
-type P = { adults: number; members: number; children: number; pupils: number; teachers: number };
+// Lehrkräfte zählen einfach als Erwachsene (gleicher Preis) — kein eigenes
+// Feld mehr. Ein evtl. vorhandener teachers-Bestand aus einer älteren
+// Buchung wird beim Öffnen einmalig in "adults" mit eingerechnet.
+type P = { adults: number; members: number; children: number; pupils: number };
 
 const FIELDS: { key: keyof P; label: string }[] = [
   { key: "members", label: "Mitglieder (Erw., −50 %)" },
-  { key: "adults", label: "Erwachsene (Nichtmitgl.)" },
+  { key: "adults", label: "Erwachsene (inkl. Lehrkräfte)" },
   { key: "children", label: "Kinder (4–15)" },
   { key: "pupils", label: "Kinder/Sch. bis 16 (Mitgl., −50 %)" },
-  { key: "teachers", label: "Lehrkräfte (wie Erw.)" },
 ];
 
 const euro = (cents: number) =>
@@ -38,7 +40,7 @@ export function PersonsPriceEditor({ bookingId, initial }: { bookingId: string; 
     setMsg(null);
     setRes(null);
     start(async () => {
-      const r = await editBookingPersons({ bookingId, ...p });
+      const r = await editBookingPersons({ bookingId, ...p, teachers: 0 });
       if (r.ok) {
         setRes({
           deltaCents: r.deltaCents,
@@ -89,7 +91,7 @@ export function PersonsPriceEditor({ bookingId, initial }: { bookingId: string; 
         ganze Gruppe. Übernachtung &amp; personenabhängige Aufschläge werden neu berechnet; Extras,
         Rabatte und Kaution bleiben unverändert.
       </p>
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {FIELDS.map((f) => (
           <label key={f.key} className="block">
             <span className="block text-[11px] text-[var(--color-wh-fg-muted)] mb-1 leading-tight">

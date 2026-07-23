@@ -214,7 +214,7 @@ const BF_COPY = {
     loginHint2: "— oder weiter buchen, wir legen automatisch ein Konto für Dich an.",
     // PersonsEditor
     adultsLabel: "Erwachsene",
-    adultsHint: "ab 16 Jahren · 22,00 € / Nacht",
+    adultsHint: "ab 16 Jahren, inkl. Lehrkräfte · 22,00 € / Nacht",
     membersLabel: "Vereinsmitglieder Skifreunde Gütersloh e.V.",
     membersHint: "nur für aktive Mitglieder des Vereins · −50 % · 11,00 € / Nacht",
     childrenLabel: "Kinder/Schüler bis 16 Jahre",
@@ -380,7 +380,7 @@ const BF_COPY = {
     loginHintLink: "Log in here",
     loginHint2: "— or continue booking; we'll create an account for you automatically.",
     adultsLabel: "Adults",
-    adultsHint: "16+ · 22.00 € / night",
+    adultsHint: "16+, incl. teachers · 22.00 € / night",
     membersLabel: "Club members Skifreunde Gütersloh e.V.",
     membersHint: "active club members only · −50% · 11.00 € / night",
     childrenLabel: "Children/pupils up to 16",
@@ -544,7 +544,7 @@ const BF_COPY = {
     loginHintLink: "Hier inloggen",
     loginHint2: "— of ga door met boeken, we maken automatisch een account voor je aan.",
     adultsLabel: "Volwassenen",
-    adultsHint: "vanaf 16 jaar · € 22,00 / nacht",
+    adultsHint: "vanaf 16 jaar, incl. docenten · € 22,00 / nacht",
     membersLabel: "Verenigingsleden Skifreunde Gütersloh e.V.",
     membersHint: "alleen voor actieve leden van de vereniging · −50% · € 11,00 / nacht",
     childrenLabel: "Kinderen/leerlingen tot 16 jaar",
@@ -1402,14 +1402,8 @@ const PersonsEditor = ({
         ariaMore={tt.ariaMore}
       />
     )}
-    <PersonRow
-      label={tt.teachersLabel}
-      hint={tt.teachersHint}
-      value={persons.teachers}
-      onChange={(v) => onChange({ ...persons, teachers: v })}
-      ariaLess={tt.ariaLess}
-      ariaMore={tt.ariaMore}
-    />
+    {/* Lehrkräfte zählen einfach als Erwachsene (gleicher Preis) — kein
+        eigenes Feld mehr, persons.teachers bleibt immer 0. */}
     {/* Ehrlichkeits-Hinweis unter den Mitglieder-Feldern (Issue #66) —
         Tarif gilt nur für aktive Mitglieder; Falschangaben ⇒ Storno-Recht. */}
     {memberAllowed && (

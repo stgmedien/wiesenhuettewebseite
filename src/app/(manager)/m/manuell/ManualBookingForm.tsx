@@ -34,11 +34,10 @@ export default function ManualBookingForm() {
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        <Input id="adults" name="adults" type="number" min={0} defaultValue={0} label="Erwachsene NM" hint="ab 16, Nichtmitgl." />
+        <Input id="adults" name="adults" type="number" min={0} defaultValue={0} label="Erwachsene NM" hint="ab 16, Nichtmitgl., inkl. Lehrkräfte" />
         <Input id="members" name="members" type="number" min={0} defaultValue={0} label="Mitglieder" hint="Vereinsmitgl." />
         <Input id="children" name="children" type="number" min={0} defaultValue={0} label="Kinder 4–15" />
         <Input id="pupils" name="pupils" type="number" min={0} defaultValue={0} label="Schüler" />
-        <Input id="teachers" name="teachers" type="number" min={0} defaultValue={0} label="Lehrkräfte" />
       </div>
 
       <div className="text-sm text-[var(--color-wh-fg-muted)] bg-[var(--color-wh-green-soft)] p-3 rounded-md">
