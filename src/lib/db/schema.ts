@@ -317,6 +317,13 @@ export const bookings = pgTable(
     // als Anhang beigefuegt, damit er sie vor Anreise ausdrucken kann.
     kurkartenPdfUrl: text("kurkarten_pdf_url"),
 
+    // Namen aus der Kurkarten-PDF extrahiert (Vorschlag, von Dana vor der
+    // PDF-Erzeugung noch korrigierbar) und die daraus generierte, auf Namen
+    // reduzierte Feuerwehr-Meldeliste (kein Preis/QR). Wird T-7 an Toni UND
+    // den Gast mitgeschickt.
+    feuerwehrNames: jsonb("feuerwehr_names").$type<string[]>(),
+    feuerwehrListePdfUrl: text("feuerwehr_liste_pdf_url"),
+
     internalNotes: text("internal_notes"),
     customerMessage: text("customer_message"),
 
