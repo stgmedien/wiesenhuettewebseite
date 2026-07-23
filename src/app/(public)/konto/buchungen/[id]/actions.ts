@@ -7,7 +7,7 @@ import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { cancellationFeeForBooking, formatEuro, calculatePrice, RULES, type Persons } from "@/lib/pricing";
-import { resolveTariffs } from "@/lib/pricing-tariffs";
+import { resolveBookingTariffs } from "@/lib/pricing-tariffs";
 import { formatDateLong } from "@/lib/utils";
 import { sendMail } from "@/lib/mail/send";
 import BookingCancelledEmail from "@/lib/mail/templates/booking-cancelled";
@@ -248,7 +248,7 @@ async function computeIncrease(
     return { ok: false, error: `Die Hütte hat ${RULES.maxPersons} Schlafplätze — mehr Personen sind nicht möglich.` };
   }
 
-  const tariffs = await resolveTariffs(booking.arrival);
+  const tariffs = await resolveBookingTariffs(booking);
   const nb = calculatePrice({
     arrival: booking.arrival,
     departure: booking.departure,

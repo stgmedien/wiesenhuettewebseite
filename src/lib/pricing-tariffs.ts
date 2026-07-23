@@ -128,3 +128,43 @@ export const resolveTariffs = async (
 
   return result;
 };
+
+type LegacyPricedBooking = {
+  arrival: string;
+  legacyNichtmitgliedCents: number | null;
+  legacyMitgliedCents: number | null;
+  legacyKindCents: number | null;
+  legacySchuelerCents: number | null;
+};
+
+/**
+ * Wie resolveTariffs(), aber respektiert einen Alt-Vertrag (fest vereinbarte
+ * Preise, siehe Spalten-Kommentar in schema.ts): Ist auch nur einer der vier
+ * legacy*Cents-Werte gesetzt, gelten diese fest — resolveTariffs() (aktuelle
+ * Saison/Tarife) wird dann NICHT aufgerufen, auch nicht bei spaeteren
+ * Personenkorrekturen. So bleibt der urspruenglich vereinbarte Preis
+ * garantiert, unabhaengig von spaeteren Preiserhoehungen.
+ */
+export const resolveBookingTariffs = async (
+  booking: LegacyPricedBooking
+): Promise<ResolvedTariffs> => {
+  const isLegacy =
+    booking.legacyNichtmitgliedCents !== null ||
+    booking.legacyMitgliedCents !== null ||
+    booking.legacyKindCents !== null ||
+    booking.legacySchuelerCents !== null;
+
+  if (!isLegacy) {
+    return resolveTariffs(booking.arrival);
+  }
+
+  const nichtmitglied = booking.legacyNichtmitgliedCents ?? PRICES.adultNonMemberCents;
+  return {
+    nichtmitglied,
+    mitglied: booking.legacyMitgliedCents ?? PRICES.adultMemberCents,
+    kind: booking.legacyKindCents ?? PRICES.childCents,
+    schueler: booking.legacySchuelerCents ?? PRICES.pupilCents,
+    lehrer: nichtmitglied, // Lehrkraefte zahlen wie Nichtmitglieder
+    seasonName: null,
+  };
+};

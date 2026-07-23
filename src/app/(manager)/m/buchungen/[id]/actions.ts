@@ -21,7 +21,7 @@ import { HUETTENWART_EMAIL, HUETTENWART_CC } from "@/lib/huettenwart";
 import { buildIcalCancel } from "@/lib/mail/ical";
 import { formatDateLong } from "@/lib/utils";
 import { formatEuro, calculatePrice, type Persons } from "@/lib/pricing";
-import { resolveTariffs } from "@/lib/pricing-tariffs";
+import { resolveBookingTariffs } from "@/lib/pricing-tariffs";
 import { mailTemplates, mailTemplateVersions } from "@/lib/db/schema";
 import { substituteVars } from "@/lib/mail-render";
 import { buildBookingVars } from "@/lib/mail-template-vars";
@@ -809,7 +809,9 @@ export async function editBookingPersons(
   if (totalPersons < 1) return { ok: false, error: "Mindestens 1 Person erforderlich." };
 
   // Personenabhaengige Posten frisch berechnen — gleiche Tarife/Saison/Solo.
-  const tariffs = await resolveTariffs(b.arrival);
+  // Bei Alt-Vertraegen (legacy*Cents gesetzt) bleiben die urspruenglich
+  // vereinbarten Saetze fest, auch wenn sich die Personenzahl aendert.
+  const tariffs = await resolveBookingTariffs(b);
   const nb = calculatePrice({
     arrival: b.arrival,
     departure: b.departure,

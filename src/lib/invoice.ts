@@ -9,7 +9,7 @@
 import { db } from "@/lib/db";
 import { invoices, bookings, customers } from "@/lib/db/schema";
 import { sql, eq, and, ne, desc } from "drizzle-orm";
-import { resolveTariffs } from "@/lib/pricing-tariffs";
+import { resolveBookingTariffs } from "@/lib/pricing-tariffs";
 import { PRICES } from "@/lib/pricing";
 import { toLocalIso } from "@/lib/utils";
 
@@ -92,7 +92,7 @@ export const createInvoiceForBooking = async (
   // Line items snapshot
   const lineItems: { label: string; qty: number; unitCents: number; totalCents: number }[] = [];
   if (booking.accommodationCents > 0) {
-    const tariffs = await resolveTariffs(booking.arrival);
+    const tariffs = await resolveBookingTariffs(booking);
     const nights = booking.nights;
     const categories = [
       { count: booking.adults,   unitCents: tariffs.nichtmitglied ?? PRICES.adultNonMemberCents, label: "Übernachtung — Erwachsene" },
