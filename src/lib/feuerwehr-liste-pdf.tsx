@@ -90,7 +90,7 @@ export function FeuerwehrListePdf({
         </View>
 
         {names.map((name, i) => (
-          <View key={i} style={styles.row}>
+          <View key={i} style={styles.row} wrap={false}>
             <Text style={styles.num}>{i + 1}.</Text>
             <View style={styles.box} />
             <Text style={styles.name}>{name}</Text>

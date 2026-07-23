@@ -6,18 +6,21 @@ import { bookings, customers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { buildKurkartenFilename } from "@/lib/kurkarten";
 import { extractNamesFromKurkartenPdf } from "@/lib/kurkarten-names";
+import { generateFeuerwehrListePdf } from "@/lib/generate-feuerwehr-liste";
 
 async function requireManager() {
   const session = await auth();
   const role = (session?.user as { role?: string } | undefined)?.role;
-  return role === "manager" || role === "admin";
+  if (role !== "manager" && role !== "admin") return null;
+  return session;
 }
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
-  if (!(await requireManager())) {
+  const session = await requireManager();
+  if (!session) {
     return NextResponse.json({ error: "Nicht autorisiert" }, { status: 403 });
   }
 
@@ -52,16 +55,38 @@ export async function POST(req: NextRequest) {
     contentType: "application/pdf",
   });
 
-  // Namen als Vorschlag fuer die Feuerwehr-Meldeliste extrahieren — rein
-  // informativ, Dana prueft/korrigiert sie vor der eigentlichen PDF-Erzeugung.
+  // Namen per KI aus der Kurkarten-PDF extrahieren und die Feuerwehr-Meldeliste
+  // direkt automatisch daraus erzeugen — Dana kann sie danach im Manager-Tool
+  // noch korrigieren, muss dafuer aber nicht mehr selbst einen Erzeugen-Schritt
+  // anstossen.
   const suggestedNames = await extractNamesFromKurkartenPdf(Buffer.from(await file.arrayBuffer()));
 
+  let feuerwehrListeUrl: string | null = null;
+  if (suggestedNames.length > 0) {
+    try {
+      feuerwehrListeUrl = await generateFeuerwehrListePdf(
+        bookingId,
+        suggestedNames,
+        session.user?.name ?? session.user?.email ?? "Manager"
+      );
+    } catch (err) {
+      console.error("[kurkarten-upload] automatische Feuerwehr-Liste fehlgeschlagen:", err);
+    }
+  }
+
+  // generateFeuerwehrListePdf setzt bei Erfolg bereits feuerwehrNames +
+  // feuerwehrListePdfUrl an der Buchung — hier nur noch die Kurkarten-PDF-URL
+  // nachtragen (bzw. bei leerer Liste/Fehlschlag auch die Namen selbst).
   await db
     .update(bookings)
-    .set({ kurkartenPdfUrl: blob.url, feuerwehrNames: suggestedNames })
+    .set(
+      feuerwehrListeUrl
+        ? { kurkartenPdfUrl: blob.url }
+        : { kurkartenPdfUrl: blob.url, feuerwehrNames: suggestedNames }
+    )
     .where(eq(bookings.id, bookingId));
 
-  return NextResponse.json({ url: blob.url, suggestedNames });
+  return NextResponse.json({ url: blob.url, suggestedNames, feuerwehrListeUrl });
 }
 
 export async function DELETE(req: NextRequest) {
