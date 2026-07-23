@@ -51,7 +51,18 @@ export default async function TemplateEditorPage({ params }: Props) {
       <div className="flex items-start justify-between gap-4 mt-3 mb-6">
         <div>
           <p className="font-mono text-xs text-[var(--color-wh-fg-muted)]">{tpl.key}</p>
-          <h1 className="text-[32px] mt-1 mb-1">{tpl.name}</h1>
+          <div className="flex flex-wrap items-center gap-2 mt-1 mb-1">
+            <h1 className="text-[32px] m-0">{tpl.name}</h1>
+            {activeVersion ? (
+              <span className="inline-flex items-center gap-1 h-6 px-2.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-semibold uppercase tracking-wider">
+                ● Aktiv: v{activeVersion.version}
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 h-6 px-2.5 rounded-full bg-amber-50 text-amber-700 text-[11px] font-semibold uppercase tracking-wider">
+                Noch keine aktive Version
+              </span>
+            )}
+          </div>
           {tpl.description && (
             <p className="text-[var(--color-wh-fg-muted)] m-0">{tpl.description}</p>
           )}

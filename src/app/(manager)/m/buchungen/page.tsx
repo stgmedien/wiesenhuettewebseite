@@ -50,6 +50,17 @@ export default async function BookingsListPage({
     .where(where)
     .orderBy(sortByBooked ? desc(bookings.createdAt) : asc(bookings.arrival));
 
+  // Stornierte Buchungen raus aus der normalen Arbeits-Ansicht — sie sind fuer
+  // den Tagesbetrieb irrelevant und wuerden die Liste sonst zumuellen. Eigenes
+  // Archiv weiter unten. Nur wenn explizit nach "storniert" gefiltert wird,
+  // bleibt die normale (Datums-basierte) Ansicht bestehen, weil Dana dann
+  // gezielt danach sucht.
+  const stornoRows = statusFilter ? [] : rows.filter((r) => r.status === "storniert");
+  const nonStornoRows = statusFilter ? rows : rows.filter((r) => r.status !== "storniert");
+  const sortedStornoRows = [...stornoRows].sort((a, b) =>
+    a.arrival < b.arrival ? 1 : a.arrival > b.arrival ? -1 : 0
+  );
+
   // Im Anreise-Modus: aktuelle/anstehende Buchungen (nächstes Datum zuerst)
   // von laengst abgereisten trennen — sonst verschwindet "was ist als
   // Naechstes dran" in einer langen Liste voller vergangener Aufenthalte.
@@ -58,10 +69,10 @@ export default async function BookingsListPage({
   const oldCutoff = new Date();
   oldCutoff.setDate(oldCutoff.getDate() - 7);
   const oldCutoffIso = oldCutoff.toISOString().slice(0, 10);
-  const currentRows = sortByBooked ? rows : rows.filter((r) => r.departure >= oldCutoffIso);
+  const currentRows = sortByBooked ? nonStornoRows : nonStornoRows.filter((r) => r.departure >= oldCutoffIso);
   const oldRows = sortByBooked
     ? []
-    : rows
+    : nonStornoRows
         .filter((r) => r.departure < oldCutoffIso)
         .sort((a, b) => (a.departure < b.departure ? 1 : a.departure > b.departure ? -1 : 0));
 
@@ -71,7 +82,10 @@ export default async function BookingsListPage({
         <div>
           <div className="eyebrow">Buchungen</div>
           <h1 className="text-[28px] sm:text-[40px] mt-2 mb-0">Alle Buchungen</h1>
-          <p className="text-[var(--color-wh-fg-muted)] m-0 mt-2">{rows.length} insgesamt</p>
+          <p className="text-[var(--color-wh-fg-muted)] m-0 mt-2">
+            {nonStornoRows.length} insgesamt
+            {sortedStornoRows.length > 0 && ` · ${sortedStornoRows.length} storniert im Archiv`}
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <Suspense>
@@ -113,6 +127,18 @@ export default async function BookingsListPage({
           </summary>
           <div className="mt-4 bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] overflow-hidden">
             <BookingsTable rows={oldRows} emptyMessage="" />
+          </div>
+        </details>
+      )}
+
+      {sortedStornoRows.length > 0 && (
+        <details className="mt-6 group">
+          <summary className="cursor-pointer text-sm font-semibold text-[var(--color-wh-fg-muted)] hover:text-[var(--color-wh-deep-green)] list-none flex items-center gap-2">
+            <span className="inline-block transition-transform group-open:rotate-90">▶</span>
+            Archiv — Stornierte Buchungen ({sortedStornoRows.length})
+          </summary>
+          <div className="mt-4 bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] overflow-hidden">
+            <BookingsTable rows={sortedStornoRows} emptyMessage="" />
           </div>
         </details>
       )}
