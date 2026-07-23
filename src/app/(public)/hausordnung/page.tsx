@@ -88,6 +88,14 @@ export default async function HausordnungPage() {
               Ab <strong>22:00 Uhr gilt Ruhezeit</strong> im Ort.
             </li>
           </ul>
+          <div className="rounded-[var(--radius-md)] border-l-4 border-[var(--color-wh-sunset)] bg-[var(--color-wh-beige)] px-4 py-3 mt-4">
+            <p className="m-0">
+              <strong>Nachtruhe gilt ausdrücklich auch im Außengelände</strong> — an der Feuerstelle,
+              auf dem Freisitz und rund ums Haus. Die Hütte liegt mitten im Dorf: Bitte ab 22:00 Uhr
+              draußen Gespräche und Musik auf Zimmerlautstärke bringen, aus Rücksicht auf die
+              Nachbarschaft.
+            </p>
+          </div>
         </Block>
 
         <Block title="Checkliste für Eure Abreise">
