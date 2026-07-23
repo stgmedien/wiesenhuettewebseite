@@ -283,6 +283,7 @@ export default async function BookingDetail({ params }: Props) {
               />
               <KurkartenUploadForm bookingId={b.id} currentUrl={b.kurkartenPdfUrl} />
               <FeuerwehrListeForm
+                key={JSON.stringify(b.feuerwehrNames ?? [])}
                 bookingId={b.id}
                 suggestedNames={b.feuerwehrNames ?? []}
                 currentUrl={b.feuerwehrListePdfUrl}
