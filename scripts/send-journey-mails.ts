@@ -132,6 +132,7 @@ const jobs: { name: string; subject: string; react: React.ReactElement }[] = [
       persons: 18,
       nights: 3,
       baseUrl: BASE,
+      kurkartenAttached: true,
     }),
   },
   {

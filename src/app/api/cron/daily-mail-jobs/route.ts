@@ -559,6 +559,7 @@ export async function GET(req: Request) {
             persons: b.persons,
             nights: b.nights,
             baseUrl: BASE_URL,
+            kurkartenAttached: !!b.kurkartenPdfUrl,
           }),
         });
         stats.arrivalInfoSent++;
