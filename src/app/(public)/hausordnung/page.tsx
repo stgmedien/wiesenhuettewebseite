@@ -13,126 +13,132 @@ export default async function HausordnungPage() {
     <div className="bg-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24">
       <DeOnlyBanner locale={locale} />
       <div className="max-w-[820px] mx-auto">
-        <div className="eyebrow">Hausordnung</div>
-        <h1 className="text-[44px] sm:text-[56px] mt-4 mb-2">Damit's für alle gut wird.</h1>
+        <div className="eyebrow">Wiesenhütte</div>
+        <h1 className="text-[44px] sm:text-[56px] mt-4 mb-2">Hausordnung</h1>
         <p className="text-base sm:text-[18px] leading-relaxed text-[var(--color-wh-fg-muted)] mt-4">
-          Die folgende Hausordnung gilt verbindlich für alle Gäste der Wiesenhütte. Sie wird mit
-          der Buchungsbestätigung als Bestandteil des Mietvertrags übermittelt.
+          Gilt verbindlich für alle Gäste und wird mit der Buchungsbestätigung als Bestandteil des
+          Mietvertrags übermittelt.
+        </p>
+        <p className="leading-relaxed mt-6">
+          Die Wiesenhütte ist eine Selbstversorgerhütte für Vereins-, Schul-, Klassen- und
+          Gruppenfahrten — bewusst einfach, naturnah und getragen vom Verein Skifreunde Gütersloh
+          e.V.
+        </p>
+        <p className="leading-relaxed">
+          Das Haus ist eine Nichtraucher-Unterkunft. Um auch Allergiker:innen einen unbeschwerten
+          Aufenthalt zu garantieren, sind Haustiere bei uns nicht gestattet. Vielen Dank für Eure
+          Rücksichtnahme.
+        </p>
+        <p className="leading-relaxed">
+          Wir freuen uns über jede Gruppe, die zu uns passt. Was nicht zu uns passt: Event- oder
+          reine Partynutzung. Übermäßiger Alkoholkonsum, laute Feiern, Verhalten, das die
+          Nachbarschaft stört oder die Hütte in Mitleidenschaft zieht, kann im Zweifel zum Verweis
+          und zur Einbehaltung der Kaution führen.
         </p>
 
-        <Block title="Charakter der Hütte">
-          <div className="rounded-[var(--radius-md)] border-l-4 border-[var(--color-wh-sunset)] bg-[var(--color-wh-beige)] px-4 py-3">
-            <p className="m-0">
-              Die Wiesenhütte ist eine{" "}
-              <strong>Selbstversorgerhütte für Vereins-, Schul-, Klassen- und Gruppenfahrten</strong> —
-              bewusst einfach, naturnah und getragen vom Verein Skifreunde Gütersloh e.V. Sie ist{" "}
-              <strong>keine Eventlocation und kein Partyort</strong>: übermäßiger Alkoholkonsum,
-              laute Feiern und Verhalten, das andere im Ort stört oder die Hütte schädigt, sind
-              ausdrücklich nicht gewünscht und können zum Verweis und zur Einbehaltung der Kaution
-              führen. Reine Partygruppen können wir nicht aufnehmen.
-            </p>
-          </div>
-        </Block>
-
-        <Block title="Vor Eurer Anreise">
-          <ol className="list-decimal list-inside marker:font-semibold marker:text-[var(--color-wh-deep-green)] space-y-2">
+        <Block title="Vor der Anreise">
+          <ul>
             <li>
-              <strong>Spätestens 14 Tage vor Anreise:</strong> Kurkarten anfordern — füllt den
-              digitalen Meldeschein aus (den Link dafür bekommt Ihr von uns per E-Mail). Das ist
-              gesetzlich vorgeschrieben (Meldepflicht und Kurbeitrag der Stadt Winterberg, Pflicht
-              ab 16 Jahren). Eure Kurkarten schickt Euch AVS anschließend automatisch per E-Mail —
-              bitte zur Anreise mitbringen, digital oder ausgedruckt.
+              <strong>Kurkarte:</strong> Spätestens 14 Tage vorher füllt Ihr bitte den digitalen
+              Meldeschein aus (Link per E-Mail von uns) — das ist gesetzlich vorgeschrieben
+              (Meldepflicht und Kurbeitrag der Stadt Winterberg, ab 16 Jahren). AVS schickt Euch
+              danach automatisch die fertigen Kurkarten zu; bringt sie zur Anreise mit, digital
+              reicht.
             </li>
             <li>
-              <strong>Spätestens 2 Tage vor Anreise:</strong> teilt dem Hüttenwart Toni Klauke
-              telefonisch Eure genaue Ankunftszeit mit. Er nimmt Euch an der Hütte in Empfang und
-              überreicht die Schlüssel.
+              <strong>Bettwäsche:</strong> Gestellt wird nur ein Kopfkissen. Selbst mitzubringen
+              sind ein Bettlaken, ein Kopfkissenbezug sowie ein Schlafsack oder eine Decke mit
+              Bezug.
             </li>
-          </ol>
+            <li>
+              <strong>Ankunft:</strong> Es gibt keine feste Ankunftszeit. Meldet Euch bitte
+              spätestens 2 Tage vorher telefonisch bei unserem Hüttenwart Toni Klauke und sprecht
+              die genaue Ankunftszeit mit ihm ab — die Hütte ist spätestens am Vortag geputzt, Toni
+              richtet sich gerne nach Euch. Er nimmt Euch persönlich in Empfang und übergibt die
+              Schlüssel.
+            </li>
+          </ul>
           <Address />
           <ul>
             <li>
-              Die zugeschickte Feuerwehr-Meldeliste hängt zu Eurer Sicherheit ausgefüllt am
-              Klemmbrett hinter der ersten Eingangstür links oben — bitte auch nach der Abreise
-              dort hängen lassen.
+              <strong>Feuerwehr-Meldeliste:</strong> Die zugeschickte Liste hängt Ihr bitte
+              ausgefüllt am Klemmbrett hinter der ersten Eingangstür auf, links oben. Streicht bei
+              Anreise Teilnehmer:innen durch, die doch nicht mitgekommen sind, damit die Feuerwehr
+              im Ernstfall nicht unnötig auf jemanden wartet, der gar nicht da ist. Dies ist auch
+              bei vorzeitigen Abreisen zu erledigen.
             </li>
-            <li>Mängel bitte sofort nach Anreise beim Hüttenwart melden und protokollieren lassen.</li>
+            <li>
+              <strong>Mängel:</strong> Fällt Euch direkt nach Ankunft etwas auf, meldet es kurz
+              beim Hüttenwart, damit wir es protokollieren können.
+            </li>
           </ul>
         </Block>
 
-        <Block title="Während Eures Aufenthalts">
-          <ul>
-            <li>
-              <strong>Kein Partyort:</strong> übermäßiger Alkoholkonsum und laute private Feiern
-              sind nicht erlaubt — die Hütte ist eine ruhige Gruppenunterkunft im Dorf, mit
-              Nachbarn ringsum.
-            </li>
-            <li>
-              <strong>Das Haus ist eine Nichtraucher-Unterkunft.</strong> Um auch Allergikern
-              einen unbeschwerten Aufenthalt zu garantieren, sind Haustiere bei uns nicht
-              gestattet. Vielen Dank für Eure Rücksichtnahme.
-            </li>
-            <li>Alle Räume bitte nur mit Hausschuhen begehen.</li>
-            <li>Mit Skischuhen ausschließlich den Kellereingang benutzen.</li>
-            <li>
-              Für die Benutzung der Betten sind mitzubringen: 1 Bettlaken, 1 Kopfkissenbezug, 1
-              Schlafsack <em>oder</em> Decke mit Bettbezug.
-            </li>
-            <li>
-              Aus hygienischen Gründen keine Lebensmittel, Süßigkeiten oder Getränke in die
-              Schlafräume.
-            </li>
-            <li>Müll muss getrennt werden — in Winterberg gibt es strenge Kontrollen.</li>
-            <li>Mobiltelefone aus Sicherheitsgründen nicht in den Schlafräumen aufladen.</li>
-            <li>
-              Ab <strong>22:00 Uhr gilt Ruhezeit</strong> im Ort.
-            </li>
-          </ul>
-          <div className="rounded-[var(--radius-md)] border-l-4 border-[var(--color-wh-sunset)] bg-[var(--color-wh-beige)] px-4 py-3 mt-4">
+        <Block title="Während des Aufenthalts">
+          <div className="rounded-[var(--radius-md)] border-l-4 border-[var(--color-wh-sunset)] bg-[var(--color-wh-beige)] px-4 py-3">
             <p className="m-0">
-              <strong>Nachtruhe gilt ausdrücklich auch im Außengelände</strong> — an der Feuerstelle,
-              auf dem Freisitz und rund ums Haus. Die Hütte liegt mitten im Dorf: Bitte ab 22:00 Uhr
-              draußen Gespräche und Musik auf Zimmerlautstärke bringen, aus Rücksicht auf die
-              Nachbarschaft.
+              <strong>Ruhe &amp; Rücksicht:</strong> Die Hütte liegt am Rand des Dorfes mit
+              Nachbarn ringsum. Ab 22:00 Uhr gilt besonders draußen eine Ruhezeit, auch an der
+              Feuerstelle und auf dem Freisitz. Bitte keine lauten Feiern und reduziert Gespräche
+              und Musik ab 22 Uhr auf Zimmerlautstärke.
             </p>
           </div>
-        </Block>
-
-        <Block title="Checkliste für Eure Abreise">
-          <p className="text-sm text-[var(--color-wh-fg-muted)]">
-            Eventuell angerichtete Schäden sind dem Hüttenwart vor der Schlüsselabgabe zu melden
-            und zu protokollieren. Sachschäden werden in Rechnung gestellt.{" "}
-            <strong>
-              Bei Mehraufwand (Reinigung, Aufräumen, fehlende Müllentsorgung etc.) behalten wir
-              uns vor, einen entsprechenden Anteil der Kaution einzubehalten.
-            </strong>
-          </p>
-          <ul className="space-y-1.5">
-            <li>Hütte besenrein hinterlassen</li>
-            <li>Einrichtung an den ursprünglichen Platz zurück</li>
-            <li>Stühle bitte nicht auf die Tische hochstellen</li>
-            <li>Geschirrspüler inklusive Besteckschublade ausgeräumt</li>
-            <li>Geschirr an seinem Platz</li>
-            <li>Kühlschränke leer — und die Türen bitte offen lassen (verhindert Schimmel/Geruch)</li>
-            <li>Alle Heizkörper auf Stufe 1 stellen (Frostschutz)</li>
-            <li>Restmüll in die schwarzen Mülltonnen am Parkplatz oben</li>
-            <li>Papiermüll und Kartons in die Tonne mit blauem Deckel</li>
+          <ul>
             <li>
-              Gelbe Wertstoff-Säcke unter den Carport von Frau Brunhilde Hennecke, Bundesstraße 10
-            </li>
-            <li>Sämtliche Lebensmittel, Reste, Getränke, Leergut und sonstigen Müll mitnehmen</li>
-            <li>
-              <strong>Hütte bis 12:00 Uhr verlassen.</strong>
+              <strong>Rauchen &amp; Haustiere:</strong> Das Haus ist komplett rauchfrei. Aus
+              Rücksicht auf Allergiker:innen sind Haustiere leider nicht erlaubt.
             </li>
             <li>
-              Schlüssel beim Hüttenwart Toni Klauke, Vorm Rohrbach 1 (um die Ecke), in den
-              Briefkasten werfen.
+              <strong>Schuhe:</strong> Drinnen bitte nur mit Hausschuhen. Mit Skischuhen kommt Ihr
+              ausschließlich über den Kellereingang rein.
+            </li>
+            <li>
+              <strong>Schlafräume:</strong> Aus hygienischen Gründen bitte keine Lebensmittel,
+              Süßigkeiten oder Getränke mit hineinnehmen und den Müll wieder heraus. Handys aus
+              Sicherheitsgründen bitte auch nicht dort aufladen.
+            </li>
+            <li>
+              <strong>Müll:</strong> Bitte sauber trennen. Winterberg kontrolliert das streng.
             </li>
           </ul>
+        </Block>
+
+        <Block title="Vor der Abreise">
+          <p>
+            Ist während Eures Aufenthalts etwas kaputtgegangen, sagt es dem Hüttenwart bitte vor
+            der Schlüsselübergabe — Sachschäden protokollieren wir dann gemeinsam und stellen sie
+            in Rechnung. Bei größerem Mehraufwand (Reinigung, Aufräumen, liegengebliebener Müll)
+            behalten wir uns vor, einen entsprechenden Teil der Kaution einzubehalten.
+          </p>
+          <p className="font-semibold mt-4 mb-1">Checkliste bei Abreise</p>
+          <p className="mt-0">So hinterlasst Ihr die Hütte am liebsten:</p>
+          <ul className="space-y-1.5">
+            <li>Besenrein, mit der Einrichtung zurück an ihrem ursprünglichen Platz</li>
+            <li>Stühle bitte nicht auf die Tische hochstellen</li>
+            <li>Geschirrspüler inklusive Besteckschublade ausgeräumt, Geschirr an seinem Platz</li>
+            <li>Kühlschränke leer, Türen bitte offen lassen (gegen Schimmel und Gerüche)</li>
+            <li>Alle Heizkörper auf Stufe 1 (Frostschutz)</li>
+            <li>
+              Restmüll in die schwarzen Tonnen am Parkplatz oben, Papier/Kartons in die blaue
+              Tonne, gelbe Säcke unter den Carport von Frau Brunhilde Hennecke (Bundesstraße 10)
+            </li>
+            <li>Alle Lebensmittel-Reste, Getränke, Leergut und sonstigen Müll bitte mitnehmen</li>
+            <li>
+              <strong>Die Hütte bis 12:00 Uhr verlassen.</strong>
+            </li>
+            <li>
+              Schlüssel an Toni Klauke nach Absprache übergeben oder in seinen Briefkasten werfen.
+              Adresse: Vorm Rohrbach 1 (um die Ecke).
+            </li>
+          </ul>
+          <p className="text-sm text-[var(--color-wh-fg-muted)] mt-4">
+            Die Abnahme der Hütte für die Erstattung der Kaution erfolgt abschließend durch das
+            Reinigungs-Team.
+          </p>
         </Block>
 
         <p className="mt-12 text-center text-[var(--color-wh-fg-muted)] italic">
-          Die Skifreunde Gütersloh e.V. wünschen Euch einen angenehmen Aufenthalt!
+          Skifreunde Gütersloh e.V. wünschen Euch einen richtig schönen Aufenthalt!
         </p>
       </div>
     </div>
