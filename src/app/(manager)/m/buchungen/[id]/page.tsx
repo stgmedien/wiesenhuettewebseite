@@ -347,11 +347,12 @@ export default async function BookingDetail({ params }: Props) {
             <PersonsPriceEditor
               bookingId={b.id}
               initial={{
-                adults: b.adults,
+                // Lehrkräfte zählen als Erwachsene — evtl. vorhandener
+                // Altbestand wird hier einmalig mit eingerechnet.
+                adults: b.adults + b.teachers,
                 members: b.members,
                 children: b.children,
                 pupils: b.pupils,
-                teachers: b.teachers,
               }}
             />
 
