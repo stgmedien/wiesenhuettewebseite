@@ -132,8 +132,8 @@ export default async function HausordnungPage() {
             </li>
           </ul>
           <p className="text-sm text-[var(--color-wh-fg-muted)] mt-4">
-            Die Abnahme der Hütte für die Erstattung der Kaution erfolgt abschließend durch das
-            Reinigungs-Team.
+            Die Abnahme der Hütte für die Erstattung der Kaution erfolgt durch den Hüttenwart bei
+            der Schlüsselübergabe und abschließend durch das Reinigungs-Team.
           </p>
         </Block>
 
