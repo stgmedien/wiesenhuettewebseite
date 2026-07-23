@@ -14,6 +14,7 @@
  */
 
 import { Document, Page, Text, View, StyleSheet, Font } from "@react-pdf/renderer";
+import { PRICES } from "@/lib/pricing";
 
 // Farben analog zur Webseite
 const C = {
@@ -318,7 +319,9 @@ export function InvoicePdf({
                 <Text style={styles.extraValue}>{formatEuro(kurtaxeCents)}</Text>
               </View>
               <Text style={[styles.extraDetail, { textAlign: "right" }]}>
-                {kurtaxePersons} Personen ab 16 Jahren — wird an die Kurverwaltung Winterberg abgeführt
+                {kurtaxePersons} Personen (ab 16 Jahren) × {nights} Nächte ×{" "}
+                {formatEuro(PRICES.kurtaxeRateCents)} = {formatEuro(kurtaxeCents)} — wird an die
+                Kurverwaltung Winterberg abgeführt
               </Text>
             </View>
           )}

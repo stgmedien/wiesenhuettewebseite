@@ -11,7 +11,7 @@ import {
   Row,
   Column,
 } from "@react-email/components";
-import { formatEuro } from "@/lib/pricing";
+import { formatEuro, PRICES } from "@/lib/pricing";
 
 type Props = {
   bookingNumber: string;
@@ -281,9 +281,9 @@ export default function MietvertragEmail({
           </Section>
           {pricing.kurtaxeCents > 0 && (
             <Text style={muted}>
-              Kurtaxe Hochsauerland: {pricing.kurtaxePersons} Personen (ab 16 Jahren) ×{" "}
-              {formatEuro(270)} = {formatEuro(pricing.kurtaxeCents)}. Der Verein zieht sie ein
-              und führt sie an die Kurverwaltung Winterberg ab.
+              Kurtaxe Hochsauerland: {pricing.kurtaxePersons} Personen (ab 16 Jahren) × {nights}{" "}
+              Nächte × {formatEuro(PRICES.kurtaxeRateCents)} = {formatEuro(pricing.kurtaxeCents)}.
+              Der Verein zieht sie ein und führt sie an die Kurverwaltung Winterberg ab.
             </Text>
           )}
 
