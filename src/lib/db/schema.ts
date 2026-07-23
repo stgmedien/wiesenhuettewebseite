@@ -281,6 +281,16 @@ export const bookings = pgTable(
     totalCents: integer("total_cents").notNull().default(0),      // ohne Kaution
     paidCents: integer("paid_cents").notNull().default(0),
 
+    // Alt-Vertrag mit fest vereinbarten Preisen (i. d. R. Papier-Mietvertrag vor der
+    // Portal-Umstellung, erkennbar an 100 € pauschaler Anzahlung). Ist auch nur EINER
+    // dieser vier Werte gesetzt, gelten sie fest fuer die Uebernachtung dieser Buchung
+    // — resolveTariffs() (aktuelle/saisonale Saetze) wird dann ignoriert, auch wenn
+    // spaeter noch Personen korrigiert werden (Vorstandswunsch 23.07.2026).
+    legacyNichtmitgliedCents: integer("legacy_nichtmitglied_cents"),
+    legacyMitgliedCents: integer("legacy_mitglied_cents"),
+    legacyKindCents: integer("legacy_kind_cents"),
+    legacySchuelerCents: integer("legacy_schueler_cents"),
+
     // Manager kann Kaution-Auto-Refund pausieren (z. B. bei Schaden)
     depositHold: boolean("deposit_hold").notNull().default(false),
     depositHoldReason: text("deposit_hold_reason"),
