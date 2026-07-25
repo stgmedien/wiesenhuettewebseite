@@ -18,6 +18,7 @@ type Props = {
   oldPersons: number;
   newPersons: number;
   deltaCents: number;
+  kurtaxeDeltaCents: number;
   newSubtotalCents: number;
 };
 
@@ -64,6 +65,7 @@ export default function PersonsIncreasedEmail({
   oldPersons,
   newPersons,
   deltaCents,
+  kurtaxeDeltaCents,
   newSubtotalCents,
 }: Props) {
   return (
@@ -94,6 +96,12 @@ export default function PersonsIncreasedEmail({
               Mehrbetrag: <strong>{eur(deltaCents)}</strong>
               <br />
               Neue Zwischensumme: <strong>{eur(newSubtotalCents)}</strong>
+              {kurtaxeDeltaCents > 0 && (
+                <>
+                  <br />
+                  zzgl. Kurtaxe: <strong>{eur(kurtaxeDeltaCents)}</strong>
+                </>
+              )}
             </Text>
           </Section>
           <Text style={text}>
