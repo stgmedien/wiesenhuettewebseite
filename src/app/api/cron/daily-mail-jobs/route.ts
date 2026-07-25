@@ -461,6 +461,17 @@ export async function GET(req: Request) {
             },
           },
         ],
+        // Karte für spätere Off-Session-Abbuchungen speichern (z. B. eine
+        // künftige Aufenthalt-Verlängerung) — dieser Alt-Vertrag hatte bisher
+        // nie einen Stripe-Checkout, bekommt mit dieser Zahlung also
+        // erstmals eine hinterlegte Zahlungsmethode. Der Webhook schreibt
+        // die PaymentIntent-ID danach auf die Buchung zurück (siehe
+        // handleCheckoutCompleted, kind "nachbelastung").
+        customer_creation: "always",
+        payment_intent_data: {
+          setup_future_usage: "off_session",
+          metadata: { bookingId: b.id, bookingNumber: b.bookingNumber },
+        },
         metadata: { bookingId: b.id, bookingNumber: b.bookingNumber, kind: "nachbelastung" },
         success_url: `${BASE_URL}/buchen/erfolg?bn=${b.bookingNumber}`,
         cancel_url: `${BASE_URL}/buchen/abbruch?bn=${b.bookingNumber}`,

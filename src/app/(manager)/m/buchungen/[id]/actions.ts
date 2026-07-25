@@ -255,6 +255,17 @@ export async function sendBookingMessage(
           },
         },
       ],
+      // Karte für spätere Off-Session-Abbuchungen speichern (Cron T-14,
+      // Aufenthalt-Verlängerung o.ä.) — wichtig v.a. für Alt-Verträge, die
+      // nie einen Stripe-Checkout durchlaufen haben (Anzahlung per
+      // Banküberweisung) und daher noch keine hinterlegte Zahlungsmethode
+      // haben. Der Webhook schreibt die PaymentIntent-ID danach auf die
+      // Buchung zurück, falls dort noch keine hinterlegt ist.
+      customer_creation: "always",
+      payment_intent_data: {
+        setup_future_usage: "off_session",
+        metadata: { bookingId: booking.id, bookingNumber: booking.bookingNumber },
+      },
       metadata: {
         bookingId: booking.id,
         bookingNumber: booking.bookingNumber,
