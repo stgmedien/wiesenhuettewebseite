@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { bookings, customers, payments, notes, mailTemplates, emailLog } from "@/lib/db/schema";
-import { eq, desc, and, isNotNull, asc } from "drizzle-orm";
+import { eq, desc, and, isNotNull, asc, sql } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { formatEuro } from "@/lib/pricing";
@@ -82,6 +82,7 @@ export default async function BookingDetail({ params }: Props) {
           status: emailLog.status,
           error: emailLog.error,
           sentAt: emailLog.sentAt,
+          hasBody: sql<boolean>`${emailLog.bodyHtml} is not null`,
         })
         .from(emailLog)
         .where(eq(emailLog.bookingId, id))
@@ -402,6 +403,7 @@ export default async function BookingDetail({ params }: Props) {
                   <th className="py-2 pr-3 font-medium">Was</th>
                   <th className="py-2 pr-3 font-medium">An</th>
                   <th className="py-2 pr-3 font-medium">Status</th>
+                  <th className="py-2 pr-3 font-medium"></th>
                 </tr>
               </thead>
               <tbody>
@@ -431,6 +433,20 @@ export default async function BookingDetail({ params }: Props) {
                           >
                             Fehlgeschlagen
                           </span>
+                        )}
+                      </td>
+                      <td className="py-2 pr-3">
+                        {m.hasBody ? (
+                          <a
+                            href={`/api/m/mail-log/${m.id}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-[var(--color-wh-deep-green)] underline text-xs whitespace-nowrap"
+                          >
+                            ansehen
+                          </a>
+                        ) : (
+                          <span className="text-xs text-[var(--color-wh-fg-muted)]">—</span>
                         )}
                       </td>
                     </tr>
