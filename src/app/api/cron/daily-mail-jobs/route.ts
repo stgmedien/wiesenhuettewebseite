@@ -21,7 +21,7 @@ import SchoolDepositDueEmail from "@/lib/mail/templates/school-deposit-due";
 import SchoolDepositWarningEmail from "@/lib/mail/templates/school-deposit-warning";
 import SchoolBookingCancelledEmail from "@/lib/mail/templates/school-booking-cancelled";
 import HuettenwartNoticeEmail from "@/lib/mail/templates/huettenwart-notice";
-import { HUETTENWART_EMAIL } from "@/lib/huettenwart";
+import { HUETTENWART_EMAIL, HUETTENWART_CC } from "@/lib/huettenwart";
 import RestzahlungRequestEmail from "@/lib/mail/templates/restzahlung-request";
 import { MANUAL_REST_MARKER, MANUAL_REST_SENT_MARKER } from "@/lib/payment-markers";
 import AvsReminderInternalEmail from "@/lib/mail/templates/avs-reminder-internal";
@@ -585,6 +585,7 @@ export async function GET(req: Request) {
       try {
         await sendMail({
           to: HUETTENWART_EMAIL,
+          bcc: HUETTENWART_CC,
           subject: `In 7 Tagen: Gruppe an der Wiesenhütte — ${b.bookingNumber}`,
           template: "huettenwart_notice",
           bookingId: b.id,
