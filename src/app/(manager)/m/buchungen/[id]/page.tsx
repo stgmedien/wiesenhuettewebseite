@@ -441,12 +441,17 @@ export default async function BookingDetail({ params }: Props) {
                             href={`/api/m/mail-log/${m.id}`}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-[var(--color-wh-deep-green)] underline text-xs whitespace-nowrap"
+                            className="inline-flex items-center rounded-full border border-[var(--color-wh-deep-green)] text-[var(--color-wh-deep-green)] px-2.5 py-0.5 text-xs font-medium whitespace-nowrap hover:bg-[var(--color-wh-deep-green)] hover:text-white"
                           >
-                            ansehen
+                            Öffnen
                           </a>
                         ) : (
-                          <span className="text-xs text-[var(--color-wh-fg-muted)]">—</span>
+                          <span
+                            className="text-xs text-[var(--color-wh-fg-muted)] italic"
+                            title="Verschickt vor Einführung dieser Funktion oder aus Sicherheitsgründen ausgeschlossen (z. B. Login-Mails) — kein Inhalt gespeichert."
+                          >
+                            kein Inhalt
+                          </span>
                         )}
                       </td>
                     </tr>
