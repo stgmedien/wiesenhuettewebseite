@@ -112,10 +112,12 @@ export function ExtendStayForm({ bookingId, departureLabel, deadlineLabel }: Pro
                 <strong>{eur(preview.calc.deltaCents)}</strong>
               </p>
               <p className="text-xs text-[var(--color-wh-black)]/60 mt-1">
-                Davon {eur(preview.calc.accommodationDeltaCents)} Übernachtung (zum aktuell
-                gültigen Tarif — auch bei individuell vereinbarten Preisen gilt das nur für die
-                bereits gebuchten Nächte) und {eur(preview.calc.kurtaxeDeltaCents)} Kurtaxe. Wird
-                automatisch mit der Restzahlung eingezogen — keine separate Zahlung nötig.
+                Davon{" "}
+                {eur(preview.calc.accommodationDeltaCents + preview.calc.minOccupancySurchargeDeltaCents)}{" "}
+                Übernachtung (zum aktuell gültigen Tarif — auch bei individuell vereinbarten
+                Preisen gilt das nur für die bereits gebuchten Nächte) und{" "}
+                {eur(preview.calc.kurtaxeDeltaCents)} Kurtaxe. Wird automatisch mit der
+                Restzahlung eingezogen — keine separate Zahlung nötig.
               </p>
             </div>
           )}

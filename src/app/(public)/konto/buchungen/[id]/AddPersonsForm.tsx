@@ -27,7 +27,7 @@ export function AddPersonsForm({ bookingId, booked, memberAllowed, deadlineLabel
   const [open, setOpen] = useState(false);
   const [counts, setCounts] = useState<Counts>(booked);
   const [preview, setPreview] = useState<IncreasePreview | null>(null);
-  const [done, setDone] = useState<{ persons: number; deltaCents: number } | null>(null);
+  const [done, setDone] = useState<{ persons: number; deltaCents: number; kurtaxeDeltaCents: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
   const router = useRouter();
@@ -52,7 +52,7 @@ export function AddPersonsForm({ bookingId, booked, memberAllowed, deadlineLabel
     start(async () => {
       const res = await submitPersonsIncrease({ bookingId, ...counts });
       if (res.ok) {
-        setDone({ persons: res.totalPersons, deltaCents: res.deltaCents });
+        setDone({ persons: res.totalPersons, deltaCents: res.deltaCents, kurtaxeDeltaCents: res.kurtaxeDeltaCents });
         router.refresh();
       } else {
         setError(res.error);
@@ -66,8 +66,12 @@ export function AddPersonsForm({ bookingId, booked, memberAllowed, deadlineLabel
         <h2 className="font-heading text-xl text-emerald-900 mb-2">✓ Nachmeldung übernommen</h2>
         <p className="text-sm text-emerald-900">
           Eure Buchung läuft jetzt über <strong>{done.persons} Personen</strong>. Der Mehrbetrag von{" "}
-          <strong>{eur(done.deltaCents)}</strong> wird automatisch mit der Restzahlung fällig — Ihr
-          bekommt gerade eine Bestätigung per E-Mail.
+          <strong>{eur(done.deltaCents + done.kurtaxeDeltaCents)}</strong>
+          {done.kurtaxeDeltaCents > 0 && (
+            <> (davon {eur(done.kurtaxeDeltaCents)} Kurtaxe)</>
+          )}{" "}
+          wird automatisch mit der Restzahlung fällig — Ihr bekommt gerade eine Bestätigung per
+          E-Mail.
         </p>
       </section>
     );
@@ -150,6 +154,12 @@ export function AddPersonsForm({ bookingId, booked, memberAllowed, deadlineLabel
                 <strong>{eur(preview.deltaCents)}</strong> → neue Zwischensumme{" "}
                 <strong>{eur(preview.newSubtotalCents)}</strong>
               </p>
+              {preview.kurtaxeDeltaCents > 0 && (
+                <p className="text-xs text-[var(--color-wh-black)]/60 mt-1">
+                  Zzgl. {eur(preview.kurtaxeDeltaCents)} Kurtaxe für die zusätzlichen Personen (ab
+                  16 Jahren).
+                </p>
+              )}
               <p className="text-xs text-[var(--color-wh-black)]/60 mt-1">
                 Wird automatisch mit der Restzahlung eingezogen bzw. angefordert — keine separate
                 Zahlung nötig.

@@ -204,6 +204,7 @@ async function computeIncrease(
   | {
       ok: true;
       deltaCents: number;
+      kurtaxeDeltaCents: number;
       newSubtotalCents: number;
       totalPersons: number;
       newPersons: Persons;
@@ -266,6 +267,11 @@ async function computeIncrease(
     booking.accommodationCents +
     (nb.minOccupancySurchargeCents - booking.minOccupancySurchargeCents) +
     (nb.soloSurchargeCents - booking.soloSurchargeCents);
+  // Kurtaxe ist NICHT Teil von subtotalCents (eigene Spalte) — trotzdem muss
+  // sie bei mehr kurtaxenpflichtigen Personen (ab 16 J.) mit steigen, sonst
+  // wird sie fuer die neu gemeldeten Gaeste nie erhoben und der Verein zahlt
+  // die Differenz an Winterberg aus eigener Tasche.
+  const kurtaxeDeltaCents = nb.kurtaxeCents - booking.kurtaxeCents;
   if (deltaCents < 0) {
     // Bei reiner Erhöhung nie zu erwarten — defensive Schranke.
     return { ok: false, error: "Unerwartete Preisberechnung — bitte kontaktiert uns direkt." };
@@ -274,6 +280,7 @@ async function computeIncrease(
   return {
     ok: true,
     deltaCents,
+    kurtaxeDeltaCents,
     newSubtotalCents: booking.subtotalCents + deltaCents,
     totalPersons,
     newPersons,
@@ -282,7 +289,7 @@ async function computeIncrease(
 }
 
 export type IncreasePreview =
-  | { ok: true; deltaCents: number; newSubtotalCents: number; totalPersons: number }
+  | { ok: true; deltaCents: number; kurtaxeDeltaCents: number; newSubtotalCents: number; totalPersons: number }
   | { ok: false; error: string };
 
 export async function previewPersonsIncrease(
@@ -298,7 +305,13 @@ export async function previewPersonsIncrease(
   }
   const res = await computeIncrease(owned.booking, owned.customer, parsed.data);
   if (!res.ok) return res;
-  return { ok: true, deltaCents: res.deltaCents, newSubtotalCents: res.newSubtotalCents, totalPersons: res.totalPersons };
+  return {
+    ok: true,
+    deltaCents: res.deltaCents,
+    kurtaxeDeltaCents: res.kurtaxeDeltaCents,
+    newSubtotalCents: res.newSubtotalCents,
+    totalPersons: res.totalPersons,
+  };
 }
 
 export async function submitPersonsIncrease(
@@ -315,7 +328,7 @@ export async function submitPersonsIncrease(
   const { booking, customer } = owned;
   const res = await computeIncrease(booking, customer, parsed.data);
   if (!res.ok) return res;
-  const { deltaCents, newSubtotalCents, totalPersons, newPersons, calc: nb } = res;
+  const { deltaCents, kurtaxeDeltaCents, newSubtotalCents, totalPersons, newPersons, calc: nb } = res;
 
   await db
     .update(bookings)
@@ -329,6 +342,7 @@ export async function submitPersonsIncrease(
       accommodationCents: nb.accommodationCents,
       minOccupancySurchargeCents: nb.minOccupancySurchargeCents,
       soloSurchargeCents: nb.soloSurchargeCents,
+      kurtaxeCents: nb.kurtaxeCents,
       subtotalCents: newSubtotalCents,
       totalCents: newSubtotalCents,
       updatedAt: new Date(),
@@ -337,7 +351,7 @@ export async function submitPersonsIncrease(
 
   await db.insert(activityLog).values({
     who: customer.email,
-    what: `Teilnehmer nachgemeldet (Gast): ${booking.persons} → ${totalPersons} Personen (Erw ${newPersons.adults} · Mitgl ${newPersons.members} · Kind ${newPersons.children} · Schü ${newPersons.pupils} · Lehr ${newPersons.teachers}) — Zwischensumme ${formatEuro(newSubtotalCents)} (+${formatEuro(deltaCents)}), Mehrbetrag fließt in die Restzahlung.`,
+    what: `Teilnehmer nachgemeldet (Gast): ${booking.persons} → ${totalPersons} Personen (Erw ${newPersons.adults} · Mitgl ${newPersons.members} · Kind ${newPersons.children} · Schü ${newPersons.pupils} · Lehr ${newPersons.teachers}) — Zwischensumme ${formatEuro(newSubtotalCents)} (+${formatEuro(deltaCents)}), Kurtaxe +${formatEuro(kurtaxeDeltaCents)}, Mehrbetrag fließt in die Restzahlung.`,
     bookingId: booking.id,
   });
 
@@ -354,6 +368,7 @@ export async function submitPersonsIncrease(
         oldPersons: booking.persons,
         newPersons: totalPersons,
         deltaCents,
+        kurtaxeDeltaCents,
         newSubtotalCents,
       }),
       bcc: process.env.MAIL_INTERNAL_TO ?? undefined,
@@ -364,7 +379,7 @@ export async function submitPersonsIncrease(
 
   revalidatePath(`/konto/buchungen/${booking.id}`);
   revalidatePath("/konto");
-  return { ok: true, deltaCents, newSubtotalCents, totalPersons };
+  return { ok: true, deltaCents, kurtaxeDeltaCents, newSubtotalCents, totalPersons };
 }
 
 // =============================================================
@@ -405,6 +420,7 @@ type ExtensionCalc = {
   newDeparture: string;
   newNights: number;
   accommodationDeltaCents: number;
+  minOccupancySurchargeDeltaCents: number;
   kurtaxeDeltaCents: number;
   deltaCents: number;
   newSubtotalCents: number;
@@ -434,11 +450,35 @@ async function computeExtension(
   // Bewusst IMMER aktuelle Tarife (nicht resolveBookingTariffs) — zusätzliche
   // Nächte sind neues Geschäft, auch bei Alt-Verträgen mit Preis-Sperre.
   const tariffs = await resolveTariffs(booking.arrival);
-  const accommodationDeltaCents =
-    (booking.adults + booking.teachers) * raw.extraNights * tariffs.nichtmitglied +
-    booking.members * raw.extraNights * tariffs.mitglied +
-    booking.children * raw.extraNights * tariffs.kind +
-    booking.pupils * raw.extraNights * tariffs.schueler;
+  const currentPersons: Persons = {
+    adults: booking.adults,
+    members: booking.members,
+    children: booking.children,
+    pupils: booking.pupils,
+    teachers: booking.teachers,
+  };
+  // Alt/Neu über calculatePrice statt Handrechnung, damit der
+  // Mindestbelegungs-Aufschlag (< 15 Personen) für die zusätzlichen Nächte
+  // korrekt mitskaliert wird (sonst würden kleine Gruppen bei einer
+  // Verlängerung zu wenig zahlen — cleaningCents/soloSurchargeCents sind
+  // pauschal und heben sich in der Differenz von selbst auf).
+  const oldCalc = calculatePrice({
+    arrival: booking.arrival,
+    departure: booking.departure,
+    persons: currentPersons,
+    soloUse: booking.soloUse,
+    tariffs,
+  });
+  const newCalc = calculatePrice({
+    arrival: booking.arrival,
+    departure: newDeparture,
+    persons: currentPersons,
+    soloUse: booking.soloUse,
+    tariffs,
+  });
+  const accommodationDeltaCents = newCalc.accommodationCents - oldCalc.accommodationCents;
+  const minOccupancySurchargeDeltaCents =
+    newCalc.minOccupancySurchargeCents - oldCalc.minOccupancySurchargeCents;
 
   const kurtaxePersons = booking.adults + booking.members + booking.teachers;
   const kurtaxeDeltaCents = kurtaxePersons * raw.extraNights * PRICES.kurtaxeRateCents;
@@ -449,9 +489,11 @@ async function computeExtension(
       newDeparture,
       newNights: booking.nights + raw.extraNights,
       accommodationDeltaCents,
+      minOccupancySurchargeDeltaCents,
       kurtaxeDeltaCents,
-      deltaCents: accommodationDeltaCents + kurtaxeDeltaCents,
-      newSubtotalCents: booking.subtotalCents + accommodationDeltaCents,
+      deltaCents: accommodationDeltaCents + minOccupancySurchargeDeltaCents + kurtaxeDeltaCents,
+      newSubtotalCents:
+        booking.subtotalCents + accommodationDeltaCents + minOccupancySurchargeDeltaCents,
       kurtaxePersons,
     },
   };
@@ -493,6 +535,7 @@ export async function submitBookingExtension(
     newDeparture,
     newNights,
     accommodationDeltaCents,
+    minOccupancySurchargeDeltaCents,
     kurtaxeDeltaCents,
     deltaCents,
     newSubtotalCents,
@@ -505,6 +548,8 @@ export async function submitBookingExtension(
       departure: newDeparture,
       nights: newNights,
       accommodationCents: booking.accommodationCents + accommodationDeltaCents,
+      minOccupancySurchargeCents:
+        booking.minOccupancySurchargeCents + minOccupancySurchargeDeltaCents,
       kurtaxeCents: booking.kurtaxeCents + kurtaxeDeltaCents,
       subtotalCents: newSubtotalCents,
       totalCents: newSubtotalCents,
@@ -514,7 +559,7 @@ export async function submitBookingExtension(
 
   await db.insert(activityLog).values({
     who: customer.email,
-    what: `Aufenthalt verlängert (Gast): Abreise ${booking.departure} → ${newDeparture} (+${raw.extraNights} Nächte) — Zwischensumme ${formatEuro(newSubtotalCents)} (+${formatEuro(accommodationDeltaCents)}), Kurtaxe +${formatEuro(kurtaxeDeltaCents)}. Mehrbetrag fließt in die Restzahlung. Kurkarten müssen manuell bei Winterberg nachgemeldet werden.`,
+    what: `Aufenthalt verlängert (Gast): Abreise ${booking.departure} → ${newDeparture} (+${raw.extraNights} Nächte) — Zwischensumme ${formatEuro(newSubtotalCents)} (+${formatEuro(accommodationDeltaCents + minOccupancySurchargeDeltaCents)}), Kurtaxe +${formatEuro(kurtaxeDeltaCents)}. Mehrbetrag fließt in die Restzahlung. Kurkarten müssen manuell bei Winterberg nachgemeldet werden.`,
     bookingId: booking.id,
   });
 
