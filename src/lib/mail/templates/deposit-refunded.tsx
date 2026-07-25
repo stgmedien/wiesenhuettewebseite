@@ -106,6 +106,15 @@ export default function DepositRefundedEmail({
             wir kümmern uns sofort darum.
           </Text>
 
+          <Text style={text}>
+            Die Rechnung zu Eurem Aufenthalt haben wir als PDF angehängt — für Eure Unterlagen.
+          </Text>
+
+          <Text style={text}>
+            Wir hoffen, Ihr hattet eine richtig schöne Zeit bei uns in Winterberg und würden uns
+            freuen, Euch bald wieder auf der Wiesenhütte begrüßen zu dürfen!
+          </Text>
+
           <Hr style={{ borderColor: "#C8CEC4", margin: "32px 0 16px" }} />
           <Text style={muted}>
             Wiesenhütte · Skifreunde Gütersloh e.V. · Langewiese, Hochsauerland
