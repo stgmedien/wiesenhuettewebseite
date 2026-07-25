@@ -98,6 +98,8 @@ const BF_COPY = {
   de: {
     steps: ["Zeitraum & Personen", "Anlass", "Kontakt", "Übersicht"],
     s0H: "Wann?",
+    paymentMethodNote:
+      "Zahlung per Kredit-/Debitkarte (Stripe): Ihr zahlt die Anzahlung jetzt online, die Restzahlung inkl. Kaution und Kurtaxe wird 14 Tage vor Anreise automatisch von derselben Karte abgebucht — ohne dass Ihr Euch noch einmal einloggen müsst. Falls Euer Verein nur per Überweisung zahlen kann (z. B. reines Vereinskonto ohne Karte), meldet Euch bitte vorher bei uns unter hello@wiesenhuette.de — wir finden gemeinsam eine Lösung.",
     s1H: "Wer kommt?",
     s1AnlassH: "Anlass",
     s2H: "Eure Daten",
@@ -266,6 +268,8 @@ const BF_COPY = {
   en: {
     steps: ["Dates & guests", "Purpose", "Contact", "Summary"],
     s0H: "When?",
+    paymentMethodNote:
+      "Payment by credit/debit card (Stripe): you pay the deposit online now, and the remaining balance (incl. damage deposit and tourist tax) is charged automatically to the same card 14 days before arrival — no need to log in again. If your club can only pay by bank transfer (e.g. a club account with no card), please contact us beforehand at hello@wiesenhuette.de — we'll find a solution together.",
     s1H: "Who's coming?",
     s1AnlassH: "Purpose",
     s2H: "Your details",
@@ -430,6 +434,8 @@ const BF_COPY = {
   nl: {
     steps: ["Periode & personen", "Aanleiding", "Contact", "Overzicht"],
     s0H: "Wanneer?",
+    paymentMethodNote:
+      "Betaling per krediet-/debitkaart (Stripe): je betaalt de aanbetaling nu online, het resterende bedrag (incl. borg en toeristenbelasting) wordt 14 dagen vóór aankomst automatisch van dezelfde kaart afgeschreven — je hoeft niet opnieuw in te loggen. Kan jouw vereniging alleen per overschrijving betalen (bijv. een verenigingsrekening zonder kaart)? Neem dan vooraf contact met ons op via hello@wiesenhuette.de — samen vinden we een oplossing.",
     s1H: "Wie komt er?",
     s1AnlassH: "Aanleiding",
     s2H: "Jullie gegevens",
@@ -811,6 +817,10 @@ export const BookingFlow = ({
         {step === 0 && (
           <div className="mt-8 space-y-6">
             <h3 className="text-[22px] sm:text-[24px] m-0">{tt.s0H}</h3>
+
+            <div className="rounded-[var(--radius-card)] bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)] px-4 py-3 text-sm text-[var(--color-wh-fg-muted)]">
+              {tt.paymentMethodNote}
+            </div>
 
             <AvailabilityCalendar
               bookedDates={bookedDates}
