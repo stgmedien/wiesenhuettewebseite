@@ -24,6 +24,7 @@ export function PersonsPriceEditor({ bookingId, initial }: { bookingId: string; 
   const [p, setP] = useState<P>(initial);
   const [res, setRes] = useState<{
     deltaCents: number;
+    kurtaxeDeltaCents: number;
     newSubtotalCents: number;
     refundableCents: number;
   } | null>(null);
@@ -44,6 +45,7 @@ export function PersonsPriceEditor({ bookingId, initial }: { bookingId: string; 
       if (r.ok) {
         setRes({
           deltaCents: r.deltaCents,
+          kurtaxeDeltaCents: r.kurtaxeDeltaCents,
           newSubtotalCents: r.newSubtotalCents,
           refundableCents: r.refundableCents,
         });
@@ -133,6 +135,16 @@ export function PersonsPriceEditor({ bookingId, initial }: { bookingId: string; 
               {euro(res.deltaCents)}
             </span>
           </div>
+
+          {res.kurtaxeDeltaCents !== 0 && (
+            <div className="flex justify-between mt-1">
+              <span>Kurtaxe-Anpassung</span>
+              <span className="font-semibold">
+                {res.kurtaxeDeltaCents >= 0 ? "+" : ""}
+                {euro(res.kurtaxeDeltaCents)}
+              </span>
+            </div>
+          )}
 
           {res.deltaCents < 0 && res.refundableCents > 0 && (
             <button
