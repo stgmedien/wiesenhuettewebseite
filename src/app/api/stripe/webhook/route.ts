@@ -177,10 +177,18 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   // Nachbelastung / Restzahlung: nur Zahlung erfassen, Status NICHT verändern.
   if (kind === "nachbelastung" || kind === "restzahlung") {
+    const piId = (session.payment_intent as string | null) ?? null;
     await db
       .update(bookings)
       .set({
         paidCents: booking.paidCents + amountCents,
+        // Alt-Verträge ohne Stripe-Historie (Anzahlung per Banküberweisung)
+        // haben noch keine stripePaymentIntentId — mit dieser Zahlung wird
+        // erstmals eine Karte mit Off-Session-Erlaubnis hinterlegt (siehe
+        // sendBookingMessage), also die Buchung damit "aufwerten", ohne eine
+        // schon vorhandene (aus der echten Anzahlung stammende) ID zu
+        // überschreiben.
+        ...(booking.stripePaymentIntentId ? {} : { stripePaymentIntentId: piId }),
         updatedAt: new Date(),
       })
       .where(eq(bookings.id, bookingId));
