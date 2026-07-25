@@ -575,7 +575,7 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
       discountCode: appliedDiscountCode,
       subtotalCents: effectiveSubtotal,
       depositCents: breakdown.depositCents,
-      totalCents: breakdown.subtotalCents,
+      totalCents: effectiveSubtotal,
       paidCents: 0,
       cleaningOptedIn: true, // Pflicht
       soloUse: data.soloUse,
