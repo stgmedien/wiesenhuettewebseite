@@ -385,6 +385,10 @@ export const emailLog = pgTable("email_log", {
   // "delivered" | "bounced" | "blocked" | "spam" | null (noch kein Event).
   deliveryStatus: varchar("delivery_status", { length: 20 }),
   deliveryStatusAt: timestamp("delivery_status_at"),
+  // Vollstaendiges gerendertes HTML zum Sendezeitpunkt — ermoeglicht die
+  // "volle Mail-Ansicht" im Manager-Tool statt nur Betreff/Empfaenger.
+  // Nullable: Mails vor Einfuehrung dieses Felds haben keinen Inhalt mehr.
+  bodyHtml: text("body_html"),
 });
 
 // =============================================================

@@ -75,6 +75,12 @@ export const sendMail = async (args: SendMailArgs): Promise<void> => {
       : undefined;
   const bcc = [args.bcc, archiveBcc].filter((v): v is string => Boolean(v));
 
+  // Aus demselben Grund wie beim BCC-Archiv oben: Mails mit Login-/
+  // Verifizierungs-Links werden nicht im Klartext gespeichert — sonst waere
+  // ein funktionierender Magic Link fuer jeden mit Manager-Zugriff auf die
+  // Mail-Historie einsehbar.
+  const storedBodyHtml = ARCHIVE_EXCLUDED_TEMPLATES.has(args.template) ? null : html;
+
   try {
     const info = await getTransporter().sendMail({
       from,
@@ -97,6 +103,7 @@ export const sendMail = async (args: SendMailArgs): Promise<void> => {
       // genau diese Message-ID (siehe /api/webhooks/brevo). Ohne spitze
       // Klammern gespeichert, da Brevo sie im Webhook-Payload teils weglaesst.
       messageId: info.messageId ? info.messageId.replace(/^<|>$/g, "") : null,
+      bodyHtml: storedBodyHtml,
     });
 
     console.log(`[mail] ${args.template} → ${args.to} (${info.messageId})`);
@@ -109,6 +116,7 @@ export const sendMail = async (args: SendMailArgs): Promise<void> => {
       status: "failed",
       error: message,
       bookingId: args.bookingId,
+      bodyHtml: storedBodyHtml,
     });
     console.error(`[mail] FAILED ${args.template} → ${args.to}:`, message);
     throw err;
