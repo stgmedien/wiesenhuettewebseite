@@ -8,6 +8,7 @@ import { formatEuro, cancellationFeeForBooking, RULES } from "@/lib/pricing";
 import { formatDateLong } from "@/lib/utils";
 import { CancelBookingButton } from "./CancelBookingButton";
 import { AddPersonsForm } from "./AddPersonsForm";
+import { ExtendStayForm } from "./ExtendStayForm";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -78,6 +79,16 @@ export default async function BuchungDetailPage({ params }: Props) {
     booking.paidCents < booking.subtotalCents &&
     booking.persons < RULES.maxPersons;
 
+  // Aufenthalt verlängern: letzter Tag = Anreise − 16 (muss zur Prüfung in
+  // actions.ts passen — ein Tag vor dem Nachmelde-Cutoff, damit T-14 die
+  // Restzahlung mit dem schon aktualisierten Betrag berechnet).
+  const extendDeadline = new Date(arrivalDate);
+  extendDeadline.setDate(extendDeadline.getDate() - 16);
+  const canExtendStay =
+    (booking.status === "bezahlt" || booking.status === "bestaetigt") &&
+    daysUntilArrival >= 16 &&
+    booking.paidCents < booking.subtotalCents;
+
   return (
     <div className="container max-w-3xl mx-auto px-6 py-12">
       <Link
@@ -126,6 +137,19 @@ export default async function BuchungDetailPage({ params }: Props) {
             year: "numeric",
           })}
           maxPersons={RULES.maxPersons}
+        />
+      )}
+
+      {/* Aufenthalt verlängern */}
+      {canExtendStay && (
+        <ExtendStayForm
+          bookingId={booking.id}
+          departureLabel={formatDateLong(booking.departure)}
+          deadlineLabel={extendDeadline.toLocaleDateString("de-DE", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })}
         />
       )}
 
