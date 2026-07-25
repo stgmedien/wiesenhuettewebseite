@@ -7,6 +7,7 @@ import { formatDateLong } from "@/lib/utils";
 import { StatusPill } from "@/components/manager/StatusPill";
 import { getUnresolvedMailFailures } from "@/lib/mail-log";
 import { findMailTemplateMeta } from "@/lib/automatic-mail-templates";
+import { findPriceMismatches } from "@/lib/price-consistency";
 import {
   CalendarArrowDown,
   Mail,
@@ -15,6 +16,7 @@ import {
   Waves,
   Sparkles,
   MailWarning,
+  AlertTriangle,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -42,6 +44,7 @@ export default async function Dashboard() {
   const in60dIso = in60d.toISOString().slice(0, 10);
 
   const mailFailuresPromise = getUnresolvedMailFailures();
+  const priceMismatchesPromise = findPriceMismatches();
 
   // Alle unabhaengigen Queries parallel (Issue #86) — nur openPaymentBookings
   // und die Customer-Namen brauchen Ergebnisse aus dieser Stufe.
@@ -139,6 +142,7 @@ export default async function Dashboard() {
         .limit(10),
     ]);
   const mailFailures = await mailFailuresPromise;
+  const priceMismatches = await priceMismatchesPromise;
 
   const arrivalsToday = arrivalsSoon.filter((b) => b.arrival === todayIso);
   const departuresToday = departuresSoon.filter((b) => b.departure === todayIso);
@@ -212,6 +216,38 @@ export default async function Dashboard() {
                 />
               );
             })}
+          </div>
+        </section>
+      )}
+
+      {/* Inkonsistente Preisfelder — nur sichtbar, wenn es welche gibt */}
+      {priceMismatches.length > 0 && (
+        <section className="mt-8 sm:mt-10 rounded-[var(--radius-card)] border-2 border-[var(--color-wh-sunset)] bg-[var(--color-wh-beige)] p-5 sm:p-6">
+          <h3 className="text-[20px] m-0 mb-1 flex items-center gap-2 text-[var(--color-wh-sunset)]">
+            <AlertTriangle size={20} />
+            {priceMismatches.length === 1
+              ? "Eine Buchung hat inkonsistente Preisfelder"
+              : `${priceMismatches.length} Buchungen haben inkonsistente Preisfelder`}
+          </h3>
+          <p className="text-sm text-[var(--color-wh-fg-muted)] m-0 mb-4">
+            Zwischensumme, Gesamtsumme oder Kurtaxe passen nicht mehr zu den gespeicherten
+            Einzelposten — bitte manuell prüfen, hier wird nichts automatisch korrigiert.
+          </p>
+          <div>
+            {priceMismatches.map((m) => (
+              <Link
+                key={m.bookingId}
+                href={`/m/buchungen/${m.bookingId}`}
+                className="block py-3 border-b border-[var(--color-wh-winter-grey)] last:border-b-0 no-underline text-[var(--color-wh-black)] hover:bg-[var(--color-wh-green-soft)]/40 -mx-2 px-2 rounded-md transition-colors"
+              >
+                <div className="font-semibold">
+                  {m.bookingNumber} · {m.guestName}
+                </div>
+                <div className="text-sm text-[var(--color-wh-fg-muted)]">
+                  {m.issues.join(" · ")}
+                </div>
+              </Link>
+            ))}
           </div>
         </section>
       )}
