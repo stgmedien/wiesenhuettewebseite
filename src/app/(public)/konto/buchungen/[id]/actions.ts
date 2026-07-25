@@ -5,13 +5,17 @@ import { db } from "@/lib/db";
 import { bookings, customers, activityLog, payments } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
-import { revalidatePath } from "next/cache";
-import { cancellationFeeForBooking, formatEuro, calculatePrice, RULES, type Persons } from "@/lib/pricing";
-import { resolveBookingTariffs } from "@/lib/pricing-tariffs";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { cancellationFeeForBooking, formatEuro, calculatePrice, PRICES, RULES, type Persons } from "@/lib/pricing";
+import { resolveBookingTariffs, resolveTariffs } from "@/lib/pricing-tariffs";
+import { isRangeAvailable, BOOKING_BLOCKS_TAG } from "@/lib/availability";
 import { formatDateLong } from "@/lib/utils";
 import { sendMail } from "@/lib/mail/send";
 import BookingCancelledEmail from "@/lib/mail/templates/booking-cancelled";
 import PersonsIncreasedEmail from "@/lib/mail/templates/persons-increased";
+import BookingExtendedEmail from "@/lib/mail/templates/booking-extended";
+import BookingExtendedInternalEmail from "@/lib/mail/templates/booking-extended-internal";
+import BookingExtendedKurkartenReminderEmail from "@/lib/mail/templates/booking-extended-kurkarten-reminder";
 import HuettenwartCancellationEmail from "@/lib/mail/templates/huettenwart-cancellation";
 import { HUETTENWART_EMAIL, HUETTENWART_CC } from "@/lib/huettenwart";
 import { buildIcalCancel } from "@/lib/mail/ical";
@@ -361,4 +365,222 @@ export async function submitPersonsIncrease(
   revalidatePath(`/konto/buchungen/${booking.id}`);
   revalidatePath("/konto");
   return { ok: true, deltaCents, newSubtotalCents, totalPersons };
+}
+
+// =============================================================
+// GAST-SELBSTVERLÄNGERUNG (bis T-16): Gast kann online zusätzliche Nächte
+// anhängen (Abreise nach hinten verschieben). Der Mehrbetrag fließt in die
+// Restzahlung (T-14) — keine Sofortzahlung, keine neue Kaution/Endreinigung
+// (beide sind pauschal pro Aufenthalt). Zusätzliche Nächte werden IMMER zum
+// aktuellen Tarif berechnet — auch bei Alt-Verträgen mit Preis-Sperre gilt
+// die nur für die ursprünglich gebuchten Nächte, nicht für die Verlängerung.
+// =============================================================
+
+const EXTENSION_CUTOFF_DAYS = 16; // letzter erlaubter Tag: Anreise minus 16 Tage
+const EXTENSION_MAX_NIGHTS = 14; // grobe Plausibilitäts-Schranke gegen Fehleingaben
+
+const extendSchema = z.object({
+  bookingId: z.string().uuid(),
+  extraNights: z.coerce.number().int().min(1).max(EXTENSION_MAX_NIGHTS),
+});
+
+function addDaysToIso(iso: string, days: number): string {
+  const d = new Date(`${iso}T00:00:00`);
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+/** Prüft, ob die Buchung für eine Gast-Selbstverlängerung offen ist. */
+function extensionBlockedReason(booking: BookingRow): string | null {
+  if (booking.status !== "bezahlt" && booking.status !== "bestaetigt") {
+    return "Eine Verlängerung ist nur bei bestätigten Buchungen möglich.";
+  }
+  if (daysUntilArrival(booking.arrival) < EXTENSION_CUTOFF_DAYS) {
+    return "Die Frist ist abgelaufen — ab 16 Tage vor Anreise ist eine Online-Verlängerung nicht mehr möglich. Bitte kontaktiert uns direkt (einfach auf eine unserer Mails antworten).";
+  }
+  return null;
+}
+
+type ExtensionCalc = {
+  newDeparture: string;
+  newNights: number;
+  accommodationDeltaCents: number;
+  kurtaxeDeltaCents: number;
+  deltaCents: number;
+  newSubtotalCents: number;
+  kurtaxePersons: number;
+};
+
+async function computeExtension(
+  booking: BookingRow,
+  raw: z.infer<typeof extendSchema>
+): Promise<{ ok: true; calc: ExtensionCalc } | { ok: false; error: string }> {
+  const blocked = extensionBlockedReason(booking);
+  if (blocked) return { ok: false, error: blocked };
+
+  const newDeparture = addDaysToIso(booking.departure, raw.extraNights);
+  const available = await isRangeAvailable(
+    { arrival: booking.arrival, departure: newDeparture },
+    booking.id
+  );
+  if (!available) {
+    return {
+      ok: false,
+      error:
+        "Für den verlängerten Zeitraum ist die Hütte leider schon belegt. Bitte kontaktiert uns direkt.",
+    };
+  }
+
+  // Bewusst IMMER aktuelle Tarife (nicht resolveBookingTariffs) — zusätzliche
+  // Nächte sind neues Geschäft, auch bei Alt-Verträgen mit Preis-Sperre.
+  const tariffs = await resolveTariffs(booking.arrival);
+  const accommodationDeltaCents =
+    (booking.adults + booking.teachers) * raw.extraNights * tariffs.nichtmitglied +
+    booking.members * raw.extraNights * tariffs.mitglied +
+    booking.children * raw.extraNights * tariffs.kind +
+    booking.pupils * raw.extraNights * tariffs.schueler;
+
+  const kurtaxePersons = booking.adults + booking.members + booking.teachers;
+  const kurtaxeDeltaCents = kurtaxePersons * raw.extraNights * PRICES.kurtaxeRateCents;
+
+  return {
+    ok: true,
+    calc: {
+      newDeparture,
+      newNights: booking.nights + raw.extraNights,
+      accommodationDeltaCents,
+      kurtaxeDeltaCents,
+      deltaCents: accommodationDeltaCents + kurtaxeDeltaCents,
+      newSubtotalCents: booking.subtotalCents + accommodationDeltaCents,
+      kurtaxePersons,
+    },
+  };
+}
+
+export type ExtensionPreview =
+  | { ok: true; calc: ExtensionCalc }
+  | { ok: false; error: string };
+
+export async function previewBookingExtension(
+  raw: z.infer<typeof extendSchema>
+): Promise<ExtensionPreview> {
+  const parsed = extendSchema.safeParse(raw);
+  if (!parsed.success) return { ok: false, error: "Ungültige Eingabe." };
+  let owned: Awaited<ReturnType<typeof loadOwnedBooking>>;
+  try {
+    owned = await loadOwnedBooking(parsed.data.bookingId);
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Nicht erlaubt." };
+  }
+  return computeExtension(owned.booking, parsed.data);
+}
+
+export async function submitBookingExtension(
+  raw: z.infer<typeof extendSchema>
+): Promise<ExtensionPreview> {
+  const parsed = extendSchema.safeParse(raw);
+  if (!parsed.success) return { ok: false, error: "Ungültige Eingabe." };
+  let owned: Awaited<ReturnType<typeof loadOwnedBooking>>;
+  try {
+    owned = await loadOwnedBooking(parsed.data.bookingId);
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Nicht erlaubt." };
+  }
+  const { booking, customer } = owned;
+  const res = await computeExtension(booking, parsed.data);
+  if (!res.ok) return res;
+  const {
+    newDeparture,
+    newNights,
+    accommodationDeltaCents,
+    kurtaxeDeltaCents,
+    deltaCents,
+    newSubtotalCents,
+    kurtaxePersons,
+  } = res.calc;
+
+  await db
+    .update(bookings)
+    .set({
+      departure: newDeparture,
+      nights: newNights,
+      accommodationCents: booking.accommodationCents + accommodationDeltaCents,
+      kurtaxeCents: booking.kurtaxeCents + kurtaxeDeltaCents,
+      subtotalCents: newSubtotalCents,
+      totalCents: newSubtotalCents,
+      updatedAt: new Date(),
+    })
+    .where(eq(bookings.id, booking.id));
+
+  await db.insert(activityLog).values({
+    who: customer.email,
+    what: `Aufenthalt verlängert (Gast): Abreise ${booking.departure} → ${newDeparture} (+${raw.extraNights} Nächte) — Zwischensumme ${formatEuro(newSubtotalCents)} (+${formatEuro(accommodationDeltaCents)}), Kurtaxe +${formatEuro(kurtaxeDeltaCents)}. Mehrbetrag fließt in die Restzahlung. Kurkarten müssen manuell bei Winterberg nachgemeldet werden.`,
+    bookingId: booking.id,
+  });
+
+  revalidateTag(BOOKING_BLOCKS_TAG, "max");
+
+  try {
+    await sendMail({
+      to: customer.email,
+      subject: `Aufenthalt verlängert — Buchung ${booking.bookingNumber}`,
+      template: "booking-extended",
+      bookingId: booking.id,
+      react: BookingExtendedEmail({
+        firstName: customer.firstName,
+        bookingNumber: booking.bookingNumber,
+        oldDeparture: formatDateLong(booking.departure),
+        newDeparture: formatDateLong(newDeparture),
+        extraNights: raw.extraNights,
+        deltaCents,
+        newSubtotalCents,
+      }),
+    });
+  } catch (err) {
+    console.error("[booking-extended-mail] failed:", err);
+  }
+
+  try {
+    await sendMail({
+      to: process.env.MAIL_INTERNAL_TO ?? HUETTENWART_EMAIL,
+      bcc: [HUETTENWART_EMAIL, HUETTENWART_CC].filter(Boolean).join(",") || undefined,
+      subject: `Aufenthalt verlängert — Buchung ${booking.bookingNumber}`,
+      template: "booking-extended-internal",
+      bookingId: booking.id,
+      react: BookingExtendedInternalEmail({
+        bookingNumber: booking.bookingNumber,
+        guestName: `${customer.firstName} ${customer.lastName}`.trim(),
+        oldDeparture: formatDateLong(booking.departure),
+        newDeparture: formatDateLong(newDeparture),
+        extraNights: raw.extraNights,
+        deltaCents,
+      }),
+    });
+  } catch (err) {
+    console.error("[booking-extended-internal-mail] failed:", err);
+  }
+
+  try {
+    await sendMail({
+      to: process.env.MAIL_KURKARTEN_TO ?? "johannesleiskau@gmail.com",
+      subject: `Kurkarten nachmelden — Buchung ${booking.bookingNumber} verlängert`,
+      template: "booking-extended-kurkarten-reminder",
+      bookingId: booking.id,
+      react: BookingExtendedKurkartenReminderEmail({
+        bookingNumber: booking.bookingNumber,
+        guestName: `${customer.firstName} ${customer.lastName}`.trim(),
+        oldDeparture: formatDateLong(booking.departure),
+        newDeparture: formatDateLong(newDeparture),
+        extraNights: raw.extraNights,
+        kurtaxePersons,
+      }),
+    });
+  } catch (err) {
+    console.error("[booking-extended-kurkarten-mail] failed:", err);
+  }
+
+  revalidatePath(`/konto/buchungen/${booking.id}`);
+  revalidatePath("/konto");
+  revalidatePath("/m/dashboard");
+  return { ok: true, calc: res.calc };
 }
