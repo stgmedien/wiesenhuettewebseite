@@ -787,6 +787,7 @@ export type EditPersonsResult =
   | {
       ok: true;
       deltaCents: number; // < 0 = Erstattung an Gast, > 0 = Nachforderung
+      kurtaxeDeltaCents: number; // Kurtaxe-Anpassung (separat, nicht Teil von subtotalCents)
       newSubtotalCents: number;
       refundableCents: number; // ueber Stripe automatisch erstattbar (0 = nicht moeglich)
     }
@@ -837,6 +838,12 @@ export async function editBookingPersons(
     b.accommodationCents +
     (nb.minOccupancySurchargeCents - b.minOccupancySurchargeCents) +
     (nb.soloSurchargeCents - b.soloSurchargeCents);
+  // Kurtaxe ist eine eigene Spalte (nicht Teil von subtotalCents), muss aber
+  // bei jeder Personenänderung mit angepasst werden — sonst wird sie für
+  // nachträglich geänderte kurtaxenpflichtige Personen (ab 16 J.) nie neu
+  // berechnet und der Verein zahlt die Differenz an Winterberg aus eigener
+  // Tasche (bzw. verschenkt sie bei einer Verringerung).
+  const kurtaxeDeltaCents = nb.kurtaxeCents - b.kurtaxeCents;
   const newSubtotalCents = b.subtotalCents + deltaCents;
   if (newSubtotalCents < 0) {
     return { ok: false, error: "Neue Zwischensumme wäre negativ — bitte Eingaben prüfen." };
@@ -854,6 +861,7 @@ export async function editBookingPersons(
       accommodationCents: nb.accommodationCents,
       minOccupancySurchargeCents: nb.minOccupancySurchargeCents,
       soloSurchargeCents: nb.soloSurchargeCents,
+      kurtaxeCents: nb.kurtaxeCents,
       subtotalCents: newSubtotalCents,
       totalCents: newSubtotalCents,
       updatedAt: new Date(),
@@ -862,7 +870,7 @@ export async function editBookingPersons(
 
   await db.insert(activityLog).values({
     who: session.user?.name ?? session.user?.email ?? "Manager",
-    what: `Personen angepasst (Mitgl ${d.members} · Erw ${d.adults} · Kind ${d.children} · Schü ${d.pupils} · Lehr ${d.teachers}) → Zwischensumme ${formatEuro(newSubtotalCents)} (${deltaCents >= 0 ? "+" : ""}${formatEuro(deltaCents)})`,
+    what: `Personen angepasst (Mitgl ${d.members} · Erw ${d.adults} · Kind ${d.children} · Schü ${d.pupils} · Lehr ${d.teachers}) → Zwischensumme ${formatEuro(newSubtotalCents)} (${deltaCents >= 0 ? "+" : ""}${formatEuro(deltaCents)})${kurtaxeDeltaCents !== 0 ? `, Kurtaxe ${kurtaxeDeltaCents >= 0 ? "+" : ""}${formatEuro(kurtaxeDeltaCents)}` : ""}`,
     bookingId: d.bookingId,
   });
 
@@ -874,7 +882,7 @@ export async function editBookingPersons(
       ? Math.min(Math.abs(deltaCents), b.paidCents)
       : 0;
 
-  return { ok: true, deltaCents, newSubtotalCents, refundableCents };
+  return { ok: true, deltaCents, kurtaxeDeltaCents, newSubtotalCents, refundableCents };
 }
 
 export async function refundBookingDifference(
