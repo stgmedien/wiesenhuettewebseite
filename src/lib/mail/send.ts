@@ -46,10 +46,12 @@ export type SendMailArgs = {
   attachments?: MailAttachment[];
 };
 
-// Vorlagen mit Login-/Verifizierungs-Links werden NIE ins Archiv kopiert:
-// eine BCC-Kopie eines Magic-Links wäre ein fertiger Konto-Zugang für jeden
-// mit Zugriff auf das Archiv-Postfach.
-const ARCHIVE_EXCLUDED_TEMPLATES = new Set([
+// Vorlagen mit Login-/Verifizierungs-Links: werden NIE ins Archiv kopiert
+// (eine BCC-Kopie eines Magic-Links wäre ein fertiger Konto-Zugang für jeden
+// mit Zugriff auf das Archiv-Postfach), NIE im Klartext gespeichert (gleicher
+// Grund) und bekommen KEINE Standard-Antwortadresse — eine Antwort auf einen
+// Login-Link ist ohnehin nutzlos, da niemand sie vor Ablauf des Links liest.
+const SENSITIVE_TEMPLATES = new Set([
   "magic_link",
   "welcome",
   "welcome_with_booking",
@@ -57,20 +59,29 @@ const ARCHIVE_EXCLUDED_TEMPLATES = new Set([
   "member-welcome",
   "email-verification",
   "email_verification",
+  "2fa-enabled",
 ]);
+
+const HELLO_EMAIL = "hello@wiesenhuette.de";
 
 export const sendMail = async (args: SendMailArgs): Promise<void> => {
   const html = await render(args.react);
   const text = await render(args.react, { plainText: true });
 
   const from = process.env.MAIL_FROM ?? "Wiesenhütte <noreply@wiesenhuette.de>";
+  // Standard-Antwortadresse: hello@ statt noreply@, damit Gästeantworten
+  // tatsaechlich ankommen — ausser bei den obigen sicherheitsrelevanten
+  // Vorlagen, und ausser der Aufrufer hat schon selbst eine gesetzt (z. B.
+  // manuelle Manager-Nachricht → Antwort geht an den Manager persoenlich).
+  const replyTo =
+    args.replyTo ?? (SENSITIVE_TEMPLATES.has(args.template) ? undefined : HELLO_EMAIL);
 
   // Optionales Versand-Archiv: Wenn MAIL_BCC_ARCHIVE gesetzt ist (z. B. ein
   // Vereins-Postfach), bekommt es jede ausgehende Mail als Blindkopie — so
   // ist im Postfach nachvollziehbar, was das System verschickt hat. SMTP
   // legt sonst keine Kopie in einem "Gesendet"-Ordner ab.
   const archiveBcc =
-    process.env.MAIL_BCC_ARCHIVE && !ARCHIVE_EXCLUDED_TEMPLATES.has(args.template)
+    process.env.MAIL_BCC_ARCHIVE && !SENSITIVE_TEMPLATES.has(args.template)
       ? process.env.MAIL_BCC_ARCHIVE
       : undefined;
   const bcc = [args.bcc, archiveBcc].filter((v): v is string => Boolean(v));
@@ -79,7 +90,7 @@ export const sendMail = async (args: SendMailArgs): Promise<void> => {
   // Verifizierungs-Links werden nicht im Klartext gespeichert — sonst waere
   // ein funktionierender Magic Link fuer jeden mit Manager-Zugriff auf die
   // Mail-Historie einsehbar.
-  const storedBodyHtml = ARCHIVE_EXCLUDED_TEMPLATES.has(args.template) ? null : html;
+  const storedBodyHtml = SENSITIVE_TEMPLATES.has(args.template) ? null : html;
 
   try {
     const info = await getTransporter().sendMail({
@@ -88,7 +99,7 @@ export const sendMail = async (args: SendMailArgs): Promise<void> => {
       subject: args.subject,
       html,
       text,
-      replyTo: args.replyTo,
+      replyTo,
       bcc: bcc.length > 0 ? bcc : undefined,
       attachments: args.attachments,
     });
