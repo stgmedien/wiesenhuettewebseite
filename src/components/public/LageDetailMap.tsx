@@ -75,10 +75,15 @@ const ROUTE: [number, number][] = [
 ];
 
 // Bolzplatz Langewiese — direkt im selben Feld wie der Spielplatz Delleweg
-// (auf Google Maps so benannt, per Luftbild-Vergleich bestätigt: Juli 2026).
-// Position nach Augenmaß aus dem Luftbild geschätzt (wie beim Spielplatz
-// oben — keine amtliche Quelle dafür verfügbar), bei Bedarf feinjustieren.
-const BOLZPLATZ: [number, number] = [51.15353, 8.46421];
+// (auf Google Maps so benannt). Die erste Schätzung (reines Augenmaß aus
+// einem Google-Maps-Screenshot) lag falsch auf einem Firmengrundstück
+// südlich davon. Position jetzt aus echten Esri-Luftbild-Kacheln neu
+// bestimmt: ~39 m nordwestlich vom Spielplatz liegt ein klar sichtbarer,
+// ausgetretener Fleck im sonst geschlossenen Grün — genau im selben
+// Wiesenstück wie der Spielplatz, weit weg von den Gebäuden/Einfahrten,
+// die auf den Nachbarkacheln zu sehen sind. Keine amtliche Quelle
+// verfügbar, bei Bedarf feinjustieren.
+const BOLZPLATZ: [number, number] = [51.1547, 8.46394];
 
 // Der weiter entfernte "Sportplatz Langewiese" (~700 m, ehem. FUSSBALL_1/2)
 // ist bewusst nicht mit auf der Karte — vermutlich ein Vereinsgelände, auf
@@ -193,7 +198,7 @@ function LeafletMap({ locale }: { locale: Locale }) {
       });
       L.marker(ROUTE[Math.floor(ROUTE.length / 2)], { icon: badge, interactive: false }).addTo(map);
 
-      const bounds = L.latLngBounds([...GRUNDSTUECK, ...ROUTE, BOLZPLATZ]).pad(0.15);
+      const bounds = L.latLngBounds([...GRUNDSTUECK, ...ROUTE, BOLZPLATZ]).pad(0.08);
       map.fitBounds(bounds);
       grund.openPopup();
 

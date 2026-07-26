@@ -106,7 +106,7 @@ type Copy = {
     summer: { label: string; h: string; body: string };
     winter: { label: string; h: string; body: string };
   };
-  map: { eyebrow: string; h2: string; lead: string; openIn: string };
+  map: { eyebrow: string; h2: string; lead: string; openIn: string; noteTitle: string; noteBody: string };
   wandern: {
     eyebrow: string;
     h2: string;
@@ -227,6 +227,9 @@ const COPY: Record<Locale, Copy> = {
       h2: "Hier liegen wir.",
       lead: "Langewiese, Westhang. Drumherum: Asten-Massiv, Hochheide, Rothaarsteig.",
       openIn: "In Karten-App öffnen",
+      noteTitle: "Verstecken auf dem Gelände, Fußball gleich nebenan.",
+      noteBody:
+        "Unser Grundstück — 3.358 m² Wiese und Wald am Hang — ist bestens zum Verstecken, Toben oder für ein Lagerfeuer am Abend. Braucht Euer Spiel mehr Rasen — Fußball, Frisbee, Völkerball — lohnt sich der kurze Fußweg: Spielplatz Delleweg und der Bolzplatz Langewiese liegen im selben Wiesenstück, keine 6 Gehminuten von der Hütte entfernt (die Karte oben zeigt genau den Weg). Viel Spaß in Langewiese!",
     },
     wandern: {
       eyebrow: "Wandern",
@@ -400,6 +403,9 @@ const COPY: Record<Locale, Copy> = {
       h2: "Here we are.",
       lead: "Langewiese, west-facing slope. Around: Asten massif, high moor, Rothaarsteig trail.",
       openIn: "Open in maps app",
+      noteTitle: "Hide-and-seek on our grounds, football right next door.",
+      noteBody:
+        "Our grounds — 3,358 m² of meadow and forest on the hillside — are perfect for hide-and-seek, running around, or an evening campfire. If your game needs more open grass — football, frisbee, dodgeball — it's a short walk: Playground Delleweg and the Langewiese kickabout pitch sit in the same meadow, barely 6 minutes from the cabin (the map above shows exactly where). Have fun in Langewiese!",
     },
     wandern: {
       eyebrow: "Hiking",
@@ -542,6 +548,9 @@ const COPY: Record<Locale, Copy> = {
       h2: "Hier liggen we.",
       lead: "Langewiese, helling op het westen. Eromheen: Asten-massief, hoogveen, Rothaarsteig.",
       openIn: "In kaarten-app openen",
+      noteTitle: "Verstoppertje op ons terrein, voetbal net ernaast.",
+      noteBody:
+        "Ons terrein — 3.358 m² weide en bos op de helling — is uitstekend voor verstoppertje, rondrennen of een avondkampvuur. Heeft jullie spel meer grasveld nodig — voetbal, frisbee, trefbal — dan is het maar een kort stukje lopen: Speeltuin Delleweg en het trapveld Langewiese liggen in hetzelfde weiland, amper 6 minuten van de hut (de kaart hierboven laat precies de weg zien). Veel plezier in Langewiese!",
     },
     wandern: {
       eyebrow: "Wandelen",
@@ -913,6 +922,17 @@ export default async function LagePage() {
           <ScrollReveal delay={250}>
             <div className="mt-6">
               <LageDetailMap locale={locale} />
+            </div>
+          </ScrollReveal>
+
+          <ScrollReveal delay={280}>
+            <div className="mt-6 max-w-2xl">
+              <h3 className="font-display font-bold text-[var(--color-wh-deep-green)] text-[19px] sm:text-[22px] m-0 mb-2 leading-tight">
+                {c.map.noteTitle}
+              </h3>
+              <p className="text-[14px] sm:text-[15px] text-[var(--color-wh-black)] leading-relaxed m-0">
+                {c.map.noteBody}
+              </p>
             </div>
           </ScrollReveal>
 
