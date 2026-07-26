@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { bookings, customers, payments, activityLog } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { BOOKING_BLOCKS_TAG } from "@/lib/availability";
@@ -27,6 +27,8 @@ import { substituteVars } from "@/lib/mail-render";
 import { buildBookingVars } from "@/lib/mail-template-vars";
 import { confirmDepositPayment } from "@/lib/booking-payment-confirmation";
 import { generateFeuerwehrListePdf } from "@/lib/generate-feuerwehr-liste";
+import { buildInvoicePdfAttachment } from "@/lib/invoice-attachment";
+import DepositRefundedEmail from "@/lib/mail/templates/deposit-refunded";
 
 async function requireManager() {
   const session = await auth();
@@ -676,6 +678,203 @@ export async function recordManualPayment(
   });
 
   revalidatePath(`/m/buchungen/${data.bookingId}`);
+  revalidatePath("/m/dashboard");
+  return { ok: true };
+}
+
+// =============================================================
+// Manuelle Bank-Buchungen komplett ins System bringen (ohne Stripe):
+// zwei "Häkchen", die dieselbe Buchführung nachziehen wie die
+// automatischen Cron-Pfade (T-14-Off-Session-Charge bzw. Kaution-Auto-
+// Refund) — nur eben von Dana ausgelöst, wenn Geld per Überweisung kommt
+// oder rausgeht statt über Stripe.
+// =============================================================
+
+export type ManualFinalPaymentResult =
+  | { ok: true; chargeCents: number; kautionCents: number; kurtaxeCents: number }
+  | { ok: false; error: string };
+
+/**
+ * "Restzahlung + Kaution + Kurtaxe per Überweisung erhalten" — Pendant zur
+ * T-14-Off-Session-Charge (daily-mail-jobs), nur ohne Stripe-Charge. Nutzt
+ * exakt dieselbe Restbetrags-Ermittlung (offene Altsystem-Restzahlungs-Zeile
+ * bevorzugt, sonst subtotalCents − paidCents), damit der T-14-Cron diese
+ * Buchung danach korrekt als "bereits bezahlt" überspringt.
+ */
+export async function confirmManualFinalPayment(
+  bookingId: string
+): Promise<ManualFinalPaymentResult> {
+  let session: Awaited<ReturnType<typeof requireManager>>;
+  try {
+    session = await requireManager();
+  } catch {
+    return { ok: false, error: "Nicht autorisiert" };
+  }
+
+  const b = (await db.select().from(bookings).where(eq(bookings.id, bookingId)).limit(1))[0];
+  if (!b) return { ok: false, error: "Buchung nicht gefunden." };
+  if (b.status !== "bezahlt") {
+    return { ok: false, error: `Nur bei Buchungen im Status „Bezahlt" möglich (aktuell „${b.status}").` };
+  }
+
+  const restPmts = await db
+    .select()
+    .from(payments)
+    .where(and(eq(payments.bookingId, b.id), eq(payments.kind, "restzahlung")));
+  if (restPmts.some((p) => p.status === "erhalten")) {
+    return { ok: false, error: "Die Restzahlung wurde bereits erfasst." };
+  }
+  const originalRestRow = restPmts.find((p) => p.status === "offen");
+  const rentRemainderCents = originalRestRow
+    ? originalRestRow.amountCents
+    : Math.max(0, b.subtotalCents - Math.min(b.paidCents, b.subtotalCents));
+
+  const kautionPmts = await db
+    .select()
+    .from(payments)
+    .where(and(eq(payments.bookingId, b.id), eq(payments.kind, "kaution")));
+  const kautionCents = kautionPmts.some((p) => p.status === "erhalten") ? 0 : b.depositCents;
+
+  const kurtaxePmts = await db
+    .select()
+    .from(payments)
+    .where(and(eq(payments.bookingId, b.id), eq(payments.kind, "kurtaxe")));
+  const kurtaxeCents = kurtaxePmts.some((p) => p.status === "erhalten") ? 0 : b.kurtaxeCents;
+
+  const chargeCents = rentRemainderCents + kautionCents + kurtaxeCents;
+  if (chargeCents <= 0) {
+    return { ok: false, error: "Kein offener Restbetrag gefunden — nichts zu bestätigen." };
+  }
+
+  const method = "Banküberweisung (manuell bestätigt)";
+  if (originalRestRow) {
+    await db
+      .update(payments)
+      .set({ status: "erhalten", method, receivedAt: new Date() })
+      .where(eq(payments.id, originalRestRow.id));
+  } else {
+    await db.insert(payments).values({
+      bookingId: b.id,
+      kind: "restzahlung",
+      status: "erhalten",
+      amountCents: rentRemainderCents,
+      method,
+      receivedAt: new Date(),
+    });
+  }
+  if (kautionCents > 0) {
+    await db.insert(payments).values({
+      bookingId: b.id,
+      kind: "kaution",
+      status: "erhalten",
+      amountCents: kautionCents,
+      method,
+      receivedAt: new Date(),
+    });
+  }
+  if (kurtaxeCents > 0) {
+    await db.insert(payments).values({
+      bookingId: b.id,
+      kind: "kurtaxe",
+      status: "erhalten",
+      amountCents: kurtaxeCents,
+      method,
+      receivedAt: new Date(),
+    });
+  }
+  await db
+    .update(bookings)
+    .set({ paidCents: b.paidCents + chargeCents, updatedAt: new Date() })
+    .where(eq(bookings.id, b.id));
+
+  await db.insert(activityLog).values({
+    who: session.user?.name ?? session.user?.email ?? "Manager",
+    what: `Restzahlung manuell bestätigt (Banküberweisung): ${formatEuro(chargeCents)} (davon ${formatEuro(kautionCents)} Kaution, ${formatEuro(kurtaxeCents)} Kurtaxe)`,
+    bookingId: b.id,
+  });
+
+  revalidatePath(`/m/buchungen/${bookingId}`);
+  revalidatePath("/m/dashboard");
+  return { ok: true, chargeCents, kautionCents, kurtaxeCents };
+}
+
+/**
+ * "Kaution manuell zurücküberwiesen" — Pendant zum release-deposits-Cron
+ * für Buchungen ohne Stripe-Zahlungsvorgang (der Cron kann dort technisch
+ * gar nicht automatisch erstatten, siehe stripePaymentIntentId-Filter dort).
+ * Verschickt dieselbe "Kaution zurück"-Mail mit Rechnung als PDF-Anhang.
+ */
+export async function confirmManualDepositReturn(
+  bookingId: string
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  let session: Awaited<ReturnType<typeof requireManager>>;
+  try {
+    session = await requireManager();
+  } catch {
+    return { ok: false, error: "Nicht autorisiert" };
+  }
+
+  const b = (await db.select().from(bookings).where(eq(bookings.id, bookingId)).limit(1))[0];
+  if (!b) return { ok: false, error: "Buchung nicht gefunden." };
+  if (b.status !== "abgereist") {
+    return { ok: false, error: "Nur bei bereits abgereisten Buchungen möglich." };
+  }
+  if (b.depositCents <= 0) {
+    return { ok: false, error: "Keine Kaution auf dieser Buchung hinterlegt." };
+  }
+
+  const existing = await db
+    .select({ id: payments.id })
+    .from(payments)
+    .where(and(eq(payments.bookingId, b.id), eq(payments.kind, "rueckerstattung")))
+    .limit(1);
+  if (existing.length > 0) {
+    return { ok: false, error: "Für diese Buchung wurde die Kaution bereits erstattet/erfasst." };
+  }
+
+  await db.insert(payments).values({
+    bookingId: b.id,
+    kind: "rueckerstattung",
+    status: "erstattet",
+    amountCents: b.depositCents,
+    method: "Banküberweisung (manuell)",
+    receivedAt: new Date(),
+  });
+
+  await db.insert(activityLog).values({
+    who: session.user?.name ?? session.user?.email ?? "Manager",
+    what: `Kaution manuell zurücküberwiesen: ${formatEuro(b.depositCents)}`,
+    bookingId: b.id,
+  });
+
+  if (b.customerId) {
+    const c = (await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1))[0];
+    if (c) {
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://wiesenhuette.vercel.app";
+      const attachment = await buildInvoicePdfAttachment(b.id);
+      try {
+        await sendMail({
+          to: c.email,
+          subject: `Kaution zurückgebucht — Buchung ${b.bookingNumber}`,
+          template: "deposit-refunded",
+          bookingId: b.id,
+          attachments: attachment ? [attachment] : undefined,
+          react: DepositRefundedEmail({
+            guestName: `${c.firstName} ${c.lastName}`.trim(),
+            bookingNumber: b.bookingNumber,
+            arrival: formatDateLong(b.arrival),
+            departure: formatDateLong(b.departure),
+            refundCents: b.depositCents,
+            baseUrl,
+          }),
+        });
+      } catch (err) {
+        console.error("[confirmManualDepositReturn] Mail fehlgeschlagen:", err);
+      }
+    }
+  }
+
+  revalidatePath(`/m/buchungen/${bookingId}`);
   revalidatePath("/m/dashboard");
   return { ok: true };
 }

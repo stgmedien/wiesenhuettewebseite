@@ -39,6 +39,7 @@ export default async function BookingsListPage({
       totalCents: bookings.subtotalCents,
       paidCents: bookings.paidCents,
       depositCents: bookings.depositCents,
+      stripePaymentIntentId: bookings.stripePaymentIntentId,
       createdAt: bookings.createdAt,
       customerFirst: customers.firstName,
       customerLast: customers.lastName,
@@ -157,6 +158,7 @@ type BookingRow = {
   totalCents: number;
   paidCents: number;
   depositCents: number;
+  stripePaymentIntentId: string | null;
   createdAt: Date;
   customerFirst: string | null;
   customerLast: string | null;
@@ -201,6 +203,7 @@ const BookingsTable = ({ rows, emptyMessage }: { rows: BookingRow[]; emptyMessag
                 status={r.status}
                 paidCents={r.paidCents}
                 dueCents={r.totalCents + r.depositCents}
+                manual={!r.stripePaymentIntentId}
               />
             </Td>
             <Td>
