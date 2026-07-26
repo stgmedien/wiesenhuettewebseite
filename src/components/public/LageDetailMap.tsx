@@ -6,15 +6,21 @@ import "leaflet/dist/leaflet.css";
 import type { Locale } from "@/lib/i18n-shared";
 
 // =============================================================
-// Echte Detailkarte (Leaflet + OpenStreetMap) für die Lage-Seite:
+// Echte Detailkarte (Leaflet + Esri-Luftbild) für die Lage-Seite:
 //  - Exakter Grundstücks-Umriss aus dem amtlichen Liegenschaftskataster
 //    (ALKIS NRW Open Data, WFS "alkis_vereinfacht", Stand Juli 2026):
 //    Gemarkung Langewiese, Flur 1, Flurstücke 607 + 163 + 165,
 //    zusammen 3.358 m². Vereinigt zum Außenumriss (innere Grenzen weg).
 //  - Fußweg zum Spielplatz am Delleweg entlang realer OSM-Straßengeometrie
 //    (Bundesstraße → Alter Weg → Delleweg), ca. 430 m / ~6 min.
-// Kartenkacheln laden von openstreetmap.org → hinter ConsentGate
-// (Kategorie "functional"), wie die komoot-Embeds.
+//
+// Kartenkacheln: Esri World Imagery (Luftbild) statt des OSM-Standard-
+// Kachelservers — der ist laut eigener Nutzungsrichtlinie NICHT für
+// produktive Websites gedacht (nur leichtes Testen) und war bei uns
+// deshalb dauerhaft fehlgeschlagen (jede Kachel lud mit 0×0px). Esri
+// World Imagery ist ohne Anmeldung nutzbar und liefert echtes Luftbild
+// statt reiner Straßenlinien — näher an dem, was Gäste von Google Maps
+// gewohnt sind. Weiterhin hinter ConsentGate (Kategorie "functional").
 // =============================================================
 
 // Amtlicher Außenumriss (WGS84), Quelle: ALKIS NRW (s.o.)
@@ -68,19 +74,16 @@ const ROUTE: [number, number][] = [
   SPIELPLATZ,
 ];
 
-// Fußballplätze (Sportplatz Langewiese) — exakte Umringe aus OSM.
-const FUSSBALL_1: [number, number][] = [
-  [51.15799, 8.47268],
-  [51.15788, 8.47319],
-  [51.15829, 8.47342],
-  [51.1584, 8.47291],
-];
-const FUSSBALL_2: [number, number][] = [
-  [51.15941, 8.47424],
-  [51.15898, 8.47287],
-  [51.15843, 8.47331],
-  [51.15885, 8.47468],
-];
+// Bolzplatz Langewiese — direkt im selben Feld wie der Spielplatz Delleweg
+// (auf Google Maps so benannt, per Luftbild-Vergleich bestätigt: Juli 2026).
+// Position nach Augenmaß aus dem Luftbild geschätzt (wie beim Spielplatz
+// oben — keine amtliche Quelle dafür verfügbar), bei Bedarf feinjustieren.
+const BOLZPLATZ: [number, number] = [51.15353, 8.46421];
+
+// Der weiter entfernte "Sportplatz Langewiese" (~700 m, ehem. FUSSBALL_1/2)
+// ist bewusst nicht mit auf der Karte — vermutlich ein Vereinsgelände, auf
+// dem Gäste nicht einfach spontan mitspielen können, anders als beim
+// öffentlich zugänglichen Bolzplatz oben (Dana/Johannes, 26.07.2026).
 
 const LABELS: Record<Locale, {
   huette: string;
@@ -88,7 +91,7 @@ const LABELS: Record<Locale, {
   grundstueckSub: string;
   spielplatz: string;
   route: string;
-  fussball: string;
+  bolzplatz: string;
 }> = {
   de: {
     huette: "Wiesenhütte",
@@ -96,7 +99,7 @@ const LABELS: Record<Locale, {
     grundstueckSub: "Flurstücke 607, 163, 165 — im Wesentlichen Hanglage",
     spielplatz: "Spielplatz Delleweg",
     route: "Fußweg ca. 430 m · ~6 min",
-    fussball: "Fußballplätze",
+    bolzplatz: "Bolzplatz Langewiese",
   },
   en: {
     huette: "Wiesenhütte",
@@ -104,7 +107,7 @@ const LABELS: Record<Locale, {
     grundstueckSub: "Parcels 607, 163, 165 — mainly hillside",
     spielplatz: "Playground Delleweg",
     route: "Footpath approx. 430 m · ~6 min",
-    fussball: "Football pitches",
+    bolzplatz: "Kickabout pitch Langewiese",
   },
   nl: {
     huette: "Wiesenhütte",
@@ -112,7 +115,7 @@ const LABELS: Record<Locale, {
     grundstueckSub: "Percelen 607, 163, 165 — grotendeels helling",
     spielplatz: "Speeltuin Delleweg",
     route: "Voetpad ca. 430 m · ~6 min",
-    fussball: "Voetbalvelden",
+    bolzplatz: "Trapveld Langewiese",
   },
 };
 
@@ -135,11 +138,14 @@ function LeafletMap({ locale }: { locale: Locale }) {
 
       map = L.map(ref.current, { scrollWheelZoom: false });
 
-      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende · Flurstücke: &copy; Geobasis NRW (dl-de/by-2-0)',
-      }).addTo(map);
+      L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        {
+          maxZoom: 19,
+          attribution:
+            'Tiles &copy; Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS user community · Flurstücke: &copy; Geobasis NRW (dl-de/by-2-0)',
+        }
+      ).addTo(map);
 
       const grund = L.polygon(GRUNDSTUECK, {
         color: GREEN,
@@ -159,18 +165,6 @@ function LeafletMap({ locale }: { locale: Locale }) {
         .addTo(map)
         .bindPopup(L2.route);
 
-      for (const pitch of [FUSSBALL_1, FUSSBALL_2]) {
-        L.polygon(pitch, {
-          color: GREEN,
-          weight: 2,
-          fillColor: "#6FA05F",
-          fillOpacity: 0.2,
-          dashArray: "4 4",
-        })
-          .addTo(map)
-          .bindPopup(L2.fussball);
-      }
-
       const dot = (color: string) =>
         L.divIcon({
           className: "",
@@ -185,8 +179,21 @@ function LeafletMap({ locale }: { locale: Locale }) {
       L.marker(SPIELPLATZ, { icon: dot(GREEN) })
         .addTo(map)
         .bindPopup(`<strong>${L2.spielplatz}</strong><br/>${L2.route}`);
+      L.marker(BOLZPLATZ, { icon: dot(GREEN) })
+        .addTo(map)
+        .bindPopup(`<strong>${L2.bolzplatz}</strong>`);
 
-      const bounds = L.latLngBounds([...GRUNDSTUECK, ...ROUTE]).pad(0.15);
+      // Gehzeit-Badge auf der Route (fester Hinweis statt nur Klick-Popup —
+      // gleiche Idee wie die Google-Maps-Laufzeit-Blase im Referenz-Screenshot).
+      const badge = L.divIcon({
+        className: "",
+        html: `<div style="display:flex;align-items:center;gap:6px;background:#fff;padding:6px 12px;border-radius:999px;box-shadow:0 2px 10px rgba(0,0,0,0.35);font-family:Inter,system-ui,sans-serif;font-size:13px;font-weight:600;color:${GREEN};white-space:nowrap">🚶 ${L2.route}</div>`,
+        iconSize: [0, 0],
+        iconAnchor: [-10, 10],
+      });
+      L.marker(ROUTE[Math.floor(ROUTE.length / 2)], { icon: badge, interactive: false }).addTo(map);
+
+      const bounds = L.latLngBounds([...GRUNDSTUECK, ...ROUTE, BOLZPLATZ]).pad(0.15);
       map.fitBounds(bounds);
       grund.openPopup();
 
