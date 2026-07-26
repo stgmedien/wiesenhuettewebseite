@@ -128,12 +128,16 @@ export const RULES = {
   // (site_settings-Tabelle, abrufbar über getSiteSettings()). Default = 1.
 } as const;
 
-// Storno-Staffel (Vorstandsbeschluss 04.07.2026) — gerechnet auf den REINEN
+// Storno-Staffel (Vorstandsbeschluss 04.07.2026, erweitert nach Danas
+// Vorschlag am 26.07.2026 um die 60-Tage-Stufe — verhindert, dass beliebte
+// Termine wie Pfingsten kurzfristig freigegeben werden, wenn eine Gruppe zu
+// wenige Anmeldungen bekommt und storniert) — gerechnet auf den REINEN
 // ÜBERNACHTUNGSPREIS (accommodationCents). Endreinigung und Kaution werden
 // im Stornofall gar nicht erst fällig.
-// > 30 Tage 0 %, 30–14 Tage 50 %, < 14 Tage 100 %
+// > 60 Tage 0 %, 60–31 Tage 30 %, 30–14 Tage 50 %, < 14 Tage 100 %
 export const CANCELLATION_TIERS = [
-  { minDaysBefore: 30, percent: 0 },
+  { minDaysBefore: 60, percent: 0 },
+  { minDaysBefore: 30, percent: 30 },
   { minDaysBefore: 14, percent: 50 },
   { minDaysBefore: 0, percent: 100 },
 ] as const;

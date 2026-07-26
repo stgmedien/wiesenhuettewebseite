@@ -1,11 +1,13 @@
 /**
  * Storno-Regelwerk für die UI-Anzeige (Buchungsflow). Muss inhaltlich zur
  * verbindlichen Staffel in pricing.ts (CANCELLATION_TIERS) und den AGB § 5
- * passen — Vorstandsbeschluss 04.07.2026.
+ * passen — Vorstandsbeschluss 04.07.2026, erweitert nach Danas Vorschlag am
+ * 26.07.2026 um die 60-Tage-Stufe.
  *
  * Logik (von Anreise rückwärts gerechnet, Basis: reiner Übernachtungspreis;
  * Endreinigung und Kaution werden im Stornofall nicht fällig):
- *  - > 30 Tage vorher: 100 % Rückerstattung (kostenlos)
+ *  - > 60 Tage vorher: 100 % Rückerstattung (kostenlos)
+ *  - 60 - 30 Tage:      70 % Rückerstattung
  *  - 30 - 14 Tage:      50 % Rückerstattung
  *  -  < 14 Tage:         0 % (Übernachtungspreis verfällt)
  */
@@ -18,28 +20,32 @@ export type CancellationTier = {
   label: string;
 };
 
-const TIER_LABELS: Record<Locale, [string, string, string]> = {
+const TIER_LABELS: Record<Locale, [string, string, string, string]> = {
   de: [
-    "Mehr als 30 Tage vorher",
+    "Mehr als 60 Tage vorher",
+    "60 bis 30 Tage vorher",
     "30 bis 14 Tage vorher",
     "Weniger als 14 Tage vorher",
   ],
   en: [
-    "More than 30 days in advance",
+    "More than 60 days in advance",
+    "60 to 30 days in advance",
     "30 to 14 days in advance",
     "Less than 14 days in advance",
   ],
   nl: [
-    "Meer dan 30 dagen vooraf",
+    "Meer dan 60 dagen vooraf",
+    "60 tot 30 dagen vooraf",
     "30 tot 14 dagen vooraf",
     "Minder dan 14 dagen vooraf",
   ],
 };
 
 const buildTiers = (locale: Locale): CancellationTier[] => [
-  { daysBeforeArrival: 30, refundPercent: 100, label: TIER_LABELS[locale][0] },
-  { daysBeforeArrival: 14, refundPercent: 50, label: TIER_LABELS[locale][1] },
-  { daysBeforeArrival: 0, refundPercent: 0, label: TIER_LABELS[locale][2] },
+  { daysBeforeArrival: 60, refundPercent: 100, label: TIER_LABELS[locale][0] },
+  { daysBeforeArrival: 30, refundPercent: 70, label: TIER_LABELS[locale][1] },
+  { daysBeforeArrival: 14, refundPercent: 50, label: TIER_LABELS[locale][2] },
+  { daysBeforeArrival: 0, refundPercent: 0, label: TIER_LABELS[locale][3] },
 ];
 
 /** Backwards-compatible Default-Export (DE). */

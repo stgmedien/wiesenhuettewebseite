@@ -198,7 +198,10 @@ export default function BookingConfirmedEmail({
             werden im Stornofall nicht fällig:
           </Text>
           <Text style={{ ...text, margin: "0 0 4px 0" }}>
-            • <strong>Mehr als 30 Tage vorher:</strong> kostenlos
+            • <strong>Mehr als 60 Tage vorher:</strong> kostenlos
+          </Text>
+          <Text style={{ ...text, margin: "0 0 4px 0" }}>
+            • <strong>60 bis 30 Tage vorher:</strong> 30 % Stornogebühr
           </Text>
           <Text style={{ ...text, margin: "0 0 4px 0" }}>
             • <strong>30 bis 14 Tage vorher:</strong> 50 % Stornogebühr
