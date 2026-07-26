@@ -223,8 +223,8 @@ export default async function QuittungPage({ params }: Props) {
             eingezogen und an die Kurverwaltung Winterberg abgeführt.
           </p>
           <p className="mb-2">
-            <strong>Stornierungs­bedingungen:</strong> &gt; 30 Tage 0% / 30–14 Tage 50% / &lt; 14
-            Tage 100% (auf den reinen Übernachtungspreis).
+            <strong>Stornierungs­bedingungen:</strong> &gt; 60 Tage 0% / 60–30 Tage 30% / 30–14
+            Tage 50% / &lt; 14 Tage 100% (auf den reinen Übernachtungspreis).
           </p>
           <p>
             <strong>Aufbewahrung:</strong> Diese Quittung dient als steuerlicher Beleg. Bitte
