@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { warmUpDb } from "@/lib/db/warmup";
-import { bookings, customers, payments, activityLog, invoices } from "@/lib/db/schema";
-import { and, eq, lte, gt, sql, ne, desc } from "drizzle-orm";
+import { bookings, customers, payments, activityLog } from "@/lib/db/schema";
+import { and, eq, lte, gt, sql } from "drizzle-orm";
 import { stripe } from "@/lib/stripe";
-import { sendMail, type MailAttachment } from "@/lib/mail/send";
+import { sendMail } from "@/lib/mail/send";
 import DepositRefundedEmail from "@/lib/mail/templates/deposit-refunded";
 import { formatDateLong } from "@/lib/utils";
-import { formatEuro, CANCELLATION_POLICY_CUTOFF } from "@/lib/pricing";
-import { renderToBuffer } from "@react-pdf/renderer";
-import { InvoicePdf } from "@/lib/invoice-pdf";
+import { formatEuro } from "@/lib/pricing";
+import { buildInvoicePdfAttachment } from "@/lib/invoice-attachment";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -127,59 +126,7 @@ export async function GET(req: NextRequest) {
           // bisher der einzige Moment, in dem die Rechnung aktiv verschickt
           // wird (sonst nur Selbstbedienung im Konto). Best-effort: schlägt
           // das PDF fehl, geht die Mail trotzdem ohne Anhang raus.
-          let attachments: MailAttachment[] | undefined;
-          try {
-            const invRows = await db
-              .select()
-              .from(invoices)
-              .where(and(eq(invoices.bookingId, b.id), ne(invoices.status, "storniert")))
-              .orderBy(desc(invoices.createdAt))
-              .limit(1);
-            const activeInvoice = invRows[0];
-            if (activeInvoice) {
-              const pdfBuffer = await renderToBuffer(
-                InvoicePdf({
-                  invoiceNumber: activeInvoice.invoiceNumber,
-                  issueDate: activeInvoice.issueDate ?? activeInvoice.createdAt,
-                  bookingNumber: b.bookingNumber,
-                  customer: activeInvoice.customerSnapshot as {
-                    name: string;
-                    company?: string;
-                    street?: string;
-                    zip?: string;
-                    city?: string;
-                    country?: string;
-                    email?: string;
-                  },
-                  arrival: b.arrival,
-                  departure: b.departure,
-                  nights: b.nights,
-                  persons: b.persons,
-                  lineItems: activeInvoice.lineItems as {
-                    label: string;
-                    qty: number;
-                    unitCents: number;
-                    totalCents: number;
-                  }[],
-                  subtotalCents: activeInvoice.subtotalCents,
-                  depositCents: b.depositCents,
-                  kurtaxeCents: b.kurtaxeCents,
-                  kurtaxePersons: b.adults + b.members + b.teachers,
-                  isLegacy: b.createdAt < CANCELLATION_POLICY_CUTOFF,
-                  notes: activeInvoice.notes ?? undefined,
-                })
-              );
-              attachments = [
-                {
-                  filename: `Rechnung_${activeInvoice.invoiceNumber}.pdf`,
-                  content: pdfBuffer,
-                  contentType: "application/pdf",
-                },
-              ];
-            }
-          } catch (pdfErr) {
-            console.error(`[cron/release-deposits] Rechnungs-PDF fehlgeschlagen für ${b.bookingNumber}:`, pdfErr);
-          }
+          const attachment = await buildInvoicePdfAttachment(b.id);
 
           try {
             await sendMail({
@@ -187,7 +134,7 @@ export async function GET(req: NextRequest) {
               subject: `Kaution zurückgebucht — Buchung ${b.bookingNumber}`,
               template: "deposit-refunded",
               bookingId: b.id,
-              attachments,
+              attachments: attachment ? [attachment] : undefined,
               react: DepositRefundedEmail({
                 guestName: `${c.firstName} ${c.lastName}`.trim(),
                 bookingNumber: b.bookingNumber,

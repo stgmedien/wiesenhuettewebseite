@@ -113,6 +113,7 @@ export default async function Dashboard() {
           subtotalCents: bookings.subtotalCents,
           depositCents: bookings.depositCents,
           kurtaxeCents: bookings.kurtaxeCents,
+          stripePaymentIntentId: bookings.stripePaymentIntentId,
         })
         .from(bookings)
         .where(ne(bookings.status, "storniert"))
@@ -337,6 +338,7 @@ export default async function Dashboard() {
                       status={b.status}
                       paidCents={b.paidCents}
                       dueCents={b.subtotalCents + b.depositCents + b.kurtaxeCents}
+                      manual={!b.stripePaymentIntentId}
                     />
                   }
                 />

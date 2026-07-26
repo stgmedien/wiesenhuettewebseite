@@ -8,6 +8,7 @@ import { formatDateLong } from "@/lib/utils";
 import { StatusPill } from "@/components/manager/StatusPill";
 import { StatusActions } from "./StatusActions";
 import { ManualPaymentForm } from "./ManualPaymentForm";
+import { ManualAutomationButtons } from "./ManualAutomationButtons";
 import { AvsCheckinForm } from "./AvsCheckinForm";
 import { KurkartenUploadForm } from "./KurkartenUploadForm";
 import { PaymentsTable } from "./PaymentsTable";
@@ -108,6 +109,7 @@ export default async function BookingDetail({ params }: Props) {
               status={b.status}
               paidCents={b.paidCents}
               dueCents={b.subtotalCents + b.depositCents + b.kurtaxeCents}
+              manual={!b.stripePaymentIntentId}
             />
             <span className="text-[var(--color-wh-fg-muted)]">
               {formatDateLong(b.arrival)} → {formatDateLong(b.departure)} · {b.nights} Nächte
@@ -272,6 +274,13 @@ export default async function BookingDetail({ params }: Props) {
               />
             )}
             <ManualPaymentForm bookingId={b.id} bookingStatus={b.status} />
+            <ManualAutomationButtons
+              bookingId={b.id}
+              status={b.status}
+              hasStripePaymentIntent={!!b.stripePaymentIntentId}
+              depositCents={b.depositCents}
+              hasRefund={pmts.some((p) => p.kind === "rueckerstattung")}
+            />
           </Section>
 
           {customer && b.status !== "storniert" && (
