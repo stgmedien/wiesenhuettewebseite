@@ -33,6 +33,7 @@ export async function findPriceMismatches(): Promise<PriceMismatch[]> {
 
     const expectedSubtotal =
       b.accommodationCents +
+      b.energyFlatCents +
       b.cleaningCents +
       b.soloSurchargeCents +
       b.minOccupancySurchargeCents +
