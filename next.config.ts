@@ -68,7 +68,7 @@ const nextConfig: NextConfig = {
               "default-src 'self'",
               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://va.vercel-scripts.com",
               "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: blob: https://*.blob.vercel-storage.com https://*.public.blob.vercel-storage.com https://q.stripe.com https://upload.wikimedia.org",
+              "img-src 'self' data: blob: https://*.blob.vercel-storage.com https://*.public.blob.vercel-storage.com https://q.stripe.com https://upload.wikimedia.org https://server.arcgisonline.com",
               "font-src 'self' data:",
               "connect-src 'self' https://api.stripe.com https://q.stripe.com https://va.vercel-scripts.com",
               "frame-src https://js.stripe.com https://hooks.stripe.com https://www.komoot.com https://*.komoot.com",
