@@ -137,6 +137,9 @@ const LABELS: Record<Locale, {
 
 const GREEN = "#2F4A35";
 const CLAY = "#B85C38";
+// Sehr dunkles Grün nur für die Grundstücks-Schraffur — auf dem satten
+// Kartengrün war die Schraffur in normalem GREEN kaum zu erkennen.
+const HATCH_DARK = "#0F1C13";
 
 function LeafletMap({ locale }: { locale: Locale }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -251,9 +254,9 @@ function LeafletMap({ locale }: { locale: Locale }) {
         line.setAttribute("y1", "0");
         line.setAttribute("x2", "0");
         line.setAttribute("y2", "8");
-        line.setAttribute("stroke", GREEN);
-        line.setAttribute("stroke-width", "3");
-        line.setAttribute("stroke-opacity", "0.55");
+        line.setAttribute("stroke", HATCH_DARK);
+        line.setAttribute("stroke-width", "4");
+        line.setAttribute("stroke-opacity", "0.8");
         pattern.appendChild(line);
         defs.appendChild(pattern);
         svg.insertBefore(defs, svg.firstChild);
