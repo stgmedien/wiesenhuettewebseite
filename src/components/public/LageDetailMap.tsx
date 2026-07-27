@@ -12,7 +12,12 @@ import type { Locale } from "@/lib/i18n-shared";
 //    Gemarkung Langewiese, Flur 1, Flurstücke 607 + 163 + 165,
 //    zusammen 3.358 m². Vereinigt zum Außenumriss (innere Grenzen weg).
 //  - Fußweg zum Spielplatz am Delleweg entlang realer OSM-Straßengeometrie
-//    (Bundesstraße → Alter Weg → Delleweg), ca. 430 m / ~6 min.
+//    (Bundesstraße → Alter Weg → Delleweg), ca. 430 m / ~6 min. Route per
+//    OSRM-Fußgänger-Routing (routing.openstreetmap.de) berechnet, nicht
+//    von Hand gezeichnet.
+//  - Spielplatz Delleweg + Bolzplatz Langewiese: Koordinaten von Johannes
+//    vor Ort per GPS eingemessen (26./27.07.2026, WGS84 aus Google Maps
+//    "In Grad, Minuten, Sekunden" abgelesen) — keine Schätzung mehr.
 //
 // Kartenkacheln: Esri World Imagery (Luftbild) statt des OSM-Standard-
 // Kachelservers — der ist laut eigener Nutzungsrichtlinie NICHT für
@@ -47,43 +52,49 @@ const GRUNDSTUECK: [number, number][] = [
 
 const HUETTE: [number, number] = [51.1524045, 8.4636047];
 
-// Fußweg-Route auf realer Straßengeometrie (OSM): Bundesstraße → Alter Weg
-// → Delleweg. Ziel: Spielplatz am Delleweg (nicht in OSM erfasst — Position
-// nach Luftbild gesetzt, bei Bedarf feinjustieren).
-const SPIELPLATZ: [number, number] = [51.15452, 8.46442];
+// Spielplatz Delleweg + Bolzplatz Langewiese — beide von Johannes vor Ort
+// per GPS eingemessen (Google Maps "Grad/Minuten/Sekunden"):
+//   Spielplatz: 51°09'15.5"N 8°27'49.4"E
+//   Bolzplatz:  51°09'14.9"N 8°27'48.9"E
+// Zwei frühere Versuche (Augenmaß vom Screenshot, dann Interpretation von
+// Satellitenkacheln) lagen beide daneben — das hier sind die echten
+// Koordinaten, keine Schätzung mehr. Beide liegen nur ~21 m auseinander,
+// im selben Wiesenstück direkt an der Delleweg-Kurve.
+const SPIELPLATZ: [number, number] = [51.154306, 8.463722];
+const BOLZPLATZ: [number, number] = [51.154139, 8.463583];
+
+// Fußweg-Route auf realer Straßengeometrie: Bundesstraße → Alter Weg →
+// Delleweg, ca. 425 m / ~6 min. Von OSRM-Fußgänger-Routing berechnet
+// (routing.openstreetmap.de, Profil "foot" auf OSM-Straßendaten) — nicht
+// von Hand gezeichnet. Letzter Punkt ist ein kurzes Stück abseits der
+// Straße bis zum tatsächlichen Spielplatz.
 const ROUTE: [number, number][] = [
   HUETTE,
-  [51.1525, 8.4626],
-  [51.15281, 8.46227],
-  [51.15303, 8.46204],
-  [51.15327, 8.46183],
-  [51.15341, 8.46173],
-  [51.15353, 8.46183],
-  [51.15364, 8.46196],
-  [51.15371, 8.46204],
-  [51.15378, 8.46213],
-  [51.1539, 8.46227],
-  [51.15408, 8.46244],
-  [51.15426, 8.46259],
-  [51.15439, 8.46271],
-  [51.1545, 8.46272],
-  [51.1545, 8.46301],
-  [51.15448, 8.46325],
-  [51.15445, 8.46355],
-  [51.15437, 8.4642],
+  [51.152478, 8.463551],
+  [51.15246, 8.463491],
+  [51.152609, 8.463221],
+  [51.152701, 8.463084],
+  [51.152709, 8.463042],
+  [51.152709, 8.463006],
+  [51.152706, 8.46298],
+  [51.152699, 8.462956],
+  [51.152503, 8.462597],
+  [51.152808, 8.462267],
+  [51.153026, 8.462042],
+  [51.153078, 8.461987],
+  [51.153493, 8.462273],
+  [51.153736, 8.46243],
+  [51.153887, 8.462528],
+  [51.154085, 8.462638],
+  [51.1542, 8.462681],
+  [51.154392, 8.462708],
+  [51.154502, 8.462725],
+  [51.154497, 8.463008],
+  [51.15448, 8.463246],
+  [51.154453, 8.46355],
+  [51.154425, 8.463762],
   SPIELPLATZ,
 ];
-
-// Bolzplatz Langewiese — direkt im selben Feld wie der Spielplatz Delleweg
-// (auf Google Maps so benannt). Die erste Schätzung (reines Augenmaß aus
-// einem Google-Maps-Screenshot) lag falsch auf einem Firmengrundstück
-// südlich davon. Position jetzt aus echten Esri-Luftbild-Kacheln neu
-// bestimmt: ~39 m nordwestlich vom Spielplatz liegt ein klar sichtbarer,
-// ausgetretener Fleck im sonst geschlossenen Grün — genau im selben
-// Wiesenstück wie der Spielplatz, weit weg von den Gebäuden/Einfahrten,
-// die auf den Nachbarkacheln zu sehen sind. Keine amtliche Quelle
-// verfügbar, bei Bedarf feinjustieren.
-const BOLZPLATZ: [number, number] = [51.1547, 8.46394];
 
 // Der weiter entfernte "Sportplatz Langewiese" (~700 m, ehem. FUSSBALL_1/2)
 // ist bewusst nicht mit auf der Karte — vermutlich ein Vereinsgelände, auf
@@ -159,7 +170,9 @@ function LeafletMap({ locale }: { locale: Locale }) {
         fillOpacity: 0.3,
       })
         .addTo(map)
-        .bindPopup(`<strong>${L2.grundstueck}</strong><br/>${L2.grundstueckSub}`);
+        .bindPopup(
+          `<strong style="font-family:var(--font-display,Georgia,serif);color:${GREEN};font-size:14px">${L2.grundstueck}</strong><br/><span style="font-family:var(--font-body,Inter,system-ui,sans-serif);color:${GREEN};opacity:0.8">${L2.grundstueckSub}</span>`
+        );
 
       L.polyline(ROUTE, {
         color: CLAY,
@@ -178,21 +191,37 @@ function LeafletMap({ locale }: { locale: Locale }) {
           iconAnchor: [9, 9],
         });
 
+      // Emoji-Pins statt neutraler Punkte für Spielplatz + Bolzplatz — auf
+      // einen Blick erkennbar, was dort wartet, statt erst klicken zu
+      // müssen. Font-Stack der Site (--font-display/--font-body) auch in
+      // den Popups, damit die Karte sich nicht wie ein Fremdkörper anfühlt.
+      const poiPin = (emoji: string) =>
+        L.divIcon({
+          className: "",
+          html: `<div style="width:32px;height:32px;border-radius:50%;background:${GREEN};border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1">${emoji}</div>`,
+          iconSize: [32, 32],
+          iconAnchor: [16, 16],
+        });
+      const popupTitle = (text: string) =>
+        `<strong style="font-family:var(--font-display,Georgia,serif);color:${GREEN};font-size:14px">${text}</strong>`;
+      const popupSub = (text: string) =>
+        `<span style="font-family:var(--font-body,Inter,system-ui,sans-serif);color:${GREEN};opacity:0.8">${text}</span>`;
+
       L.marker(HUETTE, { icon: dot(CLAY) })
         .addTo(map)
-        .bindPopup(`<strong>${L2.huette}</strong>`);
-      L.marker(SPIELPLATZ, { icon: dot(GREEN) })
+        .bindPopup(popupTitle(L2.huette));
+      L.marker(SPIELPLATZ, { icon: poiPin("🛝") })
         .addTo(map)
-        .bindPopup(`<strong>${L2.spielplatz}</strong><br/>${L2.route}`);
-      L.marker(BOLZPLATZ, { icon: dot(GREEN) })
+        .bindPopup(`${popupTitle(L2.spielplatz)}<br/>${popupSub(L2.route)}`);
+      L.marker(BOLZPLATZ, { icon: poiPin("⚽") })
         .addTo(map)
-        .bindPopup(`<strong>${L2.bolzplatz}</strong>`);
+        .bindPopup(popupTitle(L2.bolzplatz));
 
       // Gehzeit-Badge auf der Route (fester Hinweis statt nur Klick-Popup —
       // gleiche Idee wie die Google-Maps-Laufzeit-Blase im Referenz-Screenshot).
       const badge = L.divIcon({
         className: "",
-        html: `<div style="display:flex;align-items:center;gap:6px;background:#fff;padding:6px 12px;border-radius:999px;box-shadow:0 2px 10px rgba(0,0,0,0.35);font-family:Inter,system-ui,sans-serif;font-size:13px;font-weight:600;color:${GREEN};white-space:nowrap">🚶 ${L2.route}</div>`,
+        html: `<div style="display:flex;align-items:center;gap:6px;background:#fff;padding:6px 12px;border-radius:999px;box-shadow:0 2px 10px rgba(0,0,0,0.35);font-family:var(--font-body,Inter,system-ui,sans-serif);font-size:13px;font-weight:600;color:${GREEN};white-space:nowrap">🚶 ${L2.route}</div>`,
         iconSize: [0, 0],
         iconAnchor: [-10, 10],
       });
