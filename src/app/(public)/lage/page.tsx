@@ -106,7 +106,16 @@ type Copy = {
     summer: { label: string; h: string; body: string };
     winter: { label: string; h: string; body: string };
   };
-  map: { eyebrow: string; h2: string; lead: string; openIn: string; noteEyebrow: string; noteTitle: string; noteBody: string };
+  map: {
+    eyebrow: string;
+    h2: string;
+    lead: string;
+    openIn: string;
+    noteEyebrow: string;
+    noteTitle: string;
+    noteBody: string;
+    cards: { emoji: string; title: string; meta: string; detail: string }[];
+  };
   wandern: {
     eyebrow: string;
     h2: string;
@@ -230,7 +239,27 @@ const COPY: Record<Locale, Copy> = {
       noteEyebrow: "Nähere Umgebung",
       noteTitle: "Verstecken auf dem Gelände, Fußball gleich nebenan.",
       noteBody:
-        "Unser Grundstück — knapp ein halbes Fußballfeld groß, Wiese und Wald am Hang — ist bestens zum Verstecken, Toben oder für ein Lagerfeuer am Abend geeignet. Braucht Euer Spiel mehr Rasen — Fußball, Frisbee, Völkerball — lohnt sich der kurze Fußweg: Spielplatz Delleweg und der Bolzplatz Langewiese liegen im selben Wiesenstück, keine 6 Gehminuten von der Hütte entfernt (die Karte oben zeigt genau den Weg). Viel Spaß in Langewiese!",
+        "Verstecken, Toben, ein Lagerfeuer am Abend — auf dem eigenen Gelände ist schon einiges möglich. Braucht Euer Spiel mehr Rasen, ist der Rest nur einen kurzen Fußweg entfernt. Viel Spaß in Langewiese!",
+      cards: [
+        {
+          emoji: "🌳",
+          title: "Eigenes Gelände",
+          meta: "direkt vor der Tür",
+          detail: "Wiese und Wald am Hang, knapp ein halbes Fußballfeld groß — bestens zum Verstecken, Toben oder für ein Lagerfeuer am Abend.",
+        },
+        {
+          emoji: "🛝",
+          title: "Spielplatz Delleweg",
+          meta: "~6 Gehminuten",
+          detail: "Braucht Euer Spiel mehr Rasen, ist der Spielplatz die erste Anlaufstelle — im selben Wiesenstück wie der Bolzplatz.",
+        },
+        {
+          emoji: "⚽",
+          title: "Bolzplatz Langewiese",
+          meta: "~6 Gehminuten",
+          detail: "Für Fußball, Frisbee oder Völkerball — gleich nebenan beim Spielplatz, die Karte oben zeigt genau den Weg.",
+        },
+      ],
     },
     wandern: {
       eyebrow: "Wandern",
@@ -407,7 +436,27 @@ const COPY: Record<Locale, Copy> = {
       noteEyebrow: "Nearby",
       noteTitle: "Hide-and-seek on our grounds, football right next door.",
       noteBody:
-        "Our grounds — just under half a football pitch of meadow and forest on the hillside — are perfect for hide-and-seek, running around, or an evening campfire. If your game needs more open grass — football, frisbee, dodgeball — it's a short walk: Playground Delleweg and the Langewiese kickabout pitch sit in the same meadow, barely 6 minutes from the cabin (the map above shows exactly where). Have fun in Langewiese!",
+        "Hide-and-seek, running around, an evening campfire — our own grounds already cover a lot. If your game needs more open grass, the rest is just a short walk away. Have fun in Langewiese!",
+      cards: [
+        {
+          emoji: "🌳",
+          title: "Our Own Grounds",
+          meta: "right outside the door",
+          detail: "Meadow and forest on the hillside, just under half a football pitch — perfect for hide-and-seek, running around, or an evening campfire.",
+        },
+        {
+          emoji: "🛝",
+          title: "Playground Delleweg",
+          meta: "~6 minutes on foot",
+          detail: "Need more open grass for your game? The playground is the first stop — in the same meadow as the kickabout pitch.",
+        },
+        {
+          emoji: "⚽",
+          title: "Kickabout Pitch Langewiese",
+          meta: "~6 minutes on foot",
+          detail: "For football, frisbee, or dodgeball — right next to the playground, the map above shows exactly where.",
+        },
+      ],
     },
     wandern: {
       eyebrow: "Hiking",
@@ -553,7 +602,27 @@ const COPY: Record<Locale, Copy> = {
       noteEyebrow: "Vlakbij",
       noteTitle: "Verstoppertje op ons terrein, voetbal net ernaast.",
       noteBody:
-        "Ons terrein — net geen half voetbalveld groot, weide en bos op de helling — is uitstekend geschikt voor verstoppertje, rondrennen of een avondkampvuur. Heeft jullie spel meer grasveld nodig — voetbal, frisbee, trefbal — dan is het maar een kort stukje lopen: Speeltuin Delleweg en het trapveld Langewiese liggen in hetzelfde weiland, amper 6 minuten van de hut (de kaart hierboven laat precies de weg zien). Veel plezier in Langewiese!",
+        "Verstoppertje, rondrennen, een avondkampvuur — op ons eigen terrein kan al veel. Heeft jullie spel meer grasveld nodig, dan is de rest maar een kort stukje lopen. Veel plezier in Langewiese!",
+      cards: [
+        {
+          emoji: "🌳",
+          title: "Ons eigen terrein",
+          meta: "direct voor de deur",
+          detail: "Weide en bos op de helling, net geen half voetbalveld groot — uitstekend voor verstoppertje, rondrennen of een avondkampvuur.",
+        },
+        {
+          emoji: "🛝",
+          title: "Speeltuin Delleweg",
+          meta: "~6 minuten lopen",
+          detail: "Heeft jullie spel meer grasveld nodig? De speeltuin is de eerste stop — in hetzelfde weiland als het trapveld.",
+        },
+        {
+          emoji: "⚽",
+          title: "Trapveld Langewiese",
+          meta: "~6 minuten lopen",
+          detail: "Voor voetbal, frisbee of trefbal — vlak naast de speeltuin, de kaart hierboven laat precies de weg zien.",
+        },
+      ],
     },
     wandern: {
       eyebrow: "Wandelen",
@@ -929,18 +998,6 @@ export default async function LagePage() {
           </ScrollReveal>
 
           <ScrollReveal delay={280}>
-            <div className="mt-8 max-w-2xl">
-              <div className="eyebrow text-[var(--color-wh-deep-green)] mb-2">{c.map.noteEyebrow}</div>
-              <h3 className="font-display font-bold text-[var(--color-wh-deep-green)] text-[19px] sm:text-[22px] m-0 mb-2 leading-tight">
-                {c.map.noteTitle}
-              </h3>
-              <p className="text-[14px] sm:text-[15px] text-[var(--color-wh-black)] leading-relaxed m-0">
-                {c.map.noteBody}
-              </p>
-            </div>
-          </ScrollReveal>
-
-          <ScrollReveal delay={300}>
             <div className="mt-6 flex flex-wrap gap-2 sm:gap-3 items-center">
               <span className="text-[11px] uppercase tracking-[0.25em] font-bold text-[var(--color-wh-deep-green)]/60 mr-2">
                 {c.map.openIn}:
@@ -951,6 +1008,52 @@ export default async function LagePage() {
               <MapDeepLink href={NAVI_LINKS.osm} label="OpenStreetMap" />
             </div>
           </ScrollReveal>
+        </div>
+      </section>
+
+      {/* ============= NÄHERE UMGEBUNG (Spielplatz/Bolzplatz) ============= */}
+      <section className="px-6 sm:px-8 py-20 sm:py-28 bg-[var(--color-wh-beige)]">
+        <div className="max-w-[1280px] mx-auto">
+          <ScrollReveal>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-10 sm:mb-14">
+              <div className="md:col-span-5">
+                <div className="eyebrow text-[var(--color-wh-deep-green)] mb-3">{c.map.noteEyebrow}</div>
+                <h2
+                  className="font-display font-bold text-[var(--color-wh-deep-green)] m-0 leading-[1.02]"
+                  style={{ fontSize: "clamp(32px, 5vw, 56px)", letterSpacing: "-0.02em" }}
+                >
+                  {c.map.noteTitle}
+                </h2>
+              </div>
+              <div className="md:col-span-7 md:pt-3">
+                <p className="text-base sm:text-[18px] leading-[1.7] text-[var(--color-wh-black)] m-0 max-w-2xl">
+                  {c.map.noteBody}
+                </p>
+              </div>
+            </div>
+          </ScrollReveal>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+            {c.map.cards.map((card, i) => (
+              <ScrollReveal key={card.title} delay={i * 100}>
+                <article className="bg-white border border-[var(--color-wh-winter-grey)] rounded-2xl p-6 sm:p-7 h-full flex flex-col">
+                  <div className="w-12 h-12 rounded-full bg-[var(--color-wh-green-soft)] flex items-center justify-center mb-5 text-[20px]">
+                    {card.emoji}
+                  </div>
+                  <h3 className="font-display font-bold text-[var(--color-wh-deep-green)] text-[19px] sm:text-[22px] m-0 mb-2 leading-tight">
+                    {card.title}
+                  </h3>
+                  <div className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[var(--color-wh-deep-green)]/70 mb-4">
+                    <MapPin size={11} />
+                    {card.meta}
+                  </div>
+                  <p className="text-[14px] text-[var(--color-wh-black)] leading-relaxed m-0">
+                    {card.detail}
+                  </p>
+                </article>
+              </ScrollReveal>
+            ))}
+          </div>
         </div>
       </section>
 
