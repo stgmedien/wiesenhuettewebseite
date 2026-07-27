@@ -111,24 +111,24 @@ const LABELS: Record<Locale, {
 }> = {
   de: {
     huette: "Wiesenhütte",
-    grundstueck: "Grundstück · 3.358 m² (amtlich)",
-    grundstueckSub: "Flurstücke 607, 163, 165 — im Wesentlichen Hanglage",
+    grundstueck: "Außengelände der Hütte",
+    grundstueckSub: "Kein Zaun, keine Grenze — eine Bergwiese, die der Nachbarbauer im Sommer zwischendurch mäht. Zum Toben und Spielen da.",
     spielplatz: "Spielplatz Delleweg",
     route: "Fußweg ca. 430 m · ~6 min",
     bolzplatz: "Bolzplatz Langewiese",
   },
   en: {
     huette: "Wiesenhütte",
-    grundstueck: "Grounds · 3,358 m² (official)",
-    grundstueckSub: "Parcels 607, 163, 165 — mainly hillside",
+    grundstueck: "Grounds around the cabin",
+    grundstueckSub: "No fence, no hard border — a hillside meadow a neighbouring farmer mows now and then in summer. Yours to run around and play on.",
     spielplatz: "Playground Delleweg",
     route: "Footpath approx. 430 m · ~6 min",
     bolzplatz: "Kickabout pitch Langewiese",
   },
   nl: {
     huette: "Wiesenhütte",
-    grundstueck: "Terrein · 3.358 m² (officieel)",
-    grundstueckSub: "Percelen 607, 163, 165 — grotendeels helling",
+    grundstueck: "Terrein rond de hut",
+    grundstueckSub: "Geen hek, geen harde grens — een bergweide die een boer uit de buurt 's zomers af en toe maait. Om op te rennen en te spelen.",
     spielplatz: "Speeltuin Delleweg",
     route: "Voetpad ca. 430 m · ~6 min",
     bolzplatz: "Trapveld Langewiese",
@@ -230,6 +230,35 @@ function LeafletMap({ locale }: { locale: Locale }) {
       const bounds = L.latLngBounds([...GRUNDSTUECK, ...ROUTE, BOLZPLATZ]).pad(0.08);
       map.fitBounds(bounds);
       grund.openPopup();
+
+      // Schraffur statt Flatfill: klarer erkennbar "das gehört ungefähr
+      // dazu", ohne echte Katasterdaten (Quadratmeter/Flurstücke) zu
+      // zeigen — die stehen bewusst nicht mehr im Popup, siehe LABELS oben.
+      // Erst hier (nach fitBounds) einhängen: direkt nach polygon.addTo()
+      // existiert der SVG-Renderer-Container noch nicht zuverlässig.
+      const svg = map.getPanes().overlayPane.querySelector("svg");
+      if (svg) {
+        const NS = "http://www.w3.org/2000/svg";
+        const defs = document.createElementNS(NS, "defs");
+        const pattern = document.createElementNS(NS, "pattern");
+        pattern.setAttribute("id", "grundstueck-hatch");
+        pattern.setAttribute("width", "8");
+        pattern.setAttribute("height", "8");
+        pattern.setAttribute("patternUnits", "userSpaceOnUse");
+        pattern.setAttribute("patternTransform", "rotate(45)");
+        const line = document.createElementNS(NS, "line");
+        line.setAttribute("x1", "0");
+        line.setAttribute("y1", "0");
+        line.setAttribute("x2", "0");
+        line.setAttribute("y2", "8");
+        line.setAttribute("stroke", GREEN);
+        line.setAttribute("stroke-width", "3");
+        line.setAttribute("stroke-opacity", "0.55");
+        pattern.appendChild(line);
+        defs.appendChild(pattern);
+        svg.insertBefore(defs, svg.firstChild);
+        grund.setStyle({ fillColor: "url(#grundstueck-hatch)", fillOpacity: 1 });
+      }
 
       // Robust gegen Container, die erst nach Init ihre Groesse bekommen
       // (ScrollReveal, Consent-Umschaltung, Tab-Wechsel): Groesse neu messen
