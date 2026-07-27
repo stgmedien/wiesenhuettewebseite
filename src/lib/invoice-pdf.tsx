@@ -360,7 +360,7 @@ export function InvoicePdf({
             <Text style={{ fontWeight: 700 }}>Stornierungsbedingungen:</Text>{" "}
             {isLegacy
               ? <>{">"} 30 Tage vor Anreise 0 % · 29–14 Tage 30 % · 13–7 Tage 60 % · {"<"} 7 Tage 90 % der Zwischensumme (ohne Kaution).</>
-              : <>{">"} 60 Tage vor Anreise 0 % · 60–30 Tage 30 % · 30–14 Tage 50 % · {"<"} 14 Tage 100 % des reinen Übernachtungspreises.</>}
+              : <>{">"} 60 Tage vor Anreise 0 % · 60–31 Tage 30 % · 30–14 Tage 50 % · {"<"} 14 Tage 100 % des reinen Übernachtungspreises.</>}
           </Text>
         </View>
 
