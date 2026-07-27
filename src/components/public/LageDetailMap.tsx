@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { Maximize2, X } from "lucide-react";
 import { ConsentGate } from "@/components/consent/ConsentGate";
 import "leaflet/dist/leaflet.css";
 import type { Locale } from "@/lib/i18n-shared";
@@ -155,7 +157,19 @@ function LeafletMap({ locale, compact }: { locale: Locale; compact?: boolean }) 
       if (cancelled || !ref.current || ref.current.dataset.mapInit) return;
       ref.current.dataset.mapInit = "1";
 
-      map = L.map(ref.current, { scrollWheelZoom: false });
+      // Im kompakten Vorschau-Modus keine eigene Interaktion (Pan/Zoom/Klick)
+      // — die ganze Fläche ist dann ein einziger "Karte vergrößern"-Button,
+      // siehe LageDetailMap weiter unten. Sonst würde Ziehen auf der Vorschau
+      // mit dem Öffnen des großen Modals kollidieren.
+      map = L.map(ref.current, {
+        scrollWheelZoom: false,
+        dragging: !compact,
+        zoomControl: !compact,
+        doubleClickZoom: !compact,
+        touchZoom: !compact,
+        boxZoom: !compact,
+        keyboard: !compact,
+      });
 
       L.tileLayer(
         "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
@@ -171,6 +185,7 @@ function LeafletMap({ locale, compact }: { locale: Locale; compact?: boolean }) 
         weight: 3,
         fillColor: "#6FA05F",
         fillOpacity: 0.3,
+        interactive: !compact,
       })
         .addTo(map)
         .bindPopup(
@@ -182,6 +197,7 @@ function LeafletMap({ locale, compact }: { locale: Locale; compact?: boolean }) 
         weight: 4,
         dashArray: "2 8",
         lineCap: "round",
+        interactive: !compact,
       })
         .addTo(map)
         .bindPopup(L2.route);
@@ -210,13 +226,13 @@ function LeafletMap({ locale, compact }: { locale: Locale; compact?: boolean }) 
       const popupSub = (text: string) =>
         `<span style="font-family:var(--font-body,Inter,system-ui,sans-serif);color:${GREEN};opacity:0.8">${text}</span>`;
 
-      L.marker(HUETTE, { icon: dot(CLAY) })
+      L.marker(HUETTE, { icon: dot(CLAY), interactive: !compact })
         .addTo(map)
         .bindPopup(popupTitle(L2.huette));
-      L.marker(SPIELPLATZ, { icon: poiPin("🛝") })
+      L.marker(SPIELPLATZ, { icon: poiPin("🛝"), interactive: !compact })
         .addTo(map)
         .bindPopup(`${popupTitle(L2.spielplatz)}<br/>${popupSub(L2.route)}`);
-      L.marker(BOLZPLATZ, { icon: poiPin("⚽") })
+      L.marker(BOLZPLATZ, { icon: poiPin("⚽"), interactive: !compact })
         .addTo(map)
         .bindPopup(popupTitle(L2.bolzplatz));
 
@@ -296,21 +312,120 @@ function LeafletMap({ locale, compact }: { locale: Locale; compact?: boolean }) 
   );
 }
 
+const MODAL_LABELS: Record<Locale, { expand: string; close: string }> = {
+  de: { expand: "Karte vergrößern", close: "Schließen" },
+  en: { expand: "Enlarge map", close: "Close" },
+  nl: { expand: "Kaart vergroten", close: "Sluiten" },
+};
+
 /**
- * compact: kleine, weiterhin interaktive Vorschau (z. B. eingebettet neben
- * einer Überschrift) statt der großen Standalone-Karte.
+ * compact: kleine Vorschau (z. B. neben einer Überschrift eingebettet)
+ * statt der großen Standalone-Karte. Die Vorschau selbst ist bewusst NICHT
+ * interaktiv (kein Pan/Zoom/Popup) — ein Klick irgendwo darauf öffnet
+ * stattdessen die volle, interaktive Karte groß in einem Modal. So gibt es
+ * keinen Konflikt zwischen "Karte ziehen" und "Karte öffnen".
  */
 export function LageDetailMap({ locale, compact }: { locale: Locale; compact?: boolean }) {
+  const [expanded, setExpanded] = useState(false);
+  const t = MODAL_LABELS[locale];
+
+  useEffect(() => {
+    if (!expanded) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setExpanded(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [expanded]);
+
+  if (!compact) {
+    return (
+      <div className="rounded-3xl overflow-hidden border border-[var(--color-wh-winter-grey)] shadow-[0_20px_60px_rgba(47,74,53,0.12)]">
+        <ConsentGate
+          category="functional"
+          serviceName="OpenStreetMap"
+          serviceUrl="https://osmfoundation.org/wiki/Privacy_Policy"
+          className="m-0 rounded-none border-0 min-h-[420px]"
+        >
+          <LeafletMap locale={locale} />
+        </ConsentGate>
+      </div>
+    );
+  }
+
   return (
-    <div className="rounded-3xl overflow-hidden border border-[var(--color-wh-winter-grey)] shadow-[0_20px_60px_rgba(47,74,53,0.12)]">
-      <ConsentGate
-        category="functional"
-        serviceName="OpenStreetMap"
-        serviceUrl="https://osmfoundation.org/wiki/Privacy_Policy"
-        className={compact ? "m-0 rounded-none border-0 min-h-[280px]" : "m-0 rounded-none border-0 min-h-[420px]"}
+    <>
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={() => setExpanded(true)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setExpanded(true);
+          }
+        }}
+        aria-label={t.expand}
+        className="group relative w-full cursor-zoom-in rounded-3xl overflow-hidden border border-[var(--color-wh-winter-grey)] shadow-[0_20px_60px_rgba(47,74,53,0.12)]"
       >
-        <LeafletMap locale={locale} compact={compact} />
-      </ConsentGate>
-    </div>
+        <ConsentGate
+          category="functional"
+          serviceName="OpenStreetMap"
+          serviceUrl="https://osmfoundation.org/wiki/Privacy_Policy"
+          className="m-0 rounded-none border-0 min-h-[280px]"
+        >
+          <LeafletMap locale={locale} compact />
+        </ConsentGate>
+        <span className="pointer-events-none absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-[11px] font-semibold text-[var(--color-wh-deep-green)] shadow-md opacity-0 transition-opacity group-hover:opacity-100">
+          <Maximize2 size={12} />
+          {t.expand}
+        </span>
+      </div>
+
+      {expanded &&
+        createPortal(
+          // Als Portal direkt in <body> gerendert, nicht innerhalb der
+          // ScrollReveal-Hierarchie: ScrollReveal setzt dauerhaft
+          // will-change-transform (auch im "sichtbar"-Zustand noch
+          // translate-y-0), und das erzeugt einen eigenen CSS-Containing-
+          // Block für position:fixed-Nachfahren. Ohne Portal würde das
+          // Modal relativ zum ScrollReveal-Wrapper statt zum Viewport
+          // positioniert — mitten auf der Seite statt zentriert im Fenster.
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={t.expand}
+            onClick={() => setExpanded(false)}
+            className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm sm:p-8"
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-4xl rounded-3xl border border-[var(--color-wh-winter-grey)] bg-white shadow-2xl overflow-hidden"
+            >
+              <button
+                type="button"
+                onClick={() => setExpanded(false)}
+                aria-label={t.close}
+                className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white text-[var(--color-wh-deep-green)] shadow-md transition-colors hover:bg-[var(--color-wh-green-soft)]"
+              >
+                <X size={18} />
+              </button>
+              <ConsentGate
+                category="functional"
+                serviceName="OpenStreetMap"
+                serviceUrl="https://osmfoundation.org/wiki/Privacy_Policy"
+                className="m-0 rounded-none border-0 min-h-[420px]"
+              >
+                <LeafletMap locale={locale} />
+              </ConsentGate>
+            </div>
+          </div>,
+          document.body
+        )}
+    </>
   );
 }
