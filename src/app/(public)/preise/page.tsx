@@ -152,7 +152,7 @@ const COPY: Record<Locale, Copy> = {
     cancelIntro: "Je nach Zeitpunkt der Stornierung (vom reinen Übernachtungspreis — Endreinigung und Kaution werden im Stornofall nicht fällig):",
     cancelRows: [
       { when: "mehr als 60 Tage vorher", fee: "kostenlos" },
-      { when: "60 – 30 Tage vorher", fee: "30 %" },
+      { when: "60 – 31 Tage vorher", fee: "30 %" },
       { when: "30 – 14 Tage vorher", fee: "50 %" },
       { when: "weniger als 14 Tage vorher", fee: "100 %" },
     ],
@@ -201,7 +201,7 @@ const COPY: Record<Locale, Copy> = {
     cancelIntro: "Depending on when you cancel (of the accommodation price only — final cleaning and deposit are not charged if you cancel):",
     cancelRows: [
       { when: "more than 60 days before", fee: "free" },
-      { when: "60 – 30 days before", fee: "30%" },
+      { when: "60 – 31 days before", fee: "30%" },
       { when: "30 – 14 days before", fee: "50%" },
       { when: "less than 14 days before", fee: "100%" },
     ],
@@ -250,7 +250,7 @@ const COPY: Record<Locale, Copy> = {
     cancelIntro: "Afhankelijk van het moment van annuleren (alleen van de overnachtingsprijs — eindschoonmaak en borg vervallen bij annulering):",
     cancelRows: [
       { when: "meer dan 60 dagen vooraf", fee: "gratis" },
-      { when: "60 – 30 dagen vooraf", fee: "30%" },
+      { when: "60 – 31 dagen vooraf", fee: "30%" },
       { when: "30 – 14 dagen vooraf", fee: "50%" },
       { when: "minder dan 14 dagen vooraf", fee: "100%" },
     ],

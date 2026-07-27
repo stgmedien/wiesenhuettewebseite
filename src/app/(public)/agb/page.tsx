@@ -98,7 +98,7 @@ export default async function AGB() {
           </p>
           <ul>
             <li>mehr als 60 Tage vor Anreise: <strong>0 %</strong></li>
-            <li>60 – 30 Tage vor Anreise: <strong>30 %</strong></li>
+            <li>60 – 31 Tage vor Anreise: <strong>30 %</strong></li>
             <li>30 – 14 Tage vor Anreise: <strong>50 %</strong></li>
             <li>weniger als 14 Tage vor Anreise: <strong>100 %</strong></li>
           </ul>

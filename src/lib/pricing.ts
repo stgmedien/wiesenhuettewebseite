@@ -137,7 +137,7 @@ export const RULES = {
 // > 60 Tage 0 %, 60–31 Tage 30 %, 30–14 Tage 50 %, < 14 Tage 100 %
 export const CANCELLATION_TIERS = [
   { minDaysBefore: 60, percent: 0 },
-  { minDaysBefore: 30, percent: 30 },
+  { minDaysBefore: 31, percent: 30 },
   { minDaysBefore: 14, percent: 50 },
   { minDaysBefore: 0, percent: 100 },
 ] as const;

@@ -295,7 +295,7 @@ export default function MietvertragEmail({
           </Text>
           <ul style={{ margin: "0 0 8px 18px", padding: 0, color: "#111", fontFamily: "Inter, sans-serif", fontSize: "14px", lineHeight: 1.55 }}>
             <li>mehr als 60 Tage vor Anreise: 0 %</li>
-            <li>60 – 30 Tage vor Anreise: 30 %</li>
+            <li>60 – 31 Tage vor Anreise: 30 %</li>
             <li>30 – 14 Tage vor Anreise: 50 %</li>
             <li>weniger als 14 Tage vor Anreise: 100 %</li>
           </ul>
