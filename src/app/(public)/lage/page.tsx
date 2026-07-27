@@ -989,15 +989,7 @@ export default async function LagePage() {
             <IllustratedMap />
           </ScrollReveal>
 
-          {/* Detailkarte: amtlicher Grundstücks-Umriss + Fußweg zum
-              Spielplatz — echte OSM-Karte, DSGVO via ConsentGate. */}
           <ScrollReveal delay={250}>
-            <div className="mt-6">
-              <LageDetailMap locale={locale} />
-            </div>
-          </ScrollReveal>
-
-          <ScrollReveal delay={280}>
             <div className="mt-6 flex flex-wrap gap-2 sm:gap-3 items-center">
               <span className="text-[11px] uppercase tracking-[0.25em] font-bold text-[var(--color-wh-deep-green)]/60 mr-2">
                 {c.map.openIn}:
@@ -1025,10 +1017,11 @@ export default async function LagePage() {
                   {c.map.noteTitle}
                 </h2>
               </div>
-              <div className="md:col-span-7 md:pt-3">
-                <p className="text-base sm:text-[18px] leading-[1.7] text-[var(--color-wh-black)] m-0 max-w-2xl">
+              <div className="md:col-span-7 md:pt-3 grid grid-cols-1 sm:grid-cols-2 gap-6 items-start">
+                <p className="text-base sm:text-[18px] leading-[1.7] text-[var(--color-wh-black)] m-0">
                   {c.map.noteBody}
                 </p>
+                <LageDetailMap locale={locale} compact />
               </div>
             </div>
           </ScrollReveal>

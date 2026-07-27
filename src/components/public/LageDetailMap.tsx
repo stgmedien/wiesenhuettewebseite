@@ -141,7 +141,7 @@ const CLAY = "#B85C38";
 // Kartengrün war die Schraffur in normalem GREEN kaum zu erkennen.
 const HATCH_DARK = "#0F1C13";
 
-function LeafletMap({ locale }: { locale: Locale }) {
+function LeafletMap({ locale, compact }: { locale: Locale; compact?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   const L2 = LABELS[locale];
 
@@ -232,7 +232,10 @@ function LeafletMap({ locale }: { locale: Locale }) {
 
       const bounds = L.latLngBounds([...GRUNDSTUECK, ...ROUTE, BOLZPLATZ]).pad(0.08);
       map.fitBounds(bounds);
-      grund.openPopup();
+      // Im kompakten Vorschau-Format (eingebettet neben der "Nähere
+      // Umgebung"-Überschrift) automatisch geöffnetes Popup weglassen —
+      // wirkt auf der kleinen Fläche zu voll.
+      if (!compact) grund.openPopup();
 
       // Schraffur statt Flatfill: klarer erkennbar "das gehört ungefähr
       // dazu", ohne echte Katasterdaten (Quadratmeter/Flurstücke) zu
@@ -286,23 +289,27 @@ function LeafletMap({ locale }: { locale: Locale }) {
   return (
     <div
       ref={ref}
-      className="w-full h-[420px] sm:h-[520px]"
+      className={compact ? "w-full h-[280px]" : "w-full h-[420px] sm:h-[520px]"}
       role="application"
       aria-label={`${L2.grundstueck} — ${L2.route}`}
     />
   );
 }
 
-export function LageDetailMap({ locale }: { locale: Locale }) {
+/**
+ * compact: kleine, weiterhin interaktive Vorschau (z. B. eingebettet neben
+ * einer Überschrift) statt der großen Standalone-Karte.
+ */
+export function LageDetailMap({ locale, compact }: { locale: Locale; compact?: boolean }) {
   return (
     <div className="rounded-3xl overflow-hidden border border-[var(--color-wh-winter-grey)] shadow-[0_20px_60px_rgba(47,74,53,0.12)]">
       <ConsentGate
         category="functional"
         serviceName="OpenStreetMap"
         serviceUrl="https://osmfoundation.org/wiki/Privacy_Policy"
-        className="m-0 rounded-none border-0 min-h-[420px]"
+        className={compact ? "m-0 rounded-none border-0 min-h-[280px]" : "m-0 rounded-none border-0 min-h-[420px]"}
       >
-        <LeafletMap locale={locale} />
+        <LeafletMap locale={locale} compact={compact} />
       </ConsentGate>
     </div>
   );
