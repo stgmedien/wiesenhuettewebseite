@@ -335,7 +335,7 @@ export default function MietvertragEmail({
             (Zustimmung dokumentiert: {signedAt}). Eine separate Unterschrift ist nicht erforderlich.
           </Text>
           <Text style={muted}>
-            Skifreunde Gütersloh e.V. · Postfach 2819 · 33258 Gütersloh · Vereinsregister VR 142
+            Skifreunde Gütersloh e.V. · Postfach 2819 · 33258 Gütersloh · Vereinsregister VR 320
             beim Amtsgericht Gütersloh
           </Text>
         </Container>
