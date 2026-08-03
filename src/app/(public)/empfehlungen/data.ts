@@ -478,9 +478,9 @@ export const RECOMMENDATIONS: Recommendation[] = [
       nl: "24/7 spoedeisende hulp — bij nood 112",
     },
     description: {
-      de: "Das nächste Krankenhaus mit Notaufnahme. Im akuten Notfall immer erst 112 anrufen — der Rettungswagen kommt schneller zur Hütte als ihr zum Krankenhaus. Adresse für den Notruf: Wiesenweg, 59955 Winterberg-Langewiese.",
-      en: "The nearest hospital with emergency department. In acute emergencies always call 112 first — the ambulance reaches the cabin faster than you'd reach the hospital. Address for the dispatcher: Wiesenweg, 59955 Winterberg-Langewiese.",
-      nl: "Het dichtstbijzijnde ziekenhuis met spoedeisende hulp. Bij acute nood altijd eerst 112 bellen — de ambulance is sneller bij de hut dan jullie bij het ziekenhuis. Adres voor de centrale: Wiesenweg, 59955 Winterberg-Langewiese.",
+      de: "Das nächste Krankenhaus mit Notaufnahme. Im akuten Notfall immer erst 112 anrufen — der Rettungswagen kommt schneller zur Hütte als ihr zum Krankenhaus. Adresse für den Notruf: Bundesstraße 6, 59955 Winterberg-Langewiese.",
+      en: "The nearest hospital with emergency department. In acute emergencies always call 112 first — the ambulance reaches the cabin faster than you'd reach the hospital. Address for the dispatcher: Bundesstraße 6, 59955 Winterberg-Langewiese.",
+      nl: "Het dichtstbijzijnde ziekenhuis met spoedeisende hulp. Bij acute nood altijd eerst 112 bellen — de ambulance is sneller bij de hut dan jullie bij het ziekenhuis. Adres voor de centrale: Bundesstraße 6, 59955 Winterberg-Langewiese.",
     },
     address: "Winterberg",
     distanceMinutesByCar: 12,

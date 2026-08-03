@@ -103,7 +103,7 @@ export default function ArrivalInfoEmail({
             Adresse
           </Heading>
           <Text style={text}>
-            Wiesenhütte, Wiesenhütte 1, 59955 Winterberg-Langewiese
+            Wiesenhütte, Bundesstraße 6, 59955 Winterberg-Langewiese
           </Text>
 
           <Heading
