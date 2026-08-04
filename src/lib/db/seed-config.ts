@@ -80,66 +80,25 @@ async function seedTariffs() {
 }
 
 // =============================================================
-// EXTRAS — typische Zusatzleistungen, Manager kann später aktivieren/erweitern
+// EXTRAS — leer: die frueheren Default-Extras (Brennholz, Handtuch-Set,
+// Bettwaesche-Set, Fruehstuecks-Paket, Skiservice-Termin) spiegelten keine
+// tatsaechlich angebotene Leistung des Vereins wider und wurden entfernt
+// (siehe drizzle/remove-unused-extras.sql fuer den einmaligen DB-Cleanup
+// der schon gesaeten Zeilen). Manager kann bei Bedarf ueber /m/stammdaten
+// echte Extras anlegen.
 // =============================================================
 
-const DEFAULT_EXTRAS = [
-  {
-    code: "holz_buendel",
-    label: "Brennholz, Bündel",
-    description: "Vorgetrocknetes Buchenholz, ca. 25 kg pro Bündel.",
-    unitCents: 800,
-    unitLabel: "pro Bündel",
-    perNight: false,
-    perPerson: false,
-    sortOrder: 10,
-    active: true,
-  },
-  {
-    code: "handtuchset",
-    label: "Handtuch-Set",
-    description: "Großes + kleines Handtuch + Waschlappen.",
-    unitCents: 600,
-    unitLabel: "pro Person",
-    perNight: false,
-    perPerson: true,
-    sortOrder: 20,
-    active: true,
-  },
-  {
-    code: "bettwaesche",
-    label: "Bettwäsche-Set",
-    description: "Bezogenes Bett bei Anreise (Spannlaken, Bettbezug, Kissenbezug).",
-    unitCents: 1200,
-    unitLabel: "pro Person",
-    perNight: false,
-    perPerson: true,
-    sortOrder: 30,
-    active: true,
-  },
-  {
-    code: "fruehstueck_paket",
-    label: "Frühstücks-Starterpaket",
-    description: "Brot, Aufschnitt, Kaffee, Marmelade — für die erste Mahlzeit.",
-    unitCents: 6500,
-    unitLabel: "pauschal",
-    perNight: false,
-    perPerson: false,
-    sortOrder: 40,
-    active: false,  // optional, Manager schaltet bei Bedarf frei
-  },
-  {
-    code: "skiservice_termin",
-    label: "Skiservice-Termin (lokal)",
-    description: "Vermittlung Termin beim Skiservice in Langewiese.",
-    unitCents: 0,
-    unitLabel: "Vermittlung kostenlos",
-    perNight: false,
-    perPerson: false,
-    sortOrder: 50,
-    active: false,
-  },
-];
+const DEFAULT_EXTRAS: {
+  code: string;
+  label: string;
+  description: string;
+  unitCents: number;
+  unitLabel: string;
+  perNight: boolean;
+  perPerson: boolean;
+  sortOrder: number;
+  active: boolean;
+}[] = [];
 
 async function seedExtras() {
   for (const e of DEFAULT_EXTRAS) {
