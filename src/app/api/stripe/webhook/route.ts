@@ -26,6 +26,8 @@ import { addContactToMembersList } from "@/lib/brevo";
 import { promoteToMemberRole } from "@/lib/membership-role";
 import { confirmDepositPayment } from "@/lib/booking-payment-confirmation";
 import { formatEuro } from "@/lib/pricing";
+import { formatDateLong } from "@/lib/utils";
+import RestzahlungConfirmedEmail from "@/lib/mail/templates/restzahlung-confirmed";
 import type Stripe from "stripe";
 
 export const runtime = "nodejs"; // raw body needed
@@ -208,6 +210,30 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       what: `Zahlungseingang ${kind === "restzahlung" ? "Restzahlung" : "Nachbelastung"} ${(amountCents / 100).toFixed(2)} € — Buchung ${booking.bookingNumber}`,
       bookingId,
     });
+
+    if (kind === "restzahlung") {
+      const restCustomer = booking.customerId
+        ? (await db.select().from(customers).where(eq(customers.id, booking.customerId)).limit(1))[0]
+        : null;
+      if (restCustomer) {
+        try {
+          await sendMail({
+            to: restCustomer.email,
+            subject: `Zahlung bestätigt — Buchung ${booking.bookingNumber}`,
+            template: "restzahlung-confirmed",
+            bookingId,
+            react: RestzahlungConfirmedEmail({
+              guestName: restCustomer.firstName,
+              bookingNumber: booking.bookingNumber,
+              amountCents,
+              dateFormatted: formatDateLong(new Date()),
+            }),
+          });
+        } catch (err) {
+          console.error("[webhook] restzahlung-confirmed failed:", err);
+        }
+      }
+    }
     return;
   }
 

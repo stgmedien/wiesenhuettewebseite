@@ -80,6 +80,14 @@ export const AUTOMATIC_MAIL_TEMPLATES: AutomaticMailTemplate[] = [
     file: "src/app/api/cron/daily-mail-jobs/route.ts",
   },
   {
+    key: "restzahlung-confirmed",
+    label: "Restzahlung — Zahlung bestätigt",
+    category: "Zahlungen",
+    trigger: "Sofort bei erfolgreicher Restzahlung — automatischer Off-Session-Einzug (T-14) oder Altsystem-Stripe-Link.",
+    audience: "Gast",
+    file: "src/app/api/cron/daily-mail-jobs/route.ts, src/app/api/stripe/webhook/route.ts",
+  },
+  {
     key: "manual-payment-check",
     label: "Manuelle Zahlungen — Kontoeingang prüfen",
     category: "Zahlungen",

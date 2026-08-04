@@ -27,6 +27,7 @@ import { MANUAL_REST_MARKER, MANUAL_REST_SENT_MARKER } from "@/lib/payment-marke
 import AvsReminderInternalEmail from "@/lib/mail/templates/avs-reminder-internal";
 import MailFailureDigestEmail from "@/lib/mail/templates/mail-failure-digest";
 import ManualPaymentCheckEmail from "@/lib/mail/templates/manual-payment-check";
+import RestzahlungConfirmedEmail from "@/lib/mail/templates/restzahlung-confirmed";
 import { getUnresolvedMailFailures } from "@/lib/mail-log";
 import { findMailTemplateMeta } from "@/lib/automatic-mail-templates";
 import { buildKurkartenFilename } from "@/lib/kurkarten";
@@ -379,6 +380,28 @@ export async function GET(req: Request) {
             .set({ paidCents: b.paidCents + chargeCents, updatedAt: new Date() })
             .where(eq(bookings.id, b.id));
           stats.autoChargeSucceeded++;
+
+          const restCustomer = b.customerId
+            ? (await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1))[0]
+            : null;
+          if (restCustomer) {
+            try {
+              await sendMail({
+                to: restCustomer.email,
+                subject: `Zahlung bestätigt — Buchung ${b.bookingNumber}`,
+                template: "restzahlung-confirmed",
+                bookingId: b.id,
+                react: RestzahlungConfirmedEmail({
+                  guestName: restCustomer.firstName,
+                  bookingNumber: b.bookingNumber,
+                  amountCents: chargeCents,
+                  dateFormatted: formatDateLong(new Date()),
+                }),
+              });
+            } catch (err) {
+              console.error("[cron] restzahlung-confirmed failed:", err);
+            }
+          }
         } else {
           await db.insert(payments).values({
             bookingId: b.id,
