@@ -18,7 +18,6 @@ import { DepositHoldControl } from "./DepositHoldControl";
 import { InvoiceControl } from "./InvoiceControl";
 import { getInvoiceForBooking } from "./invoice-actions";
 import { Kundenakte } from "./Kundenakte";
-import { ReviewActions } from "./ReviewActions";
 import { findMailTemplateMeta } from "@/lib/automatic-mail-templates";
 import { CustomerContactForm } from "./CustomerContactForm";
 import { ResendMailsButton } from "./ResendMailsButton";
@@ -118,15 +117,6 @@ export default async function BookingDetail({ params }: Props) {
         </div>
         <StatusActions bookingId={b.id} currentStatus={b.status} />
       </div>
-
-      {/* Phase B: Private-Feier-Pruefung — Approve/Reject UI */}
-      {b.requiresReview && b.reviewStatus === "pending" && (
-        <ReviewActions
-          bookingId={b.id}
-          bookingNumber={b.bookingNumber}
-          purposeRaw={b.purpose}
-        />
-      )}
 
       {customer && (
         <ManagerMessage

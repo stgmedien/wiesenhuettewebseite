@@ -11,7 +11,6 @@ const CATEGORY_ORDER: MailCategory[] = [
   "Buchung — Hüttenservice/intern",
   "Zahlungen",
   "Schulgruppen",
-  "Freigabe (Private Feier)",
   "Mitgliedschaft",
   "Konto & Login",
   "Sonstiges",

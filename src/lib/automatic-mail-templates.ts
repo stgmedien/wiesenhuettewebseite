@@ -15,7 +15,6 @@ export type MailCategory =
   | "Buchung — Hüttenservice/intern"
   | "Zahlungen"
   | "Schulgruppen"
-  | "Freigabe (Private Feier)"
   | "Mitgliedschaft"
   | "Konto & Login"
   | "Sonstiges";
@@ -210,40 +209,6 @@ export const AUTOMATIC_MAIL_TEMPLATES: AutomaticMailTemplate[] = [
     trigger: "T-16, wenn die Anzahlung trotz Mahnungen weiter offen ist.",
     audience: "Gast",
     file: "src/app/api/cron/daily-mail-jobs/route.ts",
-  },
-
-  // ---------- Freigabe (Private Feier) ----------
-  {
-    key: "review-pending-guest",
-    label: "Anfrage in Prüfung",
-    category: "Freigabe (Private Feier)",
-    trigger: "Sofort bei Buchung mit Anlass 'Private Feier' — noch keine Zahlung, wartet auf Vorstandsfreigabe.",
-    audience: "Gast",
-    file: "src/app/(public)/buchen/actions.ts",
-  },
-  {
-    key: "review-pending-internal",
-    label: "Anfrage wartet auf Freigabe (intern)",
-    category: "Freigabe (Private Feier)",
-    trigger: "Gleichzeitig mit der Gast-Mail bei 'Private Feier'.",
-    audience: "Manager",
-    file: "src/app/(public)/buchen/actions.ts",
-  },
-  {
-    key: "review-approved",
-    label: "Anfrage freigegeben",
-    category: "Freigabe (Private Feier)",
-    trigger: "Manager genehmigt die Anfrage im Manager-Backend.",
-    audience: "Gast",
-    file: "src/app/(manager)/m/buchungen/[id]/actions.ts",
-  },
-  {
-    key: "review-rejected",
-    label: "Anfrage abgelehnt",
-    category: "Freigabe (Private Feier)",
-    trigger: "Manager lehnt die Anfrage im Manager-Backend ab.",
-    audience: "Gast",
-    file: "src/app/(manager)/m/buchungen/[id]/actions.ts",
   },
 
   // ---------- Mitgliedschaft ----------
