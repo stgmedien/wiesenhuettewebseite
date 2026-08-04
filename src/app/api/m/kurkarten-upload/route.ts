@@ -9,6 +9,8 @@ import { extractNamesFromKurkartenPdf } from "@/lib/kurkarten-names";
 import { generateFeuerwehrListePdf } from "@/lib/generate-feuerwehr-liste";
 import { sendMail } from "@/lib/mail/send";
 import KurkartenReadyEmail from "@/lib/mail/templates/kurkarten-ready";
+import HuettenwartKurkartenReadyEmail from "@/lib/mail/templates/huettenwart-kurkarten-ready";
+import { HUETTENWART_EMAIL, HUETTENWART_CC } from "@/lib/huettenwart";
 import { formatDateLong } from "@/lib/utils";
 
 async function requireManager() {
@@ -38,7 +40,12 @@ export async function POST(req: NextRequest) {
   }
 
   const [booking] = await db
-    .select({ arrival: bookings.arrival, customerId: bookings.customerId, bookingNumber: bookings.bookingNumber })
+    .select({
+      arrival: bookings.arrival,
+      departure: bookings.departure,
+      customerId: bookings.customerId,
+      bookingNumber: bookings.bookingNumber,
+    })
     .from(bookings)
     .where(eq(bookings.id, bookingId))
     .limit(1);
@@ -93,10 +100,33 @@ export async function POST(req: NextRequest) {
     )
     .where(eq(bookings.id, bookingId));
 
-  // Kurkarten-Zustellung an den Gast ist event-getrieben statt an einen
-  // festen Tag gebunden (Dana laedt sie hoch, wann immer sie vom AVS-Portal
-  // fertig sind) — anders als frueher (T-7-Sammel-Mail) kommt die PDF jetzt
-  // sofort bei diesem Upload an, egal wie viele Tage das noch vor Anreise ist.
+  // Kurkarten-Zustellung ist event-getrieben statt an einen festen Tag
+  // gebunden (Dana laedt hoch, wann immer die PDF vom AVS-Portal fertig
+  // ist) — Gast UND Toni bekommen beide Dokumente (Kurkarten + Feuerwehr-
+  // Meldeliste) automatisch in genau diesem Moment, ohne weiteren
+  // manuellen Schritt.
+  const sharedAttachments: { filename: string; content: Buffer; contentType: string }[] = [
+    {
+      filename: displayName,
+      content: Buffer.from(await file.arrayBuffer()),
+      contentType: "application/pdf",
+    },
+  ];
+  if (feuerwehrListeUrl) {
+    try {
+      const listeRes = await fetch(feuerwehrListeUrl);
+      if (listeRes.ok) {
+        sharedAttachments.push({
+          filename: `Feuerwehr-Meldeliste-${booking.bookingNumber}.pdf`,
+          content: Buffer.from(await listeRes.arrayBuffer()),
+          contentType: "application/pdf",
+        });
+      }
+    } catch (err) {
+      console.error("[kurkarten-upload] Feuerwehr-Meldeliste-Abruf fehlgeschlagen:", err);
+    }
+  }
+
   if (customer?.email) {
     try {
       await sendMail({
@@ -104,13 +134,7 @@ export async function POST(req: NextRequest) {
         subject: `Eure Kurkarten sind da — Buchung ${booking.bookingNumber}`,
         template: "kurkarten-ready",
         bookingId,
-        attachments: [
-          {
-            filename: displayName,
-            content: Buffer.from(await file.arrayBuffer()),
-            contentType: "application/pdf",
-          },
-        ],
+        attachments: sharedAttachments,
         react: KurkartenReadyEmail({
           firstName: customer.firstName,
           bookingNumber: booking.bookingNumber,
@@ -120,6 +144,25 @@ export async function POST(req: NextRequest) {
     } catch (err) {
       console.error("[kurkarten-upload] kurkarten-ready mail failed:", err);
     }
+  }
+
+  try {
+    await sendMail({
+      to: HUETTENWART_EMAIL,
+      bcc: HUETTENWART_CC,
+      subject: `Kurkarten sind da — Buchung ${booking.bookingNumber}`,
+      template: "huettenwart-kurkarten-ready",
+      bookingId,
+      attachments: sharedAttachments,
+      react: HuettenwartKurkartenReadyEmail({
+        bookingNumber: booking.bookingNumber,
+        guestName: customer ? `${customer.firstName} ${customer.lastName}`.trim() : booking.bookingNumber,
+        arrival: formatDateLong(booking.arrival),
+        departure: formatDateLong(booking.departure),
+      }),
+    });
+  } catch (err) {
+    console.error("[kurkarten-upload] huettenwart-kurkarten-ready mail failed:", err);
   }
 
   return NextResponse.json({ url: blob.url, suggestedNames, feuerwehrListeUrl });

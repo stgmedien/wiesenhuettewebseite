@@ -671,12 +671,12 @@ export const DOC_SECTIONS: DocSection[] = [
             [
               "T-7",
               "huettenwart_notice",
-              "Nur intern an Toni Klauke — Gast bekommt hier keine eigene Mail mehr (Inhalte stecken in restzahlung-confirmed bei T-14).",
+              "Nur intern an Toni Klauke — Gast bekommt hier keine eigene Mail mehr (Inhalte stecken in restzahlung-confirmed bei T-14). Ohne Kurkarten-Anhang.",
             ],
             [
               "Event (Kurkarten-Upload)",
-              "kurkarten-ready",
-              "Sobald Dana die Kurkarten-PDF hochlädt, geht sie sofort mit dieser Mail an den Gast raus — unabhängig vom Anreisedatum.",
+              "kurkarten-ready + huettenwart-kurkarten-ready",
+              "Sobald Dana die Kurkarten-PDF hochlädt, gehen sofort zwei Mails raus — an den Gast UND an Toni, beide mit Kurkarten + Feuerwehr-Meldeliste im Anhang. Unabhängig vom Anreisedatum und vom Zahlungsstatus.",
             ],
             [
               "T+14 (nach Abreise)",
