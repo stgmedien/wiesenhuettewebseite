@@ -11,35 +11,24 @@ import { createBookingAndCheckout, previewDiscountAction } from "./actions";
 import { track } from "@/lib/analytics";
 import { AvailabilityCalendar } from "./AvailabilityCalendar";
 
-// Anlass-Kategorien + Sub-Auswahl bei "Private Feier".
-// Sind Pflicht beim Buchen. Bei "privat" muss zusätzlich ein freier Grund
-// angegeben werden (Vorstands-Prüfung — siehe interne Notification).
-const PURPOSE_KEYS = ["familie", "klasse", "schul", "verein", "firma", "privat", "sonstiges"] as const;
+// Anlass-Kategorien. Sind Pflicht beim Buchen.
+const PURPOSE_KEYS = ["familie", "klasse", "schul", "verein", "firma", "sonstiges"] as const;
 type PurposeKey = (typeof PURPOSE_KEYS)[number];
 // Im Anlass-Dropdown auswählbar sind ausschließlich diese vier (Reihenfolge wie
 // gewünscht): Vereins-, Schul-, Klassen- und Gruppenfahrt. 'familie' fungiert als
 // generische „Gruppenfahrt" (Standard-Checkout, keine Institutionspflicht). Die
 // übrigen Keys bleiben nur für Bestandsbuchungen/Backend-Kompatibilität im Typ.
 const SELECTABLE_PURPOSE_KEYS = ["verein", "schul", "klasse", "familie"] as const;
-const PRIVATE_SUB_KEYS = ["jga", "geburtstag", "hochzeit", "sonstiges"] as const;
-type PrivateSubKey = (typeof PRIVATE_SUB_KEYS)[number];
 
-// Erzeugt aus den strukturierten Anlass-Feldern den String fuers DB-Feld
-// `purpose`. Locale-Labels kommen aus dem Booking-Flow-Copy ("tt"), damit
-// der Manager den lesbaren Anlass sieht. Bei "privat" wird der Grund
-// angehaengt — der Vorstand soll das beim Check sehen koennen.
+// Erzeugt aus der Anlass-Kategorie den String fuers DB-Feld `purpose`.
+// Locale-Labels kommen aus dem Booking-Flow-Copy ("tt"), damit der Manager
+// den lesbaren Anlass sieht.
 function composePurpose(
   category: PurposeKey | "",
-  subtype: PrivateSubKey | "",
-  reason: string,
-  tt: { purposeOpts: Record<PurposeKey, string>; privateSubOpts: Record<PrivateSubKey, string> }
+  tt: { purposeOpts: Record<PurposeKey, string> }
 ): string | null {
   if (!category) return null;
-  const catLabel = tt.purposeOpts[category];
-  if (category !== "privat") return catLabel;
-  const subLabel = subtype ? tt.privateSubOpts[subtype] : "(unbekannt)";
-  const r = reason.trim();
-  return `${catLabel} — ${subLabel}${r ? ` — Grund: ${r}` : ""}`;
+  return tt.purposeOpts[category];
 }
 
 type Step = 0 | 1 | 2 | 3;
@@ -115,20 +104,10 @@ const BF_COPY = {
       schul: "Schulfahrt",
       verein: "Vereinsfahrt",
       firma: "Firmen-/Team-Event",
-      privat: "Private Feier",
       sonstiges: "Sonstiges",
-    },
-    privateSubLabel: "Art der privaten Feier *",
-    privateSubPlaceholder: "Bitte wählen …",
-    privateSubOpts: {
-      jga: "Junggesell:innen-Abschied (JGA)",
-      geburtstag: "Runder Geburtstag",
-      hochzeit: "Hochzeit / Vorfeier",
-      sonstiges: "Andere private Feier",
     },
     privateReasonLabel: "Kurze Beschreibung *",
     privateReasonPlaceholder: "Worum geht es genau? Wer kommt? Was ist geplant?",
-    privateReasonHint: "Private Feiern werden vom Vorstand kurz geprüft. Bitte 1–2 Sätze.",
     purposeReasonHintNonPrivate: "Bitte 1–2 Sätze zur Gruppe / dem Anlass — hilft uns, die Buchung richtig einzuordnen.",
     eventLocationWarn: "Partygruppen bitten wir, eine andere Unterkunft zu suchen.",
     firstName: "Vorname",
@@ -285,20 +264,10 @@ const BF_COPY = {
       schul: "School trip",
       verein: "Club trip",
       firma: "Company / team event",
-      privat: "Private party",
       sonstiges: "Other",
-    },
-    privateSubLabel: "Type of private party *",
-    privateSubPlaceholder: "Please choose …",
-    privateSubOpts: {
-      jga: "Bachelor/ette party (JGA)",
-      geburtstag: "Big-number birthday",
-      hochzeit: "Wedding / pre-wedding",
-      sonstiges: "Other private party",
     },
     privateReasonLabel: "Short description *",
     privateReasonPlaceholder: "What is it exactly? Who's coming? What's planned?",
-    privateReasonHint: "Private parties are briefly reviewed by the board. Just 1–2 sentences.",
     purposeReasonHintNonPrivate: "Just 1–2 sentences about the group / occasion — helps us put the booking in context.",
     eventLocationWarn: "Party groups: please look for another accommodation.",
     firstName: "First name",
@@ -451,20 +420,10 @@ const BF_COPY = {
       schul: "Schoolreis",
       verein: "Verenigingsreis",
       firma: "Bedrijf / team-event",
-      privat: "Privéfeest",
       sonstiges: "Anders",
-    },
-    privateSubLabel: "Soort privéfeest *",
-    privateSubPlaceholder: "Maak een keuze …",
-    privateSubOpts: {
-      jga: "Vrijgezellenfeest (JGA)",
-      geburtstag: "Mijlpaal-verjaardag",
-      hochzeit: "Bruiloft / vooravond",
-      sonstiges: "Ander privéfeest",
     },
     privateReasonLabel: "Korte beschrijving *",
     privateReasonPlaceholder: "Waar gaat het precies om? Wie komen er? Wat is er gepland?",
-    privateReasonHint: "Privéfeesten worden kort door het bestuur beoordeeld. 1–2 zinnen volstaan.",
     purposeReasonHintNonPrivate: "1–2 zinnen over de groep / aanleiding — helpt ons de boeking in context te plaatsen.",
     eventLocationWarn: "Feestgroepen verzoeken we vriendelijk een andere accommodatie te zoeken.",
     firstName: "Voornaam",
@@ -630,9 +589,8 @@ export const BookingFlow = ({
   // Entscheidung). soloUse bleibt fix auf false, damit kein Aufschlag entsteht
   // und der Wert für Pricing/Action-Kompatibilität vorhanden ist.
   const soloUse = false;
-  // Anlass — Pflicht-Dropdown. Bei "privat" werden Subtyp + freier Grund erforderlich.
+  // Anlass — Pflicht-Dropdown.
   const [purposeCategory, setPurposeCategory] = useState<PurposeKey | "">("");
-  const [purposeSubtype, setPurposeSubtype] = useState<PrivateSubKey | "">("");
   const [purposeReason, setPurposeReason] = useState("");
 
   const [customerType, setCustomerType] = useState<"privat" | "mitglied" | "verein" | "firma">(
@@ -710,13 +668,12 @@ export const BookingFlow = ({
   }, [arrival, departure, datesValid, blockedSet]);
 
   const canGoStep1 = datesValid && personsValid && !rangeBlocked;
-  // Step 2: Anlass ist Pflicht. Bei "privat" zusaetzlich Subtyp. Grund-Pflichtfeld
-  // (min. 20 Z.) fuer ALLE Anlaesse AUSSER Klassenfahrt — gibt dem Vorstand Kontext
-  // und schreckt missbraeuchliche Anmeldungen ab.
+  // Step 2: Anlass ist Pflicht. Grund-Pflichtfeld (min. 20 Z.) fuer ALLE
+  // Anlaesse AUSSER Klassenfahrt — gibt dem Vorstand Kontext und schreckt
+  // missbraeuchliche Anmeldungen ab.
   const reasonRequired = !!purposeCategory && purposeCategory !== "klasse";
-  const subtypeValid = purposeCategory !== "privat" || !!purposeSubtype;
   const reasonValid = !reasonRequired || purposeReason.trim().length >= 20;
-  const purposeValid = !!purposeCategory && subtypeValid && reasonValid;
+  const purposeValid = !!purposeCategory && reasonValid;
   const canGoStep2 = breakdown !== null && purposeValid;
 
   // Institutions-Feld: Pflicht bei Schul-/Gruppen-/Firmen-Anlaessen.
@@ -766,11 +723,8 @@ export const BookingFlow = ({
         street: street.trim() || null,
         zip: zip.trim() || null,
         city: city.trim() || null,
-        purpose: composePurpose(purposeCategory, purposeSubtype, purposeReason, tt) ?? "",
+        purpose: composePurpose(purposeCategory, tt) ?? "",
         purposeCategory: (purposeCategory || undefined) as PurposeKey | undefined,
-        purposeSubtypeLabel:
-          purposeCategory === "privat" && purposeSubtype ? tt.privateSubOpts[purposeSubtype] : null,
-        purposeReason: purposeCategory && purposeCategory !== "klasse" ? purposeReason.trim() || null : null,
         customerMessage: customerMessage.trim() || null,
         discountCode:
           discountState.status === "valid" ? discountState.code : discountCode.trim() || null,
@@ -779,13 +733,6 @@ export const BookingFlow = ({
       });
       if (!res.ok) {
         setError(res.error);
-        return;
-      }
-      // Phase B: Bei Private Feier landet die Buchung erst in der Vorstands-
-      // Prüfung — kein Stripe-Redirect.
-      if ("requiresReview" in res && res.requiresReview) {
-        track("booking_review_requested", { nights: breakdown?.nights, purpose: purposeCategory || null });
-        window.location.href = `/buchen/pruefung?b=${encodeURIComponent(res.bookingNumber)}`;
         return;
       }
       if ("checkoutUrl" in res && res.checkoutUrl) {
@@ -906,38 +853,18 @@ export const BookingFlow = ({
               onChange={(e) => {
                 const v = e.target.value as PurposeKey;
                 setPurposeCategory(v);
-                // Felder leeren wenn nicht mehr "privat"
-                if (v !== "privat") {
-                  setPurposeSubtype("");
-                  setPurposeReason("");
-                }
+                if (v === "klasse") setPurposeReason("");
               }}
               required
               options={SELECTABLE_PURPOSE_KEYS.map((k) => ({ value: k, label: tt.purposeOpts[k] }))}
             />
-
-            {purposeCategory === "privat" && (
-              <Select
-                id="privateSub"
-                label={tt.privateSubLabel}
-                placeholder={tt.privateSubPlaceholder}
-                value={purposeSubtype}
-                onChange={(e) => setPurposeSubtype(e.target.value as PrivateSubKey)}
-                required
-                options={PRIVATE_SUB_KEYS.map((k) => ({ value: k, label: tt.privateSubOpts[k] }))}
-              />
-            )}
 
             {purposeCategory && purposeCategory !== "klasse" && (
               <Textarea
                 id="purposeReason"
                 label={tt.privateReasonLabel}
                 placeholder={tt.privateReasonPlaceholder}
-                hint={
-                  purposeCategory === "privat"
-                    ? tt.privateReasonHint
-                    : tt.purposeReasonHintNonPrivate
-                }
+                hint={tt.purposeReasonHintNonPrivate}
                 value={purposeReason}
                 onChange={(e) => setPurposeReason(e.target.value)}
                 required
