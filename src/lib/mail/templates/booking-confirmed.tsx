@@ -180,9 +180,9 @@ export default function BookingConfirmedEmail({
             </Text>
             <Text style={{ ...text, margin: 0 }}>
               Auch wenn einzelne Teilnehmer kurzfristig ausfallen, bleibt der volle
-              Übernachtungspreis fällig. Unser Tipp: Kalkuliert lieber knapp — zusätzliche
-              Personen könnt ihr bis 15 Tage vor Anreise jederzeit bequem selbst über euer
-              Konto nachbuchen und direkt bezahlen:{" "}
+              Übernachtungspreis fällig. Zusätzliche Personen könnt ihr bis 15 Tage vor
+              Anreise jederzeit bequem selbst über euer Konto nachbuchen und direkt
+              bezahlen:{" "}
               <a href={`${baseUrl}/konto`} style={{ color: "#2F4A35" }}>
                 {baseUrl}/konto
               </a>

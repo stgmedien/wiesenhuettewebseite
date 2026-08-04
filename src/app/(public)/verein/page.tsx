@@ -159,7 +159,7 @@ const COPY: Record<Locale, Copy> = {
       { year: "1960", title: "Anbau Seitentrakt", body: "3.650 ehrenamtliche Arbeitsstunden der Vereinsmitglieder." },
       { year: "1968", title: "Heizungsanlage", body: "Die Skibusse befördern 453 Personen nach Langewiese — ein Jahr später schon 661." },
       { year: "1972", title: "Grundstückskauf", body: "Etwa 2.000 m² inklusive Hang." },
-      { year: "1986", title: "Letzter Erweiterungsbau", body: "Seitdem 33 Schlafplätze in 5 Schlafzimmern, 2 Aufenthaltsräume, voll ausgestattete Küche, Sanitäranlagen, Skikeller." },
+      { year: "1986", title: "Letzter Erweiterungsbau", body: "Seitdem 33 Schlafplätze in 5 Schlafzimmern, Esszimmer und Wohnzimmer, voll ausgestattete Küche, Sanitäranlagen, Skikeller." },
       { year: "Heute", title: "Verein in Bewegung", body: "Skigymnastik, Vereinsfahrten, Renovierungswochenenden, ESG-Projekte — getragen von Ehrenamt und Generationen." },
     ],
     member: {

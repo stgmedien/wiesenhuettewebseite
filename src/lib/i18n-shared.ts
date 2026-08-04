@@ -66,7 +66,7 @@ const DE: Record<string, string> = {
   "home.hero.issueYear": "Seit 1956",
   "home.intro.eyebrow": "Was die Wiesenhütte ist",
   "home.intro.h2": "Keine Designunterkunft. Eine echte Vereinshütte.",
-  "home.intro.p1": "Verwittertes Holz, robuste Etagenbetten, eine Küche zum Selbstkochen, zwei Aufenthaltsräume und ein Skikeller voller Winterspuren.",
+  "home.intro.p1": "Verwittertes Holz, robuste Etagenbetten, eine Küche zum Selbstkochen, Esszimmer und Wohnzimmer, ein Skikeller voller Winterspuren.",
   "home.intro.p2": "Seit 1956 am Hang unterhalb von Langewiese — gebaut von Vereinsmitgliedern in Eigenleistung, mehrfach erweitert, getragen von Generationen. Ein Ort für Gruppen, die nicht nur übernachten wollen, sondern zusammen kochen, wandern, an der Feuerstelle sitzen.",
   "home.features.eyebrow": "Auf einen Blick",
   "home.features.h2": "Was Euch hier erwartet.",
