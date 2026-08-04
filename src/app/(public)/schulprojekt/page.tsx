@@ -829,7 +829,7 @@ const FAQS = [
   },
   {
     q: "Was soll mein Kind mitbringen?",
-    a: "Feste Schuhe, wetterfeste Kleidung (Sauerland ist Sauerland), Schlafsack oder Bettzeug, Handtücher, Toilettenartikel. Die genaue Packliste bekommt Ihr rechtzeitig von der Klassenleitung — die Hütte stellt Küche, Bettengestelle und Aufenthaltsräume, der Rest kommt mit.",
+    a: "Feste Schuhe, wetterfeste Kleidung (Sauerland ist Sauerland), Schlafsack oder Bettzeug, Handtücher, Toilettenartikel. Die genaue Packliste bekommt Ihr rechtzeitig von der Klassenleitung — die Hütte stellt Küche, Bettengestelle, Esszimmer und Wohnzimmer, der Rest kommt mit.",
   },
   {
     q: "Gibt es Handyempfang oder WLAN an der Hütte?",

@@ -227,6 +227,8 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
               bookingNumber: booking.bookingNumber,
               amountCents,
               dateFormatted: formatDateLong(new Date()),
+              arrival: formatDateLong(booking.arrival),
+              baseUrl,
             }),
           });
         } catch (err) {

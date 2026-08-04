@@ -230,9 +230,10 @@ export default function BookingConfirmedEmail({
             Was als Nächstes passiert
           </Heading>
           <Text style={text}>
-            Eine Woche vor eurer Anreise schicken wir euch alle Anfahrtsdetails, die Hausordnung
-            und Infos zur Schlüsselübergabe. Falls ihr vorher Fragen habt, antwortet einfach auf
-            diese Mail.
+            Etwa 14 Tage vor eurer Anreise ziehen wir automatisch die Restzahlung ein und
+            schicken euch dabei die Hausordnung-Erinnerung und Infos zur Schlüsselübergabe. Eure
+            Kurkarten kommen separat, sobald sie fertig sind. Falls ihr vorher Fragen habt,
+            antwortet einfach auf diese Mail.
           </Text>
 
           <Section

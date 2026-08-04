@@ -5,14 +5,15 @@
  * Lauf:  npx tsx --env-file=.env.local scripts/send-journey-mails.ts
  *
  * Reihenfolge = chronologischer Buchungsweg eines Gastes:
- *   1. welcome            – Buchungseingang + Konto-Zugang
- *   2. magic-link         – Login-Link fürs Kundenkonto
- *   3. booking-confirmed  – Buchungsbestätigung + Mietvertrag (§1–§9) nach Zahlung
- *   4. payment-reminder   – Erinnerung Restzahlung
- *   5. arrival-info       – Anreise-Infos
- *   6. booking-cancelled  – Stornierung
- *   7. deposit-hold       – Kaution einbehalten
- *   8. deposit-refunded   – Kaution zurückerstattet + Feedback-Einladung
+ *   1. welcome              – Buchungseingang + Konto-Zugang
+ *   2. magic-link           – Login-Link fürs Kundenkonto
+ *   3. booking-confirmed    – Buchungsbestätigung + Mietvertrag (§1–§9) nach Zahlung
+ *   4. payment-reminder     – Erinnerung Restzahlung (T-21)
+ *   5. restzahlung-confirmed – Restzahlung bestätigt + Anreise-Infos (T-14)
+ *   6. kurkarten-ready      – Kurkarten sind da (event-getrieben, kein fester Tag)
+ *   7. booking-cancelled    – Stornierung
+ *   8. deposit-hold         – Kaution einbehalten
+ *   9. deposit-refunded     – Kaution zurückerstattet + Feedback-Einladung
  */
 
 import { sendMail } from "@/lib/mail/send";
@@ -20,7 +21,8 @@ import WelcomeEmail from "@/lib/mail/templates/welcome";
 import MagicLinkEmail from "@/lib/mail/templates/magic-link";
 import BookingConfirmedEmail from "@/lib/mail/templates/booking-confirmed";
 import PaymentReminderEmail from "@/lib/mail/templates/payment-reminder";
-import ArrivalInfoEmail from "@/lib/mail/templates/arrival-info";
+import RestzahlungConfirmedEmail from "@/lib/mail/templates/restzahlung-confirmed";
+import KurkartenReadyEmail from "@/lib/mail/templates/kurkarten-ready";
 import BookingCancelledEmail from "@/lib/mail/templates/booking-cancelled";
 import DepositHoldEmail from "@/lib/mail/templates/deposit-hold";
 import DepositRefundedEmail from "@/lib/mail/templates/deposit-refunded";
@@ -107,17 +109,24 @@ const jobs: { name: string; subject: string; react: React.ReactElement }[] = [
     }),
   },
   {
-    name: "arrival-info",
-    subject: `${P} Anreise-Infos WH-TEST-0001`,
-    react: ArrivalInfoEmail({
+    name: "restzahlung-confirmed",
+    subject: `${P} Zahlung bestätigt WH-TEST-0001`,
+    react: RestzahlungConfirmedEmail({
+      guestName: "Max Mustermann",
+      bookingNumber: "WH-TEST-0001",
+      amountCents: 57500,
+      dateFormatted: "6. Februar 2026",
+      arrival: "20.02.2026",
+      baseUrl: BASE,
+    }),
+  },
+  {
+    name: "kurkarten-ready",
+    subject: `${P} Kurkarten sind da WH-TEST-0001`,
+    react: KurkartenReadyEmail({
       firstName: "Max",
       bookingNumber: "WH-TEST-0001",
       arrival: "20.02.2026",
-      departure: "23.02.2026",
-      persons: 18,
-      nights: 3,
-      baseUrl: BASE,
-      kurkartenAttached: true,
     }),
   },
   {

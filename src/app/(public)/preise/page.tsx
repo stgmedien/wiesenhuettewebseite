@@ -137,7 +137,7 @@ const COPY: Record<Locale, Copy> = {
       "Energie & Heizung — seit 2026 ohne Zuschlag",
       "Voll ausgestattete Selbstversorger-Küche",
       "33 Schlafplätze in 5 Zimmern",
-      "Aufenthaltsräume, Skikeller, Feuerstelle",
+      "Esszimmer und Wohnzimmer, Skikeller, Feuerstelle",
     ],
     examplesHeading: "So rechnet sich das",
     examplesLead:

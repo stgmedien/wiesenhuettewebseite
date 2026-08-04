@@ -654,19 +654,34 @@ export const DOC_SECTIONS: DocSection[] = [
           head={["Trigger", "Template", "Inhalt + Effekt"]}
           rows={[
             [
+              "T-21",
+              "payment_reminder",
+              "Erinnerung an die Restzahlung, eine Woche vor dem automatischen Einzug bei T-14.",
+            ],
+            [
               "T-14",
-              "payment-reminder",
-              "Restzahlung in 14 Tagen, mit Hinweis auf automatischen Einzug bei T-7",
+              "restzahlung-confirmed",
+              "Automatischer Off-Session-Einzug (Restzahlung + Kaution + Kurtaxe) wird versucht. Bei Erfolg: Zahlungsbestätigung inkl. Adresse, Hausordnung-Erinnerung, Ankunftszeit-Hinweis — dieselbe Mail dient als \"Anreise-Info\".",
+            ],
+            [
+              "T-14 (Altsystem)",
+              "restzahlung_request_manual",
+              "Nur für Buchungen mit dem 100-€-Anzahlung-Marker: frischer Stripe-Checkout-Link statt Auto-Einzug.",
             ],
             [
               "T-7",
-              "arrival-info",
-              "Anschrift, Anfahrt (Auto + ÖPNV), Packliste. Plus: Off-Session-Charge der Restzahlung wird versucht.",
+              "huettenwart_notice",
+              "Nur intern an Toni Klauke — Gast bekommt hier keine eigene Mail mehr (Inhalte stecken in restzahlung-confirmed bei T-14).",
             ],
             [
-              "T+5",
-              "review-request",
-              "Bewertungs-Mail mit Link zur Buchung. Triggert nur, wenn Status='abgereist'",
+              "Event (Kurkarten-Upload)",
+              "kurkarten-ready",
+              "Sobald Dana die Kurkarten-PDF hochlädt, geht sie sofort mit dieser Mail an den Gast raus — unabhängig vom Anreisedatum.",
+            ],
+            [
+              "T+14 (nach Abreise)",
+              "deposit-refunded",
+              "Kaution-Rückerstattung, inkl. Feedback-Einladung (wenn noch kein feedback_entries-Eintrag existiert).",
             ],
           ]}
         />
@@ -680,9 +695,9 @@ export const DOC_SECTIONS: DocSection[] = [
         </P>
         <Tip>
           Falls Du eine bereits versendete Mail manuell erneut auslösen willst
-          (z. B. arrival-info weil sich Daten geändert haben): den entsprechenden
-          <Code>email_log</Code>-Eintrag löschen → beim nächsten Cron-Lauf wird
-          die Mail erneut versendet.
+          (z. B. restzahlung-confirmed weil sich Daten geändert haben): den
+          entsprechenden <Code>email_log</Code>-Eintrag löschen → beim nächsten
+          Cron-Lauf wird die Mail erneut versendet.
         </Tip>
       </>
     ),

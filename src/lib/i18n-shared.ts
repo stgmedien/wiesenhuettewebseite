@@ -83,7 +83,7 @@ const DE: Record<string, string> = {
   "home.feature.4.title": "Küche",
   "home.feature.4.body": "Voll ausgestattet — zwei Herde, Backofen, Spülmaschine, ausreichend Geschirr für Gruppen.",
   "home.feature.5.eye": "Drinnen",
-  "home.feature.5.title": "Zwei Aufenthaltsräume",
+  "home.feature.5.title": "Esszimmer und Wohnzimmer",
   "home.feature.5.body": "Esszimmer mit Platz für die ganze Gruppe und ein zweiter Raum für Spiele, Projekte, Gespräche.",
   "home.feature.6.eye": "Draußen",
   "home.feature.6.title": "Feuerstelle & Freisitz",
