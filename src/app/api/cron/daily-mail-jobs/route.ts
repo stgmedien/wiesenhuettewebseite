@@ -26,7 +26,6 @@ import MailFailureDigestEmail from "@/lib/mail/templates/mail-failure-digest";
 import RestzahlungConfirmedEmail from "@/lib/mail/templates/restzahlung-confirmed";
 import { getUnresolvedMailFailures } from "@/lib/mail-log";
 import { findMailTemplateMeta } from "@/lib/automatic-mail-templates";
-import { buildKurkartenFilename } from "@/lib/kurkarten";
 import {
   getOrCreateDepositCheckout,
   SCHOOL_DEPOSIT_DUE_DAYS,
@@ -528,7 +527,10 @@ export async function GET(req: Request) {
   // Nur noch intern — die Gast-Mail (frueher "arrival_info") ist entfallen,
   // ihre Inhalte (Adresse, Hausordnung-Erinnerung) stecken jetzt in der
   // restzahlung-confirmed-Mail bei T-14. Toni bekommt seine Erinnerung
-  // weiterhin eine Woche vor Anreise, unabhaengig davon.
+  // weiterhin eine Woche vor Anreise, unabhaengig davon. Kurkarten +
+  // Feuerwehr-Meldeliste haengen hier NICHT mehr dran — die bekommt Toni
+  // automatisch sofort beim Kurkarten-Upload (siehe kurkarten-upload/
+  // route.ts), unabhaengig vom Anreisedatum.
   const t7 = isoDayOffset(7);
   const t7Bookings = await db
     .select()
@@ -541,38 +543,6 @@ export async function GET(req: Request) {
     if (!customer) continue;
     if (await alreadySent(b.id, "huettenwart_notice")) continue;
 
-    // Kurkarten-Sammel-PDF + Feuerwehr-Meldeliste (falls bis T-7 hochgeladen/
-    // erzeugt) fuer Toni zum Ausdrucken.
-    const sharedAttachments: { filename: string; content: Buffer; contentType: string }[] = [];
-    if (b.kurkartenPdfUrl) {
-      try {
-        const pdfRes = await fetch(b.kurkartenPdfUrl);
-        if (pdfRes.ok) {
-          sharedAttachments.push({
-            filename: buildKurkartenFilename(customer.lastName, b.arrival),
-            content: Buffer.from(await pdfRes.arrayBuffer()),
-            contentType: "application/pdf",
-          });
-        }
-      } catch (err) {
-        console.error("[cron] Kurkarten-PDF-Abruf fehlgeschlagen:", err);
-      }
-    }
-    if (b.feuerwehrListePdfUrl) {
-      try {
-        const pdfRes = await fetch(b.feuerwehrListePdfUrl);
-        if (pdfRes.ok) {
-          sharedAttachments.push({
-            filename: `Feuerwehr-Meldeliste-${b.bookingNumber}.pdf`,
-            content: Buffer.from(await pdfRes.arrayBuffer()),
-            contentType: "application/pdf",
-          });
-        }
-      } catch (err) {
-        console.error("[cron] Feuerwehr-Meldeliste-Abruf fehlgeschlagen:", err);
-      }
-    }
-
     try {
       await sendMail({
         to: HUETTENWART_EMAIL,
@@ -580,7 +550,6 @@ export async function GET(req: Request) {
         subject: `In 7 Tagen: Gruppe an der Wiesenhütte — ${b.bookingNumber}`,
         template: "huettenwart_notice",
         bookingId: b.id,
-        attachments: sharedAttachments.length > 0 ? sharedAttachments : undefined,
         react: HuettenwartNoticeEmail({
           bookingNumber: b.bookingNumber,
           guestName: `${customer.firstName} ${customer.lastName}`.trim(),
