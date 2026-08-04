@@ -580,7 +580,8 @@ export async function GET(req: Request) {
     }
 
     // Hüttenwart-Benachrichtigung (Toni): gleiche T-7-Logik, eigene
-    // Idempotenz. Enthält Portal-Link zur Buchung für Ansicht + Abnahme.
+    // Idempotenz. Rein informativ — Toni hat keinen Manager-Account, ein
+    // Portal-Link wäre für ihn nicht nutzbar (Login-Pflicht).
     if (!(await alreadySent(b.id, "huettenwart_notice"))) {
       try {
         await sendMail({
@@ -599,7 +600,6 @@ export async function GET(req: Request) {
             persons: b.persons,
             nights: b.nights,
             purpose: b.purpose,
-            managerUrl: `${BASE_URL}/m/buchungen/${b.id}`,
           }),
         });
         stats.huettenwartNoticeSent++;

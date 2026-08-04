@@ -7,7 +7,6 @@ import {
   Preview,
   Section,
   Text,
-  Button as EmailButton,
 } from "@react-email/components";
 
 type Props = {
@@ -19,7 +18,6 @@ type Props = {
   persons: number;
   nights: number;
   purpose?: string | null;
-  managerUrl: string;
 };
 
 const main = { backgroundColor: "#F7F7F2", padding: "40px 0" };
@@ -55,17 +53,6 @@ const text = {
   margin: "0 0 12px 0",
 };
 const muted = { ...text, color: "#5b5b56", fontSize: "14px" };
-const button = {
-  backgroundColor: "#2F4A35",
-  color: "#F7F7F2",
-  fontFamily: "Inter, system-ui, sans-serif",
-  fontSize: "16px",
-  fontWeight: 600,
-  padding: "14px 24px",
-  borderRadius: "14px",
-  textDecoration: "none",
-  display: "inline-block",
-};
 
 export default function HuettenwartNoticeEmail({
   bookingNumber,
@@ -76,7 +63,6 @@ export default function HuettenwartNoticeEmail({
   persons,
   nights,
   purpose,
-  managerUrl,
 }: Props) {
   return (
     <Html>
@@ -113,26 +99,8 @@ export default function HuettenwartNoticeEmail({
             ) : null}
           </Section>
 
-          <Text style={text}>
-            Über das Portal kannst Du Dir die Buchung im Detail ansehen und die Übergabe (Check-in)
-            sowie die Abnahme (Check-out) direkt dokumentieren:
-          </Text>
-
-          <Section style={{ textAlign: "center", margin: "24px 0" }}>
-            <EmailButton href={managerUrl} style={button}>
-              Buchung & Abnahme im Portal öffnen
-            </EmailButton>
-          </Section>
-
           <Text style={muted}>
-            Falls der Button nicht funktioniert, hier der direkte Link:
-            <br />
-            <a href={managerUrl}>{managerUrl}</a>
-          </Text>
-
-          <Text style={muted}>
-            Hinweis: Für die Ansicht im Portal musst Du als Manager angemeldet sein. Fragen? Einfach
-            auf diese Mail antworten.
+            Fragen? Einfach auf diese Mail antworten.
           </Text>
         </Container>
       </Body>
