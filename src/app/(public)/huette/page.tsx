@@ -60,7 +60,7 @@ type Copy = {
 const COPY: Record<Locale, Copy> = {
   de: {
     hero: { eyebrow: "Die Hütte", h1l1: "Echtes Hüttenleben.", h1l2: "Selbstversorgung." },
-    facts: { sleeps: "Schlafplätze", rooms: "Schlafzimmer", lounges: "Aufenthaltsräume", occupancy: "Personen Belegung" },
+    facts: { sleeps: "Schlafplätze", rooms: "Schlafzimmer", lounges: "Gemeinschaftsräume", occupancy: "Personen Belegung" },
     desc: {
       eyebrow: "Beschreibung",
       h2: "Zwei Vollgeschosse, Dachboden, Untergeschoss.",

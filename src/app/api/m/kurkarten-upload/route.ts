@@ -7,6 +7,9 @@ import { eq } from "drizzle-orm";
 import { buildKurkartenFilename } from "@/lib/kurkarten";
 import { extractNamesFromKurkartenPdf } from "@/lib/kurkarten-names";
 import { generateFeuerwehrListePdf } from "@/lib/generate-feuerwehr-liste";
+import { sendMail } from "@/lib/mail/send";
+import KurkartenReadyEmail from "@/lib/mail/templates/kurkarten-ready";
+import { formatDateLong } from "@/lib/utils";
 
 async function requireManager() {
   const session = await auth();
@@ -35,7 +38,7 @@ export async function POST(req: NextRequest) {
   }
 
   const [booking] = await db
-    .select({ arrival: bookings.arrival, customerId: bookings.customerId })
+    .select({ arrival: bookings.arrival, customerId: bookings.customerId, bookingNumber: bookings.bookingNumber })
     .from(bookings)
     .where(eq(bookings.id, bookingId))
     .limit(1);
@@ -43,7 +46,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Buchung nicht gefunden" }, { status: 404 });
   }
   const [customer] = booking.customerId
-    ? await db.select({ lastName: customers.lastName }).from(customers).where(eq(customers.id, booking.customerId)).limit(1)
+    ? await db
+        .select({ firstName: customers.firstName, lastName: customers.lastName, email: customers.email })
+        .from(customers)
+        .where(eq(customers.id, booking.customerId))
+        .limit(1)
     : [];
 
   const displayName = buildKurkartenFilename(customer?.lastName ?? "Gast", booking.arrival);
@@ -85,6 +92,35 @@ export async function POST(req: NextRequest) {
         : { kurkartenPdfUrl: blob.url, feuerwehrNames: suggestedNames }
     )
     .where(eq(bookings.id, bookingId));
+
+  // Kurkarten-Zustellung an den Gast ist event-getrieben statt an einen
+  // festen Tag gebunden (Dana laedt sie hoch, wann immer sie vom AVS-Portal
+  // fertig sind) — anders als frueher (T-7-Sammel-Mail) kommt die PDF jetzt
+  // sofort bei diesem Upload an, egal wie viele Tage das noch vor Anreise ist.
+  if (customer?.email) {
+    try {
+      await sendMail({
+        to: customer.email,
+        subject: `Eure Kurkarten sind da — Buchung ${booking.bookingNumber}`,
+        template: "kurkarten-ready",
+        bookingId,
+        attachments: [
+          {
+            filename: displayName,
+            content: Buffer.from(await file.arrayBuffer()),
+            contentType: "application/pdf",
+          },
+        ],
+        react: KurkartenReadyEmail({
+          firstName: customer.firstName,
+          bookingNumber: booking.bookingNumber,
+          arrival: formatDateLong(booking.arrival),
+        }),
+      });
+    } catch (err) {
+      console.error("[kurkarten-upload] kurkarten-ready mail failed:", err);
+    }
+  }
 
   return NextResponse.json({ url: blob.url, suggestedNames, feuerwehrListeUrl });
 }

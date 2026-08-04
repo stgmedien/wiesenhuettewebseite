@@ -13,7 +13,6 @@ import { and, eq, gte, lte, sql } from "drizzle-orm";
 import { stripe } from "@/lib/stripe";
 import { sendMail } from "@/lib/mail/send";
 import PaymentReminderEmail from "@/lib/mail/templates/payment-reminder";
-import ArrivalInfoEmail from "@/lib/mail/templates/arrival-info";
 import BirthdayEmail from "@/lib/mail/templates/birthday";
 import SchoolDepositDueEmail from "@/lib/mail/templates/school-deposit-due";
 import SchoolDepositWarningEmail from "@/lib/mail/templates/school-deposit-warning";
@@ -107,7 +106,6 @@ export async function GET(req: Request) {
 
   const stats = {
     paymentReminderSent: 0,
-    arrivalInfoSent: 0,
     huettenwartNoticeSent: 0,
     birthdaySent: 0,
     autoChargeSucceeded: 0,
@@ -385,6 +383,8 @@ export async function GET(req: Request) {
                   bookingNumber: b.bookingNumber,
                   amountCents: chargeCents,
                   dateFormatted: formatDateLong(new Date()),
+                  arrival: formatDateLong(b.arrival),
+                  baseUrl: BASE_URL,
                 }),
               });
             } catch (err) {
@@ -480,13 +480,14 @@ export async function GET(req: Request) {
         // nie einen Stripe-Checkout, bekommt mit dieser Zahlung also
         // erstmals eine hinterlegte Zahlungsmethode. Der Webhook schreibt
         // die PaymentIntent-ID danach auf die Buchung zurück (siehe
-        // handleCheckoutCompleted, kind "nachbelastung").
+        // handleCheckoutCompleted, kind "restzahlung") — das loest zugleich
+        // die automatische restzahlung-confirmed-Mail an den Gast aus.
         customer_creation: "always",
         payment_intent_data: {
           setup_future_usage: "off_session",
           metadata: { bookingId: b.id, bookingNumber: b.bookingNumber },
         },
-        metadata: { bookingId: b.id, bookingNumber: b.bookingNumber, kind: "nachbelastung" },
+        metadata: { bookingId: b.id, bookingNumber: b.bookingNumber, kind: "restzahlung" },
         success_url: `${BASE_URL}/buchen/erfolg?bn=${b.bookingNumber}`,
         cancel_url: `${BASE_URL}/buchen/abbruch?bn=${b.bookingNumber}`,
       });
@@ -523,7 +524,11 @@ export async function GET(req: Request) {
     }
   }
 
-  // ---------- T-7: Anreise-Info-Mail ----------
+  // ---------- T-7: Hüttenwart-Benachrichtigung (Toni) ----------
+  // Nur noch intern — die Gast-Mail (frueher "arrival_info") ist entfallen,
+  // ihre Inhalte (Adresse, Hausordnung-Erinnerung) stecken jetzt in der
+  // restzahlung-confirmed-Mail bei T-14. Toni bekommt seine Erinnerung
+  // weiterhin eine Woche vor Anreise, unabhaengig davon.
   const t7 = isoDayOffset(7);
   const t7Bookings = await db
     .select()
@@ -534,10 +539,10 @@ export async function GET(req: Request) {
       ? (await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1))[0]
       : null;
     if (!customer) continue;
+    if (await alreadySent(b.id, "huettenwart_notice")) continue;
 
     // Kurkarten-Sammel-PDF + Feuerwehr-Meldeliste (falls bis T-7 hochgeladen/
-    // erzeugt) gehen an BEIDE: Toni (zum Ausdrucken) und den Gast (zum
-    // Aufhängen laut Hausordnung) — einmal zentral abrufen, zweimal anhängen.
+    // erzeugt) fuer Toni zum Ausdrucken.
     const sharedAttachments: { filename: string; content: Buffer; contentType: string }[] = [];
     if (b.kurkartenPdfUrl) {
       try {
@@ -568,58 +573,28 @@ export async function GET(req: Request) {
       }
     }
 
-    if (!(await alreadySent(b.id, "arrival_info"))) {
-      try {
-        await sendMail({
-          to: customer.email,
-          subject: `In 7 Tagen: Eure Anreise zur Wiesenhütte (${b.bookingNumber})`,
-          template: "arrival_info",
-          bookingId: b.id,
-          attachments: sharedAttachments.length > 0 ? sharedAttachments : undefined,
-          react: ArrivalInfoEmail({
-            firstName: customer.firstName,
-            bookingNumber: b.bookingNumber,
-            arrival: formatDateLong(b.arrival),
-            departure: formatDateLong(b.departure),
-            persons: b.persons,
-            nights: b.nights,
-            baseUrl: BASE_URL,
-            kurkartenAttached: !!b.kurkartenPdfUrl,
-          }),
-        });
-        stats.arrivalInfoSent++;
-      } catch (err) {
-        console.error("[cron] arrival_info failed:", err);
-      }
-    }
-
-    // Hüttenwart-Benachrichtigung (Toni): gleiche T-7-Logik, eigene
-    // Idempotenz. Rein informativ — Toni hat keinen Manager-Account, ein
-    // Portal-Link wäre für ihn nicht nutzbar (Login-Pflicht).
-    if (!(await alreadySent(b.id, "huettenwart_notice"))) {
-      try {
-        await sendMail({
-          to: HUETTENWART_EMAIL,
-          bcc: HUETTENWART_CC,
-          subject: `In 7 Tagen: Gruppe an der Wiesenhütte — ${b.bookingNumber}`,
-          template: "huettenwart_notice",
-          bookingId: b.id,
-          attachments: sharedAttachments.length > 0 ? sharedAttachments : undefined,
-          react: HuettenwartNoticeEmail({
-            bookingNumber: b.bookingNumber,
-            guestName: `${customer.firstName} ${customer.lastName}`.trim(),
-            guestPhone: customer.phone,
-            arrival: formatDateLong(b.arrival),
-            departure: formatDateLong(b.departure),
-            persons: b.persons,
-            nights: b.nights,
-            purpose: b.purpose,
-          }),
-        });
-        stats.huettenwartNoticeSent++;
-      } catch (err) {
-        console.error("[cron] huettenwart_notice failed:", err);
-      }
+    try {
+      await sendMail({
+        to: HUETTENWART_EMAIL,
+        bcc: HUETTENWART_CC,
+        subject: `In 7 Tagen: Gruppe an der Wiesenhütte — ${b.bookingNumber}`,
+        template: "huettenwart_notice",
+        bookingId: b.id,
+        attachments: sharedAttachments.length > 0 ? sharedAttachments : undefined,
+        react: HuettenwartNoticeEmail({
+          bookingNumber: b.bookingNumber,
+          guestName: `${customer.firstName} ${customer.lastName}`.trim(),
+          guestPhone: customer.phone,
+          arrival: formatDateLong(b.arrival),
+          departure: formatDateLong(b.departure),
+          persons: b.persons,
+          nights: b.nights,
+          purpose: b.purpose,
+        }),
+      });
+      stats.huettenwartNoticeSent++;
+    } catch (err) {
+      console.error("[cron] huettenwart_notice failed:", err);
     }
   }
 
