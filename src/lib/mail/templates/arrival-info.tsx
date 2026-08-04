@@ -71,12 +71,7 @@ export default function ArrivalInfoEmail({
       <Body style={main}>
         <Container style={container}>
           <Text style={eyebrow}>Wiesenhütte · Anreise-Info</Text>
-          <Heading style={heading}>Bald geht&apos;s los.</Heading>
           <Text style={text}>Hallo {firstName},</Text>
-          <Text style={text}>
-            in einer Woche fahrt Ihr zur Wiesenhütte. Hier alles Wichtige für die Anreise auf einen
-            Blick.
-          </Text>
 
           <Section
             style={{
@@ -104,31 +99,6 @@ export default function ArrivalInfoEmail({
           </Heading>
           <Text style={text}>
             Wiesenhütte, Bundesstraße 6, 59955 Winterberg-Langewiese
-          </Text>
-
-          <Heading
-            style={{ ...heading, fontSize: "20px", marginTop: 28, marginBottom: 8 }}
-          >
-            Anfahrt
-          </Heading>
-          <Text style={text}>
-            <strong>Mit dem Auto:</strong> A46 → Abfahrt Bestwig → B480 nach Winterberg →
-            Langewiese. Parkplätze vor der Hütte. Im Winter ggf. Schneeketten erforderlich. Bei
-            unsicheren Bedingungen oben an der Bundesstraße parken und zu Fuß runter.
-          </Text>
-          <Text style={text}>
-            <strong>Mit dem ÖPNV:</strong> ZOB Winterberg, von dort Bus R28 nach Langewiese,
-            Haltestelle „Wiesenhütte&rdquo;.
-          </Text>
-
-          <Heading
-            style={{ ...heading, fontSize: "20px", marginTop: 28, marginBottom: 8 }}
-          >
-            Was Ihr mitbringen solltet
-          </Heading>
-          <Text style={text}>
-            Bettwäsche oder Schlafsack, Handtücher, Hausschuhe, Lebensmittel für die Selbstversorgung,
-            Spülmittel, Geschirrtücher, Müllsäcke. Brennholz ist vor Ort.
           </Text>
 
           <Heading
