@@ -1,5 +1,6 @@
 import {
   Body,
+  Button,
   Container,
   Head,
   Heading,
@@ -18,6 +19,9 @@ type Props = {
   departure: string;
   refundCents: number;
   baseUrl: string;
+  /** Wenn gesetzt, wird eine kurze Feedback-Einladung mit diesem Link
+   * angehängt — ersetzt die frühere eigene Feedback-Mail (T+2). */
+  feedbackUrl?: string;
 };
 
 const main = { backgroundColor: "#F7F7F2", padding: "40px 0" };
@@ -65,6 +69,17 @@ const amount = {
   fontSize: "36px",
   margin: 0,
 };
+const button = {
+  backgroundColor: "#2F4A35",
+  borderRadius: "999px",
+  color: "#ffffff",
+  fontFamily: "Inter, system-ui, sans-serif",
+  fontWeight: 600,
+  fontSize: "15px",
+  padding: "12px 24px",
+  textDecoration: "none",
+  display: "inline-block",
+};
 
 export default function DepositRefundedEmail({
   guestName,
@@ -73,6 +88,7 @@ export default function DepositRefundedEmail({
   departure,
   refundCents,
   baseUrl,
+  feedbackUrl,
 }: Props) {
   return (
     <Html>
@@ -114,6 +130,21 @@ export default function DepositRefundedEmail({
             Wir hoffen, Ihr hattet eine richtig schöne Zeit bei uns in Winterberg und würden uns
             freuen, Euch bald wieder auf der Wiesenhütte begrüßen zu dürfen!
           </Text>
+
+          {feedbackUrl && (
+            <Section style={{ backgroundColor: "#EFE6D8", padding: "20px", borderRadius: "12px", margin: "20px 0" }}>
+              <Text style={{ ...text, fontWeight: 700, margin: "0 0 4px 0" }}>
+                Wie war&apos;s bei Euch?
+              </Text>
+              <Text style={{ ...muted, margin: "0 0 14px 0" }}>
+                Zwei Minuten Feedback helfen uns, die Hütte weiter besser zu machen — wir lesen
+                jede Antwort.
+              </Text>
+              <Button style={button} href={feedbackUrl}>
+                Feedback geben
+              </Button>
+            </Section>
+          )}
 
           <Hr style={{ borderColor: "#C8CEC4", margin: "32px 0 16px" }} />
           <Text style={muted}>

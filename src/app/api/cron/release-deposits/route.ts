@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { warmUpDb } from "@/lib/db/warmup";
-import { bookings, customers, payments, activityLog } from "@/lib/db/schema";
+import { bookings, customers, payments, activityLog, feedbackEntries } from "@/lib/db/schema";
 import { and, eq, lte, gt, sql } from "drizzle-orm";
 import { stripe } from "@/lib/stripe";
 import { sendMail } from "@/lib/mail/send";
@@ -9,6 +9,12 @@ import DepositRefundedEmail from "@/lib/mail/templates/deposit-refunded";
 import { formatDateLong } from "@/lib/utils";
 import { formatEuro } from "@/lib/pricing";
 import { buildInvoicePdfAttachment } from "@/lib/invoice-attachment";
+import {
+  generateFeedbackToken,
+  hashFeedbackToken,
+  feedbackUrl as buildFeedbackUrl,
+  feedbackExpiry,
+} from "@/lib/feedback";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -128,6 +134,29 @@ export async function GET(req: NextRequest) {
           // das PDF fehl, geht die Mail trotzdem ohne Anhang raus.
           const attachment = await buildInvoicePdfAttachment(b.id);
 
+          // Feedback-Einladung an dieselbe Mail hängen statt eigenem Versand
+          // (frühere T+2-Mail) — kein eigener feedback_entries-Eintrag, wenn
+          // schon einer existiert (Idempotenz bei Mehrfach-Cron-Aufrufen).
+          let feedbackLink: string | undefined;
+          const existingFeedback = await db
+            .select({ id: feedbackEntries.id })
+            .from(feedbackEntries)
+            .where(eq(feedbackEntries.bookingId, b.id))
+            .limit(1);
+          if (!existingFeedback[0]) {
+            try {
+              const token = generateFeedbackToken();
+              await db.insert(feedbackEntries).values({
+                bookingId: b.id,
+                tokenHash: hashFeedbackToken(token),
+                expiresAt: feedbackExpiry(),
+              });
+              feedbackLink = buildFeedbackUrl(baseUrl, token);
+            } catch (err) {
+              console.error(`[cron/release-deposits] feedback token failed for ${b.bookingNumber}`, err);
+            }
+          }
+
           try {
             await sendMail({
               to: c.email,
@@ -142,6 +171,7 @@ export async function GET(req: NextRequest) {
                 departure: formatDateLong(b.departure),
                 refundCents: b.depositCents,
                 baseUrl,
+                feedbackUrl: feedbackLink,
               }),
             });
           } catch (mailErr) {

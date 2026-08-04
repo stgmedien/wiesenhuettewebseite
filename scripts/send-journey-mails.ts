@@ -10,10 +10,9 @@
  *   3. booking-confirmed  – Buchungsbestätigung + Mietvertrag (§1–§9) nach Zahlung
  *   4. payment-reminder   – Erinnerung Restzahlung
  *   5. arrival-info       – Anreise-Infos
- *   6. feedback-request   – Feedback nach dem Aufenthalt
- *   7. booking-cancelled  – Stornierung
- *   8. deposit-hold       – Kaution einbehalten
- *   9. deposit-refunded   – Kaution zurückerstattet
+ *   6. booking-cancelled  – Stornierung
+ *   7. deposit-hold       – Kaution einbehalten
+ *   8. deposit-refunded   – Kaution zurückerstattet + Feedback-Einladung
  */
 
 import { sendMail } from "@/lib/mail/send";
@@ -22,7 +21,6 @@ import MagicLinkEmail from "@/lib/mail/templates/magic-link";
 import BookingConfirmedEmail from "@/lib/mail/templates/booking-confirmed";
 import PaymentReminderEmail from "@/lib/mail/templates/payment-reminder";
 import ArrivalInfoEmail from "@/lib/mail/templates/arrival-info";
-import FeedbackRequestEmail from "@/lib/mail/templates/feedback-request";
 import BookingCancelledEmail from "@/lib/mail/templates/booking-cancelled";
 import DepositHoldEmail from "@/lib/mail/templates/deposit-hold";
 import DepositRefundedEmail from "@/lib/mail/templates/deposit-refunded";
@@ -123,15 +121,6 @@ const jobs: { name: string; subject: string; react: React.ReactElement }[] = [
     }),
   },
   {
-    name: "feedback-request",
-    subject: `${P} Wie war euer Aufenthalt?`,
-    react: FeedbackRequestEmail({
-      firstName: "Max",
-      bookingNumber: "WH-TEST-0001",
-      feedbackUrl: `${BASE}/feedback/TESTTOKEN`,
-    }),
-  },
-  {
     name: "booking-cancelled",
     subject: `${P} Stornierung WH-TEST-0001`,
     react: BookingCancelledEmail({
@@ -166,6 +155,7 @@ const jobs: { name: string; subject: string; react: React.ReactElement }[] = [
       departure: "23.02.2026",
       refundCents: 30000,
       baseUrl: BASE,
+      feedbackUrl: `${BASE}/feedback/TESTTOKEN`,
     }),
   },
 ];

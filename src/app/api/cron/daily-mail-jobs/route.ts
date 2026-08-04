@@ -7,7 +7,6 @@ import {
   payments,
   emailLog,
   activityLog,
-  feedbackEntries,
   discountCodes,
 } from "@/lib/db/schema";
 import { and, eq, gte, lte, sql } from "drizzle-orm";
@@ -15,7 +14,6 @@ import { stripe } from "@/lib/stripe";
 import { sendMail } from "@/lib/mail/send";
 import PaymentReminderEmail from "@/lib/mail/templates/payment-reminder";
 import ArrivalInfoEmail from "@/lib/mail/templates/arrival-info";
-import FeedbackRequestEmail from "@/lib/mail/templates/feedback-request";
 import BirthdayEmail from "@/lib/mail/templates/birthday";
 import SchoolDepositDueEmail from "@/lib/mail/templates/school-deposit-due";
 import SchoolDepositWarningEmail from "@/lib/mail/templates/school-deposit-warning";
@@ -41,12 +39,6 @@ import { cancellationFeeForBooking, formatEuro } from "@/lib/pricing";
 import { revalidateTag } from "next/cache";
 import { BOOKING_BLOCKS_TAG } from "@/lib/availability";
 import { formatDateLong } from "@/lib/utils";
-import {
-  generateFeedbackToken,
-  hashFeedbackToken,
-  feedbackUrl,
-  feedbackExpiry,
-} from "@/lib/feedback";
 import crypto from "crypto";
 
 const BIRTHDAY_DISCOUNT_PERCENT = 10;
@@ -117,7 +109,6 @@ export async function GET(req: Request) {
     paymentReminderSent: 0,
     arrivalInfoSent: 0,
     huettenwartNoticeSent: 0,
-    feedbackRequestSent: 0,
     birthdaySent: 0,
     autoChargeSucceeded: 0,
     autoChargeFailed: 0,
@@ -816,59 +807,6 @@ export async function GET(req: Request) {
   // ---------- T-1: Schlüsselübergabe ----------
   // Bewusst ENTFERNT: Die Schlüssel-/Safe-Code-Mail wird nicht mehr
   // automatisch versendet. Schlüsselübergabe wird anderweitig geregelt.
-
-  // ---------- T+2 nach Abreise: Feedback-Anfrage (Token-Mail) ----------
-  // Strukturiertes Survey-Feedback unter /feedback/[token]. Antworten landen
-  // in feedback_entries und werden im Manager-Backend ausgewertet.
-  const tMinus2 = isoDayOffset(-2);
-  const feedbackBookings = await db
-    .select()
-    .from(bookings)
-    .where(
-      and(eq(bookings.departure, tMinus2), eq(bookings.status, "abgereist"))
-    );
-  for (const b of feedbackBookings) {
-    if (await alreadySent(b.id, "feedback_request")) continue;
-    // Sicherstellen, dass nicht schon ein feedback_entry existiert (Idempotenz
-    // bei Mehrfach-Cron-Aufrufen)
-    const existing = await db
-      .select({ id: feedbackEntries.id })
-      .from(feedbackEntries)
-      .where(eq(feedbackEntries.bookingId, b.id))
-      .limit(1);
-    if (existing[0]) continue;
-
-    const customer = b.customerId
-      ? (await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1))[0]
-      : null;
-    if (!customer) continue;
-
-    // Token erzeugen, Hash speichern, Mail versenden
-    const token = generateFeedbackToken();
-    const tokenHash = hashFeedbackToken(token);
-    const expiresAt = feedbackExpiry();
-    try {
-      await db.insert(feedbackEntries).values({
-        bookingId: b.id,
-        tokenHash,
-        expiresAt,
-      });
-      await sendMail({
-        to: customer.email,
-        subject: `Wie war Dein Aufenthalt? — 2 Min. Feedback (${b.bookingNumber})`,
-        template: "feedback_request",
-        bookingId: b.id,
-        react: FeedbackRequestEmail({
-          firstName: customer.firstName,
-          bookingNumber: b.bookingNumber,
-          feedbackUrl: feedbackUrl(BASE_URL, token),
-        }),
-      });
-      stats.feedbackRequestSent++;
-    } catch (err) {
-      console.error("[cron] feedback_request failed:", err);
-    }
-  }
 
   // ---------- Geburtstagsmail mit Discount-Code ----------
   // Tägliche Suche nach Customers, deren birth_date heute Monat+Tag-Match liefert.
