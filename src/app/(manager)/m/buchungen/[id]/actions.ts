@@ -23,7 +23,7 @@ import { resolveBookingTariffs } from "@/lib/pricing-tariffs";
 import { mailTemplates, mailTemplateVersions } from "@/lib/db/schema";
 import { substituteVars } from "@/lib/mail-render";
 import { buildBookingVars } from "@/lib/mail-template-vars";
-import { confirmDepositPayment } from "@/lib/booking-payment-confirmation";
+import { confirmDepositPayment, buildBookingConfirmedEmailProps } from "@/lib/booking-payment-confirmation";
 import { generateFeuerwehrListePdf } from "@/lib/generate-feuerwehr-liste";
 import { buildInvoicePdfAttachment } from "@/lib/invoice-attachment";
 import DepositRefundedEmail from "@/lib/mail/templates/deposit-refunded";
@@ -78,11 +78,9 @@ export async function setBookingStatus(
         await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1)
       )[0];
       if (c?.email) {
-        const baseUrl =
-          process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.wiesenhuette.de";
         if (status === "bestaetigt") {
-          const kautionRows = await db
-            .select({ kind: payments.kind })
+          const pmtRows = await db
+            .select({ kind: payments.kind, amountCents: payments.amountCents })
             .from(payments)
             .where(eq(payments.bookingId, bookingId));
           await sendMail({
@@ -90,20 +88,15 @@ export async function setBookingStatus(
             subject: `Eure Buchung ${b.bookingNumber} ist bestätigt`,
             template: "booking-confirmed",
             bookingId,
-            react: BookingConfirmedEmail({
-              bookingNumber: b.bookingNumber,
-              guestName: `${c.firstName} ${c.lastName}`.trim(),
-              arrival: formatDateLong(b.arrival),
-              departure: formatDateLong(b.departure),
-              nights: b.nights,
-              persons: b.persons,
-              totalCents: b.subtotalCents,
-              depositCents: b.depositCents,
-              kurtaxeCents: b.kurtaxeCents,
-              paidCents: b.paidCents,
-              kautionDueNow: kautionRows.some((p) => p.kind === "kaution"),
-              baseUrl,
-            }),
+            react: BookingConfirmedEmail(
+              buildBookingConfirmedEmailProps({
+                booking: b,
+                customer: c,
+                paidCents: b.paidCents,
+                pmtRows,
+                kautionDueNow: pmtRows.some((p) => p.kind === "kaution"),
+              })
+            ),
           });
         } else {
           await sendMail({

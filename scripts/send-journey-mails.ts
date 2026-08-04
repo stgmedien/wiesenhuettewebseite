@@ -7,21 +7,19 @@
  * Reihenfolge = chronologischer Buchungsweg eines Gastes:
  *   1. welcome            – Buchungseingang + Konto-Zugang
  *   2. magic-link         – Login-Link fürs Kundenkonto
- *   3. booking-confirmed  – Buchungsbestätigung nach Zahlung
- *   4. mietvertrag        – Mietvertrag (PDF-Ersatz im Body)
- *   5. payment-reminder   – Erinnerung Restzahlung
- *   6. arrival-info       – Anreise-Infos
- *   7. feedback-request   – Feedback nach dem Aufenthalt
- *   8. booking-cancelled  – Stornierung
- *   9. deposit-hold       – Kaution einbehalten
- *  10. deposit-refunded   – Kaution zurückerstattet
+ *   3. booking-confirmed  – Buchungsbestätigung + Mietvertrag (§1–§9) nach Zahlung
+ *   4. payment-reminder   – Erinnerung Restzahlung
+ *   5. arrival-info       – Anreise-Infos
+ *   6. feedback-request   – Feedback nach dem Aufenthalt
+ *   7. booking-cancelled  – Stornierung
+ *   8. deposit-hold       – Kaution einbehalten
+ *   9. deposit-refunded   – Kaution zurückerstattet
  */
 
 import { sendMail } from "@/lib/mail/send";
 import WelcomeEmail from "@/lib/mail/templates/welcome";
 import MagicLinkEmail from "@/lib/mail/templates/magic-link";
 import BookingConfirmedEmail from "@/lib/mail/templates/booking-confirmed";
-import MietvertragEmail from "@/lib/mail/templates/mietvertrag";
 import PaymentReminderEmail from "@/lib/mail/templates/payment-reminder";
 import ArrivalInfoEmail from "@/lib/mail/templates/arrival-info";
 import FeedbackRequestEmail from "@/lib/mail/templates/feedback-request";
@@ -64,7 +62,7 @@ const jobs: { name: string; subject: string; react: React.ReactElement }[] = [
   },
   {
     name: "booking-confirmed",
-    subject: `${P} Buchungsbestätigung WH-TEST-0001`,
+    subject: `${P} Buchungsbestätigung + Mietvertrag WH-TEST-0001`,
     react: BookingConfirmedEmail({
       bookingNumber: "WH-TEST-0001",
       guestName: "Max Mustermann",
@@ -78,18 +76,8 @@ const jobs: { name: string; subject: string; react: React.ReactElement }[] = [
       paidCents: 57500,
       kautionDueNow: false,
       baseUrl: BASE,
-    }),
-  },
-  {
-    name: "mietvertrag",
-    subject: `${P} Euer Mietvertrag WH-TEST-0001`,
-    react: MietvertragEmail({
-      bookingNumber: "WH-TEST-0001",
-      arrival: "20.02.2026",
-      departure: "23.02.2026",
-      nights: 3,
       customer,
-      persons: { adults: 12, members: 2, children: 0, pupils: 18, teachers: 2, total: 18 },
+      personsBreakdown: { adults: 12, members: 2, children: 0, pupils: 18, teachers: 2, total: 18 },
       pricing: {
         accommodationCents: 90000,
         energyFlatCents: 15000,
@@ -103,7 +91,6 @@ const jobs: { name: string; subject: string; react: React.ReactElement }[] = [
         prepaymentCents: 57500,
         remainderCents: 57500,
       },
-      kautionDueNow: false,
       signedAt: new Date().toISOString(),
       contractDate: "16. Mai 2026",
     }),

@@ -32,17 +32,9 @@ export const AUTOMATIC_MAIL_TEMPLATES: AutomaticMailTemplate[] = [
   // ---------- Buchung — Gast ----------
   {
     key: "booking-confirmed",
-    label: "Buchungsbestätigung",
+    label: "Buchungsbestätigung + Mietvertrag",
     category: "Buchung — Gast",
-    trigger: "Sofort bei Zahlungseingang (Anzahlung) — Stripe-Webhook oder manuelle Bestätigung im Manager.",
-    audience: "Gast",
-    file: "src/lib/booking-payment-confirmation.ts",
-  },
-  {
-    key: "mietvertrag",
-    label: "Mietvertrag",
-    category: "Buchung — Gast",
-    trigger: "Direkt nach der Buchungsbestätigung, gleicher Auslöser.",
+    trigger: "Sofort bei Zahlungseingang (Anzahlung) — Stripe-Webhook oder manuelle Bestätigung im Manager. Enthält den vollständigen Mietvertrag (§1–§9) im unteren Teil derselben Mail.",
     audience: "Gast",
     file: "src/lib/booking-payment-confirmation.ts",
   },
