@@ -18,6 +18,9 @@ import SchoolDepositDueEmail from "@/lib/mail/templates/school-deposit-due";
 import SchoolDepositWarningEmail from "@/lib/mail/templates/school-deposit-warning";
 import SchoolBookingCancelledEmail from "@/lib/mail/templates/school-booking-cancelled";
 import HuettenwartNoticeEmail from "@/lib/mail/templates/huettenwart-notice";
+import ArrivalReminderEmail from "@/lib/mail/templates/arrival-reminder";
+import HuettenwartArrivalReminderEmail from "@/lib/mail/templates/huettenwart-arrival-reminder";
+import { buildKurkartenFilename } from "@/lib/kurkarten";
 import { HUETTENWART_EMAIL, HUETTENWART_CC } from "@/lib/huettenwart";
 import RestzahlungRequestEmail from "@/lib/mail/templates/restzahlung-request";
 import { MANUAL_REST_MARKER, MANUAL_REST_SENT_MARKER } from "@/lib/payment-markers";
@@ -106,6 +109,7 @@ export async function GET(req: Request) {
   const stats = {
     paymentReminderSent: 0,
     huettenwartNoticeSent: 0,
+    arrivalReminderSent: 0,
     birthdaySent: 0,
     autoChargeSucceeded: 0,
     autoChargeFailed: 0,
@@ -564,6 +568,103 @@ export async function GET(req: Request) {
       stats.huettenwartNoticeSent++;
     } catch (err) {
       console.error("[cron] huettenwart_notice failed:", err);
+    }
+  }
+
+  // ---------- T-3: Letzte Erinnerung vor Anreise ----------
+  // Schliesst die Luecke, die durch den Wegfall der T-7-Gastmail entstanden
+  // ist: "spaetestens 2 Tage vor Anreise Toni anrufen" stand bisher nur in
+  // der T-14-Mail, zu weit vor der eigentlichen Frist. Diese kurze Mail geht
+  // an Gast UND Toni parallel raus und haengt Kurkarten + Feuerwehrliste
+  // nochmal an (falls bis dahin hochgeladen) — als Sicherheitsnetz, falls
+  // die urspruengliche kurkarten-ready-Mail uebersehen wurde.
+  const t3 = isoDayOffset(3);
+  const t3Bookings = await db
+    .select()
+    .from(bookings)
+    .where(and(eq(bookings.arrival, t3), eq(bookings.status, "bezahlt")));
+  for (const b of t3Bookings) {
+    const customer = b.customerId
+      ? (await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1))[0]
+      : null;
+    if (!customer) continue;
+    const guestPending = !(await alreadySent(b.id, "arrival_reminder"));
+    const huettenwartPending = !(await alreadySent(b.id, "huettenwart_arrival_reminder"));
+    if (!guestPending && !huettenwartPending) continue;
+
+    const sharedAttachments: { filename: string; content: Buffer; contentType: string }[] = [];
+    if (b.kurkartenPdfUrl) {
+      try {
+        const pdfRes = await fetch(b.kurkartenPdfUrl);
+        if (pdfRes.ok) {
+          sharedAttachments.push({
+            filename: buildKurkartenFilename(customer.lastName, b.arrival),
+            content: Buffer.from(await pdfRes.arrayBuffer()),
+            contentType: "application/pdf",
+          });
+        }
+      } catch (err) {
+        console.error("[cron] Kurkarten-PDF-Abruf (T-3) fehlgeschlagen:", err);
+      }
+    }
+    if (b.feuerwehrListePdfUrl) {
+      try {
+        const pdfRes = await fetch(b.feuerwehrListePdfUrl);
+        if (pdfRes.ok) {
+          sharedAttachments.push({
+            filename: `Feuerwehr-Meldeliste-${b.bookingNumber}.pdf`,
+            content: Buffer.from(await pdfRes.arrayBuffer()),
+            contentType: "application/pdf",
+          });
+        }
+      } catch (err) {
+        console.error("[cron] Feuerwehr-Meldeliste-Abruf (T-3) fehlgeschlagen:", err);
+      }
+    }
+    const hasAttachments = sharedAttachments.length > 0;
+    const guestName = `${customer.firstName} ${customer.lastName}`.trim();
+
+    if (guestPending) {
+      try {
+        await sendMail({
+          to: customer.email,
+          subject: `In 3 Tagen geht's los — Buchung ${b.bookingNumber}`,
+          template: "arrival_reminder",
+          bookingId: b.id,
+          attachments: hasAttachments ? sharedAttachments : undefined,
+          react: ArrivalReminderEmail({
+            firstName: customer.firstName,
+            bookingNumber: b.bookingNumber,
+            arrival: formatDateLong(b.arrival),
+            hasAttachments,
+          }),
+        });
+        stats.arrivalReminderSent++;
+      } catch (err) {
+        console.error("[cron] arrival_reminder failed:", err);
+      }
+    }
+
+    if (huettenwartPending) {
+      try {
+        await sendMail({
+          to: HUETTENWART_EMAIL,
+          bcc: HUETTENWART_CC,
+          subject: `In 3 Tagen: ${guestName} — ${b.bookingNumber}`,
+          template: "huettenwart_arrival_reminder",
+          bookingId: b.id,
+          attachments: hasAttachments ? sharedAttachments : undefined,
+          react: HuettenwartArrivalReminderEmail({
+            bookingNumber: b.bookingNumber,
+            guestName,
+            guestPhone: customer.phone,
+            arrival: formatDateLong(b.arrival),
+            hasAttachments,
+          }),
+        });
+      } catch (err) {
+        console.error("[cron] huettenwart_arrival_reminder failed:", err);
+      }
     }
   }
 

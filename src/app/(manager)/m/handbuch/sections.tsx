@@ -679,6 +679,11 @@ export const DOC_SECTIONS: DocSection[] = [
               "Sobald Dana die Kurkarten-PDF hochlädt, gehen sofort zwei Mails raus — an den Gast UND an Toni, beide mit Kurkarten + Feuerwehr-Meldeliste im Anhang. Unabhängig vom Anreisedatum und vom Zahlungsstatus.",
             ],
             [
+              "T-3",
+              "arrival_reminder + huettenwart_arrival_reminder",
+              "Letzte Erinnerung: Gast soll Toni die Ankunftszeit mitteilen. Kurkarten + Feuerwehr-Meldeliste nochmal im Anhang (falls bis dahin vorhanden) — Sicherheitsnetz, falls die Upload-Mail übersehen wurde.",
+            ],
+            [
               "T+14 (nach Abreise)",
               "deposit-refunded",
               "Kaution-Rückerstattung, inkl. Feedback-Einladung (wenn noch kein feedback_entries-Eintrag existiert).",

@@ -95,6 +95,14 @@ export const AUTOMATIC_MAIL_TEMPLATES: AutomaticMailTemplate[] = [
     file: "src/app/api/m/kurkarten-upload/route.ts",
   },
   {
+    key: "arrival_reminder",
+    label: "Letzte Erinnerung vor Anreise",
+    category: "Buchung — Gast",
+    trigger: "T-3 (3 Tage vor Anreise) — Bitte, Toni die Ankunftszeit mitzuteilen. Kurkarten + Feuerwehr-Meldeliste nochmal im Anhang, falls bis dahin vorhanden.",
+    audience: "Gast",
+    file: "src/app/api/cron/daily-mail-jobs/route.ts",
+  },
+  {
     key: "deposit-hold",
     label: "Kaution einbehalten",
     category: "Buchung — Gast",
@@ -151,6 +159,14 @@ export const AUTOMATIC_MAIL_TEMPLATES: AutomaticMailTemplate[] = [
     trigger: "Sofort wenn Dana die fertige Kurkarten-PDF hochlädt — kein fester Tag, event-getrieben, gleicher Auslöser wie die Gast-Mail kurkarten-ready. Kurkarten + Feuerwehr-Meldeliste im Anhang.",
     audience: "Toni Klauke + Brandenburg-Team",
     file: "src/app/api/m/kurkarten-upload/route.ts",
+  },
+  {
+    key: "huettenwart_arrival_reminder",
+    label: "Letzte Erinnerung vor Anreise — Hüttenservice",
+    category: "Buchung — Hüttenservice/intern",
+    trigger: "T-3, gleicher Zeitpunkt wie die Erinnerung an den Gast — Hinweis, dass sich der Gast noch melden soll. Kurkarten + Feuerwehr-Meldeliste nochmal im Anhang, falls bis dahin vorhanden.",
+    audience: "Toni Klauke + Brandenburg-Team",
+    file: "src/app/api/cron/daily-mail-jobs/route.ts",
   },
   {
     key: "avs-reminder-internal",
