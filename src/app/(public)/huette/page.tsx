@@ -9,7 +9,7 @@ import { lodgingBusinessSchema } from "@/lib/seo";
 export const metadata = {
   title: "Die Hütte · Wiesenhütte Langewiese",
   description:
-    "33 Schlafplätze in 5 Schlafzimmern, voll ausgestattete Küche, zwei Aufenthaltsräume, Skikeller, Feuerstelle. Selbstversorgerhütte für Gruppen in Langewiese, Hochsauerland.",
+    "33 Schlafplätze in 5 Schlafzimmern, voll ausgestattete Küche, Esszimmer und Wohnzimmer, Skikeller, Feuerstelle. Selbstversorgerhütte für Gruppen in Langewiese, Hochsauerland.",
 };
 
 type Copy = {
@@ -92,7 +92,7 @@ const COPY: Record<Locale, Copy> = {
       og: {
         heading: "Obergeschoss",
         items: [
-          "Aufenthaltsraum mit 4 Tischen",
+          "Wohnzimmer mit 4 Tischen",
           "Gästetoilette",
         ],
       },
@@ -154,7 +154,7 @@ const COPY: Record<Locale, Copy> = {
           highlights: [
             "Naturtraum — 8 Schlafplätze",
             "Sonnenplatz — 4 Schlafplätze",
-            "Aufenthaltsraum mit 4 Tischen",
+            "Wohnzimmer mit 4 Tischen",
             "Gästetoilette",
           ],
         },

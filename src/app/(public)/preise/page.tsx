@@ -14,7 +14,7 @@ import {
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Preise & Tarife · Wiesenhütte",
+  title: "Preise & Kosten · Wiesenhütte",
   description:
     "Was kostet die Wiesenhütte? Transparente Übernachtungspreise (Mitglieder −50 %), Endreinigung und Kaution — mit echten Rechenbeispielen für Vereine, Schulklassen und Familienfeiern.",
 };
@@ -74,7 +74,7 @@ const EXAMPLES: Example[] = [
     persons: { adults: 10 },
     arrival: "2026-09-04",
     departure: "2026-09-06", // 2 Nächte, < 15 → Aufschlag sichtbar
-    title: { de: "Kleine Feier (unter 15)", en: "Small celebration (under 15)", nl: "Klein feest (onder 15)" },
+    title: { de: "Kleine Gruppe (unter 15 Personen)", en: "Small group (under 15 people)", nl: "Kleine groep (onder 15 personen)" },
     who: {
       de: "10 Erwachsene · 2 Nächte",
       en: "10 adults · 2 nights",
@@ -91,6 +91,7 @@ type Copy = {
   rates: { label: string; price: string; sub: string }[];
   flatHeading: string;
   flats: { label: string; value: string; note: string }[];
+  kurtaxeNote: string;
   includedHeading: string;
   included: string[];
   examplesHeading: string;
@@ -130,6 +131,7 @@ const COPY: Record<Locale, Copy> = {
       { label: "Endreinigung", value: e(PRICES.cleaningCents, "de"), note: "Pflicht — ihr reist entspannt ab." },
       { label: "Kaution", value: e(PRICES.depositCents, "de"), note: "Wird nach dem Aufenthalt zurückerstattet." },
     ],
+    kurtaxeNote: `Zusätzlich fällt die Kurtaxe Hochsauerland an: ${e(PRICES.kurtaxeRateCents, "de")} pro Person ab 16 Jahren und Nacht — wir führen sie an die Kurverwaltung Winterberg ab.`,
     includedHeading: "Im Preis enthalten",
     included: [
       "Energie & Heizung — seit 2026 ohne Zuschlag",
@@ -179,6 +181,7 @@ const COPY: Record<Locale, Copy> = {
       { label: "Final cleaning", value: e(PRICES.cleaningCents, "en"), note: "Mandatory — you leave relaxed." },
       { label: "Deposit", value: e(PRICES.depositCents, "en"), note: "Refunded after your stay." },
     ],
+    kurtaxeNote: `The Hochsauerland tourist tax (Kurtaxe) applies on top: ${e(PRICES.kurtaxeRateCents, "en")} per person aged 16+ and night — we pass it on to Winterberg's spa administration.`,
     includedHeading: "Included in the price",
     included: [
       "Energy & heating — no surcharge since 2026",
@@ -228,6 +231,7 @@ const COPY: Record<Locale, Copy> = {
       { label: "Eindschoonmaak", value: e(PRICES.cleaningCents, "nl"), note: "Verplicht — jullie vertrekken ontspannen." },
       { label: "Borg", value: e(PRICES.depositCents, "nl"), note: "Wordt na het verblijf terugbetaald." },
     ],
+    kurtaxeNote: `Daarnaast geldt de toeristenbelasting Hochsauerland (Kurtaxe): ${e(PRICES.kurtaxeRateCents, "nl")} per persoon vanaf 16 jaar en nacht — we dragen die af aan de Kurverwaltung Winterberg.`,
     includedHeading: "Inbegrepen in de prijs",
     included: [
       "Energie & verwarming — sinds 2026 zonder toeslag",
@@ -328,6 +332,7 @@ export default async function PreisePage() {
               </div>
             ))}
           </div>
+          <p className="text-[13px] text-[var(--color-wh-fg-muted)] mt-3 max-w-[520px]">{c.kurtaxeNote}</p>
 
           {/* Pauschalen + Inklusivleistungen */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">

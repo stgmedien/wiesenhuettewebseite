@@ -285,8 +285,8 @@ const COPY: Record<Locale, Copy> = {
     },
     infra: {
       eyebrow: "Im Dorf",
-      h2: "Was Ihr in Lauf-Distanz findet.",
-      lead: "Langewiese ist klein, hat aber alles Notwendige in 200 Metern Umkreis.",
+      h2: "Was Ihr in der Nähe findet.",
+      lead: "Langewiese ist klein — die Bäckerei ist fußläufig, Catering und Klinik sind eine kurze Fahrt entfernt.",
       cards: [
         {
           icon: "bakery",
@@ -482,8 +482,8 @@ const COPY: Record<Locale, Copy> = {
     },
     infra: {
       eyebrow: "In the village",
-      h2: "What you'll find within walking distance.",
-      lead: "Langewiese is small but has everything essential within 200 metres.",
+      h2: "What you'll find nearby.",
+      lead: "Langewiese is small — the bakery is a short walk, catering and the hospital are a short drive.",
       cards: [
         { icon: "bakery", title: "Bakery Gerke", distance: "30 m across", hours: "Mon–Sat 6:30–12:30 · Mon–Fri 15:00–18:00", phone: "+49 2758 280", detail: "Rolls, cake, coffee — plus a small grocery shop next door. Pre-orders for groups possible, just call the evening before. Closed Sundays." },
         { icon: "catering", title: "Gasthof Graberhof", distance: "Hoheleye, 4 km", phone: "+49 2758 284", detail: "Catering for groups, Hohenleye 1, Winterberg-Hoheleye. Delivers to the cabin or you drive over — both work. Mobile: +49 160 7622508." },
@@ -648,8 +648,8 @@ const COPY: Record<Locale, Copy> = {
     },
     infra: {
       eyebrow: "In het dorp",
-      h2: "Wat je op loopafstand vindt.",
-      lead: "Langewiese is klein maar heeft alles wat nodig is binnen 200 meter.",
+      h2: "Wat je in de buurt vindt.",
+      lead: "Langewiese is klein — de bakkerij is te voet, catering en het ziekenhuis zijn een kort ritje verderop.",
       cards: [
         { icon: "bakery", title: "Bakkerij Gerke", distance: "30 m tegenover", hours: "Ma–Za 6:30–12:30 · Ma–Vr 15:00–18:00", phone: "+49 2758 280", detail: "Broodjes, taart, koffie — én een klein levensmiddelenwinkeltje ernaast. Vooraf bestellen voor groepen mogelijk, bel even de avond ervoor. Zondag gesloten." },
         { icon: "catering", title: "Gasthof Graberhof", distance: "Hoheleye, 4 km", phone: "+49 2758 284", detail: "Catering voor groepen, Hohenleye 1, Winterberg-Hoheleye. Levert in de hut of je rijdt erheen — beide kan. Mobiel: +49 160 7622508." },

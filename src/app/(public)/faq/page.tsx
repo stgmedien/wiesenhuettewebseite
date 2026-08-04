@@ -72,9 +72,9 @@ const FAQS: QA[] = [
       nl: "Hoe verloopt de aankomst en sleuteloverdracht?",
     },
     a: {
-      de: "Stimme Deine genaue Ankunftszeit vorab ab. Hüttenwart Toni Klauke (Vorm Rohrbach 1, gleich um die Ecke) empfängt Dich an der Hütte und übergibt die Schlüssel persönlich. Die Kurkarten erhältst Du vorab automatisch per E-Mail.",
-      en: "Arrange your arrival time in advance. Cabin warden Toni Klauke (Vorm Rohrbach 1, just around the corner) welcomes you at the cabin and hands over the keys in person. Your guest cards arrive automatically by email beforehand.",
-      nl: "Stem je aankomsttijd vooraf af. Huttenbeheerder Toni Klauke (Vorm Rohrbach 1, om de hoek) ontvangt je bij de hut en overhandigt de sleutels persoonlijk. De kuurkaarten ontvang je vooraf automatisch per e-mail.",
+      de: "Stimme Deine genaue Ankunftszeit vorab ab. Hüttenwart Toni Klauke (Vorm Rohrbach 1, gleich um die Ecke) empfängt Dich an der Hütte und übergibt die Schlüssel persönlich. Die Kurkarten erhältst Du vorab automatisch per E-Mail. Am Abreisetag muss die Hütte bis 12:00 Uhr geräumt sein.",
+      en: "Arrange your arrival time in advance. Cabin warden Toni Klauke (Vorm Rohrbach 1, just around the corner) welcomes you at the cabin and hands over the keys in person. Your guest cards arrive automatically by email beforehand. On the day of departure, the cabin must be vacated by 12:00 noon.",
+      nl: "Stem je aankomsttijd vooraf af. Huttenbeheerder Toni Klauke (Vorm Rohrbach 1, om de hoek) ontvangt je bij de hut en overhandigt de sleutels persoonlijk. De kuurkaarten ontvang je vooraf automatisch per e-mail. Op de vertrekdag moet de hut uiterlijk om 12:00 uur zijn ontruimd.",
     },
   },
   {

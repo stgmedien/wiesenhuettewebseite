@@ -124,8 +124,7 @@ export function buildPackliste(input: PackInput): PackCategory[] {
       hint: "PFLICHT — In der Hütte sind NUR Kopfkissen vorhanden. Bettdecken werden NICHT gestellt!",
     },
     { name: "Spannbettlaken + Kopfkissenbezug", hint: "Matratzen und Kopfkissen sind vor Ort — Bezüge mitbringen." },
-    { name: "Handtuch (groß)" },
-    { name: "Duschhandtuch" },
+    { name: "Handtuch" },
     { name: "Kulturbeutel (Zahnpasta, Bürste, Shampoo, Deo)" },
     { name: "Sonnencreme", hint: isWinter ? "Auch im Winter (Schnee reflektiert)" : "Mindestens LSF 30" },
   ];
