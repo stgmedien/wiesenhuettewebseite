@@ -96,7 +96,7 @@ type Copy = {
     h2: string;
     lead: string;
     car: { number: string; title: string; body: string; details: string[] };
-    train: { number: string; title: string; body: string; steps: string[] };
+    train: { number: string; title: string; body: string; steps: string[]; scheduleLabel: string };
     bike: { number: string; title: string; body: string; details: string[] };
     arrival: { number: string; title: string; body: string; details: string[] };
   };
@@ -194,6 +194,7 @@ const COPY: Record<Locale, Copy> = {
           "200 m zu Fuß zur Bäckerei Gerke",
           "Direkt gegenüber: Einfahrt zur Wiesenhütte",
         ],
+        scheduleLabel: "Fahrplan R28 (ZWS)",
       },
       bike: {
         number: "03",
@@ -391,6 +392,7 @@ const COPY: Record<Locale, Copy> = {
           "200 m on foot to bakery Gerke",
           "Directly opposite: driveway to the Wiesenhütte",
         ],
+        scheduleLabel: "R28 timetable (ZWS)",
       },
       bike: {
         number: "03",
@@ -557,6 +559,7 @@ const COPY: Record<Locale, Copy> = {
           "200 m lopen naar bakkerij Gerke",
           "Direct tegenover: oprit naar de Wiesenhütte",
         ],
+        scheduleLabel: "Dienstregeling R28 (ZWS)",
       },
       bike: {
         number: "03",
@@ -883,6 +886,8 @@ export default async function LagePage() {
                 title={c.routes.train.title}
                 body={c.routes.train.body}
                 stepsList={c.routes.train.steps}
+                ctaHref="https://www.zws-online.de/fileadmin/contents/2_fahrplaene_liniennetz/2_1_fahrplaene/2_1_3_fahrplantabellen/2_1_3_4_regionalsbuslinien/R28.pdf"
+                ctaLabel={c.routes.train.scheduleLabel}
                 imgSrc="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/2019-04-19_Bahnhof_Winterberg_%28Westf%29_DB-Baureihe_633_109_%281%29.jpg/1280px-2019-04-19_Bahnhof_Winterberg_%28Westf%29_DB-Baureihe_633_109_%281%29.jpg"
                 imgAlt="Bahnhof Winterberg (Westf) mit DB-Baureihe 633"
                 imgRight={true}
@@ -1392,6 +1397,8 @@ const RouteRow = ({
       {ctaHref && ctaLabel && (
         <a
           href={ctaHref}
+          target="_blank"
+          rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 mt-6 h-11 px-5 rounded-[var(--radius-btn)] bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] no-underline text-sm font-semibold hover:bg-[var(--color-wh-green)] transition-colors"
         >
           {ctaLabel} →
