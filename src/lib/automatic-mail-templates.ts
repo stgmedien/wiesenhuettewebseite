@@ -80,6 +80,14 @@ export const AUTOMATIC_MAIL_TEMPLATES: AutomaticMailTemplate[] = [
     file: "src/app/api/cron/daily-mail-jobs/route.ts",
   },
   {
+    key: "manual-payment-check",
+    label: "Manuelle Zahlungen — Kontoeingang prüfen",
+    category: "Zahlungen",
+    trigger: "T-6 (6 Tage vor Anreise), Sammel-Mail für alle Buchungen ohne Stripe-Zahlungsmethode mit noch offenem Betrag.",
+    audience: "Norbert Monscheidt (MAIL_FINANCE_TO) + BCC johannesleiskau@gmail.com",
+    file: "src/app/api/cron/daily-mail-jobs/route.ts",
+  },
+  {
     key: "arrival_info",
     label: "Anreise-Infos",
     category: "Buchung — Gast",
