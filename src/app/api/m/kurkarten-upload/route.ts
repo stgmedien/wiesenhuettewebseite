@@ -8,10 +8,19 @@ import { buildKurkartenFilename } from "@/lib/kurkarten";
 import { extractNamesFromKurkartenPdf } from "@/lib/kurkarten-names";
 import { generateFeuerwehrListePdf } from "@/lib/generate-feuerwehr-liste";
 import { sendMail } from "@/lib/mail/send";
-import KurkartenReadyEmail from "@/lib/mail/templates/kurkarten-ready";
-import HuettenwartKurkartenReadyEmail from "@/lib/mail/templates/huettenwart-kurkarten-ready";
+import ArrivalReminderEmail from "@/lib/mail/templates/arrival-reminder";
+import HuettenwartArrivalReminderEmail from "@/lib/mail/templates/huettenwart-arrival-reminder";
 import { HUETTENWART_EMAIL, HUETTENWART_CC } from "@/lib/huettenwart";
 import { formatDateLong } from "@/lib/utils";
+import { wasMailSent } from "@/lib/mail-log";
+
+// Tage bis zur Anreise (lokale Kalendertage, unabhaengig von Uhrzeit).
+function daysUntil(arrivalIso: string): number {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const arrival = new Date(`${arrivalIso}T00:00:00`);
+  return Math.round((arrival.getTime() - today.getTime()) / (24 * 60 * 60 * 1000));
+}
 
 async function requireManager() {
   const session = await auth();
@@ -54,7 +63,12 @@ export async function POST(req: NextRequest) {
   }
   const [customer] = booking.customerId
     ? await db
-        .select({ firstName: customers.firstName, lastName: customers.lastName, email: customers.email })
+        .select({
+          firstName: customers.firstName,
+          lastName: customers.lastName,
+          email: customers.email,
+          phone: customers.phone,
+        })
         .from(customers)
         .where(eq(customers.id, booking.customerId))
         .limit(1)
@@ -100,69 +114,80 @@ export async function POST(req: NextRequest) {
     )
     .where(eq(bookings.id, bookingId));
 
-  // Kurkarten-Zustellung ist event-getrieben statt an einen festen Tag
-  // gebunden (Dana laedt hoch, wann immer die PDF vom AVS-Portal fertig
-  // ist) — Gast UND Toni bekommen beide Dokumente (Kurkarten + Feuerwehr-
-  // Meldeliste) automatisch in genau diesem Moment, ohne weiteren
-  // manuellen Schritt.
-  const sharedAttachments: { filename: string; content: Buffer; contentType: string }[] = [
-    {
-      filename: displayName,
-      content: Buffer.from(await file.arrayBuffer()),
-      contentType: "application/pdf",
-    },
-  ];
-  if (feuerwehrListeUrl) {
-    try {
-      const listeRes = await fetch(feuerwehrListeUrl);
-      if (listeRes.ok) {
-        sharedAttachments.push({
-          filename: `Feuerwehr-Meldeliste-${booking.bookingNumber}.pdf`,
-          content: Buffer.from(await listeRes.arrayBuffer()),
-          contentType: "application/pdf",
-        });
+  // Kurkarten werden NICHT sofort verschickt — sie warten planmaessig auf
+  // die T-3-Erinnerung (arrival_reminder/huettenwart_arrival_reminder), die
+  // sie ohnehin schon mitschickt, wenn vorhanden. Nur wenn der Upload SO
+  // kurz vor der Anreise passiert, dass der T-3-Lauf schon vorbei ist (oder
+  // fuer diese Buchung nie mehr kommt), wird hier sofort nachgeholt — sonst
+  // wuerde der Gast seine Kurkarten nie automatisch bekommen. Toni hat sie
+  // im Zweifel ohnehin schon (er bekommt dieselbe Mail parallel).
+  const daysLeft = daysUntil(booking.arrival);
+  if (daysLeft <= 3) {
+    const sharedAttachments: { filename: string; content: Buffer; contentType: string }[] = [
+      {
+        filename: displayName,
+        content: Buffer.from(await file.arrayBuffer()),
+        contentType: "application/pdf",
+      },
+    ];
+    if (feuerwehrListeUrl) {
+      try {
+        const listeRes = await fetch(feuerwehrListeUrl);
+        if (listeRes.ok) {
+          sharedAttachments.push({
+            filename: `Feuerwehr-Meldeliste-${booking.bookingNumber}.pdf`,
+            content: Buffer.from(await listeRes.arrayBuffer()),
+            contentType: "application/pdf",
+          });
+        }
+      } catch (err) {
+        console.error("[kurkarten-upload] Feuerwehr-Meldeliste-Abruf fehlgeschlagen:", err);
       }
-    } catch (err) {
-      console.error("[kurkarten-upload] Feuerwehr-Meldeliste-Abruf fehlgeschlagen:", err);
     }
-  }
 
-  if (customer?.email) {
-    try {
-      await sendMail({
-        to: customer.email,
-        subject: `Eure Kurkarten sind da — Buchung ${booking.bookingNumber}`,
-        template: "kurkarten-ready",
-        bookingId,
-        attachments: sharedAttachments,
-        react: KurkartenReadyEmail({
-          firstName: customer.firstName,
-          bookingNumber: booking.bookingNumber,
-          arrival: formatDateLong(booking.arrival),
-        }),
-      });
-    } catch (err) {
-      console.error("[kurkarten-upload] kurkarten-ready mail failed:", err);
+    if (customer?.email && !(await wasMailSent(bookingId, "arrival_reminder"))) {
+      try {
+        await sendMail({
+          to: customer.email,
+          subject: `In ${Math.max(daysLeft, 0)} Tagen geht's los — Buchung ${booking.bookingNumber}`,
+          template: "arrival_reminder",
+          bookingId,
+          attachments: sharedAttachments,
+          react: ArrivalReminderEmail({
+            firstName: customer.firstName,
+            bookingNumber: booking.bookingNumber,
+            arrival: formatDateLong(booking.arrival),
+            daysUntilArrival: daysLeft,
+            hasAttachments: true,
+          }),
+        });
+      } catch (err) {
+        console.error("[kurkarten-upload] arrival_reminder mail failed:", err);
+      }
     }
-  }
 
-  try {
-    await sendMail({
-      to: HUETTENWART_EMAIL,
-      bcc: HUETTENWART_CC,
-      subject: `Kurkarten sind da — Buchung ${booking.bookingNumber}`,
-      template: "huettenwart-kurkarten-ready",
-      bookingId,
-      attachments: sharedAttachments,
-      react: HuettenwartKurkartenReadyEmail({
-        bookingNumber: booking.bookingNumber,
-        guestName: customer ? `${customer.firstName} ${customer.lastName}`.trim() : booking.bookingNumber,
-        arrival: formatDateLong(booking.arrival),
-        departure: formatDateLong(booking.departure),
-      }),
-    });
-  } catch (err) {
-    console.error("[kurkarten-upload] huettenwart-kurkarten-ready mail failed:", err);
+    if (!(await wasMailSent(bookingId, "huettenwart_arrival_reminder"))) {
+      try {
+        await sendMail({
+          to: HUETTENWART_EMAIL,
+          bcc: HUETTENWART_CC,
+          subject: `In ${Math.max(daysLeft, 0)} Tagen: ${customer ? `${customer.firstName} ${customer.lastName}`.trim() : booking.bookingNumber} — ${booking.bookingNumber}`,
+          template: "huettenwart_arrival_reminder",
+          bookingId,
+          attachments: sharedAttachments,
+          react: HuettenwartArrivalReminderEmail({
+            bookingNumber: booking.bookingNumber,
+            guestName: customer ? `${customer.firstName} ${customer.lastName}`.trim() : booking.bookingNumber,
+            guestPhone: customer?.phone,
+            arrival: formatDateLong(booking.arrival),
+            daysUntilArrival: daysLeft,
+            hasAttachments: true,
+          }),
+        });
+      } catch (err) {
+        console.error("[kurkarten-upload] huettenwart_arrival_reminder mail failed:", err);
+      }
+    }
   }
 
   return NextResponse.json({ url: blob.url, suggestedNames, feuerwehrListeUrl });
