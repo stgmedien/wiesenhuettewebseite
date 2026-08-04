@@ -18,7 +18,6 @@ import { sendMail } from "@/lib/mail/send";
 import { wasMailSent } from "@/lib/mail-log";
 import BookingConfirmedEmail from "@/lib/mail/templates/booking-confirmed";
 import BookingInternalEmail from "@/lib/mail/templates/booking-internal";
-import MietvertragEmail from "@/lib/mail/templates/mietvertrag";
 import HuettenwartNewBookingEmail from "@/lib/mail/templates/huettenwart-booking-new";
 import { HUETTENWART_EMAIL, HUETTENWART_CC } from "@/lib/huettenwart";
 import { buildIcalInvite } from "@/lib/mail/ical";
@@ -31,96 +30,93 @@ type BookingRow = typeof bookings.$inferSelect;
 type CustomerRow = typeof customers.$inferSelect;
 type PmtRow = { kind: string; amountCents: number };
 
-async function sendBookingConfirmedMail(params: {
+/**
+ * Baut die vollstaendigen Props fuer BookingConfirmedEmail — dieselbe Mail
+ * dient zugleich als Mietvertrag (§1–§9 im unteren Teil), statt zwei
+ * getrennte Mails zu verschicken. Geteilt zwischen der Zahlungsbestaetigung
+ * und dem manuellen Statuswechsel-Pfad im Manager, damit beide exakt
+ * denselben Vertragsinhalt verschicken.
+ */
+export function buildBookingConfirmedEmailProps(params: {
   booking: BookingRow;
   customer: CustomerRow;
   paidCents: number;
-  kautionDueNow: boolean;
-}): Promise<void> {
-  const { booking, customer, paidCents, kautionDueNow } = params;
-  await sendMail({
-    to: customer.email,
-    subject: `Eure Buchung ${booking.bookingNumber} ist bestätigt`,
-    template: "booking-confirmed",
-    bookingId: booking.id,
-    react: BookingConfirmedEmail({
-      bookingNumber: booking.bookingNumber,
-      guestName: `${customer.firstName} ${customer.lastName}`.trim(),
-      arrival: formatDateLong(booking.arrival),
-      departure: formatDateLong(booking.departure),
-      nights: booking.nights,
-      persons: booking.persons,
-      totalCents: booking.subtotalCents,
-      depositCents: booking.depositCents,
-      kurtaxeCents: booking.kurtaxeCents,
-      paidCents,
-      kautionDueNow,
-      baseUrl,
-    }),
-  });
-}
-
-async function sendMietvertragMail(params: {
-  booking: BookingRow;
-  customer: CustomerRow;
   pmtRows: PmtRow[];
   kautionDueNow: boolean;
-}): Promise<void> {
-  const { booking, customer, pmtRows, kautionDueNow } = params;
+}): Parameters<typeof BookingConfirmedEmail>[0] {
+  const { booking, customer, paidCents, pmtRows, kautionDueNow } = params;
   const subtotal = booking.subtotalCents;
   const firstPayment = pmtRows.find((p) => p.kind === "anzahlung" || p.kind === "vollzahlung");
   const restRow = pmtRows.find((p) => p.kind === "restzahlung");
   const prepayment = firstPayment?.amountCents ?? Math.round(subtotal * 0.5);
   const remainder = restRow?.amountCents ?? subtotal - prepayment;
+  return {
+    bookingNumber: booking.bookingNumber,
+    guestName: `${customer.firstName} ${customer.lastName}`.trim(),
+    arrival: formatDateLong(booking.arrival),
+    departure: formatDateLong(booking.departure),
+    nights: booking.nights,
+    persons: booking.persons,
+    totalCents: booking.subtotalCents,
+    depositCents: booking.depositCents,
+    kurtaxeCents: booking.kurtaxeCents,
+    paidCents,
+    kautionDueNow,
+    baseUrl,
+    customer: {
+      firstName: customer.firstName,
+      lastName: customer.lastName,
+      company: customer.company,
+      email: customer.email,
+      phone: customer.phone,
+      street: customer.street,
+      zip: customer.zip,
+      city: customer.city,
+    },
+    personsBreakdown: {
+      adults: booking.adults,
+      members: booking.members,
+      children: booking.children,
+      pupils: booking.pupils,
+      teachers: booking.teachers,
+      total: booking.persons,
+    },
+    pricing: {
+      accommodationCents: booking.accommodationCents,
+      energyFlatCents: booking.energyFlatCents,
+      cleaningCents: booking.cleaningCents,
+      soloSurchargeCents: booking.soloSurchargeCents,
+      minOccupancySurchargeCents: booking.minOccupancySurchargeCents,
+      subtotalCents: subtotal,
+      depositCents: booking.depositCents,
+      kurtaxePersons: booking.adults + booking.members + booking.teachers,
+      kurtaxeCents: booking.kurtaxeCents,
+      prepaymentCents: prepayment,
+      remainderCents: remainder,
+    },
+    signedAt: new Date().toISOString(),
+    contractDate: new Date().toLocaleDateString("de-DE", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    }),
+  };
+}
+
+async function sendBookingConfirmedMail(params: {
+  booking: BookingRow;
+  customer: CustomerRow;
+  paidCents: number;
+  pmtRows: PmtRow[];
+  kautionDueNow: boolean;
+}): Promise<void> {
+  const { booking, customer } = params;
   await sendMail({
     to: customer.email,
-    subject: `Mietvertrag Wiesenhütte — Buchung ${booking.bookingNumber}`,
-    template: "mietvertrag",
+    subject: `Eure Buchung ${booking.bookingNumber} ist bestätigt`,
+    template: "booking-confirmed",
     bookingId: booking.id,
-    react: MietvertragEmail({
-      bookingNumber: booking.bookingNumber,
-      arrival: formatDateLong(booking.arrival),
-      departure: formatDateLong(booking.departure),
-      nights: booking.nights,
-      customer: {
-        firstName: customer.firstName,
-        lastName: customer.lastName,
-        company: customer.company,
-        email: customer.email,
-        phone: customer.phone,
-        street: customer.street,
-        zip: customer.zip,
-        city: customer.city,
-      },
-      persons: {
-        adults: booking.adults,
-        members: booking.members,
-        children: booking.children,
-        pupils: booking.pupils,
-        teachers: booking.teachers,
-        total: booking.persons,
-      },
-      pricing: {
-        accommodationCents: booking.accommodationCents,
-        energyFlatCents: booking.energyFlatCents,
-        cleaningCents: booking.cleaningCents,
-        soloSurchargeCents: booking.soloSurchargeCents,
-        minOccupancySurchargeCents: booking.minOccupancySurchargeCents,
-        subtotalCents: subtotal,
-        depositCents: booking.depositCents,
-        kurtaxePersons: booking.adults + booking.members + booking.teachers,
-        kurtaxeCents: booking.kurtaxeCents,
-        prepaymentCents: prepayment,
-        remainderCents: remainder,
-      },
-      kautionDueNow,
-      signedAt: new Date().toISOString(),
-      contractDate: new Date().toLocaleDateString("de-DE", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      }),
-    }),
+    react: BookingConfirmedEmail(buildBookingConfirmedEmailProps(params)),
   });
 }
 
@@ -150,17 +146,16 @@ export async function resendBookingConfirmationMails(
   const errors: string[] = [];
 
   try {
-    await sendBookingConfirmedMail({ booking, customer, paidCents: booking.paidCents, kautionDueNow });
-    sent.push("Buchungsbestätigung");
+    await sendBookingConfirmedMail({
+      booking,
+      customer,
+      paidCents: booking.paidCents,
+      pmtRows,
+      kautionDueNow,
+    });
+    sent.push("Buchungsbestätigung + Mietvertrag");
   } catch (err) {
-    errors.push(`Buchungsbestätigung: ${err instanceof Error ? err.message : String(err)}`);
-  }
-
-  try {
-    await sendMietvertragMail({ booking, customer, pmtRows, kautionDueNow });
-    sent.push("Mietvertrag");
-  } catch (err) {
-    errors.push(`Mietvertrag: ${err instanceof Error ? err.message : String(err)}`);
+    errors.push(`Buchungsbestätigung + Mietvertrag: ${err instanceof Error ? err.message : String(err)}`);
   }
 
   return { sent, errors };
@@ -303,17 +298,15 @@ export async function confirmDepositPayment(params: ConfirmDepositParams): Promi
 
   if (!(await wasMailSent(bookingId, "booking-confirmed"))) {
     try {
-      await sendBookingConfirmedMail({ booking, customer, paidCents: amountCents, kautionDueNow });
+      await sendBookingConfirmedMail({
+        booking,
+        customer,
+        paidCents: amountCents,
+        pmtRows,
+        kautionDueNow,
+      });
     } catch (err) {
       console.error("[confirmDepositPayment] customer mail failed", err);
-    }
-  }
-
-  if (!(await wasMailSent(bookingId, "mietvertrag"))) {
-    try {
-      await sendMietvertragMail({ booking, customer, pmtRows, kautionDueNow });
-    } catch (err) {
-      console.error("[confirmDepositPayment] mietvertrag mail failed", err);
     }
   }
 
