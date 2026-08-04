@@ -575,9 +575,11 @@ export async function GET(req: Request) {
   // Schliesst die Luecke, die durch den Wegfall der T-7-Gastmail entstanden
   // ist: "spaetestens 2 Tage vor Anreise Toni anrufen" stand bisher nur in
   // der T-14-Mail, zu weit vor der eigentlichen Frist. Diese kurze Mail geht
-  // an Gast UND Toni parallel raus und haengt Kurkarten + Feuerwehrliste
-  // nochmal an (falls bis dahin hochgeladen) — als Sicherheitsnetz, falls
-  // die urspruengliche kurkarten-ready-Mail uebersehen wurde.
+  // an Gast UND Toni parallel raus und ist zugleich die planmaessige
+  // Zustellung der Kurkarten + Feuerwehrliste (falls bis dahin hochgeladen)
+  // — die warten bewusst auf diesen Zeitpunkt statt sofort beim Upload
+  // verschickt zu werden (siehe kurkarten-upload/route.ts fuer den
+  // Sofort-Fallback, falls der Upload erst nach diesem Lauf passiert).
   const t3 = isoDayOffset(3);
   const t3Bookings = await db
     .select()
@@ -636,6 +638,7 @@ export async function GET(req: Request) {
             firstName: customer.firstName,
             bookingNumber: b.bookingNumber,
             arrival: formatDateLong(b.arrival),
+            daysUntilArrival: 3,
             hasAttachments,
           }),
         });
@@ -659,6 +662,7 @@ export async function GET(req: Request) {
             guestName,
             guestPhone: customer.phone,
             arrival: formatDateLong(b.arrival),
+            daysUntilArrival: 3,
             hasAttachments,
           }),
         });

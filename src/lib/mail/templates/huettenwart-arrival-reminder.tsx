@@ -14,6 +14,7 @@ type Props = {
   guestName: string;
   guestPhone?: string | null;
   arrival: string;
+  daysUntilArrival: number;
   hasAttachments: boolean;
 };
 
@@ -50,21 +51,29 @@ const text = {
 };
 const muted = { ...text, color: "#5b5b56", fontSize: "14px" };
 
+function timeLabel(days: number, guestName: string): string {
+  if (days >= 2) return `In ${days} Tagen kommt ${guestName}.`;
+  if (days === 1) return `Morgen kommt ${guestName}.`;
+  return `${guestName} kommt sehr bald.`;
+}
+
 export default function HuettenwartArrivalReminderEmail({
   bookingNumber,
   guestName,
   guestPhone,
   arrival,
+  daysUntilArrival,
   hasAttachments,
 }: Props) {
+  const headline = timeLabel(daysUntilArrival, guestName);
   return (
     <Html>
       <Head />
-      <Preview>In 3 Tagen: {guestName} — falls noch kein Anruf kam</Preview>
+      <Preview>{headline} — falls noch kein Anruf kam</Preview>
       <Body style={main}>
         <Container style={container}>
           <Text style={eyebrow}>Wiesenhütte · Hüttenwart</Text>
-          <Heading style={heading}>In 3 Tagen kommt {guestName}.</Heading>
+          <Heading style={heading}>{headline}</Heading>
           <Text style={text}>Hallo Toni,</Text>
           <Text style={text}>
             Buchung {bookingNumber}, Anreise am {arrival}. Der Gast wurde gebeten, sich bei Dir
@@ -81,7 +90,7 @@ export default function HuettenwartArrivalReminderEmail({
           {hasAttachments && (
             <Section style={{ backgroundColor: "#EFE6D8", padding: "16px 20px", borderRadius: "12px", margin: "16px 0" }}>
               <Text style={{ ...text, margin: 0 }}>
-                Zur Sicherheit noch einmal im Anhang: Kurkarten und Feuerwehr-Meldeliste.
+                Im Anhang: Kurkarten und Feuerwehr-Meldeliste.
               </Text>
             </Section>
           )}

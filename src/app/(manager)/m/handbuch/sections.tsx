@@ -674,14 +674,9 @@ export const DOC_SECTIONS: DocSection[] = [
               "Nur intern an Toni Klauke — Gast bekommt hier keine eigene Mail mehr (Inhalte stecken in restzahlung-confirmed bei T-14). Ohne Kurkarten-Anhang.",
             ],
             [
-              "Event (Kurkarten-Upload)",
-              "kurkarten-ready + huettenwart-kurkarten-ready",
-              "Sobald Dana die Kurkarten-PDF hochlädt, gehen sofort zwei Mails raus — an den Gast UND an Toni, beide mit Kurkarten + Feuerwehr-Meldeliste im Anhang. Unabhängig vom Anreisedatum und vom Zahlungsstatus.",
-            ],
-            [
-              "T-3",
+              "T-3 (oder sofort bei sehr spätem Upload)",
               "arrival_reminder + huettenwart_arrival_reminder",
-              "Letzte Erinnerung: Gast soll Toni die Ankunftszeit mitteilen. Kurkarten + Feuerwehr-Meldeliste nochmal im Anhang (falls bis dahin vorhanden) — Sicherheitsnetz, falls die Upload-Mail übersehen wurde.",
+              "Letzte Erinnerung: Gast soll Toni die Ankunftszeit mitteilen. Zugleich die planmäßige Zustellung der Kurkarten + Feuerwehr-Meldeliste (falls bis dahin hochgeladen) — die warten bewusst auf diesen Zeitpunkt, statt sofort beim Upload verschickt zu werden. Nur wenn der Upload erst nach diesem Lauf passiert, verschickt kurkarten-upload/route.ts dieselbe Mail sofort als Fallback.",
             ],
             [
               "T+14 (nach Abreise)",

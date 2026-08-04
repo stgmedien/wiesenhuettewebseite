@@ -13,6 +13,11 @@ type Props = {
   firstName: string;
   bookingNumber: string;
   arrival: string;
+  /** Tage bis zur Anreise zum Sendezeitpunkt — normalerweise 3 (planmäßiger
+   * T-3-Versand), kann aber kleiner sein, wenn die Kurkarten erst sehr kurz
+   * vor Anreise hochgeladen werden und diese Mail als Sofort-Zustellung
+   * dient statt auf den planmäßigen T-3-Lauf zu warten. */
+  daysUntilArrival: number;
   hasAttachments: boolean;
 };
 
@@ -49,20 +54,30 @@ const text = {
 };
 const muted = { ...text, color: "#5b5b56", fontSize: "14px" };
 
+function timeLabel(days: number): string {
+  if (days >= 2) return `In ${days} Tagen geht's los.`;
+  if (days === 1) return "Morgen geht's los.";
+  return "Eure Anreise steht unmittelbar bevor.";
+}
+
 export default function ArrivalReminderEmail({
   firstName,
   bookingNumber,
   arrival,
+  daysUntilArrival,
   hasAttachments,
 }: Props) {
+  const headline = timeLabel(daysUntilArrival);
   return (
     <Html>
       <Head />
-      <Preview>In 3 Tagen geht&apos;s los — Buchung {bookingNumber}</Preview>
+      <Preview>
+        {headline} — Buchung {bookingNumber}
+      </Preview>
       <Body style={main}>
         <Container style={container}>
           <Text style={eyebrow}>Wiesenhütte · Bald geht&apos;s los</Text>
-          <Heading style={heading}>In 3 Tagen geht&apos;s los.</Heading>
+          <Heading style={heading}>{headline}</Heading>
           <Text style={text}>Hallo {firstName},</Text>
           <Text style={text}>
             Eure Anreise ({arrival}) steht kurz bevor. Falls Ihr Toni Klauke noch nicht Eure
@@ -73,8 +88,7 @@ export default function ArrivalReminderEmail({
           {hasAttachments && (
             <Section style={{ backgroundColor: "#EFE6D8", padding: "16px 20px", borderRadius: "12px", margin: "16px 0" }}>
               <Text style={{ ...text, margin: 0 }}>
-                Zur Sicherheit noch einmal im Anhang: Eure Kurkarten und die
-                Feuerwehr-Meldeliste.
+                Im Anhang: Eure Kurkarten und die Feuerwehr-Meldeliste.
               </Text>
             </Section>
           )}

@@ -10,7 +10,7 @@
  *   3. booking-confirmed    – Buchungsbestätigung + Mietvertrag (§1–§9) nach Zahlung
  *   4. payment-reminder     – Erinnerung Restzahlung (T-21)
  *   5. restzahlung-confirmed – Restzahlung bestätigt + Anreise-Infos (T-14)
- *   6. kurkarten-ready      – Kurkarten sind da (event-getrieben, kein fester Tag)
+ *   6. arrival-reminder     – Letzte Erinnerung + Kurkarten (T-3, planmäßig oder Sofort-Fallback)
  *   7. booking-cancelled    – Stornierung
  *   8. deposit-hold         – Kaution einbehalten
  *   9. deposit-refunded     – Kaution zurückerstattet + Feedback-Einladung
@@ -22,7 +22,7 @@ import MagicLinkEmail from "@/lib/mail/templates/magic-link";
 import BookingConfirmedEmail from "@/lib/mail/templates/booking-confirmed";
 import PaymentReminderEmail from "@/lib/mail/templates/payment-reminder";
 import RestzahlungConfirmedEmail from "@/lib/mail/templates/restzahlung-confirmed";
-import KurkartenReadyEmail from "@/lib/mail/templates/kurkarten-ready";
+import ArrivalReminderEmail from "@/lib/mail/templates/arrival-reminder";
 import BookingCancelledEmail from "@/lib/mail/templates/booking-cancelled";
 import DepositHoldEmail from "@/lib/mail/templates/deposit-hold";
 import DepositRefundedEmail from "@/lib/mail/templates/deposit-refunded";
@@ -121,12 +121,14 @@ const jobs: { name: string; subject: string; react: React.ReactElement }[] = [
     }),
   },
   {
-    name: "kurkarten-ready",
-    subject: `${P} Kurkarten sind da WH-TEST-0001`,
-    react: KurkartenReadyEmail({
+    name: "arrival-reminder",
+    subject: `${P} In 3 Tagen geht's los WH-TEST-0001`,
+    react: ArrivalReminderEmail({
       firstName: "Max",
       bookingNumber: "WH-TEST-0001",
       arrival: "20.02.2026",
+      daysUntilArrival: 3,
+      hasAttachments: true,
     }),
   },
   {
