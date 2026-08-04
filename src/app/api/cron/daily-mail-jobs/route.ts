@@ -26,7 +26,6 @@ import RestzahlungRequestEmail from "@/lib/mail/templates/restzahlung-request";
 import { MANUAL_REST_MARKER, MANUAL_REST_SENT_MARKER } from "@/lib/payment-markers";
 import AvsReminderInternalEmail from "@/lib/mail/templates/avs-reminder-internal";
 import MailFailureDigestEmail from "@/lib/mail/templates/mail-failure-digest";
-import ManualPaymentCheckEmail from "@/lib/mail/templates/manual-payment-check";
 import { getUnresolvedMailFailures } from "@/lib/mail-log";
 import { findMailTemplateMeta } from "@/lib/automatic-mail-templates";
 import { buildKurkartenFilename } from "@/lib/kurkarten";
@@ -127,7 +126,6 @@ export async function GET(req: Request) {
     manualRestSent: 0,
     avsReminderSent: 0,
     mailFailureDigestSent: 0,
-    manualPaymentCheckSent: 0,
   };
 
   // ---------- T-21: Zahlungserinnerung (1 Woche vor Auto-Einzug bei T-14) ----------
@@ -609,60 +607,6 @@ export async function GET(req: Request) {
         console.error("[cron] huettenwart_notice failed:", err);
       }
     }
-  }
-
-  // ---------- T-6: Norbert prüft Kontoeingang manueller Zahlungen ----------
-  // Buchungen ohne Stripe-Zahlungsmethode (Überweiser) zahlen Restzahlung +
-  // Kaution + Kurtaxe nicht automatisch bei T-14 — bei T-6 ist noch genug
-  // Zeit, im Vereinskonto nachzuschauen und ggf. nachzuhaken, bevor die
-  // Gruppe anreist. Ein Sammel-Mail statt einer pro Buchung (kein
-  // alreadySent-Schutz noetig: die Buchung faellt aus der Abfrage raus,
-  // sobald jemand die manuelle Zahlung im Manager bestaetigt).
-  const t6 = isoDayOffset(6);
-  try {
-    const t6Bookings = await db
-      .select()
-      .from(bookings)
-      .where(
-        and(
-          eq(bookings.arrival, t6),
-          sql`${bookings.status} != 'storniert'`,
-          sql`${bookings.stripePaymentIntentId} IS NULL`
-        )
-      );
-    const manualRows: { bookingId: string; bookingNumber: string; guestName: string; arrival: string; amountCents: number }[] = [];
-    for (const b of t6Bookings) {
-      const dueCents = b.subtotalCents + b.depositCents + b.kurtaxeCents;
-      const outstandingCents = dueCents - b.paidCents;
-      if (outstandingCents <= 0) continue;
-      const customer = b.customerId
-        ? (await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1))[0]
-        : null;
-      manualRows.push({
-        bookingId: b.id,
-        bookingNumber: b.bookingNumber,
-        guestName: customer ? `${customer.firstName} ${customer.lastName}`.trim() : "Unbekannt",
-        arrival: formatDateLong(b.arrival),
-        amountCents: outstandingCents,
-      });
-    }
-    if (manualRows.length > 0) {
-      const financeTo = process.env.MAIL_FINANCE_TO;
-      if (financeTo) {
-        await sendMail({
-          to: financeTo,
-          bcc: "johannesleiskau@gmail.com",
-          subject: `${manualRows.length} manuelle ${manualRows.length === 1 ? "Buchung" : "Buchungen"} in 6 Tagen — Kontoeingang prüfen`,
-          template: "manual-payment-check",
-          react: ManualPaymentCheckEmail({ rows: manualRows, baseUrl: BASE_URL }),
-        });
-        stats.manualPaymentCheckSent = manualRows.length;
-      } else {
-        console.warn("[cron] MAIL_FINANCE_TO nicht gesetzt — T-6-Manuell-Check nicht verschickt");
-      }
-    }
-  } catch (err) {
-    console.error("[cron] manual-payment-check failed:", err);
   }
 
   // =====================================================================
