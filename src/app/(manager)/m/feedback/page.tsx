@@ -79,8 +79,8 @@ export default async function FeedbackDashboardPage() {
       <div className="eyebrow">Manager · Feedback</div>
       <h1 className="text-[36px] mt-2 mb-1">Gäste-Insights.</h1>
       <p className="text-[var(--color-wh-fg-muted)] m-0 mb-8">
-        Strukturiertes Feedback aus Token-Mails T+2 nach Abreise. Antworten sind intern und nicht
-        öffentlich sichtbar.
+        Strukturiertes Feedback aus der Kaution-Rückerstattungsmail (T+14 nach Abreise). Antworten
+        sind intern und nicht öffentlich sichtbar.
       </p>
 
       {/* Stat-Cards */}

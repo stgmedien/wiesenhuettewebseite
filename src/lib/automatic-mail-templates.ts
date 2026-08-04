@@ -95,14 +95,6 @@ export const AUTOMATIC_MAIL_TEMPLATES: AutomaticMailTemplate[] = [
     file: "src/app/(manager)/m/buchungen/[id]/actions.ts",
   },
   {
-    key: "feedback_request",
-    label: "Feedback-Anfrage",
-    category: "Buchung — Gast",
-    trigger: "2 Tage nach Abreise, wenn Status 'abgereist'.",
-    audience: "Gast",
-    file: "src/app/api/cron/daily-mail-jobs/route.ts",
-  },
-  {
     key: "deposit-hold",
     label: "Kaution einbehalten",
     category: "Buchung — Gast",
@@ -112,9 +104,9 @@ export const AUTOMATIC_MAIL_TEMPLATES: AutomaticMailTemplate[] = [
   },
   {
     key: "deposit-refunded",
-    label: "Kaution erstattet",
+    label: "Kaution erstattet + Feedback-Einladung",
     category: "Buchung — Gast",
-    trigger: "Cron, 14 Tage nach mangelfreier Abreise (Status 'abgereist', kein Hold).",
+    trigger: "Cron, 14 Tage nach mangelfreier Abreise (Status 'abgereist', kein Hold). Enthält eine Feedback-Einladung, wenn noch kein Feedback-Eintrag existiert.",
     audience: "Gast",
     file: "src/app/api/cron/release-deposits/route.ts",
   },

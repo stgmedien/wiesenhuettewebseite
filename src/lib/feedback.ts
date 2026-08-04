@@ -2,8 +2,9 @@
  * Helpers für das interne Feedback-System.
  *
  * Workflow:
- *  1. Cron (daily-mail-jobs) prüft Buchungen mit Abreise vor X Tagen, die noch
- *     keinen feedback_entries-Eintrag haben → erzeugt Token, sendet Mail.
+ *  1. Cron (release-deposits, T+14 nach Abreise) erzeugt beim Kaution-
+ *     Refund einen Token und hängt die Feedback-Einladung an dieselbe
+ *     Mail an (kein eigener Versand mehr).
  *  2. Gast öffnet /feedback/[token] → Token-Hash-Lookup → Form rendert.
  *  3. Submit füllt die Response-Felder + setzt respondedAt.
  *  4. Manager-Dashboard /m/feedback zeigt Analytics + Antworten.
@@ -13,7 +14,6 @@ import crypto from "crypto";
 
 const TOKEN_BYTES = 32;
 export const FEEDBACK_TTL_DAYS = 90;
-export const FEEDBACK_DELAY_DAYS_AFTER_DEPARTURE = 2;
 
 export function generateFeedbackToken(): string {
   return crypto.randomBytes(TOKEN_BYTES).toString("base64url");
