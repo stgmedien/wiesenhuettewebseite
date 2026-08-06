@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Mail, BadgeEuro, X, Copy, Check, FileText } from "lucide-react";
+import { Mail, BadgeEuro, X, Copy, Check, FileText, Paperclip } from "lucide-react";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { sendBookingMessage, applyTemplateForBooking } from "./actions";
@@ -15,15 +15,21 @@ export function ManagerMessage({
   guestName,
   bookingNumber,
   templates,
+  hasKurkarten,
+  hasFeuerwehrliste,
 }: {
   bookingId: string;
   guestEmail: string;
   guestName: string;
   bookingNumber: string;
   templates: TemplateOption[];
+  hasKurkarten: boolean;
+  hasFeuerwehrliste: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [paymentEnabled, setPaymentEnabled] = useState(false);
+  const [attachKurkarten, setAttachKurkarten] = useState(false);
+  const [attachFeuerwehrliste, setAttachFeuerwehrliste] = useState(false);
   const [subject, setSubject] = useState(`Buchung ${bookingNumber} — Nachricht von der Wiesenhütte`);
   const [body, setBody] = useState(
     `Hallo ${guestName.split(" ")[0]},\n\nhier ist eine Nachricht zu Eurer Buchung ${bookingNumber}.\n\n`
@@ -48,6 +54,8 @@ export function ManagerMessage({
         paymentEnabled,
         paymentAmountEuros: paymentEnabled ? Number(amount) : undefined,
         paymentReason: paymentEnabled ? reason : undefined,
+        attachKurkarten,
+        attachFeuerwehrliste,
       });
       if (!res.ok) {
         setError(res.error);
@@ -161,6 +169,36 @@ export function ManagerMessage({
           rows={8}
           required
         />
+
+        {(hasKurkarten || hasFeuerwehrliste) && (
+          <div className="border-t border-[var(--color-wh-winter-grey)] pt-4 space-y-2">
+            <div className="font-semibold text-[var(--color-wh-deep-green)] flex items-center gap-1.5">
+              <Paperclip size={16} /> Anhänge
+            </div>
+            {hasKurkarten && (
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={attachKurkarten}
+                  onChange={(e) => setAttachKurkarten(e.target.checked)}
+                  className="w-5 h-5 accent-[var(--color-wh-deep-green)]"
+                />
+                <span className="text-sm">Kurkarten-PDF anhängen</span>
+              </label>
+            )}
+            {hasFeuerwehrliste && (
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={attachFeuerwehrliste}
+                  onChange={(e) => setAttachFeuerwehrliste(e.target.checked)}
+                  className="w-5 h-5 accent-[var(--color-wh-deep-green)]"
+                />
+                <span className="text-sm">Feuerwehr-Meldeliste anhängen</span>
+              </label>
+            )}
+          </div>
+        )}
 
         <div className="border-t border-[var(--color-wh-winter-grey)] pt-4">
           <label className="flex items-start gap-3 cursor-pointer">

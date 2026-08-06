@@ -27,6 +27,8 @@ import { confirmDepositPayment, buildBookingConfirmedEmailProps } from "@/lib/bo
 import { generateFeuerwehrListePdf } from "@/lib/generate-feuerwehr-liste";
 import { buildInvoicePdfAttachment } from "@/lib/invoice-attachment";
 import DepositRefundedEmail from "@/lib/mail/templates/deposit-refunded";
+import { buildKurkartenFilename } from "@/lib/kurkarten";
+import type { MailAttachment } from "@/lib/mail/send";
 
 async function requireManager() {
   const session = await auth();
@@ -187,6 +189,8 @@ const messageSchema = z.object({
   paymentEnabled: z.boolean().default(false),
   paymentAmountEuros: z.coerce.number().positive().optional(),
   paymentReason: z.string().max(255).optional(),
+  attachKurkarten: z.boolean().default(false),
+  attachFeuerwehrliste: z.boolean().default(false),
 });
 
 export type SendBookingMessageResult =
@@ -290,6 +294,39 @@ export async function sendBookingMessage(
     });
   }
 
+  // Optionale Anhänge: bereits hochgeladene Kurkarten-PDF / Feuerwehr-Meldeliste
+  // manuell mitschicken (z. B. wenn der automatische T-3-Versand aus
+  // irgendeinem Grund nicht gelaufen ist).
+  const attachments: MailAttachment[] = [];
+  if (data.attachKurkarten && booking.kurkartenPdfUrl) {
+    try {
+      const res = await fetch(booking.kurkartenPdfUrl);
+      if (res.ok) {
+        attachments.push({
+          filename: buildKurkartenFilename(customer.lastName, booking.arrival),
+          content: Buffer.from(await res.arrayBuffer()),
+          contentType: "application/pdf",
+        });
+      }
+    } catch (err) {
+      console.error("[sendBookingMessage] Kurkarten-PDF-Abruf fehlgeschlagen:", err);
+    }
+  }
+  if (data.attachFeuerwehrliste && booking.feuerwehrListePdfUrl) {
+    try {
+      const res = await fetch(booking.feuerwehrListePdfUrl);
+      if (res.ok) {
+        attachments.push({
+          filename: `Feuerwehr-Meldeliste-${booking.bookingNumber}.pdf`,
+          content: Buffer.from(await res.arrayBuffer()),
+          contentType: "application/pdf",
+        });
+      }
+    } catch (err) {
+      console.error("[sendBookingMessage] Feuerwehrliste-Abruf fehlgeschlagen:", err);
+    }
+  }
+
   // Send the mail
   try {
     await sendMail({
@@ -298,6 +335,7 @@ export async function sendBookingMessage(
       template: data.paymentEnabled ? "manager-message-payment" : "manager-message",
       bookingId: booking.id,
       replyTo: session.user?.email ?? undefined,
+      attachments: attachments.length > 0 ? attachments : undefined,
       react: ManagerMessageEmail({
         guestName: `${customer.firstName} ${customer.lastName}`.trim(),
         bookingNumber: booking.bookingNumber,
