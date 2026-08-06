@@ -125,6 +125,8 @@ export default async function BookingDetail({ params }: Props) {
           guestName={`${customer.firstName} ${customer.lastName}`.trim()}
           bookingNumber={b.bookingNumber}
           templates={availableTemplates}
+          hasKurkarten={!!b.kurkartenPdfUrl}
+          hasFeuerwehrliste={!!b.feuerwehrListePdfUrl}
         />
       )}
 
