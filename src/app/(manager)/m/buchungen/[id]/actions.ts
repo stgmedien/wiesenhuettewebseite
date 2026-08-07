@@ -18,7 +18,7 @@ import HuettenwartCancellationEmail from "@/lib/mail/templates/huettenwart-cance
 import { HUETTENWART_EMAIL, HUETTENWART_CC } from "@/lib/huettenwart";
 import { buildIcalCancel } from "@/lib/mail/ical";
 import { formatDateLong } from "@/lib/utils";
-import { formatEuro, calculatePrice, type Persons } from "@/lib/pricing";
+import { formatEuro, calculatePrice, nightsBetween, PRICES, type Persons } from "@/lib/pricing";
 import { resolveBookingTariffs } from "@/lib/pricing-tariffs";
 import { mailTemplates, mailTemplateVersions } from "@/lib/db/schema";
 import { substituteVars } from "@/lib/mail-render";
@@ -816,11 +816,12 @@ const editPersonsSchema = z.object({
   children: z.coerce.number().int().min(0).max(60),
   pupils: z.coerce.number().int().min(0).max(60),
   teachers: z.coerce.number().int().min(0).max(60),
-  // Kurtaxe ist Durchlaufposten an Winterberg, gekoppelt an tatsächliche
-  // Gästezahl — anders als der eigene Übernachtungspreis (der laut
-  // Vorstandsbeschluss bei sinkender Personenzahl NICHT reduziert wird)
-  // muss sie unabhängig davon manuell korrigierbar sein.
-  kurtaxeOverrideEuros: z.coerce.number().min(0).optional(),
+  // Kurtaxe ist Durchlaufposten an Winterberg, gekoppelt an die bei AVS
+  // gemeldete Personenzahl — die kann von der Übernachtungs-Personenzahl
+  // oben abweichen (z. B. wenn sich eine nachträgliche Änderung bei AVS
+  // nicht mehr nachpflegen lässt), deshalb hier separat als eigene
+  // Personenzahl statt als Euro-Betrag angebbar.
+  kurtaxeOverridePersons: z.coerce.number().int().min(0).max(200).optional(),
 });
 
 export type EditPersonsResult =
@@ -883,12 +884,15 @@ export async function editBookingPersons(
   // nachträglich geänderte kurtaxenpflichtige Personen (ab 16 J.) nie neu
   // berechnet und der Verein zahlt die Differenz an Winterberg aus eigener
   // Tasche (bzw. verschenkt sie bei einer Verringerung).
-  // Manueller Override möglich: die Kurtaxe ist ein Durchlaufposten an
-  // Winterberg und folgt der TATSÄCHLICHEN Gästezahl — anders als unser
-  // eigener Übernachtungspreis, der laut Vorstandsbeschluss bei sinkender
-  // Personenzahl nicht reduziert wird (siehe Storno-/Personen-Regeln).
+  // Manueller Override möglich: die Kurtaxe folgt der bei AVS gemeldeten
+  // Personenzahl, die von der Übernachtungs-Personenzahl oben abweichen
+  // kann (z. B. wenn sich eine Reduzierung bei AVS nicht mehr nachpflegen
+  // lässt) — anders als unser eigener Übernachtungspreis, der laut
+  // Vorstandsbeschluss bei sinkender Personenzahl nicht reduziert wird.
   const finalKurtaxeCents =
-    d.kurtaxeOverrideEuros !== undefined ? Math.round(d.kurtaxeOverrideEuros * 100) : nb.kurtaxeCents;
+    d.kurtaxeOverridePersons !== undefined
+      ? d.kurtaxeOverridePersons * nightsBetween(b.arrival, b.departure) * PRICES.kurtaxeRateCents
+      : nb.kurtaxeCents;
   const kurtaxeDeltaCents = finalKurtaxeCents - b.kurtaxeCents;
   const newSubtotalCents = b.subtotalCents + deltaCents;
   if (newSubtotalCents < 0) {
@@ -916,7 +920,7 @@ export async function editBookingPersons(
 
   await db.insert(activityLog).values({
     who: session.user?.name ?? session.user?.email ?? "Manager",
-    what: `Personen angepasst (Mitgl ${d.members} · Erw ${d.adults} · Kind ${d.children} · Schü ${d.pupils} · Lehr ${d.teachers}) → Zwischensumme ${formatEuro(newSubtotalCents)} (${deltaCents >= 0 ? "+" : ""}${formatEuro(deltaCents)})${kurtaxeDeltaCents !== 0 ? `, Kurtaxe ${kurtaxeDeltaCents >= 0 ? "+" : ""}${formatEuro(kurtaxeDeltaCents)}${d.kurtaxeOverrideEuros !== undefined ? " (manuell)" : ""}` : ""}`,
+    what: `Personen angepasst (Mitgl ${d.members} · Erw ${d.adults} · Kind ${d.children} · Schü ${d.pupils} · Lehr ${d.teachers}) → Zwischensumme ${formatEuro(newSubtotalCents)} (${deltaCents >= 0 ? "+" : ""}${formatEuro(deltaCents)})${kurtaxeDeltaCents !== 0 ? `, Kurtaxe ${kurtaxeDeltaCents >= 0 ? "+" : ""}${formatEuro(kurtaxeDeltaCents)}${d.kurtaxeOverridePersons !== undefined ? ` (manuell, ${d.kurtaxeOverridePersons} Pers.)` : ""}` : ""}`,
     bookingId: d.bookingId,
   });
 
