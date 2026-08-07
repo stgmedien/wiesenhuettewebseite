@@ -22,16 +22,16 @@ const euro = (cents: number) =>
 export function PersonsPriceEditor({
   bookingId,
   initial,
-  currentKurtaxeCents,
+  currentKurtaxePersons,
 }: {
   bookingId: string;
   initial: P;
-  currentKurtaxeCents: number;
+  currentKurtaxePersons: number;
 }) {
   const [open, setOpen] = useState(false);
   const [p, setP] = useState<P>(initial);
   const [overrideKurtaxe, setOverrideKurtaxe] = useState(false);
-  const [kurtaxeEuros, setKurtaxeEuros] = useState((currentKurtaxeCents / 100).toFixed(2));
+  const [kurtaxePersons, setKurtaxePersons] = useState(String(currentKurtaxePersons));
   const [res, setRes] = useState<{
     deltaCents: number;
     kurtaxeDeltaCents: number;
@@ -55,7 +55,7 @@ export function PersonsPriceEditor({
         bookingId,
         ...p,
         teachers: 0,
-        kurtaxeOverrideEuros: overrideKurtaxe ? Number(kurtaxeEuros) : undefined,
+        kurtaxeOverridePersons: overrideKurtaxe ? Number(kurtaxePersons) : undefined,
       });
       if (r.ok) {
         setRes({
@@ -135,22 +135,22 @@ export function PersonsPriceEditor({
             className="w-4 h-4 accent-[var(--color-wh-deep-green)]"
           />
           <span className="text-[12px] text-[var(--color-wh-fg-muted)]">
-            Kurtaxe manuell setzen (statt automatisch aus Personenzahl) — z. B. wenn sich die
-            tatsächliche Teilnehmerzahl ändert, unser Preis laut Vorstandsbeschluss aber nicht
-            reduziert wird.
+            Kurtaxe an eigene Personenzahl koppeln (statt an die Übernachtungs-Personenzahl oben)
+            — z. B. wenn die bei AVS/Winterberg gemeldete Zahl von der tatsächlichen Übernachtungs-
+            Personenzahl abweicht und sich dort (noch) nicht anpassen lässt.
           </span>
         </label>
         {overrideKurtaxe && (
           <label className="block mt-2 max-w-[160px]">
             <span className="block text-[11px] text-[var(--color-wh-fg-muted)] mb-1 leading-tight">
-              Kurtaxe in €
+              Kurtaxepflichtige Personen (≥16 J.)
             </span>
             <input
               type="number"
               min={0}
-              step="0.01"
-              value={kurtaxeEuros}
-              onChange={(e) => setKurtaxeEuros(e.target.value)}
+              step="1"
+              value={kurtaxePersons}
+              onChange={(e) => setKurtaxePersons(e.target.value)}
               className="w-full rounded-lg border border-[var(--color-wh-winter-grey)] bg-white px-2 py-1.5 text-sm focus:border-[var(--color-wh-deep-green)] focus:outline-none"
             />
           </label>
