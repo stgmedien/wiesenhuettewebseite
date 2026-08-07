@@ -91,8 +91,25 @@ export async function GET(req: NextRequest) {
 
   for (const b of eligible) {
     try {
+      // Refund am RICHTIGEN PaymentIntent: Die Kaution wird bei T-14 mit der
+      // Restzahlung eingezogen — deren PI trägt genug Volumen. Der Anzahlungs-
+      // PI (b.stripePaymentIntentId) kann kleiner als die Kaution sein (z. B.
+      // Schule: 10 % Anzahlung < 300 € Kaution) → Refund würde scheitern.
+      // Reihenfolge: Kautions-Zeile → Restzahlungs-Zeile → Anzahlungs-PI.
+      const paidRows = await db
+        .select({
+          kind: payments.kind,
+          stripePaymentIntentId: payments.stripePaymentIntentId,
+        })
+        .from(payments)
+        .where(and(eq(payments.bookingId, b.id), eq(payments.status, "erhalten")));
+      const refundPi =
+        paidRows.find((p) => p.kind === "kaution" && p.stripePaymentIntentId)?.stripePaymentIntentId ??
+        paidRows.find((p) => p.kind === "restzahlung" && p.stripePaymentIntentId)?.stripePaymentIntentId ??
+        b.stripePaymentIntentId!;
+
       const refund = await stripe.refunds.create({
-        payment_intent: b.stripePaymentIntentId!,
+        payment_intent: refundPi,
         amount: b.depositCents,
         reason: "requested_by_customer",
         metadata: {
@@ -109,7 +126,7 @@ export async function GET(req: NextRequest) {
         status: "erstattet",
         amountCents: b.depositCents,
         method: "Stripe Auto-Refund",
-        stripePaymentIntentId: b.stripePaymentIntentId,
+        stripePaymentIntentId: refundPi,
         receivedAt: new Date(),
       });
 

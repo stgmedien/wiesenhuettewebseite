@@ -5,6 +5,11 @@ import { eq, and, gt } from "drizzle-orm";
 import { headers } from "next/headers";
 import { revalidateTag } from "next/cache";
 import { BOOKING_BLOCKS_TAG } from "@/lib/availability";
+import {
+  isBankTransferEligible,
+  getOrCreateStripeCustomer,
+  BANK_TRANSFER_PM_OPTIONS,
+} from "@/lib/stripe-bank-transfer";
 import { db } from "@/lib/db";
 import { bookings, customers, payments, activityLog, users, bookingAttempts } from "@/lib/db/schema";
 import { auth } from "@/lib/auth";
@@ -609,11 +614,20 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
     const discountSnippet = discountCents > 0
       ? `${formatEuro(discountCents, locale)} (${appliedDiscountCode})`
       : null;
+    // Vereins-/Schul-/Firmengruppen zahlen bevorzugt per klassischer
+    // Überweisung → Banküberweisung (virtuelle deutsche IBAN, automatische
+    // Zuordnung durch Stripe) zusätzlich zur Karte anbieten. Braucht zwingend
+    // ein Stripe-Customer-Objekt statt customer_email/customer_creation.
+    const offerBankTransfer = isBankTransferEligible(data.customerType, isSchoolPurpose);
+    const stripeCustomerId = offerBankTransfer
+      ? await getOrCreateStripeCustomer(effectiveEmail, `${data.firstName} ${data.lastName}`)
+      : null;
+
     checkoutSession = await stripe.checkout.sessions.create({
       mode: "payment",
-      payment_method_types: ["card"],
+      payment_method_types: offerBankTransfer ? ["card", "customer_balance"] : ["card"],
       locale: STRIPE_LOCALE[locale],
-      customer_email: effectiveEmail,
+      ...(stripeCustomerId ? { customer: stripeCustomerId } : { customer_email: effectiveEmail }),
       billing_address_collection: "auto",
       // Session läuft nach 24 h ab (Stripe-Maximum) — Gäste sollen in Ruhe
       // Rücksprache halten können, ohne dass der Zahlungslink verfällt.
@@ -689,12 +703,27 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
           : []),
       ],
       // Stripe-Customer und Payment-Method speichern fuer spaetere
-      // Off-Session-Restzahlung (Cron T-7 vor Anreise).
-      customer_creation: "always",
-      payment_intent_data: {
-        setup_future_usage: "off_session",
-        metadata: { bookingId, bookingNumber },
-      },
+      // Off-Session-Restzahlung (Cron T-14). customer_balance unterstützt
+      // kein setup_future_usage → bei Banküberweisungs-Sessions wandert die
+      // Karten-Speicherung in payment_method_options.card; customer_creation
+      // ist mit explizitem `customer` nicht kombinierbar.
+      ...(stripeCustomerId
+        ? {
+            payment_method_options: {
+              card: { setup_future_usage: "off_session" as const },
+              ...BANK_TRANSFER_PM_OPTIONS,
+            },
+            payment_intent_data: {
+              metadata: { bookingId, bookingNumber },
+            },
+          }
+        : {
+            customer_creation: "always" as const,
+            payment_intent_data: {
+              setup_future_usage: "off_session" as const,
+              metadata: { bookingId, bookingNumber },
+            },
+          }),
       metadata: {
         bookingId,
         bookingNumber,

@@ -8,6 +8,7 @@ import { auth } from "@/lib/auth";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { BOOKING_BLOCKS_TAG } from "@/lib/availability";
 import { MANUAL_REST_MARKER } from "@/lib/payment-markers";
+import { getOrCreateStripeCustomer, BANK_TRANSFER_PM_OPTIONS } from "@/lib/stripe-bank-transfer";
 import { stripe } from "@/lib/stripe";
 import { sendMail } from "@/lib/mail/send";
 import ManagerMessageEmail from "@/lib/mail/templates/manager-message";
@@ -234,11 +235,18 @@ export async function sendBookingMessage(
     amountCents = Math.round(data.paymentAmountEuros * 100);
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
+    // Manuelle Zahlungslinks bieten Karte UND Banküberweisung an — gerade
+    // Vereins-/Schulkassen zahlen bevorzugt per Überweisung. Braucht ein
+    // Stripe-Customer-Objekt statt customer_email.
+    const stripeCustomerId = await getOrCreateStripeCustomer(
+      customer.email,
+      `${customer.firstName} ${customer.lastName}`
+    );
     const stripeSession = await stripe.checkout.sessions.create({
       mode: "payment",
-      payment_method_types: ["card"],
+      payment_method_types: ["card", "customer_balance"],
       locale: "de",
-      customer_email: customer.email,
+      customer: stripeCustomerId,
       line_items: [
         {
           quantity: 1,
@@ -258,9 +266,13 @@ export async function sendBookingMessage(
       // Banküberweisung) und daher noch keine hinterlegte Zahlungsmethode
       // haben. Der Webhook schreibt die PaymentIntent-ID danach auf die
       // Buchung zurück, falls dort noch keine hinterlegt ist.
-      customer_creation: "always",
+      // customer_balance unterstützt kein setup_future_usage → Karten-
+      // Speicherung läuft über payment_method_options.card.
+      payment_method_options: {
+        card: { setup_future_usage: "off_session" },
+        ...BANK_TRANSFER_PM_OPTIONS,
+      },
       payment_intent_data: {
-        setup_future_usage: "off_session",
         metadata: { bookingId: booking.id, bookingNumber: booking.bookingNumber },
       },
       metadata: {

@@ -6,6 +6,7 @@ import { eq, and, lt, isNotNull } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
 import { BOOKING_BLOCKS_TAG } from "@/lib/availability";
 import { cleanupExpiredMagicLinkTokens } from "@/lib/magic-link";
+import { BANK_TRANSFER_PENDING_MARKER } from "@/lib/payment-markers";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -57,7 +58,7 @@ export async function GET(req: Request) {
   // 0) Verwaiste, unbezahlte Standard-Buchungen freigeben (Checkout nie
   //    abgeschlossen). Schul-Aufschub + Vorstands-Review bleiben unberührt.
   const staleCutoff = new Date(Date.now() - STALE_BOOKING_HOURS * 60 * 60 * 1000);
-  const staleBookings = await db
+  const staleCandidates = await db
     .select()
     .from(bookings)
     .where(
@@ -69,6 +70,16 @@ export async function GET(req: Request) {
         lt(bookings.createdAt, staleCutoff)
       )
     );
+  // Angekündigte Banküberweisungen (Checkout abgeschlossen, SEPA-Eingang
+  // dauert 1–3 Werktage) sind NICHT verwaist — nicht auto-stornieren.
+  const pendingTransferRows = await db
+    .select({ bookingId: payments.bookingId })
+    .from(payments)
+    .where(
+      and(eq(payments.method, BANK_TRANSFER_PENDING_MARKER), eq(payments.status, "offen"))
+    );
+  const pendingTransferIds = new Set(pendingTransferRows.map((r) => r.bookingId));
+  const staleBookings = staleCandidates.filter((b) => !pendingTransferIds.has(b.id));
   for (const b of staleBookings) {
     await db
       .update(bookings)
