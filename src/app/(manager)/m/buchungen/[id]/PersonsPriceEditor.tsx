@@ -19,9 +19,19 @@ const FIELDS: { key: keyof P; label: string }[] = [
 const euro = (cents: number) =>
   (cents / 100).toLocaleString("de-DE", { style: "currency", currency: "EUR" });
 
-export function PersonsPriceEditor({ bookingId, initial }: { bookingId: string; initial: P }) {
+export function PersonsPriceEditor({
+  bookingId,
+  initial,
+  currentKurtaxeCents,
+}: {
+  bookingId: string;
+  initial: P;
+  currentKurtaxeCents: number;
+}) {
   const [open, setOpen] = useState(false);
   const [p, setP] = useState<P>(initial);
+  const [overrideKurtaxe, setOverrideKurtaxe] = useState(false);
+  const [kurtaxeEuros, setKurtaxeEuros] = useState((currentKurtaxeCents / 100).toFixed(2));
   const [res, setRes] = useState<{
     deltaCents: number;
     kurtaxeDeltaCents: number;
@@ -41,7 +51,12 @@ export function PersonsPriceEditor({ bookingId, initial }: { bookingId: string; 
     setMsg(null);
     setRes(null);
     start(async () => {
-      const r = await editBookingPersons({ bookingId, ...p, teachers: 0 });
+      const r = await editBookingPersons({
+        bookingId,
+        ...p,
+        teachers: 0,
+        kurtaxeOverrideEuros: overrideKurtaxe ? Number(kurtaxeEuros) : undefined,
+      });
       if (r.ok) {
         setRes({
           deltaCents: r.deltaCents,
@@ -109,6 +124,37 @@ export function PersonsPriceEditor({ bookingId, initial }: { bookingId: string; 
             />
           </label>
         ))}
+      </div>
+
+      <div className="mt-3 pt-3 border-t border-[var(--color-wh-winter-grey)]/60">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={overrideKurtaxe}
+            onChange={(e) => setOverrideKurtaxe(e.target.checked)}
+            className="w-4 h-4 accent-[var(--color-wh-deep-green)]"
+          />
+          <span className="text-[12px] text-[var(--color-wh-fg-muted)]">
+            Kurtaxe manuell setzen (statt automatisch aus Personenzahl) — z. B. wenn sich die
+            tatsächliche Teilnehmerzahl ändert, unser Preis laut Vorstandsbeschluss aber nicht
+            reduziert wird.
+          </span>
+        </label>
+        {overrideKurtaxe && (
+          <label className="block mt-2 max-w-[160px]">
+            <span className="block text-[11px] text-[var(--color-wh-fg-muted)] mb-1 leading-tight">
+              Kurtaxe in €
+            </span>
+            <input
+              type="number"
+              min={0}
+              step="0.01"
+              value={kurtaxeEuros}
+              onChange={(e) => setKurtaxeEuros(e.target.value)}
+              className="w-full rounded-lg border border-[var(--color-wh-winter-grey)] bg-white px-2 py-1.5 text-sm focus:border-[var(--color-wh-deep-green)] focus:outline-none"
+            />
+          </label>
+        )}
       </div>
 
       {err && <p className="text-[13px] text-[#7a3a20] mt-2">{err}</p>}
