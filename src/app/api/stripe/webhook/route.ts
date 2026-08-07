@@ -25,6 +25,7 @@ import DonationFinanceNoticeEmail from "@/lib/mail/templates/donation-finance-no
 import { addContactToMembersList } from "@/lib/brevo";
 import { promoteToMemberRole } from "@/lib/membership-role";
 import { confirmDepositPayment } from "@/lib/booking-payment-confirmation";
+import { BANK_TRANSFER_PENDING_MARKER, BANK_TRANSFER_LABEL } from "@/lib/payment-markers";
 import { formatEuro } from "@/lib/pricing";
 import { formatDateLong } from "@/lib/utils";
 import RestzahlungConfirmedEmail from "@/lib/mail/templates/restzahlung-confirmed";
@@ -90,6 +91,18 @@ export async function POST(req: NextRequest) {
       case "charge.refunded": {
         const charge = event.data.object as Stripe.Charge;
         await handleChargeRefunded(charge);
+        break;
+      }
+      case "refund.failed": {
+        // Banküberweisungs-Erstattungen können scheitern (z. B. Gast bestätigt
+        // seine Bankdaten nicht binnen 45 Tagen) → Vorstand muss manuell ran.
+        const refund = event.data.object as Stripe.Refund;
+        const refundBookingId = refund.metadata?.bookingId ?? null;
+        await db.insert(activityLog).values({
+          who: "Stripe",
+          what: `⚠️ Rückerstattung FEHLGESCHLAGEN: ${(refund.amount / 100).toFixed(2)} € (${refund.id}). Bei Banküberweisung passiert das, wenn Stripe keine gültigen Bankdaten des Gastes bekommt — bitte Erstattung manuell klären.`,
+          ...(refundBookingId ? { bookingId: refundBookingId } : {}),
+        });
         break;
       }
       case "payment_intent.succeeded": {
@@ -177,6 +190,45 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   const amountCents = (session.amount_total ?? 0) | 0;
 
+  // Banküberweisung (customer_balance) zahlt asynchron: completed kommt mit
+  // payment_status "unpaid" — das Geld ist noch NICHT da (SEPA: 1–3 Werktage).
+  // Buchung bleibt reserviert; ein Marker macht den Zustand für den Vorstand
+  // sichtbar und schützt vor dem Stale-Booking-Auto-Storno (daily-cleanup).
+  // Sobald das Geld eingeht, feuert checkout.session.async_payment_succeeded
+  // und landet wieder hier (payment_status "paid").
+  if (session.payment_status === "unpaid") {
+    const marker = await db
+      .select({ id: payments.id })
+      .from(payments)
+      .where(and(eq(payments.bookingId, bookingId), eq(payments.method, BANK_TRANSFER_PENDING_MARKER)))
+      .limit(1);
+    if (!marker[0]) {
+      await db.insert(payments).values({
+        bookingId,
+        kind: kind === "nachbelastung" || kind === "restzahlung" ? "restzahlung" : "anzahlung",
+        status: "offen",
+        amountCents,
+        method: BANK_TRANSFER_PENDING_MARKER,
+        stripePaymentIntentId: (session.payment_intent as string | null) ?? null,
+      });
+      await db.insert(activityLog).values({
+        who: "Stripe",
+        what: `Banküberweisung angekündigt: ${(amountCents / 100).toFixed(2)} € — Buchung bleibt reserviert, SEPA-Zahlungseingang steht aus (1–3 Werktage)`,
+        bookingId,
+      });
+    }
+    return;
+  }
+
+  // Bezahlt: einen evtl. vorhandenen Banküberweisungs-Marker aufräumen — die
+  // Zahlung wird gleich regulär verbucht. Aus dem Marker wissen wir zugleich,
+  // dass per Banküberweisung (statt Karte) gezahlt wurde → Label.
+  const clearedMarkers = await db
+    .delete(payments)
+    .where(and(eq(payments.bookingId, bookingId), eq(payments.method, BANK_TRANSFER_PENDING_MARKER)))
+    .returning({ id: payments.id });
+  const stripeMethodLabel = clearedMarkers.length > 0 ? BANK_TRANSFER_LABEL : "Stripe";
+
   // Nachbelastung / Restzahlung: nur Zahlung erfassen, Status NICHT verändern.
   if (kind === "nachbelastung" || kind === "restzahlung") {
     const piId = (session.payment_intent as string | null) ?? null;
@@ -200,7 +252,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       kind: kind === "restzahlung" ? "restzahlung" : "vollzahlung",
       status: "erhalten",
       amountCents,
-      method: "Stripe",
+      method: stripeMethodLabel,
       stripePaymentIntentId: (session.payment_intent as string | null) ?? null,
       receivedAt: new Date(),
     });
@@ -246,6 +298,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     bookingId,
     amountCents,
     source: "Stripe",
+    fallbackPaymentMethod: stripeMethodLabel,
     stripePaymentIntentId: (session.payment_intent as string | null) ?? null,
   });
 }

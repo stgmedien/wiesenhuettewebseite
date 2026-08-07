@@ -24,6 +24,7 @@ import { buildKurkartenFilename } from "@/lib/kurkarten";
 import { HUETTENWART_EMAIL, HUETTENWART_CC } from "@/lib/huettenwart";
 import RestzahlungRequestEmail from "@/lib/mail/templates/restzahlung-request";
 import { MANUAL_REST_MARKER, MANUAL_REST_SENT_MARKER } from "@/lib/payment-markers";
+import { BANK_TRANSFER_PM_OPTIONS } from "@/lib/stripe-bank-transfer";
 import AvsReminderInternalEmail from "@/lib/mail/templates/avs-reminder-internal";
 import MailFailureDigestEmail from "@/lib/mail/templates/mail-failure-digest";
 import RestzahlungConfirmedEmail from "@/lib/mail/templates/restzahlung-confirmed";
@@ -117,6 +118,7 @@ export async function GET(req: Request) {
     schoolWarningSent: 0,
     schoolCancelled: 0,
     manualRestSent: 0,
+    bankTransferRestLinkSent: 0,
     avsReminderSent: 0,
     mailFailureDigestSent: 0,
   };
@@ -301,7 +303,75 @@ export async function GET(req: Request) {
 
     if (chargeCents > 0 && b.stripePaymentIntentId) {
       try {
-        const originalPi = await stripe.paymentIntents.retrieve(b.stripePaymentIntentId);
+        const originalPi = await stripe.paymentIntents.retrieve(b.stripePaymentIntentId, {
+          expand: ["latest_charge"],
+        });
+
+        // Anzahlung kam per Banküberweisung (customer_balance)? Dann gibt es
+        // keine gespeicherte Karte → kein Off-Session-Einzug möglich. Statt-
+        // dessen Zahlungslink (Karte ODER Banküberweisung) per Mail.
+        const latestCharge =
+          typeof originalPi.latest_charge === "object" ? originalPi.latest_charge : null;
+        const paidWithBankTransfer =
+          latestCharge?.payment_method_details?.type === "customer_balance";
+        if (paidWithBankTransfer) {
+          if (await alreadySent(b.id, "restzahlung_request_banktransfer")) continue;
+          const btCustomer = b.customerId
+            ? (await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1))[0]
+            : null;
+          if (!btCustomer) continue;
+          const linkSession = await stripe.checkout.sessions.create({
+            mode: "payment",
+            payment_method_types: ["card", "customer_balance"],
+            locale: "de",
+            customer: originalPi.customer as string,
+            payment_method_options: BANK_TRANSFER_PM_OPTIONS,
+            line_items: [
+              {
+                quantity: 1,
+                price_data: {
+                  currency: "eur",
+                  unit_amount: chargeCents,
+                  product_data: {
+                    name: `Restzahlung Wiesenhütte ${b.bookingNumber}`,
+                    description: `Buchung ${b.bookingNumber} · ${b.arrival} bis ${b.departure}${
+                      kautionCents > 0 || kurtaxeCents > 0
+                        ? ` · inkl. ${[kautionCents > 0 && "Kaution", kurtaxeCents > 0 && "Kurtaxe"].filter(Boolean).join(" + ")}`
+                        : ""
+                    }`,
+                  },
+                },
+              },
+            ],
+            metadata: { bookingId: b.id, bookingNumber: b.bookingNumber, kind: "restzahlung" },
+            success_url: `${BASE_URL}/buchen/erfolg?bn=${b.bookingNumber}`,
+            cancel_url: `${BASE_URL}/buchen/abbruch?bn=${b.bookingNumber}`,
+          });
+          if (!linkSession.url) throw new Error("keine Stripe-Session-URL");
+          await sendMail({
+            to: btCustomer.email,
+            subject: `Restzahlung Wiesenhütte — Buchung ${b.bookingNumber}`,
+            template: "restzahlung_request_banktransfer",
+            bookingId: b.id,
+            react: PaymentReminderEmail({
+              firstName: btCustomer.firstName,
+              bookingNumber: b.bookingNumber,
+              arrival: formatDateLong(b.arrival),
+              remainderCents: chargeCents,
+              daysUntilArrival: 14,
+              paymentLink: linkSession.url,
+              autoChargePlanned: false,
+            }),
+          });
+          await db.insert(activityLog).values({
+            who: "Cron",
+            what: `Restzahlung angefordert (T-14, Banküberweisungs-Buchung): ${(chargeCents / 100).toFixed(2)} € — Zahlungslink (Karte/Überweisung) an ${btCustomer.email}`,
+            bookingId: b.id,
+          });
+          stats.bankTransferRestLinkSent++;
+          continue;
+        }
+
         const stripeCustomer = originalPi.customer as string | null;
         const stripePaymentMethod = originalPi.payment_method as string | null;
         if (!stripeCustomer || !stripePaymentMethod) {

@@ -23,6 +23,7 @@ import { db } from "@/lib/db";
 import { bookings, payments } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { stripe } from "@/lib/stripe";
+import { getOrCreateStripeCustomer, BANK_TRANSFER_PM_OPTIONS } from "@/lib/stripe-bank-transfer";
 
 export type BookingRow = typeof bookings.$inferSelect;
 
@@ -103,13 +104,17 @@ export async function getOrCreateDepositCheckout(
   }
 
   // 2) Neue Checkout-Session erzeugen (mirror Initial-Checkout).
+  // Schulen zahlen bevorzugt per klassischer Überweisung (Fördervereins-/
+  // Sammelgeld-Abläufe) → Banküberweisung zusätzlich zur Karte anbieten.
+  // Braucht ein Stripe-Customer-Objekt statt customer_email.
   let session;
   try {
+    const stripeCustomerId = await getOrCreateStripeCustomer(customerEmail);
     session = await stripe.checkout.sessions.create({
       mode: "payment",
-      payment_method_types: ["card"],
+      payment_method_types: ["card", "customer_balance"],
       locale: "de",
-      customer_email: customerEmail,
+      customer: stripeCustomerId,
       billing_address_collection: "auto",
       expires_at: depositLinkExpiresAt(booking.arrival),
       line_items: [
@@ -129,10 +134,15 @@ export async function getOrCreateDepositCheckout(
           },
         },
       ],
-      // Karte fuer die spaetere Off-Session-Restzahlung (T-14) speichern.
-      customer_creation: "always",
+      // Karte fuer die spaetere Off-Session-Restzahlung (T-14) speichern —
+      // customer_balance unterstützt kein setup_future_usage, daher per
+      // payment_method_options.card. Bei Überweisungs-Zahlern verschickt der
+      // T-14-Cron stattdessen einen Zahlungslink.
+      payment_method_options: {
+        card: { setup_future_usage: "off_session" },
+        ...BANK_TRANSFER_PM_OPTIONS,
+      },
       payment_intent_data: {
-        setup_future_usage: "off_session",
         metadata: { bookingId: booking.id, bookingNumber: booking.bookingNumber },
       },
       metadata: {
