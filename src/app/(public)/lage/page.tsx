@@ -96,7 +96,14 @@ type Copy = {
     h2: string;
     lead: string;
     car: { number: string; title: string; body: string; details: string[] };
-    train: { number: string; title: string; body: string; steps: string[]; scheduleLabel: string };
+    train: {
+      number: string;
+      title: string;
+      body: string;
+      steps: string[];
+      scheduleLabel: string;
+      scheduleHint: string;
+    };
     bike: { number: string; title: string; body: string; details: string[] };
     arrival: { number: string; title: string; body: string; details: string[] };
   };
@@ -195,6 +202,8 @@ const COPY: Record<Locale, Copy> = {
           "Direkt gegenüber: Einfahrt zur Wiesenhütte",
         ],
         scheduleLabel: "Fahrplan R28 (ZWS)",
+        scheduleHint:
+          "Führt direkt zur offiziellen Fahrplan-Übersicht der ZWS — dort immer die aktuell gültige Version, unabhängig von Fahrplanwechseln.",
       },
       bike: {
         number: "03",
@@ -393,6 +402,8 @@ const COPY: Record<Locale, Copy> = {
           "Directly opposite: driveway to the Wiesenhütte",
         ],
         scheduleLabel: "R28 timetable (ZWS)",
+        scheduleHint:
+          "Links straight to the official ZWS timetable overview — always the current version, regardless of schedule changes.",
       },
       bike: {
         number: "03",
@@ -560,6 +571,8 @@ const COPY: Record<Locale, Copy> = {
           "Direct tegenover: oprit naar de Wiesenhütte",
         ],
         scheduleLabel: "Dienstregeling R28 (ZWS)",
+        scheduleHint:
+          "Gaat direct naar het officiële dienstregeling-overzicht van ZWS — daar staat altijd de actueel geldige versie, ongeacht dienstregelingwijzigingen.",
       },
       bike: {
         number: "03",
@@ -886,8 +899,9 @@ export default async function LagePage() {
                 title={c.routes.train.title}
                 body={c.routes.train.body}
                 stepsList={c.routes.train.steps}
-                ctaHref="https://www.zws-online.de/fileadmin/contents/2_fahrplaene_liniennetz/2_1_fahrplaene/2_1_3_fahrplantabellen/2_1_3_4_regionalsbuslinien/R28.pdf"
+                ctaHref="https://www.zws-online.de/fahrplaene-liniennetz/fahrplaene/fahrplantabellen/regionalbuslinien/"
                 ctaLabel={c.routes.train.scheduleLabel}
+                ctaHint={c.routes.train.scheduleHint}
                 imgSrc="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/2019-04-19_Bahnhof_Winterberg_%28Westf%29_DB-Baureihe_633_109_%281%29.jpg/1280px-2019-04-19_Bahnhof_Winterberg_%28Westf%29_DB-Baureihe_633_109_%281%29.jpg"
                 imgAlt="Bahnhof Winterberg (Westf) mit DB-Baureihe 633"
                 imgRight={true}
@@ -1315,6 +1329,7 @@ const RouteRow = ({
   imgAttribution,
   ctaHref,
   ctaLabel,
+  ctaHint,
 }: {
   number: string;
   icon: React.ReactNode;
@@ -1328,6 +1343,7 @@ const RouteRow = ({
   imgAttribution?: string;
   ctaHref?: string;
   ctaLabel?: string;
+  ctaHint?: string;
 }) => (
   <div
     className={`grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10 items-center ${
@@ -1395,14 +1411,20 @@ const RouteRow = ({
         </ol>
       )}
       {ctaHref && ctaLabel && (
-        <a
-          href={ctaHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 mt-6 h-11 px-5 rounded-[var(--radius-btn)] bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] no-underline text-sm font-semibold hover:bg-[var(--color-wh-green)] transition-colors"
-        >
-          {ctaLabel} →
-        </a>
+        <div className="mt-6 max-w-xl rounded-2xl bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)]/40 p-4">
+          <p className="text-[12px] text-[var(--color-wh-fg-muted)] m-0 mb-2.5 leading-snug">
+            {ctaHint}
+          </p>
+          <a
+            href={ctaHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 h-11 px-5 rounded-[var(--radius-btn)] bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] no-underline text-sm font-semibold hover:bg-[var(--color-wh-green)] transition-colors"
+          >
+            {ctaLabel}
+            <ExternalLink size={14} />
+          </a>
+        </div>
       )}
     </div>
   </div>
