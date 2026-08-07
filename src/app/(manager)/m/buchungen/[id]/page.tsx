@@ -361,6 +361,7 @@ export default async function BookingDetail({ params }: Props) {
                 children: b.children,
                 pupils: b.pupils,
               }}
+              currentKurtaxeCents={b.kurtaxeCents}
             />
 
             {b.depositCents > 0 && (

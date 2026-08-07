@@ -816,6 +816,11 @@ const editPersonsSchema = z.object({
   children: z.coerce.number().int().min(0).max(60),
   pupils: z.coerce.number().int().min(0).max(60),
   teachers: z.coerce.number().int().min(0).max(60),
+  // Kurtaxe ist Durchlaufposten an Winterberg, gekoppelt an tatsächliche
+  // Gästezahl — anders als der eigene Übernachtungspreis (der laut
+  // Vorstandsbeschluss bei sinkender Personenzahl NICHT reduziert wird)
+  // muss sie unabhängig davon manuell korrigierbar sein.
+  kurtaxeOverrideEuros: z.coerce.number().min(0).optional(),
 });
 
 export type EditPersonsResult =
@@ -878,7 +883,13 @@ export async function editBookingPersons(
   // nachträglich geänderte kurtaxenpflichtige Personen (ab 16 J.) nie neu
   // berechnet und der Verein zahlt die Differenz an Winterberg aus eigener
   // Tasche (bzw. verschenkt sie bei einer Verringerung).
-  const kurtaxeDeltaCents = nb.kurtaxeCents - b.kurtaxeCents;
+  // Manueller Override möglich: die Kurtaxe ist ein Durchlaufposten an
+  // Winterberg und folgt der TATSÄCHLICHEN Gästezahl — anders als unser
+  // eigener Übernachtungspreis, der laut Vorstandsbeschluss bei sinkender
+  // Personenzahl nicht reduziert wird (siehe Storno-/Personen-Regeln).
+  const finalKurtaxeCents =
+    d.kurtaxeOverrideEuros !== undefined ? Math.round(d.kurtaxeOverrideEuros * 100) : nb.kurtaxeCents;
+  const kurtaxeDeltaCents = finalKurtaxeCents - b.kurtaxeCents;
   const newSubtotalCents = b.subtotalCents + deltaCents;
   if (newSubtotalCents < 0) {
     return { ok: false, error: "Neue Zwischensumme wäre negativ — bitte Eingaben prüfen." };
@@ -896,7 +907,7 @@ export async function editBookingPersons(
       accommodationCents: nb.accommodationCents,
       minOccupancySurchargeCents: nb.minOccupancySurchargeCents,
       soloSurchargeCents: nb.soloSurchargeCents,
-      kurtaxeCents: nb.kurtaxeCents,
+      kurtaxeCents: finalKurtaxeCents,
       subtotalCents: newSubtotalCents,
       totalCents: newSubtotalCents,
       updatedAt: new Date(),
@@ -905,7 +916,7 @@ export async function editBookingPersons(
 
   await db.insert(activityLog).values({
     who: session.user?.name ?? session.user?.email ?? "Manager",
-    what: `Personen angepasst (Mitgl ${d.members} · Erw ${d.adults} · Kind ${d.children} · Schü ${d.pupils} · Lehr ${d.teachers}) → Zwischensumme ${formatEuro(newSubtotalCents)} (${deltaCents >= 0 ? "+" : ""}${formatEuro(deltaCents)})${kurtaxeDeltaCents !== 0 ? `, Kurtaxe ${kurtaxeDeltaCents >= 0 ? "+" : ""}${formatEuro(kurtaxeDeltaCents)}` : ""}`,
+    what: `Personen angepasst (Mitgl ${d.members} · Erw ${d.adults} · Kind ${d.children} · Schü ${d.pupils} · Lehr ${d.teachers}) → Zwischensumme ${formatEuro(newSubtotalCents)} (${deltaCents >= 0 ? "+" : ""}${formatEuro(deltaCents)})${kurtaxeDeltaCents !== 0 ? `, Kurtaxe ${kurtaxeDeltaCents >= 0 ? "+" : ""}${formatEuro(kurtaxeDeltaCents)}${d.kurtaxeOverrideEuros !== undefined ? " (manuell)" : ""}` : ""}`,
     bookingId: d.bookingId,
   });
 
