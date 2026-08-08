@@ -1351,3 +1351,97 @@ export type MailTemplateVersion = typeof mailTemplateVersions.$inferSelect;
 export type NewMailTemplateVersion = typeof mailTemplateVersions.$inferInsert;
 export type ExternalReview = typeof externalReviews.$inferSelect;
 export type NewExternalReview = typeof externalReviews.$inferInsert;
+
+// =============================================================
+// Website-Upgrades 07/2026: Warteliste, teilbare Angebote, Gruppen-Hub
+// =============================================================
+
+// Verfügbarkeits-Alarm: Gast trägt sich für einen belegten Zeitraum ein und
+// wird automatisch benachrichtigt, sobald eine Stornierung ihn freigibt.
+export const waitlistEntries = pgTable(
+  "waitlist_entries",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    email: varchar("email", { length: 255 }).notNull(),
+    firstName: varchar("first_name", { length: 120 }),
+    arrival: date("arrival").notNull(),
+    departure: date("departure").notNull(),
+    persons: integer("persons"),
+    // gesetzt, sobald die Frei-geworden-Mail raus ist (kein Doppelversand)
+    notifiedAt: timestamp("notified_at"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    waitlistRangeIdx: index("waitlist_range_idx").on(t.arrival, t.departure),
+    waitlistEmailIdx: index("waitlist_email_idx").on(t.email),
+  })
+);
+
+// Teilbares Angebot: eingefrorene Preis-Kalkulation mit 14 Tagen Gültigkeit,
+// erreichbar über /angebot/<token> (+ PDF) — fürs Lehrerzimmer/Vorstandsrunde.
+export const offers = pgTable(
+  "offers",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    token: varchar("token", { length: 64 }).notNull().unique(),
+    arrival: date("arrival").notNull(),
+    departure: date("departure").notNull(),
+    adults: integer("adults").notNull().default(0),
+    children: integer("children").notNull().default(0),
+    pupils: integer("pupils").notNull().default(0),
+    teachers: integer("teachers").notNull().default(0),
+    purpose: varchar("purpose", { length: 200 }),
+    institution: varchar("institution", { length: 200 }),
+    contactName: varchar("contact_name", { length: 200 }),
+    // Preis-Snapshot zum Erstellzeitpunkt (Positionen wie Rechnung)
+    lineItems: jsonb("line_items")
+      .$type<Array<{ label: string; totalCents: number }>>()
+      .notNull()
+      .default(sql`'[]'::jsonb`),
+    subtotalCents: integer("subtotal_cents").notNull().default(0),
+    depositCents: integer("deposit_cents").notNull().default(0),
+    kurtaxeCents: integer("kurtaxe_cents").notNull().default(0),
+    validUntil: date("valid_until").notNull(),
+    views: integer("views").notNull().default(0),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => ({ offersTokenIdx: index("offers_token_idx").on(t.token) })
+);
+
+// Gruppen-Planungs-Hub: teilbarer Link pro Buchung für die Mitreisenden
+// (Packliste, Essensplan, Zimmeraufteilung, Mitfahrbörse).
+export const bookingHubs = pgTable("booking_hubs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  bookingId: uuid("booking_id")
+    .notNull()
+    .unique()
+    .references(() => bookings.id, { onDelete: "cascade" }),
+  token: varchar("token", { length: 64 }).notNull().unique(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const hubEntries = pgTable(
+  "hub_entries",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    hubId: uuid("hub_id")
+      .notNull()
+      .references(() => bookingHubs.id, { onDelete: "cascade" }),
+    // "packliste" | "essen" | "zimmer" | "mitfahrt"
+    kind: varchar("kind", { length: 20 }).notNull(),
+    title: varchar("title", { length: 200 }).notNull(),
+    details: text("details"),
+    authorName: varchar("author_name", { length: 120 }),
+    done: boolean("done").notNull().default(false),
+    // kind-spezifische Zusatzdaten (z. B. Zimmer-Nr., Sitzplätze, Mahlzeit-Slot)
+    meta: jsonb("meta").$type<Record<string, string | number | boolean>>(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => ({ hubEntriesHubIdx: index("hub_entries_hub_idx").on(t.hubId, t.kind) })
+);
+
+export type WaitlistEntry = typeof waitlistEntries.$inferSelect;
+export type Offer = typeof offers.$inferSelect;
+export type BookingHub = typeof bookingHubs.$inferSelect;
+export type HubEntry = typeof hubEntries.$inferSelect;
