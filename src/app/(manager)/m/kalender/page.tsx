@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { bookings, customers } from "@/lib/db/schema";
-import { eq, gte, lte, and } from "drizzle-orm";
+import { eq, gte, lte, and, ne } from "drizzle-orm";
 import { CalendarGrid } from "./CalendarGrid";
 import { getSiteSettings } from "@/lib/settings";
 import { getReleasedCleaningDates } from "@/lib/cleaning-overrides";
@@ -34,7 +34,13 @@ export default async function CalendarPage({ searchParams }: Props) {
     })
     .from(bookings)
     .leftJoin(customers, eq(customers.id, bookings.customerId))
-    .where(and(lte(bookings.arrival, toIso), gte(bookings.departure, fromIso)));
+    .where(
+      and(
+        lte(bookings.arrival, toIso),
+        gte(bookings.departure, fromIso),
+        ne(bookings.status, "storniert")
+      )
+    );
 
   const events = list.map((b) => ({
     id: b.id,
@@ -50,11 +56,12 @@ export default async function CalendarPage({ searchParams }: Props) {
   }));
 
   const { cleaningDaysAfterDeparture } = await getSiteSettings();
-  // Reinigungstage = Tag(e) NACH dem Abreisetag. Wartung und stornierte
-  // Buchungen erhalten keinen Putztag (konsistent mit dem öffentlichen Kalender).
+  // Reinigungstage = Tag(e) NACH dem Abreisetag. Wartung erhält keinen Putztag
+  // (konsistent mit dem öffentlichen Kalender). Stornierte Buchungen sind
+  // bereits durch den Query-Filter oben ausgeschlossen.
   const cleaningDates = new Set<string>();
   for (const e of list) {
-    if (e.status === "wartung" || e.status === "storniert") continue;
+    if (e.status === "wartung") continue;
     const dep = new Date(e.departure);
     for (let i = 0; i < cleaningDaysAfterDeparture; i++) {
       const d = new Date(dep);
