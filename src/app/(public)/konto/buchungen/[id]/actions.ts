@@ -19,6 +19,7 @@ import BookingExtendedKurkartenReminderEmail from "@/lib/mail/templates/booking-
 import HuettenwartCancellationEmail from "@/lib/mail/templates/huettenwart-cancellation";
 import { HUETTENWART_EMAIL, HUETTENWART_CC } from "@/lib/huettenwart";
 import { buildIcalCancel } from "@/lib/mail/ical";
+import { getOrCreateHubForBooking, hubUrl } from "@/lib/hub";
 
 const idSchema = z.string().uuid();
 
@@ -628,4 +629,41 @@ export async function submitBookingExtension(
   revalidatePath("/konto");
   revalidatePath("/m/dashboard");
   return { ok: true, calc: res.calc };
+}
+
+// =============================================================
+// GRUPPEN-HUB (Planungs-Hub für Mitreisende): Der Buchungsbesitzer erzeugt
+// einen teilbaren Link (/gruppe/[token]) — Packliste, Essensplan,
+// Zimmeraufteilung und Mitfahrbörse für die ganze Gruppe, ohne Login.
+// Nur bei bestätigten Buchungen (bestaetigt/bezahlt/angereist), damit für
+// unbestätigte Anfragen keine teilbaren Links durch Gruppen-Chats geistern.
+// =============================================================
+
+export type HubLinkResult = { ok: true; url: string } | { ok: false; error: string };
+
+const HUB_ALLOWED_STATUS = new Set(["bestaetigt", "bezahlt", "angereist"]);
+
+export async function createGroupHubLink(raw: { bookingId: string }): Promise<HubLinkResult> {
+  const parsed = z.object({ bookingId: z.string().uuid() }).safeParse(raw);
+  if (!parsed.success) return { ok: false, error: "Ungültige Eingabe." };
+
+  let owned: Awaited<ReturnType<typeof loadOwnedBooking>>;
+  try {
+    owned = await loadOwnedBooking(parsed.data.bookingId);
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Nicht erlaubt." };
+  }
+  const { booking } = owned;
+
+  if (!HUB_ALLOWED_STATUS.has(booking.status)) {
+    return {
+      ok: false,
+      error: "Der Gruppen-Hub ist erst verfügbar, sobald die Buchung bestätigt ist.",
+    };
+  }
+
+  const hub = await getOrCreateHubForBooking(booking.id);
+
+  revalidatePath(`/konto/buchungen/${booking.id}`);
+  return { ok: true, url: hubUrl(hub.token) };
 }

@@ -1,14 +1,16 @@
 import { auth } from "@/lib/auth";
 import { redirect, notFound } from "next/navigation";
 import { db } from "@/lib/db";
-import { bookings, customers, payments } from "@/lib/db/schema";
+import { bookings, customers, payments, bookingHubs } from "@/lib/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { getActiveInvoiceForBooking } from "@/lib/invoice";
 import { formatEuro, cancellationFeeForBooking, RULES } from "@/lib/pricing";
 import { formatDateLong } from "@/lib/utils";
+import { hubUrl } from "@/lib/hub";
 import { CancelBookingButton } from "./CancelBookingButton";
 import { AddPersonsForm } from "./AddPersonsForm";
 import { ExtendStayForm } from "./ExtendStayForm";
+import { GroupHubSection } from "./GroupHubSection";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -89,6 +91,23 @@ export default async function BuchungDetailPage({ params }: Props) {
     daysUntilArrival >= 16 &&
     booking.paidCents < booking.subtotalCents;
 
+  // Gruppen-Hub: nur bei bestätigten Buchungen (Statusprüfung auch in
+  // createGroupHubLink in actions.ts). Existiert schon ein Hub, zeigen wir
+  // den Link direkt — sonst den Erstellen-Button.
+  const canUseHub =
+    booking.status === "bestaetigt" ||
+    booking.status === "bezahlt" ||
+    booking.status === "angereist";
+  let existingHubUrl: string | null = null;
+  if (canUseHub) {
+    const hubRows = await db
+      .select({ token: bookingHubs.token })
+      .from(bookingHubs)
+      .where(eq(bookingHubs.bookingId, booking.id))
+      .limit(1);
+    existingHubUrl = hubRows[0] ? hubUrl(hubRows[0].token) : null;
+  }
+
   return (
     <div className="container max-w-3xl mx-auto px-6 py-12">
       <Link
@@ -151,6 +170,11 @@ export default async function BuchungDetailPage({ params }: Props) {
             year: "numeric",
           })}
         />
+      )}
+
+      {/* Gruppen-Hub — teilbarer Planungs-Link für die Mitreisenden */}
+      {canUseHub && (
+        <GroupHubSection bookingId={booking.id} existingUrl={existingHubUrl} />
       )}
 
       {/* Pricing-Aufschluesselung */}
