@@ -18,7 +18,6 @@ const STATUS_COLOR: Record<string, string> = {
   bezahlt: "#6FA05F",
   angereist: "#2F4A35",
   abgereist: "#C8CEC4",
-  storniert: "#f3d5cb",
   wartung: "#111111",
 };
 
@@ -28,7 +27,6 @@ const STATUS_FG: Record<string, string> = {
   bezahlt: "#F7F7F2",
   angereist: "#F7F7F2",
   abgereist: "#2F4A35",
-  storniert: "#B85C38",
   wartung: "#F7F7F2",
 };
 
