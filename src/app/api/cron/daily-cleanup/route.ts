@@ -7,6 +7,7 @@ import { revalidateTag } from "next/cache";
 import { BOOKING_BLOCKS_TAG } from "@/lib/availability";
 import { cleanupExpiredMagicLinkTokens } from "@/lib/magic-link";
 import { BANK_TRANSFER_PENDING_MARKER } from "@/lib/payment-markers";
+import { notifyWaitlistForRange, purgeExpiredWaitlist } from "@/lib/waitlist";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -53,6 +54,7 @@ export async function GET(req: Request) {
     usersAnonymized: 0,
     customersAnonymized: 0,
     staleBookingsReleased: 0,
+    waitlistPurged: 0,
   };
 
   // 0) Verwaiste, unbezahlte Standard-Buchungen freigeben (Checkout nie
@@ -95,10 +97,17 @@ export async function GET(req: Request) {
       bookingId: b.id,
     });
     stats.staleBookingsReleased++;
+    // Warteliste: freigewordenen Zeitraum prüfen, ggf. Interessenten
+    // benachrichtigen (best-effort, crasht den Cron nie).
+    await notifyWaitlistForRange(b.arrival, b.departure);
   }
   if (stats.staleBookingsReleased > 0) {
     revalidateTag(BOOKING_BLOCKS_TAG, "max");
   }
+
+  // Warteliste aufräumen: abgelaufene Wunschzeiträume + benachrichtigte
+  // Einträge > 30 Tage löschen (Datenschutz-Zusage aus dem Formular).
+  stats.waitlistPurged = await purgeExpiredWaitlist();
 
   // 1) Magic-Link-Tokens aufraeumen
   await cleanupExpiredMagicLinkTokens();

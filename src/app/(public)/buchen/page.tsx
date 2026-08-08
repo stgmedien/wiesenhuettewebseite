@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BookingFlow } from "./BookingFlow";
+import { WaitlistForm } from "./WaitlistForm";
 import { getBookingBlocks } from "@/lib/availability";
 import { getBookingPrefill } from "./actions";
 import { db } from "@/lib/db";
@@ -219,6 +220,11 @@ export default async function BuchenPage({ searchParams }: Props) {
             repeatHint={repeatHint}
             locale={locale}
           />
+        </div>
+        {/* Verfügbarkeits-Alarm: Warteliste für belegte Zeiträume — eigene
+            Sektion unterhalb des Buchungsflows. */}
+        <div className="mt-16">
+          <WaitlistForm />
         </div>
       </div>
     </div>
