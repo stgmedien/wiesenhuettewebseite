@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BookingFlow } from "./BookingFlow";
+import { WaitlistForm } from "./WaitlistForm";
 import { getBookingBlocks } from "@/lib/availability";
 import { getBookingPrefill } from "./actions";
 import { db } from "@/lib/db";
@@ -8,6 +9,8 @@ import { eq, and } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { getServerLocale } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n-shared";
+import { RULES } from "@/lib/pricing";
+import { toLocalIso } from "@/lib/utils";
 
 const PAGE_COPY: Record<Locale, { eyebrow: string; h1: string; lead: string; loggedIn: string; member: string; pricesLink: string }> = {
   de: {
@@ -41,7 +44,17 @@ export const metadata = { title: "Buchen · Wiesenhütte" };
 export const dynamic = "force-dynamic";
 
 type Props = {
-  searchParams: Promise<{ repeat?: string }>;
+  searchParams: Promise<{
+    repeat?: string;
+    // Prefill-Vertrag (z. B. vom Preis-Schnellcheck der Startseite):
+    // arrival/departure als YYYY-MM-DD, Personen als Ganzzahlen.
+    arrival?: string;
+    departure?: string;
+    adults?: string;
+    children?: string;
+    pupils?: string;
+    teachers?: string;
+  }>;
 };
 
 export default async function BuchenPage({ searchParams }: Props) {
@@ -101,9 +114,58 @@ export default async function BuchenPage({ searchParams }: Props) {
     }
   }
 
+  // Prefill via Query-Params (z. B. vom Preis-Schnellcheck der Startseite):
+  // arrival/departure + adults/children/pupils/teachers. Datum und Personen
+  // werden UNABHÄNGIG validiert und nur bei validen Werten übernommen — so
+  // füllt z. B. eine gültige Personenzahl auch dann vor, wenn das Datum
+  // kaputt oder abgelaufen ist. repeat= hat Vorrang (kompletteres Prefill).
+  if (!repeatHint) {
+    const todayIso = toLocalIso(today);
+    const isIsoDate = (s: string | undefined): s is string =>
+      !!s && /^\d{4}-\d{2}-\d{2}$/.test(s) && !Number.isNaN(new Date(`${s}T00:00:00Z`).getTime());
+    const nightsBetween = (a: string, d: string) =>
+      Math.round(
+        (new Date(`${d}T00:00:00Z`).getTime() - new Date(`${a}T00:00:00Z`).getTime()) / 86_400_000
+      );
+    const datesOk =
+      isIsoDate(sp.arrival) &&
+      isIsoDate(sp.departure) &&
+      sp.arrival >= todayIso &&
+      nightsBetween(sp.arrival, sp.departure) >= RULES.minNights;
+
+    // Personen: fehlende Params zählen als 0; ein einziger kaputter Wert
+    // macht die ganze Personen-Gruppe ungültig (kein Rate-Prefill).
+    const parseCount = (s: string | undefined): number => {
+      if (s === undefined) return 0;
+      return /^\d{1,2}$/.test(s) ? Number(s) : NaN;
+    };
+    const qp = {
+      adults: parseCount(sp.adults),
+      children: parseCount(sp.children),
+      pupils: parseCount(sp.pupils),
+      teachers: parseCount(sp.teachers),
+    };
+    const qpTotal = qp.adults + qp.children + qp.pupils + qp.teachers;
+    const personsOk =
+      Number.isInteger(qpTotal) && qpTotal >= 1 && qpTotal <= RULES.maxPersons;
+
+    if (datesOk || personsOk) {
+      repeatHint = {
+        adults: personsOk ? qp.adults : 0,
+        members: 0,
+        children: personsOk ? qp.children : 0,
+        pupils: personsOk ? qp.pupils : 0,
+        teachers: personsOk ? qp.teachers : 0,
+        soloUse: false,
+        arrival: datesOk ? sp.arrival! : "",
+        departure: datesOk ? sp.departure! : "",
+      };
+    }
+  }
+
   // Re-Book-Guard: Wenn die +1-Jahr-Daten (teilweise) belegt sind, NICHT
   // vorbefüllen (nur Personen übernehmen) — sonst startet der Gast mit einer
-  // bereits gesperrten Auswahl.
+  // bereits gesperrten Auswahl. Gilt genauso für das Query-Param-Prefill.
   if (repeatHint && repeatHint.arrival && repeatHint.departure) {
     const blockedAll = new Set<string>([...booked, ...cleaning, ...wartung]);
     let anyBlocked = false;
@@ -158,6 +220,11 @@ export default async function BuchenPage({ searchParams }: Props) {
             repeatHint={repeatHint}
             locale={locale}
           />
+        </div>
+        {/* Verfügbarkeits-Alarm: Warteliste für belegte Zeiträume — eigene
+            Sektion unterhalb des Buchungsflows. */}
+        <div className="mt-16">
+          <WaitlistForm />
         </div>
       </div>
     </div>

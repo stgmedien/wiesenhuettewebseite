@@ -41,6 +41,7 @@ import { cancellationFeeForBooking, formatEuro } from "@/lib/pricing";
 import { revalidateTag } from "next/cache";
 import { BOOKING_BLOCKS_TAG } from "@/lib/availability";
 import { formatDateLong } from "@/lib/utils";
+import { notifyWaitlistForRange } from "@/lib/waitlist";
 import crypto from "crypto";
 
 const BIRTHDAY_DISCOUNT_PERCENT = 10;
@@ -920,6 +921,9 @@ export async function GET(req: Request) {
       what: `Schul-Buchung ${b.bookingNumber} AUTO-STORNIERT (A-16, Anzahlung nicht eingegangen). Fällige Stornogebühr ${fee.percent}% = ${formatEuro(fee.feeCents)}.`,
       bookingId: b.id,
     });
+    // Warteliste: freigewordenen Zeitraum prüfen, ggf. Interessenten
+    // benachrichtigen (best-effort, crasht den Cron nie).
+    await notifyWaitlistForRange(b.arrival, b.departure);
     stats.schoolCancelled++;
   }
 
