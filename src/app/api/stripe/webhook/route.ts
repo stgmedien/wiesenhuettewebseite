@@ -28,6 +28,7 @@ import { confirmDepositPayment } from "@/lib/booking-payment-confirmation";
 import { BANK_TRANSFER_PENDING_MARKER, BANK_TRANSFER_LABEL } from "@/lib/payment-markers";
 import { formatEuro } from "@/lib/pricing";
 import { formatDateLong } from "@/lib/utils";
+import { notifyWaitlistForRange } from "@/lib/waitlist";
 import RestzahlungConfirmedEmail from "@/lib/mail/templates/restzahlung-confirmed";
 import type Stripe from "stripe";
 
@@ -359,6 +360,9 @@ async function handleCheckoutExpired(session: Stripe.Checkout.Session) {
   });
   // Öffentlichen Verfügbarkeits-Cache invalidieren → Tage sofort wieder buchbar.
   revalidateTag(BOOKING_BLOCKS_TAG, "max");
+  // Warteliste: freigewordenen Zeitraum prüfen, ggf. Interessenten
+  // benachrichtigen (best-effort, crasht den Webhook nie).
+  await notifyWaitlistForRange(booking.arrival, booking.departure);
 }
 
 // =============================================================

@@ -9,6 +9,7 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { cancellationFeeForBooking, formatEuro, calculatePrice, PRICES, RULES, type Persons } from "@/lib/pricing";
 import { resolveBookingTariffs, resolveTariffs } from "@/lib/pricing-tariffs";
 import { isRangeAvailable, BOOKING_BLOCKS_TAG } from "@/lib/availability";
+import { notifyWaitlistForRange } from "@/lib/waitlist";
 import { formatDateLong } from "@/lib/utils";
 import { sendMail } from "@/lib/mail/send";
 import BookingCancelledEmail from "@/lib/mail/templates/booking-cancelled";
@@ -95,6 +96,10 @@ export async function cancelOwnBooking(formData: FormData) {
     }`,
     bookingId: booking.id,
   });
+
+  // Warteliste: freigewordenen Zeitraum prüfen, ggf. Interessenten
+  // benachrichtigen (best-effort, crasht den Storno nie).
+  await notifyWaitlistForRange(booking.arrival, booking.departure);
 
   // Bestätigungs-Mail an Kunde + Intern an Manager
   try {

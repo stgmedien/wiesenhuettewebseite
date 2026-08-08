@@ -25,6 +25,7 @@ import { mailTemplates, mailTemplateVersions } from "@/lib/db/schema";
 import { substituteVars } from "@/lib/mail-render";
 import { buildBookingVars } from "@/lib/mail-template-vars";
 import { confirmDepositPayment, buildBookingConfirmedEmailProps } from "@/lib/booking-payment-confirmation";
+import { notifyWaitlistForRange } from "@/lib/waitlist";
 import { generateFeuerwehrListePdf } from "@/lib/generate-feuerwehr-liste";
 import { buildInvoicePdfAttachment } from "@/lib/invoice-attachment";
 import DepositRefundedEmail from "@/lib/mail/templates/deposit-refunded";
@@ -159,6 +160,12 @@ export async function setBookingStatus(
     } catch (err) {
       console.error("[setBookingStatus] Hüttenwart-Storno-Mail fehlgeschlagen:", err);
     }
+  }
+
+  // Warteliste: Storno gibt Tage frei → Verfügbarkeits-Alarm prüfen und ggf.
+  // Interessenten benachrichtigen (best-effort, crasht den Statuswechsel nie).
+  if (status === "storniert" && b.status !== "storniert") {
+    await notifyWaitlistForRange(b.arrival, b.departure);
   }
 
   // Loyalty: Wechsel auf 'abgereist' triggert ggf. Treue-Rabatt-Code.
