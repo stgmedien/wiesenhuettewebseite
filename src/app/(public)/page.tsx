@@ -5,6 +5,7 @@ import { makeT, type Locale } from "@/lib/i18n-shared";
 import { getSeason, SEASON_CLAIMS } from "@/lib/season";
 import { loadTrustData, type TrustData } from "@/lib/trust-reviews";
 import { TrustBadgeButton } from "@/components/public/TrustBadgeButton";
+import { PriceQuickCheck } from "@/components/public/PriceQuickCheck";
 import { EditorialGallery } from "@/components/public/landing/EditorialGallery";
 import { PullQuote } from "@/components/public/landing/PullQuote";
 import { ScrollStory } from "@/components/public/landing/ScrollStory";
@@ -53,7 +54,10 @@ const Hero = ({
   trust: TrustData;
   locale: Locale;
 }) => (
-  <section className="relative h-[600px] sm:h-[680px] overflow-hidden">
+  // min-h statt fester Hoehe: der Preis-Schnellcheck unten im Hero braucht
+  // Platz und darf auf schmalen Viewports nicht abgeschnitten werden — das
+  // Video (absolute + object-cover) fuellt jede resultierende Hoehe.
+  <section className="relative min-h-[600px] sm:min-h-[680px] overflow-hidden">
     <video
       autoPlay
       loop
@@ -116,6 +120,10 @@ const Hero = ({
         </Link>
         <TrustBadgeButton trust={trust} locale={locale} variant="hero" />
       </div>
+      {/* Preis-Schnellcheck: nimmt die groesste Buchungshuerde (Preis-
+          Unsicherheit) direkt im Hero — Zeitraum + Personen rein, Preis &
+          Verfuegbarkeit sofort, CTA springt mit Vorauswahl in /buchen. */}
+      <PriceQuickCheck locale={locale} />
     </div>
     {/* Tagline rechts oben — nur auf >=sm, weil sie auf Mobile mit dem
         Editorial-Issue unten links (Nº 70 · Langewiese, Hochsauerland · Seit 1956)
