@@ -153,6 +153,10 @@ export async function cancelOwnBooking(formData: FormData) {
 
   revalidatePath(`/konto/buchungen/${booking.id}`);
   revalidatePath("/konto");
+  // Storno gibt Tage frei → öffentlichen Verfügbarkeits-Cache invalidieren,
+  // sonst zeigt der /buchen-Kalender die freien Tage erst verzögert
+  // (Nebenbefund aus dem Warteliste-Feature).
+  revalidateTag(BOOKING_BLOCKS_TAG, "max");
   return { ok: true };
 }
 
