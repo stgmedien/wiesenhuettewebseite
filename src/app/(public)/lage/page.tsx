@@ -101,8 +101,10 @@ type Copy = {
       title: string;
       body: string;
       steps: string[];
-      scheduleLabel: string;
       scheduleHint: string;
+      scheduleLinks: { label: string; href: string }[];
+      searchLabel: string;
+      searchTip: string;
     };
     bike: { number: string; title: string; body: string; details: string[] };
     arrival: { number: string; title: string; body: string; details: string[] };
@@ -197,13 +199,24 @@ const COPY: Record<Locale, Copy> = {
         steps: [
           "Bahn bis Bahnhof Winterberg (Westf)",
           "Vom anschließenden ZOB: Bus R28 Richtung Schmallenberg",
-          "Ausstieg Langewiese Ortsmitte",
+          "Ausstieg an der Haltestelle „Bundesstraße“ (Ortsmitte Langewiese)",
           "200 m zu Fuß zur Bäckerei Gerke",
           "Direkt gegenüber: Einfahrt zur Wiesenhütte",
         ],
-        scheduleLabel: "Fahrplan R28 (ZWS)",
-        scheduleHint:
-          "Führt direkt zur offiziellen Fahrplan-Übersicht der ZWS — dort immer die aktuell gültige Version, unabhängig von Fahrplanwechseln.",
+        scheduleHint: "Fahrpläne ändern sich — hier immer die aktuelle Version:",
+        scheduleLinks: [
+          {
+            label: "Fahrplan R28 als PDF",
+            href: "https://www.zws-online.de/fileadmin/contents/2_fahrplaene_liniennetz/2_1_fahrplaene/2_1_3_fahrplantabellen/2_1_3_4_regionalsbuslinien/R28.pdf",
+          },
+          {
+            label: "Alle Fahrpläne (ZWS)",
+            href: "https://www.zws-online.de/fahrplaene-liniennetz/fahrplaene/fahrplantabellen/regionalbuslinien/",
+          },
+        ],
+        searchLabel: "Verbindung live suchen",
+        searchTip:
+          "Tipp: Als Haltestelle „Langewiese, Bundesstraße“ eingeben, als Ziel z. B. „Winterberg“.",
       },
       bike: {
         number: "03",
@@ -238,7 +251,7 @@ const COPY: Record<Locale, Copy> = {
       winter: {
         label: "Im Winter",
         h: "Oben an der Straße",
-        body: "Wenn Schnee liegt, parken alle oben an der Bundesstraße — der Schotterweg ist dann eisig und keine sichere Anfahrt mit dem Wagen.",
+        body: "Bei winterlichem Wetter grundsätzlich oben an der Bundesstraße parken — der Schotterweg wird schnell eisig, das müsst Ihr nicht selbst einschätzen.",
       },
     },
     map: {
@@ -397,13 +410,24 @@ const COPY: Record<Locale, Copy> = {
         steps: [
           "Train to Winterberg (Westf) station",
           "From the adjacent ZOB: bus R28 toward Schmallenberg",
-          "Get off at Langewiese Ortsmitte",
+          "Get off at the stop \"Bundesstraße\" (Langewiese centre)",
           "200 m on foot to bakery Gerke",
           "Directly opposite: driveway to the Wiesenhütte",
         ],
-        scheduleLabel: "R28 timetable (ZWS)",
-        scheduleHint:
-          "Links straight to the official ZWS timetable overview — always the current version, regardless of schedule changes.",
+        scheduleHint: "Timetables change — always find the current version here:",
+        scheduleLinks: [
+          {
+            label: "R28 timetable as PDF",
+            href: "https://www.zws-online.de/fileadmin/contents/2_fahrplaene_liniennetz/2_1_fahrplaene/2_1_3_fahrplantabellen/2_1_3_4_regionalsbuslinien/R28.pdf",
+          },
+          {
+            label: "All timetables (ZWS)",
+            href: "https://www.zws-online.de/fahrplaene-liniennetz/fahrplaene/fahrplantabellen/regionalbuslinien/",
+          },
+        ],
+        searchLabel: "Search a live connection",
+        searchTip:
+          "Tip: enter \"Langewiese, Bundesstraße\" as the stop, and e.g. \"Winterberg\" as the destination.",
       },
       bike: {
         number: "03",
@@ -438,7 +462,7 @@ const COPY: Record<Locale, Copy> = {
       winter: {
         label: "Winter",
         h: "Up on the main road",
-        body: "When snow lies, everyone parks up on the main road — the gravel track turns icy and isn't a safe drive with a car.",
+        body: "In winter weather, always park up on the main road — the gravel track turns icy quickly, so there's no need to judge the conditions yourselves.",
       },
     },
     map: {
@@ -566,13 +590,24 @@ const COPY: Record<Locale, Copy> = {
         steps: [
           "Trein tot station Winterberg (Westf)",
           "Vanaf het aansluitende ZOB: bus R28 richting Schmallenberg",
-          "Uitstappen bij Langewiese Ortsmitte",
+          "Uitstappen bij halte \"Bundesstraße\" (centrum Langewiese)",
           "200 m lopen naar bakkerij Gerke",
           "Direct tegenover: oprit naar de Wiesenhütte",
         ],
-        scheduleLabel: "Dienstregeling R28 (ZWS)",
-        scheduleHint:
-          "Gaat direct naar het officiële dienstregeling-overzicht van ZWS — daar staat altijd de actueel geldige versie, ongeacht dienstregelingwijzigingen.",
+        scheduleHint: "Dienstregelingen veranderen — hier vind je altijd de actuele versie:",
+        scheduleLinks: [
+          {
+            label: "Dienstregeling R28 als pdf",
+            href: "https://www.zws-online.de/fileadmin/contents/2_fahrplaene_liniennetz/2_1_fahrplaene/2_1_3_fahrplantabellen/2_1_3_4_regionalsbuslinien/R28.pdf",
+          },
+          {
+            label: "Alle dienstregelingen (ZWS)",
+            href: "https://www.zws-online.de/fahrplaene-liniennetz/fahrplaene/fahrplantabellen/regionalbuslinien/",
+          },
+        ],
+        searchLabel: "Live een verbinding zoeken",
+        searchTip:
+          "Tip: vul als halte \"Langewiese, Bundesstraße\" in, en als bestemming bijv. \"Winterberg\".",
       },
       bike: {
         number: "03",
@@ -607,7 +642,7 @@ const COPY: Record<Locale, Copy> = {
       winter: {
         label: "In de winter",
         h: "Boven aan de weg",
-        body: "Bij sneeuw parkeert iedereen boven aan de hoofdweg — de onverharde weg wordt dan ijzig en is niet veilig met de auto.",
+        body: "Bij winters weer altijd boven aan de hoofdweg parkeren — de onverharde weg wordt snel ijzig, dat hoef je niet zelf in te schatten.",
       },
     },
     map: {
@@ -899,9 +934,11 @@ export default async function LagePage() {
                 title={c.routes.train.title}
                 body={c.routes.train.body}
                 stepsList={c.routes.train.steps}
-                ctaHref="https://www.zws-online.de/fahrplaene-liniennetz/fahrplaene/fahrplantabellen/regionalbuslinien/"
-                ctaLabel={c.routes.train.scheduleLabel}
                 ctaHint={c.routes.train.scheduleHint}
+                ctaLinks={c.routes.train.scheduleLinks}
+                ctaPrimaryHref="https://www.westfalenfahrplan.de"
+                ctaPrimaryLabel={c.routes.train.searchLabel}
+                ctaPrimaryTip={c.routes.train.searchTip}
                 imgSrc="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/2019-04-19_Bahnhof_Winterberg_%28Westf%29_DB-Baureihe_633_109_%281%29.jpg/1280px-2019-04-19_Bahnhof_Winterberg_%28Westf%29_DB-Baureihe_633_109_%281%29.jpg"
                 imgAlt="Bahnhof Winterberg (Westf) mit DB-Baureihe 633"
                 imgRight={true}
@@ -1327,9 +1364,11 @@ const RouteRow = ({
   imgAlt,
   imgRight,
   imgAttribution,
-  ctaHref,
-  ctaLabel,
   ctaHint,
+  ctaLinks,
+  ctaPrimaryHref,
+  ctaPrimaryLabel,
+  ctaPrimaryTip,
 }: {
   number: string;
   icon: React.ReactNode;
@@ -1341,9 +1380,11 @@ const RouteRow = ({
   imgAlt: string;
   imgRight: boolean;
   imgAttribution?: string;
-  ctaHref?: string;
-  ctaLabel?: string;
   ctaHint?: string;
+  ctaLinks?: { href: string; label: string }[];
+  ctaPrimaryHref?: string;
+  ctaPrimaryLabel?: string;
+  ctaPrimaryTip?: string;
 }) => (
   <div
     className={`grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10 items-center ${
@@ -1410,20 +1451,43 @@ const RouteRow = ({
           ))}
         </ol>
       )}
-      {ctaHref && ctaLabel && (
+      {ctaPrimaryHref && ctaPrimaryLabel && (
         <div className="mt-6 max-w-xl rounded-2xl bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)]/40 p-4">
-          <p className="text-[12px] text-[var(--color-wh-fg-muted)] m-0 mb-2.5 leading-snug">
-            {ctaHint}
-          </p>
+          {ctaHint && (
+            <p className="text-[12px] text-[var(--color-wh-fg-muted)] m-0 mb-3 leading-snug">
+              {ctaHint}
+            </p>
+          )}
+          {ctaLinks && ctaLinks.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-3">
+              {ctaLinks.map((l) => (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full bg-white border border-[var(--color-wh-winter-grey)] text-[var(--color-wh-deep-green)] no-underline text-[12px] font-semibold hover:bg-[var(--color-wh-green-soft)] transition-colors"
+                >
+                  {l.label}
+                  <ExternalLink size={11} />
+                </a>
+              ))}
+            </div>
+          )}
           <a
-            href={ctaHref}
+            href={ctaPrimaryHref}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 h-11 px-5 rounded-[var(--radius-btn)] bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] no-underline text-sm font-semibold hover:bg-[var(--color-wh-green)] transition-colors"
           >
-            {ctaLabel}
+            {ctaPrimaryLabel}
             <ExternalLink size={14} />
           </a>
+          {ctaPrimaryTip && (
+            <p className="text-[12px] text-[var(--color-wh-fg-muted)] m-0 mt-2.5 leading-snug">
+              {ctaPrimaryTip}
+            </p>
+          )}
         </div>
       )}
     </div>
