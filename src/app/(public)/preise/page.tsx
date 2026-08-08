@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Mountain, Users, Sparkles, ShieldCheck, ArrowRight, Info } from "lucide-react";
+import { Mountain, Users, Sparkles, ShieldCheck, ArrowRight, Info, FileText } from "lucide-react";
 import { getServerLocale } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n-shared";
 import {
@@ -99,6 +99,9 @@ type Copy = {
   perPersonNight: string;
   plusDeposit: string;
   surchargeNote: string;
+  offerTitle: string;
+  offerBody: string;
+  offerCta: string;
   memberHeading: string;
   memberBody: string;
   memberCta: string;
@@ -146,6 +149,10 @@ const COPY: Record<Locale, Copy> = {
     plusDeposit: "zzgl. {x} Kaution (zurück)",
     surchargeNote:
       "Enthält den Mindestbelegungs-Aufschlag: Wir rechnen mindestens mit 15 Personen — kleinere Gruppen sind willkommen, zahlen aber den Aufschlag.",
+    offerTitle: "Ihr müsst das erst intern abstimmen?",
+    offerBody:
+      "Erstellt in 30 Sekunden ein teilbares Angebot als Link + PDF — mit eingefrorener Preis-Kalkulation, 14 Tage gültig. Perfekt fürs Lehrerzimmer oder die Vorstandsrunde.",
+    offerCta: "Angebot erstellen",
     memberHeading: "Mitglied werden lohnt sich",
     memberBody:
       "Als Vereinsmitglied zahlt ihr pro Übernachtung nur die Hälfte. Schon ab der zweiten Buchung kann sich der Jahresbeitrag rechnen — und ihr unterstützt die Hütte.",
@@ -196,6 +203,10 @@ const COPY: Record<Locale, Copy> = {
     plusDeposit: "plus {x} deposit (refunded)",
     surchargeNote:
       "Includes the minimum-occupancy surcharge: we bill for at least 15 guests — smaller groups are welcome but pay the surcharge.",
+    offerTitle: "Need to run it past your team first?",
+    offerBody:
+      "Create a shareable offer as a link + PDF in 30 seconds — with a frozen price calculation, valid for 14 days. Perfect for the staff room or the board meeting.",
+    offerCta: "Create an offer",
     memberHeading: "Membership pays off",
     memberBody:
       "As a club member you pay only half per night. The annual fee can pay for itself from the second booking — and you support the cabin.",
@@ -246,6 +257,10 @@ const COPY: Record<Locale, Copy> = {
     plusDeposit: "plus {x} borg (terug)",
     surchargeNote:
       "Inclusief de toeslag minimale bezetting: we rekenen met minimaal 15 personen — kleinere groepen zijn welkom maar betalen de toeslag.",
+    offerTitle: "Moeten jullie het eerst intern afstemmen?",
+    offerBody:
+      "Maak in 30 seconden een deelbaar aanbod als link + pdf — met bevroren prijsberekening, 14 dagen geldig. Perfect voor de lerarenkamer of het bestuur.",
+    offerCta: "Aanbod maken",
     memberHeading: "Lid worden loont",
     memberBody:
       "Als lid betaal je per overnachting maar de helft. Vanaf de tweede boeking kan de jaarbijdrage zich terugverdienen — en je steunt de hut.",
@@ -408,6 +423,29 @@ export default async function PreisePage() {
                 </div>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* ANGEBOT ZUM TEILEN — dezenter Hinweis für Gruppen, die intern abstimmen müssen */}
+      <section className="px-6 sm:px-8 pb-12">
+        <div className="max-w-[1080px] mx-auto">
+          <div className="rounded-[var(--radius-card)] bg-[var(--color-wh-sand)] border border-[var(--color-wh-winter-grey)] p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+            <div className="flex items-start gap-3 flex-1">
+              <FileText size={20} className="text-[var(--color-wh-deep-green)] shrink-0 mt-0.5" aria-hidden />
+              <div>
+                <h3 className="text-[16px] font-semibold m-0">{c.offerTitle}</h3>
+                <p className="text-[13.5px] text-[var(--color-wh-fg-muted)] leading-relaxed m-0 mt-1">
+                  {c.offerBody}
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/angebot"
+              className="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-[var(--radius-btn)] border border-[var(--color-wh-deep-green)] text-[var(--color-wh-deep-green)] font-semibold text-[14px] hover:bg-[var(--color-wh-green-soft)] transition-colors shrink-0"
+            >
+              {c.offerCta} <ArrowRight size={16} />
+            </Link>
           </div>
         </div>
       </section>
