@@ -66,7 +66,7 @@ export const AUTOMATIC_MAIL_TEMPLATES: AutomaticMailTemplate[] = [
     key: "restzahlung_request_manual",
     label: "Restzahlung — Altsystem-Buchung",
     category: "Zahlungen",
-    trigger: "T-14, nur für Buchungen mit dem Altsystem-Restzahlungs-Marker (100 €-Anzahlung-Altverträge) — generiert frischen Stripe-Link.",
+    trigger: "T-21, nur für Buchungen mit dem Altsystem-Restzahlungs-Marker (100 €-Anzahlung-Altverträge) — bittet um klassische Überweisung (kein Stripe-Link) mit Zahlungsziel T-14; nutzt den gespeicherten AVS-Check-in-Link nochmal mit, falls vorhanden.",
     audience: "Gast",
     file: "src/app/api/cron/daily-mail-jobs/route.ts",
   },

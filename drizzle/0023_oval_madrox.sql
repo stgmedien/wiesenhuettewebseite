@@ -1,0 +1,1 @@
+ALTER TABLE "bookings" ADD COLUMN "avs_checkin_link" text;

@@ -317,6 +317,12 @@ export const bookings = pgTable(
     // als Anhang beigefuegt, damit er sie vor Anreise ausdrucken kann.
     kurkartenPdfUrl: text("kurkarten_pdf_url"),
 
+    // Zuletzt manuell im AVS-Portal erzeugter und an den Gast verschickter
+    // SelfCheck-in-Link — gespeichert, damit ihn spaetere Erinnerungs-Mails
+    // (z. B. Altsystem-Restzahlung T-21) wiederverwenden koennen, ohne dass
+    // er im AVS-Portal neu erzeugt werden muss.
+    avsCheckinLink: text("avs_checkin_link"),
+
     // Namen aus der Kurkarten-PDF extrahiert (Vorschlag, von Dana vor der
     // PDF-Erzeugung noch korrigierbar) und die daraus generierte, auf Namen
     // reduzierte Feuerwehr-Meldeliste (kein Preis/QR). Wird T-7 an Toni UND

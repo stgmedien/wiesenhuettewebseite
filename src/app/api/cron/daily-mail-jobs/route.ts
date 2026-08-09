@@ -502,7 +502,7 @@ export async function GET(req: Request) {
     }
   }
 
-  // ---------- Altsystem-Restzahlung: T-14 Stripe-Link-Mail ----------
+  // ---------- Altsystem-Restzahlung: T-21 Überweisungs-Erinnerung ----------
   // Buchungen, die im ALTEN System mit 100 € angezahlt wurden (Anzahlung manuell
   // verbucht). Marker: payments.method == MANUAL_REST_MARKER + status "offen";
   // amountCents = geplanter Restbetrag (Summe + Kaution − 100), MANUELL von
@@ -510,11 +510,17 @@ export async function GET(req: Request) {
   // beim Gast NICHT ein (Rechnung geht an den Verein) — falls der Alt-Vertrag
   // die Kurtaxe "versteckt" in der Summe enthielt, MUSS dieser Betrag mit im
   // Restbetrag bleiben (nicht rausrechnen, sonst zahlt der Verein sie aus
-  // eigener Tasche). 14 Tage vor Anreise: Stripe-Checkout-Link für den Rest +
-  // Mail. Eng begrenzt auf die markierten Zeilen — fasst die normale
-  // Stripe-Pipeline nicht an.
+  // eigener Tasche). 21 Tage vor Anreise: Bitte um klassische Überweisung
+  // (kein Stripe-Link mehr — Vereine/Altverträge zahlen lieber klassisch,
+  // Vorstandsentscheidung 2026-08-09) mit Zahlungsziel 14 Tage vor Anreise.
+  // Nutzt denselben AVS-SelfCheck-in-Link nochmal mit, falls bereits einer
+  // ueber sendAvsCheckinLink verschickt und auf der Buchung gespeichert wurde.
+  // Eng begrenzt auf die markierten Zeilen — fasst die normale
+  // Stripe-Pipeline nicht an. Marker-String bleibt bewusst "@T-14" (nicht
+  // umbenannt), damit bereits bestehende Altvertrags-Zeilen in der DB
+  // weiterhin gefunden werden.
   const today0 = isoDayOffset(0);
-  const in14 = isoDayOffset(14);
+  const in21 = isoDayOffset(21);
   const manualRest = await db
     .select()
     .from(payments)
@@ -522,7 +528,7 @@ export async function GET(req: Request) {
   for (const pm of manualRest) {
     const b = (await db.select().from(bookings).where(eq(bookings.id, pm.bookingId)).limit(1))[0];
     if (!b || b.status === "storniert") continue;
-    if (b.arrival < today0 || b.arrival > in14) continue; // erst ab T-14, nicht rückwirkend
+    if (b.arrival < today0 || b.arrival > in21) continue; // erst ab T-21, nicht rückwirkend
     if (await alreadySent(b.id, "restzahlung_request_manual")) continue;
     const customer = b.customerId
       ? (await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1))[0]
@@ -531,41 +537,8 @@ export async function GET(req: Request) {
     const remainderCents = pm.amountCents;
     if (remainderCents <= 0) continue;
     try {
-      const session = await stripe.checkout.sessions.create({
-        mode: "payment",
-        payment_method_types: ["card"],
-        locale: "de",
-        customer_email: customer.email,
-        line_items: [
-          {
-            quantity: 1,
-            price_data: {
-              currency: "eur",
-              unit_amount: remainderCents,
-              product_data: {
-                name: `Restzahlung Wiesenhütte ${b.bookingNumber}`,
-                description: `Buchung ${b.bookingNumber} · ${b.arrival} bis ${b.departure} · inkl. Kaution, abzgl. 100 € Anzahlung.`,
-              },
-            },
-          },
-        ],
-        // Karte für spätere Off-Session-Abbuchungen speichern (z. B. eine
-        // künftige Aufenthalt-Verlängerung) — dieser Alt-Vertrag hatte bisher
-        // nie einen Stripe-Checkout, bekommt mit dieser Zahlung also
-        // erstmals eine hinterlegte Zahlungsmethode. Der Webhook schreibt
-        // die PaymentIntent-ID danach auf die Buchung zurück (siehe
-        // handleCheckoutCompleted, kind "restzahlung") — das loest zugleich
-        // die automatische restzahlung-confirmed-Mail an den Gast aus.
-        customer_creation: "always",
-        payment_intent_data: {
-          setup_future_usage: "off_session",
-          metadata: { bookingId: b.id, bookingNumber: b.bookingNumber },
-        },
-        metadata: { bookingId: b.id, bookingNumber: b.bookingNumber, kind: "restzahlung" },
-        success_url: `${BASE_URL}/buchen/erfolg?bn=${b.bookingNumber}`,
-        cancel_url: `${BASE_URL}/buchen/abbruch?bn=${b.bookingNumber}`,
-      });
-      if (!session.url) throw new Error("keine Stripe-Session-URL");
+      const deadlineDate = new Date(`${b.arrival}T00:00:00`);
+      deadlineDate.setDate(deadlineDate.getDate() - 14);
       await sendMail({
         to: customer.email,
         subject: `Restzahlung Eurer Wiesenhütten-Buchung ${b.bookingNumber}`,
@@ -579,7 +552,8 @@ export async function GET(req: Request) {
           departure: formatDateLong(b.departure),
           remainderCents,
           depositCents: b.depositCents,
-          checkoutUrl: session.url,
+          deadline: formatDateLong(deadlineDate.toISOString().slice(0, 10)),
+          avsCheckinLink: b.avsCheckinLink,
         }),
       });
       // Marker entschärfen → kein erneuter Versand (zusätzlich zur alreadySent-Idempotenz).
@@ -589,7 +563,7 @@ export async function GET(req: Request) {
         .where(eq(payments.id, pm.id));
       await db.insert(activityLog).values({
         who: "Cron",
-        what: `Altsystem-Restzahlung angefordert (T-14): ${formatEuro(remainderCents)} → ${customer.email}`,
+        what: `Altsystem-Restzahlung angefordert (T-21, Überweisung): ${formatEuro(remainderCents)} → ${customer.email}`,
         bookingId: b.id,
       });
       stats.manualRestSent++;
