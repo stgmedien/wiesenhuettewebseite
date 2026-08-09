@@ -1061,6 +1061,11 @@ export async function sendAvsCheckinLink(
     return { ok: false, error: `Mail-Versand fehlgeschlagen: ${msg}` };
   }
 
+  // Gespeichert, damit spaetere Erinnerungs-Mails (z. B. Altsystem-Restzahlung
+  // T-21) denselben Link wiederverwenden koennen, ohne ihn neu im AVS-Portal
+  // erzeugen zu muessen.
+  await db.update(bookings).set({ avsCheckinLink: url.toString() }).where(eq(bookings.id, bookingId));
+
   await db.insert(activityLog).values({
     who: session.user?.name ?? session.user?.email ?? "Manager",
     what: `AVS-SelfCheck-in-Link an ${customer.email} verschickt (digitaler Meldeschein/Kurkarten).`,
