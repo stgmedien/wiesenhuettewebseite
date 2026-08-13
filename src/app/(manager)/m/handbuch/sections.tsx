@@ -1195,6 +1195,44 @@ export const DOC_SECTIONS: DocSection[] = [
       </>
     ),
   },
+  {
+    id: "keine-erfundenen-inhalte",
+    title: "Keine erfundenen Bewertungen/Testimonials",
+    group: "Datenschutz & Audit",
+    searchText:
+      "erfundene Bewertungen fake reviews Testimonials Hüttenbuch UWG irreführend fingiert",
+    body: (
+      <>
+        <p>
+          Am 10.08.2026 stand längere Zeit eine Sektion auf der Startseite
+          („Hüttenbuch“), die laut eigenem Code-Kommentar „fingierte, aber
+          authentisch klingende“ Gästestimmen zeigte — erfundene Namen,
+          Daten und Zitate, teils mit dem echten Namen unseres Schulpartners
+          (ESG) für eine komplett fiktive Geschichte. Wurde entfernt.
+        </p>
+        <Danger>
+          Erfundene Kundenbewertungen sind seit der UWG-Novelle
+          (Omnibus-Richtlinie) als irreführende Geschäftspraxis
+          abmahnfähig, sobald sie wie echte Erfahrungsberichte aussehen
+          (Datum, Autor, Anführungszeichen). Gilt für Menschen wie für KI:
+          nie Bewertungen, Testimonials oder Gästestimmen erfinden — auch
+          nicht als Platzhalter „zum späteren Ersetzen“.
+        </Danger>
+        <UL>
+          <li>
+            Echte Bewertungen kommen ausschließlich aus{" "}
+            <Code>externalReviews</Code>, gepflegt unter{" "}
+            <Code>/m/bewertungen</Code> (Google + manuell mit echter Quelle)
+          </li>
+          <li>
+            Fehlen echte Inhalte für eine Sektion: Sektion weglassen oder
+            klar als Beispiel/Platzhalter kennzeichnen — nie als echte
+            Gästestimme ausgeben
+          </li>
+        </UL>
+      </>
+    ),
+  },
 
   // -----------------------------------------------------------
   // Hilfe
