@@ -10,6 +10,7 @@ import { EditorialGallery } from "@/components/public/landing/EditorialGallery";
 import { PullQuote } from "@/components/public/landing/PullQuote";
 import { ScrollStory } from "@/components/public/landing/ScrollStory";
 import { HistoryTimeline } from "@/components/public/landing/HistoryTimeline";
+import { HuettenbuchSection } from "@/components/public/landing/HuettenbuchSection";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { lodgingBusinessSchema } from "@/lib/seo";
 
@@ -36,6 +37,7 @@ export default async function HomePage() {
       <PullQuote locale={locale} />
       <ScrollStory locale={locale} />
       <HistoryTimeline locale={locale} />
+      <HuettenbuchSection locale={locale} />
       <CTABand tr={tr} />
     </div>
   );
