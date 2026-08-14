@@ -3,6 +3,8 @@ import {
   MapPin,
   Compass,
   Bus,
+  Sun,
+  Snowflake,
   Mountain,
   Croissant,
   Utensils,
@@ -95,7 +97,11 @@ type Copy = {
     searchLabel: string;
     searchTip: string;
     parkingTitle: string;
-    parkingBody: string;
+    parkingIntro: string;
+    summerLabel: string;
+    parkingSummer: string;
+    winterLabel: string;
+    parkingWinter: string;
   };
   map: {
     eyebrow: string;
@@ -185,8 +191,12 @@ const COPY: Record<Locale, Copy> = {
       searchTip:
         "Tipp: Als Haltestelle „Langewiese, Bundesstraße“ eingeben, als Ziel z. B. „Winterberg“.",
       parkingTitle: "Anreise & Parken",
-      parkingBody:
-        "Die Einfahrt liegt direkt an der Bundesstraße, gegenüber der Bäckerei Gerke — leicht zu übersehen beim ersten Mal. Von dort geht es rund 50 m auf einem Schotterweg bergab zur Hütte. Im Sommer parkt Ihr direkt davor; im Winter bitte oben an der Bundesstraße, weil der Schotterweg schnell eisig wird.",
+      parkingIntro:
+        "Die Einfahrt liegt direkt an der Bundesstraße, gegenüber der Bäckerei Gerke — leicht zu übersehen beim ersten Mal. Von dort geht es rund 50 m auf einem Schotterweg bergab zur Hütte.",
+      summerLabel: "Sommer",
+      parkingSummer: "Direkt vor der Hütte parken.",
+      winterLabel: "Winter",
+      parkingWinter: "Oben an der Bundesstraße parken — der Schotterweg wird schnell eisig. Nicht runterfahren!",
     },
     map: {
       eyebrow: "Karte",
@@ -348,8 +358,12 @@ const COPY: Record<Locale, Copy> = {
       searchTip:
         "Tip: enter \"Langewiese, Bundesstraße\" as the stop, and e.g. \"Winterberg\" as the destination.",
       parkingTitle: "Arrival & parking",
-      parkingBody:
-        "The driveway is right on the main road, opposite bakery Gerke — easy to miss the first time. From there it's about 50 m downhill on a gravel track to the cabin. Park right in front in summer; in winter please park up on the main road, since the gravel track turns icy fast.",
+      parkingIntro:
+        "The driveway is right on the main road, opposite bakery Gerke — easy to miss the first time. From there it's about 50 m downhill on a gravel track to the cabin.",
+      summerLabel: "Summer",
+      parkingSummer: "Park right in front of the cabin.",
+      winterLabel: "Winter",
+      parkingWinter: "Park up on the main road — the gravel track turns icy fast. Don't drive down!",
     },
     map: {
       eyebrow: "Map",
@@ -480,8 +494,12 @@ const COPY: Record<Locale, Copy> = {
       searchTip:
         "Tip: vul als halte \"Langewiese, Bundesstraße\" in, en als bestemming bijv. \"Winterberg\".",
       parkingTitle: "Aankomst & parkeren",
-      parkingBody:
-        "De oprit ligt direct aan de hoofdweg, tegenover bakkerij Gerke — de eerste keer makkelijk over het hoofd te zien. Vandaar gaat het zo'n 50 m bergafwaarts over een onverharde weg naar de hut. In de zomer parkeer je er direct voor; in de winter graag boven aan de hoofdweg, want de weg wordt snel ijzig.",
+      parkingIntro:
+        "De oprit ligt direct aan de hoofdweg, tegenover bakkerij Gerke — de eerste keer makkelijk over het hoofd te zien. Vandaar gaat het zo'n 50 m bergafwaarts over een onverharde weg naar de hut.",
+      summerLabel: "Zomer",
+      parkingSummer: "Direct voor de hut parkeren.",
+      winterLabel: "Winter",
+      parkingWinter: "Boven aan de hoofdweg parkeren — de weg wordt snel ijzig. Niet naar beneden rijden!",
     },
     map: {
       eyebrow: "Kaart",
@@ -635,6 +653,46 @@ export default async function LagePage() {
         </div>
       </section>
 
+      {/* ============= TRAVEL TIMES ============= */}
+      <section className="px-6 sm:px-8 py-20 sm:py-28 bg-[var(--color-wh-beige)]">
+        <div className="max-w-[1280px] mx-auto">
+          <ScrollReveal>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-10 sm:mb-14">
+              <div className="md:col-span-5">
+                <div className="eyebrow text-[var(--color-wh-deep-green)] mb-3">{c.travelTimes.eyebrow}</div>
+                <h2
+                  className="font-display font-bold text-[var(--color-wh-deep-green)] m-0 leading-[1.02]"
+                  style={{ fontSize: "clamp(32px, 5vw, 56px)", letterSpacing: "-0.02em" }}
+                >
+                  {c.travelTimes.h2}
+                </h2>
+              </div>
+            </div>
+          </ScrollReveal>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+            {c.travelTimes.cities.map((city, i) => (
+              <ScrollReveal key={city.name} delay={i * 80}>
+                <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-2xl p-5 sm:p-6 h-full flex flex-col">
+                  <div className="text-[10px] uppercase tracking-[0.25em] font-bold text-[var(--color-wh-deep-green)]/60 mb-3">
+                    {city.name}
+                  </div>
+                  <div
+                    className="font-display font-extrabold text-[var(--color-wh-deep-green)] leading-none tabular-nums mb-3"
+                    style={{ fontSize: "clamp(28px, 3.5vw, 44px)" }}
+                  >
+                    {city.hours}
+                  </div>
+                  <p className="text-[12px] sm:text-[13px] text-[var(--color-wh-fg-muted)] m-0 leading-snug">
+                    {city.sub}
+                  </p>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ============= ADDRESS STATEMENT ============= */}
       <section className="px-6 sm:px-8 py-24 sm:py-32 bg-[var(--color-wh-snow)]">
         <div className="max-w-[1280px] mx-auto">
@@ -689,46 +747,6 @@ export default async function LagePage() {
         </div>
       </section>
 
-      {/* ============= TRAVEL TIMES ============= */}
-      <section className="px-6 sm:px-8 py-20 sm:py-28 bg-[var(--color-wh-beige)]">
-        <div className="max-w-[1280px] mx-auto">
-          <ScrollReveal>
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-10 sm:mb-14">
-              <div className="md:col-span-5">
-                <div className="eyebrow text-[var(--color-wh-deep-green)] mb-3">{c.travelTimes.eyebrow}</div>
-                <h2
-                  className="font-display font-bold text-[var(--color-wh-deep-green)] m-0 leading-[1.02]"
-                  style={{ fontSize: "clamp(32px, 5vw, 56px)", letterSpacing: "-0.02em" }}
-                >
-                  {c.travelTimes.h2}
-                </h2>
-              </div>
-            </div>
-          </ScrollReveal>
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
-            {c.travelTimes.cities.map((city, i) => (
-              <ScrollReveal key={city.name} delay={i * 80}>
-                <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-2xl p-5 sm:p-6 h-full flex flex-col">
-                  <div className="text-[10px] uppercase tracking-[0.25em] font-bold text-[var(--color-wh-deep-green)]/60 mb-3">
-                    {city.name}
-                  </div>
-                  <div
-                    className="font-display font-extrabold text-[var(--color-wh-deep-green)] leading-none tabular-nums mb-3"
-                    style={{ fontSize: "clamp(28px, 3.5vw, 44px)" }}
-                  >
-                    {city.hours}
-                  </div>
-                  <p className="text-[12px] sm:text-[13px] text-[var(--color-wh-fg-muted)] m-0 leading-snug">
-                    {city.sub}
-                  </p>
-                </div>
-              </ScrollReveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ============= OHNE AUTO & LETZTES STÜCK (kompakt) =============
           Ersetzt die frühere 4-teilige Fotostrecke (Auto/Bahn/Rad/Ankunft)
           + separate Parken-Sektion: Routenbeschreibung per Auto/Rad
@@ -752,6 +770,18 @@ export default async function LagePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 sm:gap-14">
             <ScrollReveal as="article">
+              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-[var(--color-wh-winter-grey)] mb-4">
+                <Image
+                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/2019-04-19_Bahnhof_Winterberg_%28Westf%29_DB-Baureihe_633_109_%281%29.jpg/1280px-2019-04-19_Bahnhof_Winterberg_%28Westf%29_DB-Baureihe_633_109_%281%29.jpg"
+                  alt="Bahnhof Winterberg (Westf) mit DB-Baureihe 633"
+                  fill
+                  sizes="(min-width: 768px) 45vw, 100vw"
+                  className="object-cover"
+                />
+              </div>
+              <p className="text-[10px] text-[var(--color-wh-fg-muted)]/70 -mt-2.5 mb-4 text-right m-0">
+                Foto: Fantaglobe11 · CC BY-SA 4.0 · Wikimedia Commons
+              </p>
               <div className="flex items-center gap-2.5 text-[var(--color-wh-deep-green)] mb-4">
                 <Bus size={22} strokeWidth={1.6} />
                 <h3 className="font-display font-bold text-[20px] sm:text-[22px] m-0">
@@ -802,15 +832,44 @@ export default async function LagePage() {
             </ScrollReveal>
 
             <ScrollReveal as="article" delay={100}>
+              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-[var(--color-wh-winter-grey)] mb-4">
+                <Image
+                  src="/media/photos/ankunft_an_der_huette.png"
+                  alt="Ankunft an der Wiesenhütte"
+                  fill
+                  sizes="(min-width: 768px) 45vw, 100vw"
+                  className="object-cover"
+                />
+              </div>
               <div className="flex items-center gap-2.5 text-[var(--color-wh-deep-green)] mb-4">
                 <MapPin size={22} strokeWidth={1.6} />
                 <h3 className="font-display font-bold text-[20px] sm:text-[22px] m-0">
                   {c.transitAndParking.parkingTitle}
                 </h3>
               </div>
-              <p className="text-[15px] sm:text-base leading-relaxed text-[var(--color-wh-black)] m-0">
-                {c.transitAndParking.parkingBody}
+              <p className="text-[14px] sm:text-[15px] leading-relaxed text-[var(--color-wh-black)] m-0 mb-4">
+                {c.transitAndParking.parkingIntro}
               </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl bg-white border border-[var(--color-wh-winter-grey)] p-3.5">
+                  <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-bold text-[var(--color-wh-deep-green)]/70 mb-1.5">
+                    <Sun size={14} strokeWidth={1.8} />
+                    {c.transitAndParking.summerLabel}
+                  </div>
+                  <p className="text-[13px] text-[var(--color-wh-black)] m-0 leading-snug">
+                    {c.transitAndParking.parkingSummer}
+                  </p>
+                </div>
+                <div className="rounded-xl bg-[#fdf1ec] border border-[var(--color-wh-sunset)]/50 p-3.5">
+                  <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-bold text-[#7a3a20] mb-1.5">
+                    <Snowflake size={14} strokeWidth={1.8} />
+                    {c.transitAndParking.winterLabel}
+                  </div>
+                  <p className="text-[13px] text-[#7a3a20] font-medium m-0 leading-snug">
+                    {c.transitAndParking.parkingWinter}
+                  </p>
+                </div>
+              </div>
             </ScrollReveal>
           </div>
         </div>
