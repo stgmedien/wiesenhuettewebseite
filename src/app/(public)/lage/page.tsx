@@ -2,13 +2,7 @@ import Image from "next/image";
 import {
   MapPin,
   Compass,
-  Car,
-  TrainFront,
-  Bike,
   Bus,
-  ParkingCircle,
-  Sun,
-  Snowflake,
   Mountain,
   Croissant,
   Utensils,
@@ -91,29 +85,17 @@ type Copy = {
     ctaWaze: string;
   };
   travelTimes: { eyebrow: string; h2: string; cities: { name: string; hours: string; sub: string }[] };
-  routes: {
+  transitAndParking: {
     eyebrow: string;
     h2: string;
-    lead: string;
-    car: { number: string; title: string; body: string; details: string[] };
-    train: {
-      number: string;
-      title: string;
-      body: string;
-      steps: string[];
-      scheduleHint: string;
-      scheduleLinks: { label: string; href: string }[];
-      searchLabel: string;
-      searchTip: string;
-    };
-    bike: { number: string; title: string; body: string; details: string[] };
-    arrival: { number: string; title: string; body: string; details: string[] };
-  };
-  parking: {
-    eyebrow: string;
-    h2: string;
-    summer: { label: string; h: string; body: string };
-    winter: { label: string; h: string; body: string };
+    busTitle: string;
+    busSteps: string[];
+    scheduleHint: string;
+    scheduleLinks: { label: string; href: string }[];
+    searchLabel: string;
+    searchTip: string;
+    parkingTitle: string;
+    parkingBody: string;
   };
   map: {
     eyebrow: string;
@@ -153,7 +135,7 @@ const COPY: Record<Locale, Copy> = {
       meta: `51° 09' N · 8° 28' O · ${ELEVATION_M} m ü. NHN`,
       h1l1: "Da wo der",
       h1l2: "Wald sich teilt.",
-      lead: "Langewiese sitzt auf 690 Metern Höhe — auf einem Plateau zwischen dem Rothaarsteig und dem Hochsauerland. Die Hütte liegt 50 Meter unter der Bundesstraße am Hang. Eine Adresse, vier Wege herauf.",
+      lead: "Langewiese sitzt auf 690 Metern Höhe — auf einem Plateau zwischen dem Rothaarsteig und dem Hochsauerland. Die Hütte liegt 50 Meter unter der Bundesstraße am Hang.",
     },
     address: {
       eyebrow: "Adresse",
@@ -177,82 +159,34 @@ const COPY: Record<Locale, Copy> = {
         { name: "Berlin", hours: "5:00 h", sub: "Über A2 + Werl" },
       ],
     },
-    routes: {
-      eyebrow: "Vier Wege herauf",
-      h2: "Mit Auto, Bahn, Rad — oder zu Fuß.",
-      lead: "Egal wie Ihr kommt, das Höhendorf ist erreichbar. Im Winter empfehlen wir Schnee-Reifen, im Sommer reicht jedes Auto.",
-      car: {
-        number: "01",
-        title: "Mit dem Auto",
-        body: "Anfahrt über A44 (Soest/Werl) oder A46 (Bestwig). Letzte Etappe über die B480 durch Winterberg ins Höhendorf Langewiese — eine schöne Strecke durch dichten Mischwald.",
-        details: [
-          "A44 ab Ruhrgebiet / A46 ab Düsseldorf",
-          "Ausfahrt Bestwig → B480 nach Winterberg",
-          "Weiter durch Winterberg nach Langewiese (8 km)",
-          "Hausnummer 6 liegt 50 m unterhalb der B480",
-        ],
-      },
-      train: {
-        number: "02",
-        title: "Mit Bahn & Bus",
-        body: "Ohne Auto kommt Ihr trotzdem hoch — das letzte Stück ab Winterberg-Bahnhof ist eine 25-Minuten-Busfahrt. Mit Klassenfahrt-Größen funktioniert das gut.",
-        steps: [
-          "Bahn bis Bahnhof Winterberg (Westf)",
-          "Vom anschließenden ZOB: Bus R28 Richtung Schmallenberg",
-          "Ausstieg an der Haltestelle „Bundesstraße“ (Ortsmitte Langewiese)",
-          "200 m zu Fuß zur Bäckerei Gerke",
-          "Direkt gegenüber: Einfahrt zur Wiesenhütte",
-        ],
-        scheduleHint: "Fahrpläne ändern sich — hier immer die aktuelle Version:",
-        scheduleLinks: [
-          {
-            label: "Fahrplan R28 als PDF",
-            href: "https://www.zws-online.de/fileadmin/contents/2_fahrplaene_liniennetz/2_1_fahrplaene/2_1_3_fahrplantabellen/2_1_3_4_regionalsbuslinien/R28.pdf",
-          },
-          {
-            label: "Alle Fahrpläne (ZWS)",
-            href: "https://www.zws-online.de/fahrplaene-liniennetz/fahrplaene/fahrplantabellen/regionalbuslinien/",
-          },
-        ],
-        searchLabel: "Verbindung live suchen",
-        searchTip:
-          "Tipp: Als Haltestelle „Langewiese, Bundesstraße“ eingeben, als Ziel z. B. „Winterberg“.",
-      },
-      bike: {
-        number: "03",
-        title: "Mit dem Rad",
-        body: "Die Hütte wird häufig als Basislager für Radtouren genutzt — das Hochsauerland rund um Langewiese ist ein lohnendes Revier, von der Panorama-Runde bis zur knackigen Anstiegs-Etappe.",
-        details: [
-          "Von Winterberg rund 8 km — stetig bergauf, sportlich lohnend",
-          "Räder stehen sicher im abschließbaren Rad- und Skikeller (Zugang von außen)",
-          "Hochheide, Kahler Asten und Rothaarsteig-Panoramen direkt vor der Tür",
-        ],
-      },
-      arrival: {
-        number: "04",
-        title: "Letztes Stück",
-        body: "Die Einfahrt geht direkt von der Bundesstraße ab — das Haus selbst liegt rund 50 m weiter unten am Hang. Wer das erste Mal kommt, übersieht die Einfahrt leicht: Der Wegweiser steht an der Bundesstraße, gegenüber der Bäckerei Gerke.",
-        details: [
-          "Schotterweg, ~50 m bergab",
-          "Im Winter super glatt — nicht befahren",
-          "Direkt vor der Hütte parken (im Sommer)",
-          "Schlüssel-Übergabe vor Ort bei Anreise",
-        ],
-      },
-    },
-    parking: {
-      eyebrow: "Parken",
-      h2: "Sommer oder Winter — der Unterschied zählt.",
-      summer: {
-        label: "Im Sommer",
-        h: "Vor dem Haus",
-        body: "Direkt vor der Hütte gibt's Stellplätze für die ganze Gruppe. Zusätzlich oben an der Bundesstraße, einseitig parken.",
-      },
-      winter: {
-        label: "Im Winter",
-        h: "Oben an der Straße",
-        body: "Bei winterlichem Wetter grundsätzlich oben an der Bundesstraße parken — der Schotterweg wird schnell eisig, das müsst Ihr nicht selbst einschätzen.",
-      },
+    transitAndParking: {
+      eyebrow: "Ohne Auto & letztes Stück",
+      h2: "Was Google Maps nicht weiß.",
+      busTitle: "Mit Bahn & Bus",
+      busSteps: [
+        "Bahn bis Bahnhof Winterberg (Westf)",
+        "Vom anschließenden ZOB: Bus R28 Richtung Schmallenberg",
+        "Ausstieg an der Haltestelle „Bundesstraße“ (Ortsmitte Langewiese)",
+        "200 m zu Fuß zur Bäckerei Gerke",
+        "Direkt gegenüber: Einfahrt zur Wiesenhütte",
+      ],
+      scheduleHint: "Fahrpläne ändern sich — hier immer die aktuelle Version:",
+      scheduleLinks: [
+        {
+          label: "Fahrplan R28 als PDF",
+          href: "https://www.zws-online.de/fileadmin/contents/2_fahrplaene_liniennetz/2_1_fahrplaene/2_1_3_fahrplantabellen/2_1_3_4_regionalsbuslinien/R28.pdf",
+        },
+        {
+          label: "Alle Fahrpläne (ZWS)",
+          href: "https://www.zws-online.de/fahrplaene-liniennetz/fahrplaene/fahrplantabellen/regionalbuslinien/",
+        },
+      ],
+      searchLabel: "Verbindung live suchen",
+      searchTip:
+        "Tipp: Als Haltestelle „Langewiese, Bundesstraße“ eingeben, als Ziel z. B. „Winterberg“.",
+      parkingTitle: "Anreise & Parken",
+      parkingBody:
+        "Die Einfahrt liegt direkt an der Bundesstraße, gegenüber der Bäckerei Gerke — leicht zu übersehen beim ersten Mal. Von dort geht es rund 50 m auf einem Schotterweg bergab zur Hütte. Im Sommer parkt Ihr direkt davor; im Winter bitte oben an der Bundesstraße, weil der Schotterweg schnell eisig wird.",
     },
     map: {
       eyebrow: "Karte",
@@ -368,7 +302,7 @@ const COPY: Record<Locale, Copy> = {
       meta: `51° 09' N · 8° 28' E · ${ELEVATION_M} m above sea level`,
       h1l1: "Where the",
       h1l2: "forest parts.",
-      lead: "Langewiese sits at 690 metres elevation — on a plateau between the Rothaarsteig and the Hochsauerland. The cabin lies 50 metres below the main road on the hillside. One address, four ways up.",
+      lead: "Langewiese sits at 690 metres elevation — on a plateau between the Rothaarsteig and the Hochsauerland. The cabin lies 50 metres below the main road on the hillside.",
     },
     address: {
       eyebrow: "Address",
@@ -388,82 +322,34 @@ const COPY: Record<Locale, Copy> = {
         { name: "Amsterdam", hours: "4h 00", sub: "Via Cologne" },
       ],
     },
-    routes: {
-      eyebrow: "Four ways up",
-      h2: "By car, train, bike — or on foot.",
-      lead: "Whichever way you come, the highland village is reachable. We recommend winter tyres in snow; any car works in summer.",
-      car: {
-        number: "01",
-        title: "By car",
-        body: "Via A44 (Soest/Werl) or A46 (Bestwig). Final stretch on the B480 through Winterberg up to Langewiese — a beautiful drive through dense mixed forest.",
-        details: [
-          "A44 from the Ruhr / A46 from Düsseldorf",
-          "Exit Bestwig → B480 toward Winterberg",
-          "Continue 8 km through Winterberg to Langewiese",
-          "Number 6 sits 50 m below the B480",
-        ],
-      },
-      train: {
-        number: "02",
-        title: "By train + bus",
-        body: "You can still get up without a car — the final stretch from Winterberg station is a 25-minute bus ride. Works fine for school-group sizes.",
-        steps: [
-          "Train to Winterberg (Westf) station",
-          "From the adjacent ZOB: bus R28 toward Schmallenberg",
-          "Get off at the stop \"Bundesstraße\" (Langewiese centre)",
-          "200 m on foot to bakery Gerke",
-          "Directly opposite: driveway to the Wiesenhütte",
-        ],
-        scheduleHint: "Timetables change — always find the current version here:",
-        scheduleLinks: [
-          {
-            label: "R28 timetable as PDF",
-            href: "https://www.zws-online.de/fileadmin/contents/2_fahrplaene_liniennetz/2_1_fahrplaene/2_1_3_fahrplantabellen/2_1_3_4_regionalsbuslinien/R28.pdf",
-          },
-          {
-            label: "All timetables (ZWS)",
-            href: "https://www.zws-online.de/fahrplaene-liniennetz/fahrplaene/fahrplantabellen/regionalbuslinien/",
-          },
-        ],
-        searchLabel: "Search a live connection",
-        searchTip:
-          "Tip: enter \"Langewiese, Bundesstraße\" as the stop, and e.g. \"Winterberg\" as the destination.",
-      },
-      bike: {
-        number: "03",
-        title: "By bike",
-        body: "The cabin is a popular base camp for cycling tours — the Hochsauerland around Langewiese is rewarding terrain, from panoramic loops to punchy climbs.",
-        details: [
-          "From Winterberg about 8 km — a steady, rewarding climb",
-          "Bikes are stored safely in the lockable bike and ski cellar (outside access)",
-          "High moor, Kahler Asten and Rothaarsteig panoramas right outside the door",
-        ],
-      },
-      arrival: {
-        number: "04",
-        title: "Last metres",
-        body: "The driveway turns off the main road; the cabin itself is about 50 m further down the hillside. First-timers easily miss the entrance: the signpost stands on the main road, opposite bakery Gerke.",
-        details: [
-          "Gravel track, ~50 m downhill",
-          "Very slippery in winter — do not drive on it",
-          "Park right by the cabin (in summer)",
-          "Key handover on site at arrival",
-        ],
-      },
-    },
-    parking: {
-      eyebrow: "Parking",
-      h2: "Summer or winter — it matters.",
-      summer: {
-        label: "Summer",
-        h: "In front of the cabin",
-        body: "Right in front of the cabin there's space for the whole group. Additionally one-sided parking on the main road above.",
-      },
-      winter: {
-        label: "Winter",
-        h: "Up on the main road",
-        body: "In winter weather, always park up on the main road — the gravel track turns icy quickly, so there's no need to judge the conditions yourselves.",
-      },
+    transitAndParking: {
+      eyebrow: "Without a car & the last stretch",
+      h2: "What Google Maps won't tell you.",
+      busTitle: "By train & bus",
+      busSteps: [
+        "Train to Winterberg (Westf) station",
+        "From the adjacent ZOB: bus R28 toward Schmallenberg",
+        "Get off at the stop \"Bundesstraße\" (Langewiese centre)",
+        "200 m on foot to bakery Gerke",
+        "Directly opposite: driveway to the Wiesenhütte",
+      ],
+      scheduleHint: "Timetables change — always find the current version here:",
+      scheduleLinks: [
+        {
+          label: "R28 timetable as PDF",
+          href: "https://www.zws-online.de/fileadmin/contents/2_fahrplaene_liniennetz/2_1_fahrplaene/2_1_3_fahrplantabellen/2_1_3_4_regionalsbuslinien/R28.pdf",
+        },
+        {
+          label: "All timetables (ZWS)",
+          href: "https://www.zws-online.de/fahrplaene-liniennetz/fahrplaene/fahrplantabellen/regionalbuslinien/",
+        },
+      ],
+      searchLabel: "Search a live connection",
+      searchTip:
+        "Tip: enter \"Langewiese, Bundesstraße\" as the stop, and e.g. \"Winterberg\" as the destination.",
+      parkingTitle: "Arrival & parking",
+      parkingBody:
+        "The driveway is right on the main road, opposite bakery Gerke — easy to miss the first time. From there it's about 50 m downhill on a gravel track to the cabin. Park right in front in summer; in winter please park up on the main road, since the gravel track turns icy fast.",
     },
     map: {
       eyebrow: "Map",
@@ -548,7 +434,7 @@ const COPY: Record<Locale, Copy> = {
       meta: `51° 09' N · 8° 28' O · ${ELEVATION_M} m boven NAP`,
       h1l1: "Waar het bos",
       h1l2: "zich opent.",
-      lead: "Langewiese ligt op 690 meter hoogte — op een plateau tussen de Rothaarsteig en het Hochsauerland. De hut ligt 50 meter onder de hoofdweg op de helling. Eén adres, vier manieren omhoog.",
+      lead: "Langewiese ligt op 690 meter hoogte — op een plateau tussen de Rothaarsteig en het Hochsauerland. De hut ligt 50 meter onder de hoofdweg op de helling.",
     },
     address: {
       eyebrow: "Adres",
@@ -568,82 +454,34 @@ const COPY: Record<Locale, Copy> = {
         { name: "Brussel", hours: "4u 30", sub: "Via Aken + Keulen" },
       ],
     },
-    routes: {
-      eyebrow: "Vier wegen omhoog",
-      h2: "Met auto, trein, fiets — of te voet.",
-      lead: "Hoe je ook komt, het hooggelegen dorp is bereikbaar. Met sneeuw raden we winterbanden aan; in de zomer volstaat elke auto.",
-      car: {
-        number: "01",
-        title: "Met de auto",
-        body: "Via A44 (Soest/Werl) of A46 (Bestwig). Laatste stuk via de B480 door Winterberg naar Langewiese — een mooie rit door dicht gemengd bos.",
-        details: [
-          "A44 vanaf het Ruhrgebied / A46 vanaf Düsseldorf",
-          "Afrit Bestwig → B480 richting Winterberg",
-          "Door Winterberg verder naar Langewiese (8 km)",
-          "Huisnummer 6 ligt 50 m onder de B480",
-        ],
-      },
-      train: {
-        number: "02",
-        title: "Met trein + bus",
-        body: "Zonder auto kun je ook omhoog — het laatste stuk vanaf station Winterberg is een busrit van 25 minuten. Werkt prima voor schoolgroepen.",
-        steps: [
-          "Trein tot station Winterberg (Westf)",
-          "Vanaf het aansluitende ZOB: bus R28 richting Schmallenberg",
-          "Uitstappen bij halte \"Bundesstraße\" (centrum Langewiese)",
-          "200 m lopen naar bakkerij Gerke",
-          "Direct tegenover: oprit naar de Wiesenhütte",
-        ],
-        scheduleHint: "Dienstregelingen veranderen — hier vind je altijd de actuele versie:",
-        scheduleLinks: [
-          {
-            label: "Dienstregeling R28 als pdf",
-            href: "https://www.zws-online.de/fileadmin/contents/2_fahrplaene_liniennetz/2_1_fahrplaene/2_1_3_fahrplantabellen/2_1_3_4_regionalsbuslinien/R28.pdf",
-          },
-          {
-            label: "Alle dienstregelingen (ZWS)",
-            href: "https://www.zws-online.de/fahrplaene-liniennetz/fahrplaene/fahrplantabellen/regionalbuslinien/",
-          },
-        ],
-        searchLabel: "Live een verbinding zoeken",
-        searchTip:
-          "Tip: vul als halte \"Langewiese, Bundesstraße\" in, en als bestemming bijv. \"Winterberg\".",
-      },
-      bike: {
-        number: "03",
-        title: "Met de fiets",
-        body: "De hut wordt vaak gebruikt als basiskamp voor fietstochten — het Hochsauerland rond Langewiese is een dankbaar gebied, van panoramarondjes tot pittige klimmetjes.",
-        details: [
-          "Vanaf Winterberg zo'n 8 km — gestaag bergop, sportief de moeite waard",
-          "Fietsen staan veilig in de afsluitbare fietsen- en skikelder (toegang van buiten)",
-          "Hoogveen, Kahler Asten en Rothaarsteig-panorama's voor de deur",
-        ],
-      },
-      arrival: {
-        number: "04",
-        title: "Laatste meters",
-        body: "De oprit gaat rechtstreeks vanaf de hoofdweg af — het huis zelf ligt zo'n 50 m lager op de helling. Eerste keer wordt de oprit makkelijk gemist: het wegwijzerbord staat aan de hoofdweg, tegenover bakkerij Gerke.",
-        details: [
-          "Onverharde weg, ~50 m omlaag",
-          "Zeer glad in de winter — niet berijden",
-          "Direct voor de hut parkeren (in de zomer)",
-          "Sleuteloverdracht ter plaatse bij aankomst",
-        ],
-      },
-    },
-    parking: {
-      eyebrow: "Parkeren",
-      h2: "Zomer of winter — het verschil telt.",
-      summer: {
-        label: "In de zomer",
-        h: "Voor de hut",
-        body: "Direct voor de hut is plek voor de hele groep. Daarnaast aan één kant boven aan de hoofdweg.",
-      },
-      winter: {
-        label: "In de winter",
-        h: "Boven aan de weg",
-        body: "Bij winters weer altijd boven aan de hoofdweg parkeren — de onverharde weg wordt snel ijzig, dat hoef je niet zelf in te schatten.",
-      },
+    transitAndParking: {
+      eyebrow: "Zonder auto & het laatste stukje",
+      h2: "Wat Google Maps niet weet.",
+      busTitle: "Met trein & bus",
+      busSteps: [
+        "Trein tot station Winterberg (Westf)",
+        "Vanaf het aansluitende ZOB: bus R28 richting Schmallenberg",
+        "Uitstappen bij halte \"Bundesstraße\" (centrum Langewiese)",
+        "200 m lopen naar bakkerij Gerke",
+        "Direct tegenover: oprit naar de Wiesenhütte",
+      ],
+      scheduleHint: "Dienstregelingen veranderen — hier vind je altijd de actuele versie:",
+      scheduleLinks: [
+        {
+          label: "Dienstregeling R28 als pdf",
+          href: "https://www.zws-online.de/fileadmin/contents/2_fahrplaene_liniennetz/2_1_fahrplaene/2_1_3_fahrplantabellen/2_1_3_4_regionalsbuslinien/R28.pdf",
+        },
+        {
+          label: "Alle dienstregelingen (ZWS)",
+          href: "https://www.zws-online.de/fahrplaene-liniennetz/fahrplaene/fahrplantabellen/regionalbuslinien/",
+        },
+      ],
+      searchLabel: "Live een verbinding zoeken",
+      searchTip:
+        "Tip: vul als halte \"Langewiese, Bundesstraße\" in, en als bestemming bijv. \"Winterberg\".",
+      parkingTitle: "Aankomst & parkeren",
+      parkingBody:
+        "De oprit ligt direct aan de hoofdweg, tegenover bakkerij Gerke — de eerste keer makkelijk over het hoofd te zien. Vandaar gaat het zo'n 50 m bergafwaarts over een onverharde weg naar de hut. In de zomer parkeer je er direct voor; in de winter graag boven aan de hoofdweg, want de weg wordt snel ijzig.",
     },
     map: {
       eyebrow: "Kaart",
@@ -891,129 +729,88 @@ export default async function LagePage() {
         </div>
       </section>
 
-      {/* ============= ROUTES (3 Wege herauf) ============= */}
-      <section className="px-6 sm:px-8 py-24 sm:py-32 bg-[var(--color-wh-snow)]">
-        <div className="max-w-[1280px] mx-auto">
-          <ScrollReveal>
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-12 sm:mb-16">
-              <div className="md:col-span-5">
-                <div className="eyebrow text-[var(--color-wh-deep-green)] mb-3">{c.routes.eyebrow}</div>
-                <h2
-                  className="font-display font-bold text-[var(--color-wh-deep-green)] m-0 leading-[1.02]"
-                  style={{ fontSize: "clamp(32px, 5vw, 56px)", letterSpacing: "-0.02em" }}
-                >
-                  {c.routes.h2}
-                </h2>
-              </div>
-              <div className="md:col-span-7 md:pt-3">
-                <p className="text-base sm:text-[18px] leading-[1.7] text-[var(--color-wh-black)] m-0 max-w-2xl">
-                  {c.routes.lead}
-                </p>
-              </div>
-            </div>
-          </ScrollReveal>
-
-          <div className="space-y-10 sm:space-y-14">
-            <ScrollReveal as="article">
-              <RouteRow
-                number={c.routes.car.number}
-                icon={<Car size={28} strokeWidth={1.6} />}
-                title={c.routes.car.title}
-                body={c.routes.car.body}
-                details={c.routes.car.details}
-                imgSrc="/media/photos/anfahrt_a44.png"
-                imgAlt="Anfahrt über die A44 ins Sauerland"
-                imgRight={false}
-              />
-            </ScrollReveal>
-
-            <ScrollReveal as="article">
-              <RouteRow
-                number={c.routes.train.number}
-                icon={<TrainFront size={28} strokeWidth={1.6} />}
-                title={c.routes.train.title}
-                body={c.routes.train.body}
-                stepsList={c.routes.train.steps}
-                ctaHint={c.routes.train.scheduleHint}
-                ctaLinks={c.routes.train.scheduleLinks}
-                ctaPrimaryHref="https://www.westfalenfahrplan.de"
-                ctaPrimaryLabel={c.routes.train.searchLabel}
-                ctaPrimaryTip={c.routes.train.searchTip}
-                imgSrc="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/2019-04-19_Bahnhof_Winterberg_%28Westf%29_DB-Baureihe_633_109_%281%29.jpg/1280px-2019-04-19_Bahnhof_Winterberg_%28Westf%29_DB-Baureihe_633_109_%281%29.jpg"
-                imgAlt="Bahnhof Winterberg (Westf) mit DB-Baureihe 633"
-                imgRight={true}
-                imgAttribution="Foto: Fantaglobe11 · CC BY-SA 4.0 · Wikimedia Commons"
-              />
-            </ScrollReveal>
-
-            <ScrollReveal as="article">
-              <RouteRow
-                number={c.routes.bike.number}
-                icon={<Bike size={28} strokeWidth={1.6} />}
-                title={c.routes.bike.title}
-                body={c.routes.bike.body}
-                details={c.routes.bike.details}
-                imgSrc="/media/photos/nature-1.jpg"
-                imgAlt="Radrevier Hochsauerland rund um Langewiese"
-                imgRight={false}
-              />
-            </ScrollReveal>
-
-            <ScrollReveal as="article">
-              <RouteRow
-                number={c.routes.arrival.number}
-                icon={<MapPin size={28} strokeWidth={1.6} />}
-                title={c.routes.arrival.title}
-                body={c.routes.arrival.body}
-                details={c.routes.arrival.details}
-                imgSrc="/media/photos/ankunft_an_der_huette.png"
-                imgAlt="Ankunft an der Wiesenhütte"
-                imgRight={true}
-              />
-            </ScrollReveal>
-          </div>
-        </div>
-      </section>
-
-      {/* ============= PARKING ============= */}
+      {/* ============= OHNE AUTO & LETZTES STÜCK (kompakt) =============
+          Ersetzt die frühere 4-teilige Fotostrecke (Auto/Bahn/Rad/Ankunft)
+          + separate Parken-Sektion: Routenbeschreibung per Auto/Rad
+          übernimmt jedes Navi zuverlässiger. Übrig bleibt, was Google Maps
+          nicht weiß — ÖPNV-Weg und die leicht zu übersehende Einfahrt. */}
       <section className="px-6 sm:px-8 py-20 sm:py-28 bg-[var(--color-wh-beige)]">
-        <div className="max-w-[1280px] mx-auto">
+        <div className="max-w-[1080px] mx-auto">
           <ScrollReveal>
-            <div className="text-center mb-12 sm:mb-16 max-w-2xl mx-auto">
-              <div
-                className="font-display font-bold text-[var(--color-wh-deep-green)] mb-4 inline-flex items-center gap-3 justify-center leading-none"
-                style={{ fontSize: "clamp(44px, 7vw, 96px)", letterSpacing: "-0.025em" }}
-              >
-                <ParkingCircle size={48} strokeWidth={1.6} className="shrink-0" />
-                {c.parking.eyebrow}
+            <div className="mb-12 sm:mb-16 max-w-2xl">
+              <div className="eyebrow text-[var(--color-wh-deep-green)] mb-3">
+                {c.transitAndParking.eyebrow}
               </div>
               <h2
                 className="font-display font-bold text-[var(--color-wh-deep-green)] m-0 leading-[1.02]"
                 style={{ fontSize: "clamp(32px, 5vw, 56px)", letterSpacing: "-0.02em" }}
               >
-                {c.parking.h2}
+                {c.transitAndParking.h2}
               </h2>
             </div>
           </ScrollReveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-8">
-            <ScrollReveal delay={80}>
-              <ParkingCard
-                icon={<Sun size={32} strokeWidth={1.5} />}
-                accentClass="from-amber-400/30 via-orange-300/20 to-rose-300/10"
-                label={c.parking.summer.label}
-                h={c.parking.summer.h}
-                body={c.parking.summer.body}
-              />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 sm:gap-14">
+            <ScrollReveal as="article">
+              <div className="flex items-center gap-2.5 text-[var(--color-wh-deep-green)] mb-4">
+                <Bus size={22} strokeWidth={1.6} />
+                <h3 className="font-display font-bold text-[20px] sm:text-[22px] m-0">
+                  {c.transitAndParking.busTitle}
+                </h3>
+              </div>
+              <ol className="list-none p-0 m-0 space-y-3 mb-6">
+                {c.transitAndParking.busSteps.map((s, i) => (
+                  <li key={i} className="flex items-start gap-3 text-[14px] text-[var(--color-wh-deep-green)]/90">
+                    <span className="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-full bg-white text-[var(--color-wh-deep-green)] text-[11px] font-bold tabular-nums">
+                      {i + 1}
+                    </span>
+                    <span className="pt-0.5">{s}</span>
+                  </li>
+                ))}
+              </ol>
+              <div className="rounded-2xl bg-white border border-[var(--color-wh-winter-grey)]/40 p-4">
+                <p className="text-[12px] text-[var(--color-wh-fg-muted)] m-0 mb-3 leading-snug">
+                  {c.transitAndParking.scheduleHint}
+                </p>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {c.transitAndParking.scheduleLinks.map((l) => (
+                    <a
+                      key={l.href}
+                      href={l.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)] text-[var(--color-wh-deep-green)] no-underline text-[12px] font-semibold hover:bg-[var(--color-wh-green-soft)] transition-colors"
+                    >
+                      {l.label}
+                      <ExternalLink size={11} />
+                    </a>
+                  ))}
+                </div>
+                <a
+                  href="https://www.westfalenfahrplan.de"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 h-11 px-5 rounded-[var(--radius-btn)] bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] no-underline text-sm font-semibold hover:bg-[var(--color-wh-green)] transition-colors"
+                >
+                  {c.transitAndParking.searchLabel}
+                  <ExternalLink size={14} />
+                </a>
+                <p className="text-[12px] text-[var(--color-wh-fg-muted)] m-0 mt-2.5 leading-snug">
+                  {c.transitAndParking.searchTip}
+                </p>
+              </div>
             </ScrollReveal>
-            <ScrollReveal delay={180}>
-              <ParkingCard
-                icon={<Snowflake size={32} strokeWidth={1.5} />}
-                accentClass="from-sky-300/30 via-blue-200/20 to-indigo-200/10"
-                label={c.parking.winter.label}
-                h={c.parking.winter.h}
-                body={c.parking.winter.body}
-              />
+
+            <ScrollReveal as="article" delay={100}>
+              <div className="flex items-center gap-2.5 text-[var(--color-wh-deep-green)] mb-4">
+                <MapPin size={22} strokeWidth={1.6} />
+                <h3 className="font-display font-bold text-[20px] sm:text-[22px] m-0">
+                  {c.transitAndParking.parkingTitle}
+                </h3>
+              </div>
+              <p className="text-[15px] sm:text-base leading-relaxed text-[var(--color-wh-black)] m-0">
+                {c.transitAndParking.parkingBody}
+              </p>
             </ScrollReveal>
           </div>
         </div>
@@ -1353,147 +1150,6 @@ const MapDeepLink = ({ href, label }: { href: string; label: string }) => (
   </a>
 );
 
-const RouteRow = ({
-  number,
-  icon,
-  title,
-  body,
-  details,
-  stepsList,
-  imgSrc,
-  imgAlt,
-  imgRight,
-  imgAttribution,
-  ctaHint,
-  ctaLinks,
-  ctaPrimaryHref,
-  ctaPrimaryLabel,
-  ctaPrimaryTip,
-}: {
-  number: string;
-  icon: React.ReactNode;
-  title: string;
-  body: string;
-  details?: string[];
-  stepsList?: string[];
-  imgSrc: string;
-  imgAlt: string;
-  imgRight: boolean;
-  imgAttribution?: string;
-  ctaHint?: string;
-  ctaLinks?: { href: string; label: string }[];
-  ctaPrimaryHref?: string;
-  ctaPrimaryLabel?: string;
-  ctaPrimaryTip?: string;
-}) => (
-  <div
-    className={`grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10 items-center ${
-      imgRight ? "md:[&>.media]:order-2" : ""
-    }`}
-  >
-    <div className="media md:col-span-5">
-      <div className="relative aspect-[4/3] rounded-3xl overflow-hidden border border-[var(--color-wh-winter-grey)] shadow-[0_16px_44px_rgba(47,74,53,0.10)]">
-        <Image src={imgSrc} alt={imgAlt} fill sizes="(min-width: 768px) 45vw, 100vw" className="object-cover" />
-      </div>
-      {imgAttribution && (
-        <p className="text-[10px] text-[var(--color-wh-fg-muted)]/70 mt-2 text-right m-0">
-          {imgAttribution}
-        </p>
-      )}
-    </div>
-    <div className="md:col-span-7">
-      <div className="flex items-end gap-5 mb-5">
-        <div
-          className="font-display font-extrabold leading-none text-transparent select-none"
-          style={{
-            fontSize: "clamp(56px, 8vw, 110px)",
-            WebkitTextStroke: "1.5px var(--color-wh-deep-green)",
-            letterSpacing: "-0.05em",
-          }}
-        >
-          {number}
-        </div>
-        <div className="pb-2 flex items-center gap-3 text-[var(--color-wh-deep-green)]">
-          {icon}
-          <h3
-            className="font-display font-bold text-[var(--color-wh-deep-green)] m-0 leading-tight"
-            style={{ fontSize: "clamp(24px, 2.8vw, 36px)", letterSpacing: "-0.015em" }}
-          >
-            {title}
-          </h3>
-        </div>
-      </div>
-      <p className="text-[15px] sm:text-base leading-relaxed text-[var(--color-wh-black)] m-0 mb-6 max-w-2xl">
-        {body}
-      </p>
-      {details && (
-        <ul className="list-none p-0 m-0 space-y-2 max-w-xl">
-          {details.map((d, i) => (
-            <li
-              key={i}
-              className="flex items-start gap-2.5 text-[13px] sm:text-[14px] text-[var(--color-wh-deep-green)]/85"
-            >
-              <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[var(--color-wh-sunset)] shrink-0" aria-hidden />
-              {d}
-            </li>
-          ))}
-        </ul>
-      )}
-      {stepsList && (
-        <ol className="list-none p-0 m-0 space-y-3 max-w-xl">
-          {stepsList.map((s, i) => (
-            <li key={i} className="flex items-start gap-3 text-[14px] text-[var(--color-wh-deep-green)]/90">
-              <span className="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-full bg-[var(--color-wh-green-soft)] text-[var(--color-wh-deep-green)] text-[11px] font-bold tabular-nums">
-                {i + 1}
-              </span>
-              <span className="pt-0.5">{s}</span>
-            </li>
-          ))}
-        </ol>
-      )}
-      {ctaPrimaryHref && ctaPrimaryLabel && (
-        <div className="mt-6 max-w-xl rounded-2xl bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)]/40 p-4">
-          {ctaHint && (
-            <p className="text-[12px] text-[var(--color-wh-fg-muted)] m-0 mb-3 leading-snug">
-              {ctaHint}
-            </p>
-          )}
-          {ctaLinks && ctaLinks.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-3">
-              {ctaLinks.map((l) => (
-                <a
-                  key={l.href}
-                  href={l.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full bg-white border border-[var(--color-wh-winter-grey)] text-[var(--color-wh-deep-green)] no-underline text-[12px] font-semibold hover:bg-[var(--color-wh-green-soft)] transition-colors"
-                >
-                  {l.label}
-                  <ExternalLink size={11} />
-                </a>
-              ))}
-            </div>
-          )}
-          <a
-            href={ctaPrimaryHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 h-11 px-5 rounded-[var(--radius-btn)] bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] no-underline text-sm font-semibold hover:bg-[var(--color-wh-green)] transition-colors"
-          >
-            {ctaPrimaryLabel}
-            <ExternalLink size={14} />
-          </a>
-          {ctaPrimaryTip && (
-            <p className="text-[12px] text-[var(--color-wh-fg-muted)] m-0 mt-2.5 leading-snug">
-              {ctaPrimaryTip}
-            </p>
-          )}
-        </div>
-      )}
-    </div>
-  </div>
-);
-
 // =============================================================
 // ILLUSTRATIVE MAP — Custom SVG anstelle eines generischen OSM-Iframes.
 // Vereinfachte Uebersichtskarte des Hochsauerlands rund um Langewiese.
@@ -1764,44 +1420,4 @@ const SvgPin = ({ x, y, label, sublabel }: { x: number; y: number; label: string
       </text>
     )}
   </g>
-);
-
-const ParkingCard = ({
-  icon,
-  accentClass,
-  label,
-  h,
-  body,
-}: {
-  icon: React.ReactNode;
-  accentClass: string;
-  label: string;
-  h: string;
-  body: string;
-}) => (
-  <div className={`relative aspect-[5/4] sm:aspect-[3/2] rounded-3xl overflow-hidden border border-[var(--color-wh-winter-grey)] bg-gradient-to-br ${accentClass} p-8 sm:p-10 flex flex-col justify-between shadow-[0_16px_44px_rgba(47,74,53,0.08)]`}>
-    <div
-      className="absolute inset-0 opacity-30 pointer-events-none"
-      style={{
-        backgroundImage:
-          "radial-gradient(circle at 30% 25%, rgba(255,255,255,0.55) 0px, transparent 45%)",
-      }}
-      aria-hidden
-    />
-    <div className="relative text-[var(--color-wh-deep-green)] opacity-85">{icon}</div>
-    <div className="relative">
-      <div className="text-[11px] uppercase tracking-[0.25em] font-bold text-[var(--color-wh-deep-green)]/70 mb-3">
-        {label}
-      </div>
-      <h3
-        className="font-display font-bold text-[var(--color-wh-deep-green)] m-0 mb-4 leading-tight"
-        style={{ fontSize: "clamp(24px, 2.8vw, 32px)" }}
-      >
-        {h}
-      </h3>
-      <p className="text-[14px] sm:text-[15px] text-[var(--color-wh-black)]/85 leading-relaxed m-0 max-w-md">
-        {body}
-      </p>
-    </div>
-  </div>
 );
