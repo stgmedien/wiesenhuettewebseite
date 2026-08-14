@@ -1,9 +1,9 @@
 import Image from "next/image";
+import Link from "next/link";
 import { PhotoGallery } from "@/components/public/PhotoGallery";
 import { BilderStapel } from "@/components/public/BilderStapel";
 import { FeaturedQuote } from "@/components/public/FeaturedQuote";
 import { CommunityEntryCard, type CommunityEntryView } from "@/components/public/CommunityEntryCard";
-import { CommunitySubmitForm } from "@/components/public/CommunitySubmitForm";
 import { DeOnlyBanner } from "@/components/public/DeOnlyBanner";
 import { db } from "@/lib/db";
 import { communityEntries } from "@/lib/db/schema";
@@ -26,7 +26,6 @@ const TOC = [
   { id: "stimmen", label: "Kontakt zur Hüttenarbeit" },
   { id: "lernort", label: "Wie aus einer Hütte ein Lernort wird" },
   { id: "fragen", label: "Häufige Elternfragen" },
-  { id: "traeger", label: "Wer trägt die Hüttenarbeit" },
 ];
 
 const FEUERSTELLE_BILDER = [1, 2, 3, 4, 5, 6, 7, 8].map((i) => ({
@@ -600,24 +599,26 @@ export default async function EsgPage() {
           </p>
 
           {anekdoten.length === 0 ? (
-            <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-8 text-center mb-10">
+            <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-8 text-center">
               <p className="text-[var(--color-wh-fg-muted)] italic m-0">
-                Noch keine Einträge — bist Du Schüler:in einer Klasse, die kürzlich da war?
-                Schreib unten den ersten Beitrag.
+                Noch keine Einträge — Klassen bekommen den Link zum Einreichen direkt nach ihrem
+                Aufenthalt.
               </p>
             </div>
           ) : (
-            <div className="space-y-6 mb-12">
+            <div className="space-y-6">
               {anekdoten.map((e) => (
                 <CommunityEntryCard key={e.id} entry={e} />
               ))}
             </div>
           )}
 
-          <CommunitySubmitForm
-            kind="schulprojekt"
-            contextPlaceholder="z.B. Klasse 9b, ESG Gütersloh"
-          />
+          <Link
+            href="/schulprojekt/anekdote"
+            className="inline-block mt-8 text-sm text-[var(--color-wh-deep-green)] underline underline-offset-2"
+          >
+            Du warst dabei? Schreib Deine Erinnerung →
+          </Link>
         </div>
       </section>
 
@@ -768,44 +769,6 @@ export default async function EsgPage() {
         </div>
       </section>
 
-      {/* ---------------------------------------------------------------- */}
-      {/* 9. Träger — dunkler Schluss-Block */}
-      {/* ---------------------------------------------------------------- */}
-      <section
-        id="traeger"
-        className="bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] px-6 sm:px-8 py-16 sm:py-24"
-      >
-        <div className="max-w-[1080px] mx-auto">
-          <div className="text-xs uppercase tracking-wider text-[var(--color-wh-snow)]/85 font-semibold">
-            Wer trägt die Hüttenarbeit
-          </div>
-          <h2 className="text-[32px] sm:text-[44px] mt-3 mb-6 leading-tight text-[var(--color-wh-snow)]">
-            Ein starkes Gespann.
-          </h2>
-          <p className="text-[17px] leading-relaxed max-w-3xl text-[var(--color-wh-snow)]/90">
-            Die Hüttenarbeit am ESG ist getragen von zwei Säulen — Verein und Schule. Das
-            ist keine Selbstverständlichkeit. Sie funktioniert, weil über Jahre ein Vertrauen
-            zwischen Verein, Schule und Eltern gewachsen ist.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-10">
-            <PillarCard
-              num="1"
-              title="Skifreunde Gütersloh e.V."
-              body="Stellen die Hütte bereit, halten sie instand, garantieren den Hüttenwart, und sind seit 70+ Jahren ihr Rückgrat."
-            />
-            <PillarCard
-              num="2"
-              title="Lehrkräfte des ESG"
-              body="Tragen die pädagogische Konzeption, planen, begleiten und reflektieren die Fahrten."
-            />
-          </div>
-
-          <p className="text-[15px] mt-10 text-[var(--color-wh-snow)]/75 italic">
-            Wir sind dankbar, dass das so ist.
-          </p>
-        </div>
-      </section>
     </div>
   );
 }
@@ -994,28 +957,6 @@ function ContactRow({
           {email}
         </a>
       </div>
-    </div>
-  );
-}
-
-function PillarCard({
-  num,
-  title,
-  body,
-}: {
-  num: string;
-  title: string;
-  body: string;
-}) {
-  return (
-    <div className="bg-white/10 backdrop-blur border border-white/20 rounded-[var(--radius-card)] p-6">
-      <div className="text-xs uppercase tracking-wider text-[var(--color-wh-snow)]/75 font-semibold mb-2">
-        Säule {num}
-      </div>
-      <h3 className="font-display font-bold text-[20px] mb-3 text-[var(--color-wh-snow)]">
-        {title}
-      </h3>
-      <p className="text-[15px] leading-relaxed text-[var(--color-wh-snow)]/90 m-0">{body}</p>
     </div>
   );
 }
