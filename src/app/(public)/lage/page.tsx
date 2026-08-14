@@ -107,7 +107,6 @@ type Copy = {
     eyebrow: string;
     h2: string;
     lead: string;
-    openIn: string;
     noteEyebrow: string;
     noteTitle: string;
     noteBody: string;
@@ -202,7 +201,6 @@ const COPY: Record<Locale, Copy> = {
       eyebrow: "Karte",
       h2: "Hier liegen wir.",
       lead: "Langewiese, Westhang. Drumherum: Asten-Massiv, Hochheide, Rothaarsteig.",
-      openIn: "In Karten-App öffnen",
       noteEyebrow: "Nähere Umgebung",
       noteTitle: "Verstecken auf dem Gelände, Fußball gleich nebenan.",
       noteBody:
@@ -369,7 +367,6 @@ const COPY: Record<Locale, Copy> = {
       eyebrow: "Map",
       h2: "Here we are.",
       lead: "Langewiese, west-facing slope. Around: Asten massif, high moor, Rothaarsteig trail.",
-      openIn: "Open in maps app",
       noteEyebrow: "Nearby",
       noteTitle: "Hide-and-seek on our grounds, football right next door.",
       noteBody:
@@ -505,7 +502,6 @@ const COPY: Record<Locale, Copy> = {
       eyebrow: "Kaart",
       h2: "Hier liggen we.",
       lead: "Langewiese, helling op het westen. Eromheen: Asten-massief, hoogveen, Rothaarsteig.",
-      openIn: "In kaarten-app openen",
       noteEyebrow: "Vlakbij",
       noteTitle: "Verstoppertje op ons terrein, voetbal net ernaast.",
       noteBody:
@@ -735,10 +731,11 @@ export default async function LagePage() {
                   <p className="text-[10px] uppercase tracking-[0.25em] font-bold text-[var(--color-wh-deep-green)]/60 m-0 mb-3">
                     {c.address.metaLines.from}
                   </p>
-                  <div className="grid grid-cols-3 gap-2">
-                    <NaviButton href={NAVI_LINKS.apple} label={c.address.ctaApple} />
+                  <div className="grid grid-cols-2 gap-2">
                     <NaviButton href={NAVI_LINKS.google} label={c.address.ctaGoogle} primary />
+                    <NaviButton href={NAVI_LINKS.apple} label={c.address.ctaApple} />
                     <NaviButton href={NAVI_LINKS.waze} label={c.address.ctaWaze} />
+                    <NaviButton href={NAVI_LINKS.osm} label="OpenStreetMap" />
                   </div>
                 </div>
               </div>
@@ -875,6 +872,44 @@ export default async function LagePage() {
         </div>
       </section>
 
+      {/* ============= PRACTICAL NOTES ============= */}
+      <section className="px-6 sm:px-8 py-24 sm:py-32 bg-[var(--color-wh-snow)]">
+        <div className="max-w-[1280px] mx-auto">
+          <ScrollReveal>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-12 sm:mb-16">
+              <div className="md:col-span-5">
+                <div className="eyebrow text-[var(--color-wh-deep-green)] mb-3">{c.notes.eyebrow}</div>
+                <h2
+                  className="font-display font-bold text-[var(--color-wh-deep-green)] m-0 leading-[1.02]"
+                  style={{ fontSize: "clamp(32px, 5vw, 56px)", letterSpacing: "-0.02em" }}
+                >
+                  {c.notes.h2}
+                </h2>
+              </div>
+            </div>
+          </ScrollReveal>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+            {c.notes.items.map((item, i) => {
+              const Icon = NOTE_ICONS[item.icon];
+              return (
+                <ScrollReveal key={item.title} delay={i * 100}>
+                  <article className="border-l-2 border-[var(--color-wh-sunset)] pl-5 sm:pl-6 py-2 h-full">
+                    <Icon size={28} strokeWidth={1.5} className="text-[var(--color-wh-sunset)] mb-4" />
+                    <h3 className="font-display font-bold text-[var(--color-wh-deep-green)] text-[18px] sm:text-[20px] m-0 mb-3 leading-tight">
+                      {item.title}
+                    </h3>
+                    <p className="text-[14px] sm:text-[15px] text-[var(--color-wh-black)] leading-relaxed m-0">
+                      {item.body}
+                    </p>
+                  </article>
+                </ScrollReveal>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* ============= MAP (custom illustrative) ============= */}
       <section className="px-6 sm:px-8 py-20 sm:py-28 bg-[var(--color-wh-snow)]">
         <div className="max-w-[1280px] mx-auto">
@@ -899,18 +934,6 @@ export default async function LagePage() {
 
           <ScrollReveal delay={150}>
             <IllustratedMap />
-          </ScrollReveal>
-
-          <ScrollReveal delay={250}>
-            <div className="mt-6 flex flex-wrap gap-2 sm:gap-3 items-center">
-              <span className="text-[11px] uppercase tracking-[0.25em] font-bold text-[var(--color-wh-deep-green)]/60 mr-2">
-                {c.map.openIn}:
-              </span>
-              <MapDeepLink href={NAVI_LINKS.google} label="Google Maps" />
-              <MapDeepLink href={NAVI_LINKS.apple} label="Apple Maps" />
-              <MapDeepLink href={NAVI_LINKS.waze} label="Waze" />
-              <MapDeepLink href={NAVI_LINKS.osm} label="OpenStreetMap" />
-            </div>
           </ScrollReveal>
         </div>
       </section>
@@ -959,49 +982,6 @@ export default async function LagePage() {
               </ScrollReveal>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* ============= WANDERN (komoot-Embeds, DSGVO via ConsentGate) ============= */}
-      <section className="px-6 sm:px-8 py-20 sm:py-28 bg-[var(--color-wh-deep-green)]">
-        <div className="max-w-[1280px] mx-auto">
-          <ScrollReveal>
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8 sm:mb-12">
-              <div className="md:col-span-5">
-                <div className="eyebrow text-[var(--color-wh-snow)]/70 mb-3">{c.wandern.eyebrow}</div>
-                <h2
-                  className="font-display font-bold text-[var(--color-wh-snow)] m-0 leading-[1.02]"
-                  style={{ fontSize: "clamp(32px, 5vw, 56px)", letterSpacing: "-0.02em" }}
-                >
-                  {c.wandern.h2}
-                </h2>
-              </div>
-              <div className="md:col-span-7 md:pt-3">
-                <p className="text-base sm:text-[18px] leading-[1.7] text-[var(--color-wh-snow)]/85 m-0 max-w-2xl">
-                  {c.wandern.lead}
-                </p>
-              </div>
-            </div>
-          </ScrollReveal>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8 items-start">
-            {WANDER_TOURS.map((t, i) => (
-              <ScrollReveal key={t.key} delay={i * 120}>
-                <KomootEmbed
-                  tourUrl={t.url}
-                  embedSrc={t.embedSrc}
-                  height={t.height}
-                  title={c.wandern.tours[i].title}
-                  meta={c.wandern.tours[i].meta}
-                  texts={{ openLabel: c.wandern.openLabel }}
-                />
-              </ScrollReveal>
-            ))}
-          </div>
-
-          <p className="text-[12px] text-[var(--color-wh-snow)]/60 mt-6 max-w-2xl leading-relaxed">
-            {c.wandern.source}
-          </p>
         </div>
       </section>
 
@@ -1071,41 +1051,46 @@ export default async function LagePage() {
         </div>
       </section>
 
-      {/* ============= PRACTICAL NOTES ============= */}
-      <section className="px-6 sm:px-8 py-24 sm:py-32 bg-[var(--color-wh-snow)]">
+      {/* ============= WANDERN (komoot-Embeds, DSGVO via ConsentGate) ============= */}
+      <section className="px-6 sm:px-8 py-20 sm:py-28 bg-[var(--color-wh-deep-green)]">
         <div className="max-w-[1280px] mx-auto">
           <ScrollReveal>
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-12 sm:mb-16">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8 sm:mb-12">
               <div className="md:col-span-5">
-                <div className="eyebrow text-[var(--color-wh-deep-green)] mb-3">{c.notes.eyebrow}</div>
+                <div className="eyebrow text-[var(--color-wh-snow)]/70 mb-3">{c.wandern.eyebrow}</div>
                 <h2
-                  className="font-display font-bold text-[var(--color-wh-deep-green)] m-0 leading-[1.02]"
+                  className="font-display font-bold text-[var(--color-wh-snow)] m-0 leading-[1.02]"
                   style={{ fontSize: "clamp(32px, 5vw, 56px)", letterSpacing: "-0.02em" }}
                 >
-                  {c.notes.h2}
+                  {c.wandern.h2}
                 </h2>
+              </div>
+              <div className="md:col-span-7 md:pt-3">
+                <p className="text-base sm:text-[18px] leading-[1.7] text-[var(--color-wh-snow)]/85 m-0 max-w-2xl">
+                  {c.wandern.lead}
+                </p>
               </div>
             </div>
           </ScrollReveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-            {c.notes.items.map((item, i) => {
-              const Icon = NOTE_ICONS[item.icon];
-              return (
-                <ScrollReveal key={item.title} delay={i * 100}>
-                  <article className="border-l-2 border-[var(--color-wh-sunset)] pl-5 sm:pl-6 py-2 h-full">
-                    <Icon size={28} strokeWidth={1.5} className="text-[var(--color-wh-sunset)] mb-4" />
-                    <h3 className="font-display font-bold text-[var(--color-wh-deep-green)] text-[18px] sm:text-[20px] m-0 mb-3 leading-tight">
-                      {item.title}
-                    </h3>
-                    <p className="text-[14px] sm:text-[15px] text-[var(--color-wh-black)] leading-relaxed m-0">
-                      {item.body}
-                    </p>
-                  </article>
-                </ScrollReveal>
-              );
-            })}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8 items-start">
+            {WANDER_TOURS.map((t, i) => (
+              <ScrollReveal key={t.key} delay={i * 120}>
+                <KomootEmbed
+                  tourUrl={t.url}
+                  embedSrc={t.embedSrc}
+                  height={t.height}
+                  title={c.wandern.tours[i].title}
+                  meta={c.wandern.tours[i].meta}
+                  texts={{ openLabel: c.wandern.openLabel }}
+                />
+              </ScrollReveal>
+            ))}
           </div>
+
+          <p className="text-[12px] text-[var(--color-wh-snow)]/60 mt-6 max-w-2xl leading-relaxed">
+            {c.wandern.source}
+          </p>
         </div>
       </section>
 
@@ -1194,18 +1179,6 @@ const NaviButton = ({
   >
     {label}
     <ExternalLink size={11} />
-  </a>
-);
-
-const MapDeepLink = ({ href, label }: { href: string; label: string }) => (
-  <a
-    href={href}
-    target="_blank"
-    rel="noreferrer"
-    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[var(--color-wh-winter-grey)] text-[12px] font-semibold text-[var(--color-wh-deep-green)] no-underline hover:bg-[var(--color-wh-green-soft)] transition-colors"
-  >
-    {label}
-    <ExternalLink size={10} />
   </a>
 );
 
