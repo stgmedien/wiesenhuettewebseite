@@ -56,11 +56,17 @@ export function ProjektGalerie({ projekte }: { projekte: Projekt[] }) {
 
       {active &&
         createPortal(
-          <div
-            className={styles.overlayBackdrop}
-            role="presentation"
-            onClick={() => setActiveKey(null)}
-          >
+          <div className={styles.overlayWrap}>
+            {/* Eigenes, kindloses Element fuer den Blur: backdrop-filter auf
+                einem Element, das auch die Karte als Kind enthaelt, kann in
+                manchen Browsern dazu fuehren, dass der Blur auf den Karten-
+                inhalt "durchschlaegt" (Text wirkt dann unscharf). Blur-Layer
+                und Karte deshalb als Geschwister, nicht Eltern/Kind. */}
+            <div
+              className={styles.overlayScrim}
+              role="presentation"
+              onClick={() => setActiveKey(null)}
+            />
             <div
               role="dialog"
               aria-modal="true"
