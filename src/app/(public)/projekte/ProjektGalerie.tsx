@@ -84,6 +84,7 @@ export function ProjektGalerie({ projekte }: { projekte: Projekt[] }) {
                 <X size={18} />
               </button>
 
+              <div className={styles.overlayScroll}>
               <div className={styles.hero}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={active.bild} alt="" />
@@ -164,6 +165,7 @@ export function ProjektGalerie({ projekte }: { projekte: Projekt[] }) {
                   <div className={styles.sealMid}>frei</div>
                   <div className={styles.sealBot}>Nº&nbsp;{active.nr}</div>
                 </div>
+              </div>
               </div>
             </div>
           </div>,

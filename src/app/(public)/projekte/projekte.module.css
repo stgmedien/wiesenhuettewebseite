@@ -233,22 +233,38 @@
 .overlayScrim {
   position: absolute;
   inset: 0;
-  /* Dunkel genug, dass auch andere fixed-position Overlays der Seite
-     (z. B. der Cookie-Banner, falls er beim Oeffnen noch offen ist)
-     dahinter nicht als heller Fleck durchscheinen. */
   background: rgba(16, 12, 8, 0.82);
   backdrop-filter: blur(6px);
 }
 .overlayCard {
   position: relative;
   z-index: 1;
+  /* Erzwingt eine eigene, isolierte Compositing-Ebene — Chromium
+     rasterisiert Geschwister eines backdrop-filter-Elements sonst
+     manchmal ueber dessen Zwischen-Textur mit (bekannter Bug bei
+     position:fixed + z-index-Stapel + Retina), was Text unscharf
+     erscheinen laesst, ohne dass eine eigene filter-Eigenschaft
+     gesetzt ist. */
+  isolation: isolate;
+  transform: translateZ(0);
   width: 100%;
   max-width: 640px;
   max-height: 90vh;
-  overflow-y: auto;
   background: var(--card);
   border-radius: 10px;
   box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
+  /* overflow:hidden nur zum Eckenclipping, NICHT zum Scrollen — das
+     macht .overlayScroll darunter. border-radius + box-shadow +
+     overflow-y:auto auf ein und demselben Element ist in Chrome auf
+     Retina-Displays ein bekannter Ausloeser fuer unscharf gerenderten
+     Text im Scroll-Container (GPU-Rasterisierung ueber eine
+     Zwischen-Textur). Scroll-Verantwortung deshalb getrennt. */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.overlayScroll {
+  overflow-y: auto;
 }
 .closeBtn {
   all: unset;
