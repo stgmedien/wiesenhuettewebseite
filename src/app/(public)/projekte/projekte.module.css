@@ -233,8 +233,11 @@
 .overlayScrim {
   position: absolute;
   inset: 0;
-  background: rgba(20, 16, 12, 0.6);
-  backdrop-filter: blur(3px);
+  /* Dunkel genug, dass auch andere fixed-position Overlays der Seite
+     (z. B. der Cookie-Banner, falls er beim Oeffnen noch offen ist)
+     dahinter nicht als heller Fleck durchscheinen. */
+  background: rgba(16, 12, 8, 0.82);
+  backdrop-filter: blur(6px);
 }
 .overlayCard {
   position: relative;
@@ -274,12 +277,17 @@
 /* ---------- Karte (Hero/Body/Foot) ---------- */
 .hero {
   position: relative;
-  min-height: 180px;
+  /* Gleiches Seitenverhaeltnis wie das SVG (720/300) statt fixer Hoehe —
+     bei abweichendem Seitenverhaeltnis schnitt object-fit:cover Motive
+     wie die Zarges-Box am unteren Rand ab (bodenlose Kiste, wirkte wie
+     ein unscharfer Fleck statt einer Kiste). Mit passendem Verhaeltnis
+     gibt es nichts mehr zuzuschneiden. */
+  aspect-ratio: 720 / 300;
   background: var(--pine);
 }
 .hero img {
   width: 100%;
-  height: 200px;
+  height: 100%;
   object-fit: cover;
   display: block;
 }
