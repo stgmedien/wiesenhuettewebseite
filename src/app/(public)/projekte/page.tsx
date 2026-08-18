@@ -35,13 +35,9 @@ export default function ProjektePage() {
             </p>
             <p>
               Wichtig ist nur: Nehmt euch nicht zu viele Bausteine auf einmal vor. Zu einer guten
-              Fahrt gehören genauso ein Küchenteam, eine Runde durch Winterberg und einfach Zeit
-              füreinander.
-            </p>
-            <p>
-              Genauso wichtig wie das Werkeln: Zeit, in der ihr als Gruppe zusammenwachst.
-              Kennenlern- und Kooperationsspiele gehören für uns mit dazu, nicht nur das Bauen und
-              Anpacken.
+              Fahrt gehören ein Küchenteam, eine Runde durch Winterberg, Zeit füreinander und
+              Kennenlern- sowie Kooperationsspiele — das trägt genauso zu einer guten Gruppe bei
+              wie die Bauprojekte selbst.
             </p>
             <p className={styles.leadIn}>Das steht gerade zur Auswahl:</p>
           </header>
