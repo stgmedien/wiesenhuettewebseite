@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import type { Projekt } from "./data";
 import styles from "./projekte.module.css";
+import { fraunces } from "./fonts";
 
 export function ProjektGalerie({ projekte }: { projekte: Projekt[] }) {
   const [activeKey, setActiveKey] = useState<string | null>(null);
@@ -56,7 +57,7 @@ export function ProjektGalerie({ projekte }: { projekte: Projekt[] }) {
 
       {active &&
         createPortal(
-          <div className={styles.overlayWrap}>
+          <div className={`${styles.overlayWrap} ${fraunces.variable}`}>
             {/* Eigenes, kindloses Element fuer den Blur: backdrop-filter auf
                 einem Element, das auch die Karte als Kind enthaelt, kann in
                 manchen Browsern dazu fuehren, dass der Blur auf den Karten-
