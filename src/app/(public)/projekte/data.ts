@@ -274,13 +274,19 @@ export const PROJEKTE: Projekt[] = [
     nr: "WH-13",
     titel: "Eine neue Treppe führt zum Werkzeugkeller.",
     untertitel: "Neue Treppe zum Werkzeugkeller",
-    darumGehts: "Der alte Kellerraum bekommt einen sicheren Zugang: eine neue Treppe hinunter.",
-    brauchenWir: ["Material für die Treppe", "Werkzeug für den Bau"],
+    darumGehts:
+      "Der alte Kellerraum bekommt einen sicheren Zugang: eine neue Treppe hinunter – gebaut wie der Serpentinen-Pfad, mit Eisenpins, verdichteten Zweigen und Holzspänen als Belag.",
+    brauchenWir: [
+      "Eisenpins zur Befestigung der Stufen",
+      "Zweige zum Verdichten",
+      "Holzspäne für den Stufen-Belag",
+    ],
     zeitrahmen: "-",
     aufwand: "mittel",
     kosten: "Richtwert: bitte eintragen",
-    anpacken: "Treppe planen und bauen.",
-    beitrag: "Baumaterial spenden.",
+    anpacken:
+      "Stufen setzen, mit Eisenpins sichern, Zweige verdichten, mit Holzspänen auffüllen – gleiche Technik wie beim Serpentinen-Pfad.",
+    beitrag: "Material (Eisenpins, Holzspäne) spenden.",
     danke: "Der erste Schritt zu allem, was danach im Werkzeugkeller entsteht.",
     kontakt: "Ansprechpartner steht noch nicht fest",
     bild: "/media/projekte/oelkeller_treppe.svg",
