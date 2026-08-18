@@ -60,6 +60,14 @@
   line-height: 1.65;
 }
 
+.masthead .leadIn {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--pine);
+  margin-top: 26px;
+}
+
 /* ---------- Kachel-Galerie ---------- */
 .grid {
   display: grid;

@@ -26,20 +26,20 @@ export const PROJEKTE: Projekt[] = [
     titel: "Ein ebener Platz zum Zelten entsteht.",
     untertitel: "Zelt-Plateau an der Feuerstelle — startet zuerst",
     darumGehts:
-      "Unterhalb der Hütte, direkt bei der Feuerstelle, entsteht ein ebener Platz zum Zelten – ca. 6,5 × 4 m, mit Blick in die Ferne. Von allen Projekten rund um die Hütte ist das hier das wichtigste: Es soll so bald wie möglich starten.",
+      "Unterhalb der Hütte, direkt bei der Feuerstelle, entsteht ein ebener Platz zum Zelten – ca. 6,5 × 4 m, mit Blick in die Ferne. Das Fundament im Fels – Stahlträger einbetonieren – bereiten Profis vor. Danach geht es für die Fahrt vor allem darum, die Holzbretter auf das fertige Fundament zu schrauben. Von allen Projekten rund um die Hütte ist das hier das wichtigste: Es soll so bald wie möglich starten.",
     brauchenWir: [
-      "Unterbau eben herstellen (Aushub, Entwässerung)",
-      "Material für die Fläche – Holzdeck oder Schotter, noch offen",
-      "Werkzeug für Erdarbeiten",
+      "Fundament im Fels (Stahlträger einbetonieren) – wird vorab von Profis vorbereitet",
+      "Holzbretter zuschneiden und auf das Fundament schrauben",
+      "Werkzeug: Akkuschrauber, Maßband",
     ],
     zeitrahmen: "Start: sofort, höchste Priorität",
-    aufwand: "Mehrwöchig, ggf. über mehrere Fahrten",
+    aufwand: "Fundament durch Profis, danach 1–2 Tage Verschrauben mit der Fahrt",
     kosten:
-      "Richtwert Unterbau ca. 500–1.300 €, mit Holzdeck bis ca. 4.000 € – konkretes Angebot noch einholen",
+      "Richtwert Holzdeck ca. 2.500–4.000 € – Fundament separat, Angebot der Profis steht noch aus",
     anpacken:
-      "Aushub, Unterbau und die Plattform selbst entstehen im Team vor Ort – die Fahrt, die hier anpackt, legt den wichtigsten neuen Platz der Hütte an.",
+      "Das Fundament (Stahlträger im Fels einbetoniert) bereiten Profis vor – die Fahrt, die hier anpackt, verschraubt die Holzbretter darauf und macht den wichtigsten neuen Platz der Hütte fertig.",
     beitrag:
-      "Material (Holz, Schotter) oder ein Kostenbeitrag zum Unterbau helfen, früher zu starten.",
+      "Material fürs Holzdeck oder ein Kostenbeitrag zum Fundament helfen, früher zu starten.",
     danke: "Wer hier mitbaut, hat seinen eigenen Platz – jedes Mal wieder, wenn er zurückkommt.",
     kontakt: "Bei Marcus Kühle, Julian oder Teckentrupp",
     bild: "/media/projekte/plateau.svg",
