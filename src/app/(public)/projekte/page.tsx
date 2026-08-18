@@ -47,11 +47,25 @@ export default function ProjektePage() {
           </header>
 
           <aside className={styles.gdBox}>
+            <div className={styles.gdBadge}>🎲</div>
             <p className={styles.gdEyebrow}>Gruppendynamik buchen</p>
             <p className={styles.gdText}>
-              Kennenlern- und Kooperationsspiele für die Gruppe — auf Anfrage, unabhängig von den
+              Kennenlern- und Kooperationsspiele für eure Gruppe — auf Anfrage, unabhängig von den
               Bau-Bausteinen.
             </p>
+            <div className={styles.gdCategories}>
+              <div className={styles.gdCategory}>
+                <span className={styles.gdCategoryTag}>🤝 Kennenlernen</span>
+                <span className={styles.gdCategoryEx}>z. B. Namensbingo, Blitzlicht-Runden</span>
+              </div>
+              <div className={styles.gdCategory}>
+                <span className={styles.gdCategoryTag}>🧩 Kooperation</span>
+                <span className={styles.gdCategoryEx}>
+                  z. B. Turmbau-Challenge, Blindes Quadrat, Spinnennetz
+                </span>
+              </div>
+            </div>
+            <p className={styles.gdListLabel}>Ansprechpartner</p>
             <ul className={styles.gdList}>
               <li>
                 <span className={styles.gdName}>[Name]</span>
