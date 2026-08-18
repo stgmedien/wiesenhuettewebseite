@@ -1,0 +1,24 @@
+<svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Transportkiste mit Spielfiguren daneben"><defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#2E4034"/>
+        <stop offset="55%" stop-color="#6a5a3f"/>
+        <stop offset="100%" stop-color="#CE9A4A"/>
+      </linearGradient>
+    </defs>
+    <rect width="720" height="300" fill="url(#sky)"/>
+    <circle cx="588" cy="86" r="2" fill="#F7F2E9" opacity="0.8"/>
+    <circle cx="622" cy="130" r="1.6" fill="#F7F2E9" opacity="0.7"/>
+    <circle cx="540" cy="60" r="1.4" fill="#F7F2E9" opacity="0.6"/>
+    <circle cx="80" cy="70" r="1.6" fill="#F7F2E9" opacity="0.6"/>
+    <circle cx="150" cy="100" r="2" fill="#F7F2E9" opacity="0.7"/>
+    <path d="M0,210 L120,150 L260,195 L400,140 L520,190 L640,150 L720,185 L720,300 L0,300 Z" fill="#26392b" opacity="0.85"/>
+    <path d="M0,240 L160,205 L320,235 L480,200 L640,232 L720,215 L720,300 L0,300 Z" fill="#16211c"/>
+  <g transform="translate(260,220)">
+    <rect x="0" y="10" width="130" height="60" rx="4" fill="#A9AFA6"/>
+    <rect x="0" y="10" width="130" height="14" fill="#7C8279"/>
+    <rect x="55" y="10" width="20" height="60" fill="#7C8279" opacity="0.7"/>
+    <rect x="10" y="24" width="110" height="4" fill="#c6cbc2"/>
+    <rect x="180" y="42" width="16" height="28" fill="#9C7A4D"/>
+    <rect x="204" y="30" width="16" height="40" fill="#9C7A4D"/>
+    <rect x="228" y="50" width="16" height="20" fill="#9C7A4D"/>
+  </g></svg>
