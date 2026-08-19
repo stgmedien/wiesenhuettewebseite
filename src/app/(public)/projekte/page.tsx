@@ -1,5 +1,6 @@
 import { PROJEKTE } from "./data";
 import { ProjektGalerie } from "./ProjektGalerie";
+import { GelaendeKarte } from "./GelaendeKarte";
 import { fraunces } from "./fonts";
 import styles from "./projekte.module.css";
 
@@ -73,6 +74,8 @@ export default function ProjektePage() {
             </ul>
           </aside>
         </div>
+
+        <GelaendeKarte />
 
         <ProjektGalerie projekte={PROJEKTE} />
       </div>

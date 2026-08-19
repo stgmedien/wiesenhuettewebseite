@@ -36,6 +36,7 @@ export function ProjektGalerie({ projekte }: { projekte: Projekt[] }) {
             key={p.key}
             type="button"
             className={styles.tile}
+            data-projekt-key={p.key}
             onClick={(e) => {
               lastFocused.current = e.currentTarget;
               setActiveKey(p.key);

@@ -1,0 +1,291 @@
+<svg viewBox="0 0 1400 1167" xmlns="http://www.w3.org/2000/svg" font-family="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif" role="img" aria-label="Illustrierte Karte des Wiesenhütten-Geländes">
+  <title>Rundgang übers Gelände der Wiesenhütte</title>
+  <style>
+  .poi[data-key] { cursor: pointer; }
+  .poi-badge { transition: transform 0.2s cubic-bezier(.34,1.56,.64,1); transform-box: fill-box; transform-origin: center; }
+  .poi:hover .poi-badge { transform: scale(1.22); }
+  .poi-tip { opacity: 0; transition: opacity 0.18s ease; }
+  .poi:hover .poi-tip { opacity: 1; }
+  .sparkle { animation: twinkle 3.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+  @keyframes twinkle { 0%,100% { opacity: 0.25; } 50% { opacity: 0.8; } }
+</style>
+  <defs>
+    <radialGradient id="skyfade" cx="42%" cy="24%" r="85%">
+      <stop offset="0%" stop-color="#faf4e6"/>
+      <stop offset="55%" stop-color="#f7f2e9"/>
+      <stop offset="100%" stop-color="#eae3d6"/>
+    </radialGradient>
+    <radialGradient id="huetteglow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ce9a4a" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#ce9a4a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect x="0" y="0" width="1400" height="1167" fill="url(#skyfade)"/>
+  <path class="sparkle" transform="translate(495.5,259.5) scale(0.83)" d="M0,-6 L1.3,-1.3 6,0 1.3,1.3 0,6 -1.3,1.3 -6,0 -1.3,-1.3Z" fill="#ce9a4a" opacity="0.38"/>
+<path class="sparkle" transform="translate(741.7,458.7) scale(0.53)" d="M0,-6 L1.3,-1.3 6,0 1.3,1.3 0,6 -1.3,1.3 -6,0 -1.3,-1.3Z" fill="#ce9a4a" opacity="0.53"/>
+<path class="sparkle" transform="translate(163.1,521.7) scale(0.53)" d="M0,-6 L1.3,-1.3 6,0 1.3,1.3 0,6 -1.3,1.3 -6,0 -1.3,-1.3Z" fill="#ce9a4a" opacity="0.38"/>
+<path class="sparkle" transform="translate(612.4,886.4) scale(0.56)" d="M0,-6 L1.3,-1.3 6,0 1.3,1.3 0,6 -1.3,1.3 -6,0 -1.3,-1.3Z" fill="#ce9a4a" opacity="0.43"/>
+<path class="sparkle" transform="translate(789.5,487.5) scale(0.99)" d="M0,-6 L1.3,-1.3 6,0 1.3,1.3 0,6 -1.3,1.3 -6,0 -1.3,-1.3Z" fill="#ce9a4a" opacity="0.37"/>
+<path class="sparkle" transform="translate(477.7,876.5) scale(0.59)" d="M0,-6 L1.3,-1.3 6,0 1.3,1.3 0,6 -1.3,1.3 -6,0 -1.3,-1.3Z" fill="#ce9a4a" opacity="0.55"/>
+<path class="sparkle" transform="translate(861.3,464.9) scale(0.77)" d="M0,-6 L1.3,-1.3 6,0 1.3,1.3 0,6 -1.3,1.3 -6,0 -1.3,-1.3Z" fill="#ce9a4a" opacity="0.37"/>
+<path class="sparkle" transform="translate(909.4,516.1) scale(0.66)" d="M0,-6 L1.3,-1.3 6,0 1.3,1.3 0,6 -1.3,1.3 -6,0 -1.3,-1.3Z" fill="#ce9a4a" opacity="0.55"/>
+<path class="sparkle" transform="translate(645.7,397.6) scale(0.90)" d="M0,-6 L1.3,-1.3 6,0 1.3,1.3 0,6 -1.3,1.3 -6,0 -1.3,-1.3Z" fill="#ce9a4a" opacity="0.59"/>
+<path class="sparkle" transform="translate(402.9,652.3) scale(0.76)" d="M0,-6 L1.3,-1.3 6,0 1.3,1.3 0,6 -1.3,1.3 -6,0 -1.3,-1.3Z" fill="#ce9a4a" opacity="0.66"/>
+
+  <circle cx="295.5" cy="443.1" r="53.8" fill="#2e4034" stroke="#ce9a4a" stroke-width="1.6"/>
+<circle cx="352.3" cy="483.2" r="53.8" fill="#2e4034" stroke="#ce9a4a" stroke-width="1.6"/>
+<circle cx="476.7" cy="544.0" r="71.7" fill="#2e4034" stroke="#ce9a4a" stroke-width="1.6"/>
+<circle cx="743.1" cy="551.8" r="77.7" fill="#2e4034" stroke="#ce9a4a" stroke-width="1.6"/>
+<circle cx="878.3" cy="405.9" r="59.8" fill="#2e4034" stroke="#ce9a4a" stroke-width="1.6"/>
+<circle cx="995.8" cy="486.2" r="59.8" fill="#2e4034" stroke="#ce9a4a" stroke-width="1.6"/>
+
+  <polygon points="1138.4,602.8 1028.7,517.5 828.2,361.6 765.9,313.1 655.0,226.9 516.9,119.6 352.0,275.7 268.0,355.3 188.9,430.3 119.6,496.0 228.0,619.0 278.2,676.3 383.1,795.3 639.0,1047.0 713.1,968.1 816.6,861.2 938.9,734.8 1280.4,713.3" fill="#2e4034" fill-opacity="0.10" stroke="#2e4034" stroke-opacity="0.55" stroke-width="2.5"/>
+  <path d="M 154.2 462.9 L 209.0 541.1 L 316.3 606.3 L 412.9 666.6 L 504.2 720.4 L 590.1 775.8 L 649.1 810.1 L 686.7 834.5" fill="none" stroke="#6b4e30" stroke-width="62.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+  <path d="M 154.2 462.9 L 209.0 541.1 L 316.3 606.3 L 412.9 666.6 L 504.2 720.4 L 590.1 775.8 L 649.1 810.1 L 686.7 834.5" fill="none" stroke="#9c7a4d" stroke-width="59.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 738.6 731.8 C 729.8 712.2 717.0 685.3 703.4 653.3 C 689.8 621.3 703.6 629.4 684.2 603.9 C 664.9 578.5 620.1 556.1 625.8 551.6 C 631.6 547.1 676.9 573.2 707.4 585.8 C 737.9 598.4 713.7 592.4 747.7 601.9 C 781.7 611.5 808.9 623.6 843.3 624.1 C 877.8 624.6 900.7 658.3 885.6 603.9 C 870.5 549.6 808.6 455.9 782.9 406.6 " fill="none" stroke="#6b4e30" stroke-width="3" stroke-dasharray="1 7" stroke-linecap="round" opacity="0.8"/>
+  <circle cx="653.0" cy="869.8" r="70" fill="url(#huetteglow)"/>
+  <polygon points="679.0,790.6 679.0,790.6 637.9,831.4 602.6,795.8 551.0,847.1 587.6,884.0 546.3,925.0 631.1,1010.3 631.1,1010.3" fill="#9c7a4d" stroke="#241f1a" stroke-width="1.2" stroke-linejoin="round"/>
+<polygon points="631.1,1010.3 715.5,926.5 693.0,903.9 742.6,854.7 679.0,790.6" fill="#6b4e30" stroke="#241f1a" stroke-width="1.2" stroke-linejoin="round"/>
+
+  <circle cx="653.0" cy="869.8" r="5" fill="#ce9a4a" stroke="#f7f2e9" stroke-width="1.5"/>
+  <text x="653.0" y="847.8" text-anchor="middle" font-size="19" font-weight="700" fill="#20302a" style="font-family:'Fraunces',Georgia,serif;">Wiesenhütte</text>
+  
+    <g class="poi" data-key="oelkeller_instand">
+      <line x1="711.1" y1="915.4" x2="745.1" y2="925.4" stroke="#6b4e30" stroke-width="1.2" stroke-opacity="0.6"/><circle cx="711.1" cy="915.4" r="3" fill="#6b4e30"/>
+      <g class="poi-badge">
+        <circle cx="745.1" cy="925.4" r="15.0" fill="#fbf7ef" stroke="#6b4e30" stroke-width="2"/>
+        <g transform="translate(736.1,916.4) scale(0.750)" color="#6b4e30">
+          <rect x="4" y="10.5" width="16" height="3" rx="1.5" transform="rotate(45 12 12)" fill="currentColor"/><rect x="4" y="10.5" width="16" height="3" rx="1.5" transform="rotate(-45 12 12)" fill="currentColor"/>
+        </g>
+      </g>
+      <text x="763.1" y="930.4" text-anchor="start" font-size="14" font-weight="600"
+            fill="#241f1a" stroke="#f7f2e9" stroke-width="3.5" paint-order="stroke"
+            style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">Werkzeugkeller</text>
+      
+        <text class="poi-tip" x="763.1" y="957.4" text-anchor="start" font-size="11.5" font-style="italic"
+              fill="#6b4e30" stroke="#f7f2e9" stroke-width="3" paint-order="stroke"
+              style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">Werkzeug & Material</text>
+        
+    </g>
+    
+    <g class="poi" data-key="kraeuter">
+      
+      <g class="poi-badge">
+        <circle cx="534.4" cy="878.7" r="18.0" fill="#fbf7ef" stroke="#2e4034" stroke-width="2"/>
+        <g transform="translate(523.2,867.5) scale(0.938)" color="#2e4034">
+          <path d="M12 21V10M12 10c0-4 3-6.5 6.5-6.5C18.5 7 16 10 12 10Zm0 3.5c0-2.8-2.2-5-5-5 0 2.8 2.2 5 5 5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+        </g>
+      </g>
+      <text x="534.4" y="910.7" text-anchor="middle" font-size="14" font-weight="600"
+            fill="#241f1a" stroke="#f7f2e9" stroke-width="3.5" paint-order="stroke"
+            style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">Ital. Kräutergarten</text>
+      
+        <text class="poi-tip" x="534.4" y="926.7" text-anchor="middle" font-size="11.5" font-style="italic"
+              fill="#6b4e30" stroke="#f7f2e9" stroke-width="3" paint-order="stroke"
+              style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">Frische Kräuter fürs Küchenteam</text>
+        
+    </g>
+    
+    <g class="poi" data-key="spindelobst">
+      
+      <g class="poi-badge">
+        <circle cx="320.7" cy="743.7" r="18.0" fill="#fbf7ef" stroke="#a6522f" stroke-width="2"/>
+        <g transform="translate(309.5,732.4) scale(0.938)" color="#a6522f">
+          <circle cx="12" cy="14.5" r="6" fill="currentColor" stroke="none"/><path d="M12 8.5c0-1.8 1-3.3 2.3-4.2 M12 8.5c-.4-1-1.2-1.7-2-2.1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </g>
+      </g>
+      <text x="320.7" y="775.7" text-anchor="middle" font-size="14" font-weight="600"
+            fill="#241f1a" stroke="#f7f2e9" stroke-width="3.5" paint-order="stroke"
+            style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">Spalierobst</text>
+      
+        <text class="poi-tip" x="320.7" y="791.7" text-anchor="middle" font-size="11.5" font-style="italic"
+              fill="#6b4e30" stroke="#f7f2e9" stroke-width="3" paint-order="stroke"
+              style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">Obstbäume an der Mauer</text>
+        
+    </g>
+    
+    <g class="poi" data-key="feuerstelle">
+      
+      <g class="poi-badge">
+        <circle cx="899.8" cy="508.7" r="18.0" fill="#fbf7ef" stroke="#c1531f" stroke-width="2"/>
+        <g transform="translate(888.6,497.5) scale(0.938)" color="#c1531f">
+          <path d="M12 3c-3.5 4.5-6 7.7-6 11a6 6 0 0 0 12 0c0-3.3-2.5-6.5-6-11Z" fill="currentColor" stroke="none"/><path d="M12 21a3.6 3.6 0 0 0 3.6-3.6c0-1.2-.7-2.1-.7-2.1.1 1.6-.9 2.5-1.9 2.5-1.1 0-2-.9-2-2 0-.8.3-1.3.3-1.3-2 .7-2.9 2-2.9 3.4A3.6 3.6 0 0 0 12 21Z" fill="#F2C879" stroke="none"/>
+        </g>
+      </g>
+      <text x="899.8" y="540.7" text-anchor="middle" font-size="14" font-weight="600"
+            fill="#241f1a" stroke="#f7f2e9" stroke-width="3.5" paint-order="stroke"
+            style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">Feuerstelle</text>
+      
+        <text class="poi-tip" x="899.8" y="556.7" text-anchor="middle" font-size="11.5" font-style="italic"
+              fill="#6b4e30" stroke="#f7f2e9" stroke-width="3" paint-order="stroke"
+              style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">Lagerfeuer & Stockbrot</text>
+        
+    </g>
+    
+    <g class="poi" data-key="bluehwiese">
+      
+      <g class="poi-badge">
+        <circle cx="267.2" cy="655.0" r="18.0" fill="#fbf7ef" stroke="#c1531f" stroke-width="2"/>
+        <g transform="translate(256.0,643.7) scale(0.938)" color="#c1531f">
+          <circle cx="12" cy="7.3" r="2.6" fill="currentColor"/><circle cx="17" cy="12" r="2.6" fill="currentColor"/><circle cx="12" cy="16.7" r="2.6" fill="currentColor"/><circle cx="7" cy="12" r="2.6" fill="currentColor"/><circle cx="12" cy="12" r="2.3" fill="#F2C879"/>
+        </g>
+      </g>
+      <text x="267.2" y="687.0" text-anchor="middle" font-size="14" font-weight="600"
+            fill="#241f1a" stroke="#f7f2e9" stroke-width="3.5" paint-order="stroke"
+            style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">Blühwiese</text>
+      
+        <text class="poi-tip" x="267.2" y="703.0" text-anchor="middle" font-size="11.5" font-style="italic"
+              fill="#6b4e30" stroke="#f7f2e9" stroke-width="3" paint-order="stroke"
+              style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">Bunte Wildblumenwiese</text>
+        
+    </g>
+    <polygon points="825.8,596.5 875.2,554.5 826.0,496.5 776.6,538.4" fill="#9c7a4d" fill-opacity="0.3" stroke="#6b4e30" stroke-width="1.8"/>
+
+    <g class="poi" data-key="plateau">
+      
+      <g class="poi-badge">
+        <circle cx="825.9" cy="546.5" r="18.0" fill="#fbf7ef" stroke="#6b4e30" stroke-width="2"/>
+        <g transform="translate(814.7,535.2) scale(0.938)" color="#6b4e30">
+          <path d="M12 4 4 20h16L12 4Z" fill="currentColor" fill-opacity="0.18" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 9v11 M9 20l3-8 3 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+      </g>
+      <text x="825.9" y="578.5" text-anchor="middle" font-size="14" font-weight="600"
+            fill="#241f1a" stroke="#f7f2e9" stroke-width="3.5" paint-order="stroke"
+            style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">Zeltplatz</text>
+      
+        <text class="poi-tip" x="825.9" y="594.5" text-anchor="middle" font-size="11.5" font-style="italic"
+              fill="#6b4e30" stroke="#f7f2e9" stroke-width="3" paint-order="stroke"
+              style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">Platz für Zelte, ca. 4×6 m</text>
+        
+    </g>
+    <polygon points="638.7,826.3 676.9,792.8 649.7,761.8 611.5,795.2" fill="#ce9a4a" fill-opacity="0.35" stroke="#6b4e30" stroke-width="1.6"/>
+
+    <g class="poi" data-key="terrasse">
+      <line x1="644.2" y1="794.0" x2="644.2" y2="760.0" stroke="#6b4e30" stroke-width="1.2" stroke-opacity="0.6"/><circle cx="644.2" cy="794.0" r="3" fill="#6b4e30"/>
+      <g class="poi-badge">
+        <circle cx="644.2" cy="760.0" r="15.0" fill="#fbf7ef" stroke="#6b4e30" stroke-width="2"/>
+        <g transform="translate(635.2,751.0) scale(0.750)" color="#6b4e30">
+          <path d="M4 13h16M6 13v6M18 13v6M4 19h4M16 19h4M7 13V9a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+      </g>
+      <text x="644.2" y="789.0" text-anchor="middle" font-size="14" font-weight="600"
+            fill="#241f1a" stroke="#f7f2e9" stroke-width="3.5" paint-order="stroke"
+            style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">Freisitz</text>
+      
+        <text class="poi-tip" x="644.2" y="805.0" text-anchor="middle" font-size="11.5" font-style="italic"
+              fill="#6b4e30" stroke="#f7f2e9" stroke-width="3" paint-order="stroke"
+              style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">Sitzbank direkt an der Hauswand</text>
+        
+    </g>
+    <polygon points="692.1,906.1 713.6,923.8 684.8,958.7 663.3,941.0" fill="#ce9a4a" fill-opacity="0.35" stroke="#6b4e30" stroke-width="1.6"/>
+
+    <g class="poi" data-key="dachterrasse">
+      <line x1="688.4" y1="932.4" x2="682.4" y2="966.4" stroke="#6b4e30" stroke-width="1.2" stroke-opacity="0.6"/><circle cx="688.4" cy="932.4" r="3" fill="#6b4e30"/>
+      <g class="poi-badge">
+        <circle cx="682.4" cy="966.4" r="15.0" fill="#fbf7ef" stroke="#6b4e30" stroke-width="2"/>
+        <g transform="translate(673.4,957.4) scale(0.750)" color="#6b4e30">
+          <path d="M4 20V10l8-6 8 6v10M4 20h16M8 20v-6h8v6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+      </g>
+      <text x="682.4" y="995.4" text-anchor="middle" font-size="14" font-weight="600"
+            fill="#241f1a" stroke="#f7f2e9" stroke-width="3.5" paint-order="stroke"
+            style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">Dachterrasse</text>
+      
+        <text class="poi-tip" x="682.4" y="1011.4" text-anchor="middle" font-size="11.5" font-style="italic"
+              fill="#6b4e30" stroke="#f7f2e9" stroke-width="3" paint-order="stroke"
+              style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">Blick übers Gelände</text>
+        
+    </g>
+    <line x1="752.8" y1="865.7" x2="715.8" y2="910.4" stroke="#6b4e30" stroke-width="2" stroke-dasharray="2 3" stroke-linecap="round"/>
+
+    <g class="poi" data-key="oelkeller_treppe">
+      <line x1="752.8" y1="865.7" x2="794.8" y2="851.7" stroke="#6b4e30" stroke-width="1.2" stroke-opacity="0.6"/><circle cx="752.8" cy="865.7" r="3" fill="#6b4e30"/>
+      <g class="poi-badge">
+        <circle cx="794.8" cy="851.7" r="15.0" fill="#fbf7ef" stroke="#6b4e30" stroke-width="2"/>
+        <g transform="translate(785.8,842.7) scale(0.750)" color="#6b4e30">
+          <path d="M4 20h4v-4h4v-4h4v-4h4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+      </g>
+      <text x="812.8" y="856.7" text-anchor="start" font-size="14" font-weight="600"
+            fill="#241f1a" stroke="#f7f2e9" stroke-width="3.5" paint-order="stroke"
+            style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">Treppe Werkzeugkeller</text>
+      
+        <text class="poi-tip" x="812.8" y="883.7" text-anchor="start" font-size="11.5" font-style="italic"
+              fill="#6b4e30" stroke="#f7f2e9" stroke-width="3" paint-order="stroke"
+              style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">Abgang zum Keller</text>
+        
+    </g>
+    <line x1="185.9" y1="547.0" x2="531.7" y2="824.3" stroke="#6b4e30" stroke-width="5" stroke-linecap="round"/>
+<line x1="185.9" y1="547.0" x2="531.7" y2="824.3" stroke="#9c7a4d" stroke-width="2.5" stroke-linecap="round"/>
+
+    <g class="poi" data-key="mauer">
+      
+      <g class="poi-badge">
+        <circle cx="358.8" cy="685.6" r="14.0" fill="#fbf7ef" stroke="#6b4e30" stroke-width="2"/>
+        <g transform="translate(350.6,677.4) scale(0.688)" color="#6b4e30">
+          <rect x="4" y="10.5" width="16" height="3" rx="1.5" transform="rotate(45 12 12)" fill="currentColor"/><rect x="4" y="10.5" width="16" height="3" rx="1.5" transform="rotate(-45 12 12)" fill="currentColor"/>
+        </g>
+      </g>
+      <text x="358.8" y="713.6" text-anchor="middle" font-size="14" font-weight="600"
+            fill="#241f1a" stroke="#f7f2e9" stroke-width="3.5" paint-order="stroke"
+            style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">Mauer</text>
+      
+        <text class="poi-tip" x="358.8" y="729.6" text-anchor="middle" font-size="11.5" font-style="italic"
+              fill="#6b4e30" stroke="#f7f2e9" stroke-width="3" paint-order="stroke"
+              style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">Alte Trockenmauer an der Einfahrt</text>
+        
+    </g>
+    <line x1="307.6" y1="437.4" x2="526.9" y2="566.3" stroke="#ce9a4a" stroke-width="12" stroke-opacity="0.22" stroke-linecap="round"/>
+
+    <g class="poi" data-key="bewegungshang">
+      
+      <g class="poi-badge">
+        <circle cx="417.2" cy="501.9" r="18.0" fill="#fbf7ef" stroke="#6b4e30" stroke-width="2"/>
+        <g transform="translate(406.0,490.6) scale(0.938)" color="#6b4e30">
+          <path d="M4 4h16 M8 4v13 M16 4v13 M6.5 17h11v3h-11z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+      </g>
+      <text x="417.2" y="533.9" text-anchor="middle" font-size="14" font-weight="600"
+            fill="#241f1a" stroke="#f7f2e9" stroke-width="3.5" paint-order="stroke"
+            style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">Bewegungshang</text>
+      
+        <text class="poi-tip" x="417.2" y="549.9" text-anchor="middle" font-size="11.5" font-style="italic"
+              fill="#6b4e30" stroke="#f7f2e9" stroke-width="3" paint-order="stroke"
+              style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">Slackline, Schaukel, Seil</text>
+        
+    </g>
+    <circle cx="526.9" cy="273.3" r="95.7" fill="#ce9a4a" fill-opacity="0.15" stroke="#ce9a4a" stroke-width="1" stroke-dasharray="2 4"/>
+
+    <g class="poi">
+      
+      <g class="poi-badge">
+        <circle cx="526.9" cy="273.3" r="18.0" fill="#fbf7ef" stroke="#6b4e30" stroke-width="2"/>
+        <g transform="translate(515.7,262.1) scale(0.938)" color="#6b4e30">
+          <path d="M9 10V7a3 3 0 0 1 6 0v3 M5 10h14l-1.4 8.3a2 2 0 0 1-2 1.7H8.4a2 2 0 0 1-2-1.7L5 10Z M5 10h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+        </g>
+      </g>
+      <text x="526.9" y="305.3" text-anchor="middle" font-size="14" font-weight="600"
+            fill="#241f1a" stroke="#f7f2e9" stroke-width="3.5" paint-order="stroke"
+            style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">Picknickwiese</text>
+      
+        <text class="poi-tip" x="526.9" y="321.3" text-anchor="middle" font-size="11.5" font-style="italic"
+              fill="#6b4e30" stroke="#f7f2e9" stroke-width="3" paint-order="stroke"
+              style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">Platz zum Ausbreiten</text>
+        
+    </g>
+    
+    <g class="poi" data-key="pfad">
+      <line x1="707.4" y1="585.8" x2="699.4" y2="615.8" stroke="#6b4e30" stroke-width="1.2" stroke-opacity="0.6"/><circle cx="707.4" cy="585.8" r="3" fill="#6b4e30"/>
+      <g class="poi-badge">
+        <circle cx="699.4" cy="615.8" r="14.0" fill="#fbf7ef" stroke="#6b4e30" stroke-width="2"/>
+        <g transform="translate(691.2,607.6) scale(0.688)" color="#6b4e30">
+          <path d="M4 20h4v-4h4v-4h4v-4h4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+      </g>
+      <text x="716.4" y="620.8" text-anchor="start" font-size="14" font-weight="600"
+            fill="#241f1a" stroke="#f7f2e9" stroke-width="3.5" paint-order="stroke"
+            style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">Serpentinenweg</text>
+      
+    </g>
+    
+</svg>
