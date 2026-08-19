@@ -29,9 +29,8 @@ export default function ProjektePage() {
               Kostenvoranschlag bis zur Umsetzung vor Ort.
             </p>
             <p>
-              Ums Geld müsst ihr euch dabei keine Sorgen machen: Material wie Farbe, Werkzeug oder
-              Baumaterial übernimmt der Skiverein — vorher braucht&apos;s nur einen kurzen
-              Kostenvoranschlag und unsere Abstimmung.
+              Nach eurer überzeugenden Kostenkalkulation übernimmt der Skiverein gerne Material
+              wie Farbe, Werkzeug oder Baumaterial — kurze Abstimmung mit uns vorausgesetzt.
             </p>
             <p>
               Wichtig ist nur: Nehmt euch nicht zu viele Bausteine auf einmal vor. Zu einer guten
