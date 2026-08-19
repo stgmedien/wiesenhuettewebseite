@@ -71,10 +71,10 @@ export const PROJEKTE: Projekt[] = [
     titel: "Rund um die Feuerstelle wird es eben und gemütlich.",
     untertitel: "Feuerstelle-Umfeld einebnen und einrichten",
     darumGehts:
-      "Rechts von der Hütte aus gesehen wird das Gelände um die Feuerstelle arrondiert und eingeebnet. Die alten Bänke von der Terrasse wandern hier runter, dazu entstehen feste Sitzgelegenheiten mit U-Steinen.",
+      "Rechts von der Hütte aus gesehen wird das Gelände um die Feuerstelle arrondiert und eingeebnet. Die alten Bänke vom Freisitz wandern hier runter, dazu entstehen feste Sitzgelegenheiten mit U-Steinen.",
     brauchenWir: [
       "Gelände einebnen (rechte Seite von der Hütte aus)",
-      "Alte Bänke von der Terrasse runtertragen",
+      "Alte Bänke vom Freisitz runtertragen",
       "U-Steine für neue Sitzgelegenheiten",
     ],
     zeitrahmen: "-",
@@ -112,9 +112,9 @@ export const PROJEKTE: Projekt[] = [
     key: "terrasse",
     nr: "WH-05",
     titel: "Die Hauswand wird zur Rückenlehne.",
-    untertitel: "Umlaufende Sitzbank an der Dachterrasse",
+    untertitel: "Umlaufende Sitzbank am Freisitz",
     darumGehts:
-      "Rund um die Dachterrasse entstehen fest montierte Sitzbänke: Die Hauswand dient als Rückenlehne, oben ein kleiner Abstandhalter, weiter unten ein Keil – so lehnt man sich leicht zurück, statt gerade an der Wand zu sitzen.",
+      "Rund um den Freisitz entstehen fest montierte Sitzbänke: Die Hauswand dient als Rückenlehne, oben ein kleiner Abstandhalter, weiter unten ein Keil – so lehnt man sich leicht zurück, statt gerade an der Wand zu sitzen.",
     brauchenWir: [
       "Holz für Sitzflächen und Rückenlehnen",
       "9–10 U-Steine als Unterbau",
@@ -155,10 +155,10 @@ export const PROJEKTE: Projekt[] = [
   {
     key: "kraeuter",
     nr: "WH-07",
-    titel: "Italienische Kräuter ziehen oberhalb der Blühwiese ein.",
+    titel: "Italienische Kräuter ziehen links von der Haustür ein.",
     untertitel: "Kräuterfeld, ausgesucht von der Klasse",
     darumGehts:
-      "Oberhalb der Blühwiese entsteht ein Kräuterfeld – die Kräuter sucht die Klasse selbst aus, mit Blick auf Sonne und Standort.",
+      "Links von der Haustür entsteht ein Kräuterfeld – die Kräuter sucht die Klasse selbst aus, mit Blick auf Sonne und Standort.",
     brauchenWir: [
       "Kräuterauswahl (sonnenliebend, z. B. mediterran)",
       "Fläche roden, Erde einbringen",
@@ -252,19 +252,20 @@ export const PROJEKTE: Projekt[] = [
     key: "spindelobst",
     nr: "WH-12",
     titel: "Eine Baumreihe zieht die Grenze zum Nachbarn.",
-    untertitel: "Spindelobst oberhalb der Blühwiese",
+    untertitel: "Spalierobst oberhalb der Blühwiese",
     darumGehts:
-      "Oberhalb der Blühwiese entsteht eine Reihe Spindelobstbäume – schlank wachsende, platzsparende Obstbäume, die zugleich als Abgrenzung zum Nachbargrundstück dienen.",
+      "Oberhalb der Blühwiese entsteht eine Reihe Spalierobstbäume – flach am Rankgerüst gezogene, platzsparende Obstbäume, die zugleich als Abgrenzung zum Nachbargrundstück dienen.",
     brauchenWir: [
-      "Spindelobstbäume besorgen (z. B. Apfel, Birne)",
+      "Spalierobstbäume besorgen (z. B. Apfel, Birne)",
+      "Rankgerüst/Spalier zur Führung aufstellen",
       "Pflanzlöcher vorbereiten, Stützpfähle",
       "Grenzabstand mit dem Nachbarn klären",
     ],
     zeitrahmen: "Pflanzung im Herbst oder zeitigen Frühjahr",
     aufwand: "klein bis mittel",
-    kosten: "Richtwert je Baum ca. 27–60 € – bei 6 Bäumen ca. 160–360 €",
-    anpacken: "Bäume setzen, Pfähle einschlagen, Reihe entlang der Grenze anlegen.",
-    beitrag: "Obstbäume oder Stützpfähle spenden.",
+    kosten: "Richtwert je Baum ab ca. 35 € (Baumschule) – bei 6 Bäumen ab ca. 210 €",
+    anpacken: "Rankgerüst aufstellen, Bäume setzen, Reihe entlang der Grenze anlegen.",
+    beitrag: "Obstbäume, Rankgerüst oder Stützpfähle spenden.",
     danke: "Ein Baum, den ihr gepflanzt habt, trägt noch Früchte, wenn ihr längst Abitur habt.",
     kontakt: "Ansprechpartner steht noch nicht fest",
     bild: "/media/projekte/spindelobst.svg",

@@ -1,15 +1,16 @@
 <svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Wiese mit verstreuten Wildblumen"><defs>
       <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#2E4034"/>
-        <stop offset="55%" stop-color="#6a5a3f"/>
-        <stop offset="100%" stop-color="#CE9A4A"/>
+        <stop offset="0%" stop-color="#8FC1DE"/>
+        <stop offset="100%" stop-color="#F6E8C3"/>
       </linearGradient>
+      <radialGradient id="sun" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#FFF3D6"/>
+        <stop offset="55%" stop-color="#CE9A4A"/>
+        <stop offset="100%" stop-color="#CE9A4A" stop-opacity="0"/>
+      </radialGradient>
     </defs>
     <rect width="720" height="300" fill="url(#sky)"/>
-    <circle cx="588" cy="86" r="2" fill="#F7F2E9" opacity="0.8"/>
-    <circle cx="622" cy="130" r="1.6" fill="#F7F2E9" opacity="0.7"/>
-    <circle cx="540" cy="60" r="1.4" fill="#F7F2E9" opacity="0.6"/>
-    <circle cx="80" cy="70" r="1.6" fill="#F7F2E9" opacity="0.6"/>
-    <circle cx="150" cy="100" r="2" fill="#F7F2E9" opacity="0.7"/>
-    <path d="M0,210 L120,150 L260,195 L400,140 L520,190 L640,150 L720,185 L720,300 L0,300 Z" fill="#26392b" opacity="0.85"/>
-    <path d="M0,240 L160,205 L320,235 L480,200 L640,232 L720,215 L720,300 L0,300 Z" fill="#16211c"/><circle cx="120" cy="268" r="5" fill="#f4c37a"/><circle cx="160" cy="278" r="4" fill="#F7F2E9"/><circle cx="205" cy="262" r="5" fill="#e79a4c"/><circle cx="255" cy="282" r="4" fill="#F7F2E9"/><circle cx="300" cy="266" r="5" fill="#f4c37a"/><circle cx="350" cy="276" r="4" fill="#e79a4c"/><circle cx="400" cy="260" r="5" fill="#F7F2E9"/><circle cx="450" cy="280" r="4" fill="#f4c37a"/><circle cx="500" cy="268" r="5" fill="#F7F2E9"/><circle cx="550" cy="278" r="4" fill="#e79a4c"/><circle cx="600" cy="262" r="5" fill="#f4c37a"/><circle cx="80" cy="280" r="4" fill="#F7F2E9"/></svg>
+    <circle cx="600" cy="70" r="58" fill="url(#sun)"/>
+    <circle cx="600" cy="70" r="22" fill="#FFF6E2"/>
+    <path d="M0,210 L120,150 L260,195 L400,140 L520,190 L640,150 L720,185 L720,300 L0,300 Z" fill="#6FA05F" opacity="0.9"/>
+    <path d="M0,240 L160,205 L320,235 L480,200 L640,232 L720,215 L720,300 L0,300 Z" fill="#436B48"/><circle cx="120" cy="268" r="5" fill="#f4c37a"/><circle cx="160" cy="278" r="4" fill="#fff6e2"/><circle cx="205" cy="262" r="5" fill="#e79a4c"/><circle cx="255" cy="282" r="4" fill="#fff6e2"/><circle cx="300" cy="266" r="5" fill="#f4c37a"/><circle cx="350" cy="276" r="4" fill="#e79a4c"/><circle cx="400" cy="260" r="5" fill="#fff6e2"/><circle cx="450" cy="280" r="4" fill="#f4c37a"/><circle cx="500" cy="268" r="5" fill="#fff6e2"/><circle cx="550" cy="278" r="4" fill="#e79a4c"/><circle cx="600" cy="262" r="5" fill="#f4c37a"/><circle cx="80" cy="280" r="4" fill="#fff6e2"/></svg>
