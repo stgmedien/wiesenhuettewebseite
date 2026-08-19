@@ -60,9 +60,9 @@ const FAQS: QA[] = [
       nl: "Is er beddengoed? Wat moet ik meenemen?",
     },
     a: {
-      de: "Die Hütte stellt nur Kopfkissen (ohne Bezug). Selbst mitzubringen sind: 1 Bettlaken, 1 Kopfkissenbezug und 1 Schlafsack oder eine Decke mit Bezug. Außerdem ratsam: Geschirrtücher und Toilettenpapier für den Anfang.",
-      en: "The cabin provides pillows only (without covers). Please bring: 1 fitted sheet, 1 pillowcase and 1 sleeping bag or duvet with cover. Also handy: tea towels and some toilet paper to start.",
-      nl: "De hut levert alleen kussens (zonder sloop). Zelf meenemen: 1 hoeslaken, 1 kussensloop en 1 slaapzak of dekbed met overtrek. Handig: theedoeken en wat toiletpapier voor het begin.",
+      de: "Die Hütte stellt nur Kopfkissen (ohne Bezug). Selbst mitzubringen sind: 1 Bettlaken, 1 Kopfkissenbezug und 1 Schlafsack oder eine Decke mit Bezug. Außerdem ratsam: Geschirrtücher, Toilettenpapier für den Anfang sowie Mehrfachsteckdosen und ein Verlängerungskabel, falls Du Strom für Aktivitäten brauchst — die Elektrik der Hütte ist noch nicht ganz in der Moderne angekommen.",
+      en: "The cabin provides pillows only (without covers). Please bring: 1 fitted sheet, 1 pillowcase and 1 sleeping bag or duvet with cover. Also handy: tea towels, some toilet paper to start, and a power strip plus extension cord if you need electricity for activities — the cabin's wiring hasn't quite caught up with modern times.",
+      nl: "De hut levert alleen kussens (zonder sloop). Zelf meenemen: 1 hoeslaken, 1 kussensloop en 1 slaapzak of dekbed met overtrek. Handig: theedoeken, wat toiletpapier voor het begin, en een stekkerdoos plus verlengsnoer als je stroom nodig hebt voor activiteiten — de elektra van de hut is nog niet helemaal bij de tijd.",
     },
   },
   {
@@ -147,6 +147,18 @@ const FAQS: QA[] = [
       de: "Die Kurtaxe Hochsauerland (2,70 € pro Person ab 16 Jahren und Nacht) wird zusammen mit der Restzahlung eingezogen und von uns an die Kurverwaltung Winterberg abgeführt — Du musst Dich um nichts Extra kümmern.",
       en: "The Hochsauerland guest tax (€2.70 per guest aged 16+ per night) is collected together with the remaining payment and remitted by us to the Winterberg tourist office — nothing extra for you to do.",
       nl: "De toeristenbelasting Hochsauerland (€ 2,70 per persoon vanaf 16 jaar per nacht) wordt samen met de restbetaling geïncasseerd en door ons afgedragen aan de Kurverwaltung Winterberg — jij hoeft verder niets te doen.",
+    },
+  },
+  {
+    q: {
+      de: "Gibt es WLAN?",
+      en: "Is there WiFi?",
+      nl: "Is er wifi?",
+    },
+    a: {
+      de: "Nein, aktuell gibt es kein WLAN an der Hütte — eine gute Gelegenheit für ein paar Tage offline.",
+      en: "No, there's currently no WiFi at the cabin — a good excuse for a few days offline.",
+      nl: "Nee, er is momenteel geen wifi in de hut — een mooie aanleiding voor een paar dagen offline.",
     },
   },
 ];
