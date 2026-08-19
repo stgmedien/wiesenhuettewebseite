@@ -171,6 +171,7 @@ export function buildPackliste(input: PackInput): PackCategory[] {
     { name: "Kaffee + Filter (falls nicht eingekauft)", shared: true },
     { name: "Tee-Auswahl", shared: true },
     { name: "Erste-Hilfe-Set", shared: true, hint: "Pflaster, Verbandmaterial, Schere, Pinzette" },
+    { name: "Mehrfachsteckdosen + Verlängerungskabel", shared: true, hint: "Falls Strom für Aktivitäten gebraucht wird — die Elektrik ist noch nicht ganz in der Moderne angekommen" },
   ];
   if (hasHike) {
     shared.push(
