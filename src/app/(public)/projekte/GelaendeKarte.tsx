@@ -1,5 +1,6 @@
 import { readFileSync } from "fs";
 import path from "path";
+import Script from "next/script";
 import styles from "./projekte.module.css";
 
 // SVG wird als statische Datei gepflegt (gleiches Muster wie die Illustrationen
@@ -26,6 +27,25 @@ export function GelaendeKarte() {
       <div className={styles.karteCard}>
         <div className={styles.karteSvgWrap} dangerouslySetInnerHTML={{ __html: svg }} />
       </div>
+      {/* Verlinkt die Karten-Icons mit den Projektkarten weiter unten (per
+          data-key/data-projekt-key) -- ein Klick auf z. B. "Zeltplatz"
+          scrollt zur passenden Karte und oeffnet sie, wie ein Klick auf die
+          Karte selbst. Bewusst reines <script> statt React-State: die Karte
+          ist server-gerendertes, statisches SVG-Markup ohne eigene Insel. */}
+      <Script id="gelaende-karte-links" strategy="afterInteractive">
+        {`
+          document.querySelectorAll('.poi[data-key]').forEach(function (poi) {
+            poi.addEventListener('click', function () {
+              var key = poi.getAttribute('data-key');
+              var karte = document.querySelector('[data-projekt-key="' + key + '"]');
+              if (karte) {
+                karte.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                karte.click();
+              }
+            });
+          });
+        `}
+      </Script>
     </section>
   );
 }
