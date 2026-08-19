@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 import type { Projekt } from "./data";
 import styles from "./projekte.module.css";
 import { fraunces } from "./fonts";
+import { ProjektAnfrageForm } from "./ProjektAnfrageForm";
 
 export function ProjektGalerie({ projekte }: { projekte: Projekt[] }) {
   const [activeKey, setActiveKey] = useState<string | null>(null);
@@ -150,9 +151,20 @@ export function ProjektGalerie({ projekte }: { projekte: Projekt[] }) {
                       <span className={styles.pTag}>💶 Beitrag</span>
                       <h4>Sach- oder Geldspende</h4>
                       <p>{active.beitrag}</p>
+                      {active.key === "plateau" && (
+                        <a href="/huette#spenden" className={styles.spendenLink}>
+                          Zur Spendenaktion fürs Zeltpodest →
+                        </a>
+                      )}
                     </div>
                   </div>
                 </div>
+
+                <ProjektAnfrageForm
+                  projektKey={active.key}
+                  projektNr={active.nr}
+                  projektTitel={active.titel}
+                />
 
                 <p className={styles.thanks}>{active.danke}</p>
               </div>

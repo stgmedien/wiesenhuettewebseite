@@ -542,6 +542,18 @@
 .pathGive p {
   color: #3a352d;
 }
+.spendenLink {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--pk-wood-deep);
+  text-decoration: none;
+  border-bottom: 1px solid var(--pk-sun);
+}
+.spendenLink:hover {
+  color: var(--pk-sun);
+}
 
 .thanks {
   font-size: 11.5px;
@@ -549,6 +561,78 @@
   border-left: 3px solid var(--pk-wood);
   padding: 2px 0 2px 10px;
   line-height: 1.45;
+}
+
+.anfrageOeffnen {
+  display: block;
+  width: 100%;
+  text-align: center;
+  background: var(--pk-pine);
+  color: var(--pk-cream);
+  border: none;
+  border-radius: 10px;
+  padding: 11px 16px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.anfrageOeffnen:hover {
+  background: var(--pk-pine-deep);
+}
+.anfrageBox {
+  background: var(--pk-card);
+  border: 1px solid var(--pk-line);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.anfrageLabel {
+  margin: 0 0 2px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--pk-pine);
+}
+.anfrageInput {
+  font-family: var(--pk-sans);
+  font-size: 13px;
+  padding: 8px 10px;
+  border: 1px solid var(--pk-line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--pk-ink);
+  resize: vertical;
+}
+.anfrageInput:focus {
+  outline: 2px solid var(--pk-sun);
+  outline-offset: 1px;
+}
+.anfrageSubmit {
+  background: var(--pk-sun);
+  color: var(--pk-ink);
+  border: none;
+  border-radius: 8px;
+  padding: 9px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.anfrageSubmit:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.anfrageError {
+  margin: 0;
+  font-size: 12px;
+  color: #a6392e;
+}
+.anfrageDone {
+  margin: 0;
+  font-size: 13px;
+  color: var(--pk-pine);
+  font-weight: 600;
 }
 
 .foot {
