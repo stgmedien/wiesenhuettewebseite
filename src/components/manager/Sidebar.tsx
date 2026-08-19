@@ -30,6 +30,7 @@ import {
   MapPin,
   ThumbsUp,
   Flame,
+  Inbox,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -73,6 +74,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/m/wandertouren", label: "Wandertouren", Icon: Footprints },
       { href: "/m/empfehlungen", label: "Empfehlungen", Icon: MapPin },
       { href: "/m/community", label: "Anekdoten", Icon: MessageSquare },
+      { href: "/m/projekte-anfragen", label: "Projekt-Anmeldungen", Icon: Inbox },
     ],
   },
   {

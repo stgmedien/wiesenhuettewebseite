@@ -1451,3 +1451,31 @@ export type WaitlistEntry = typeof waitlistEntries.$inferSelect;
 export type Offer = typeof offers.$inferSelect;
 export type BookingHub = typeof bookingHubs.$inferSelect;
 export type HubEntry = typeof hubEntries.$inferSelect;
+
+// =============================================================
+// PROJEKTE (/projekte) — Wunschprojekt-Anmeldungen von Klassen/Gruppen.
+// Die Projekte selbst (WH-01..WH-14) leben als statische Daten in
+// projekte/data.ts, noch nicht in der DB -- deshalb projektKey/-Nr/-Titel
+// hier denormalisiert gespeichert statt als Fremdschluessel.
+// =============================================================
+export const projektAnfragen = pgTable(
+  "projekt_anfragen",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    projektKey: varchar("projekt_key", { length: 60 }).notNull(),
+    projektNr: varchar("projekt_nr", { length: 10 }).notNull(),
+    projektTitel: varchar("projekt_titel", { length: 300 }).notNull(),
+    gruppe: varchar("gruppe", { length: 200 }).notNull(),
+    kontaktName: varchar("kontakt_name", { length: 200 }).notNull(),
+    kontaktEmail: varchar("kontakt_email", { length: 320 }).notNull(),
+    kontaktTelefon: varchar("kontakt_telefon", { length: 60 }),
+    nachricht: text("nachricht"),
+    erledigt: boolean("erledigt").notNull().default(false),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    projektKeyIdx: index("projekt_anfragen_projekt_key_idx").on(t.projektKey),
+    erledigtIdx: index("projekt_anfragen_erledigt_idx").on(t.erledigt),
+  })
+);
+export type ProjektAnfrage = typeof projektAnfragen.$inferSelect;

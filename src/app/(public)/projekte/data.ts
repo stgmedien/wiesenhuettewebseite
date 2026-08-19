@@ -26,7 +26,7 @@ export const PROJEKTE: Projekt[] = [
     titel: "Ein ebener Platz zum Zelten entsteht.",
     untertitel: "Zelt-Plateau an der Feuerstelle — startet zuerst",
     darumGehts:
-      "Unterhalb der Hütte, direkt bei der Feuerstelle, entsteht ein ebener Platz zum Zelten – ca. 6,5 × 4 m, mit Blick in die Ferne. Das Fundament im Fels – Stahlträger einbetonieren – bereiten Profis vor. Danach geht es für die Fahrt vor allem darum, die Holzbretter auf das fertige Fundament zu schrauben. Von allen Projekten rund um die Hütte ist das hier das wichtigste: Es soll so bald wie möglich starten.",
+      "Unterhalb der Hütte, direkt bei der Feuerstelle, entsteht ein ebener Platz zum Zelten – ca. 6,5 × 4 m, mit Blick in die Ferne. Das Fundament im Fels – Stahlträger einbetonieren – bereiten Profis vor. Danach geht es für die Fahrt vor allem darum, die Holzbretter auf das fertige Fundament zu schrauben. Von allen Projekten rund um die Hütte ist das hier das wichtigste und steht deshalb ganz oben auf der Liste: Mehr Schlafplätze draußen entlasten das Haus – und wer will, verbringt die Nacht im Zelt auf der Wiese.",
     brauchenWir: [
       "Fundament im Fels (Stahlträger einbetonieren) – wird vorab von Profis vorbereitet",
       "Holzbretter zuschneiden und auf das Fundament schrauben",
