@@ -3,9 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
-import type { Projekt } from "./data";
+import type { Projekt } from "@/lib/db/schema";
 import styles from "./projekte.module.css";
 import { fraunces } from "./fonts";
+
+const STATUS_LABEL: Record<Projekt["status"], string> = {
+  frei: "frei",
+  teils: "teils",
+  vergeben: "vergeben",
+};
 
 export function ProjektGalerie({ projekte }: { projekte: Projekt[] }) {
   const [activeKey, setActiveKey] = useState<string | null>(null);
@@ -161,9 +167,11 @@ export function ProjektGalerie({ projekte }: { projekte: Projekt[] }) {
                   <div className={styles.footK}>So sagst du zu</div>
                   <div className={styles.footV}>{active.kontakt}</div>
                 </div>
-                <div className={styles.seal}>
+                <div
+                  className={`${styles.seal} ${active.status === "teils" ? styles.sealTeils : ""} ${active.status === "vergeben" ? styles.sealVergeben : ""}`}
+                >
                   <div className={styles.sealTop}>Patenschaft</div>
-                  <div className={styles.sealMid}>frei</div>
+                  <div className={styles.sealMid}>{STATUS_LABEL[active.status]}</div>
                   <div className={styles.sealBot}>Nº&nbsp;{active.nr}</div>
                 </div>
               </div>

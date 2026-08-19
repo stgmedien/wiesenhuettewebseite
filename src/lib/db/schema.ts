@@ -1451,3 +1451,41 @@ export type WaitlistEntry = typeof waitlistEntries.$inferSelect;
 export type Offer = typeof offers.$inferSelect;
 export type BookingHub = typeof bookingHubs.$inferSelect;
 export type HubEntry = typeof hubEntries.$inferSelect;
+
+// =============================================================
+// PROJEKTE — versteckte /projekte-Seite, Hütten-Bauprojekte für
+// Klassenfahrten (Zelt-Plateau, Blühwiese, ...). Von Dana/Tanja im
+// Manager-Bereich pflegbar statt per Code-Deploy.
+// =============================================================
+
+export const projektStatusEnum = pgEnum("projekt_status", ["frei", "teils", "vergeben"]);
+
+export const projekte = pgTable(
+  "projekte",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    key: varchar("key", { length: 60 }).notNull().unique(),
+    nr: varchar("nr", { length: 10 }).notNull(),
+    titel: varchar("titel", { length: 300 }).notNull(),
+    untertitel: varchar("untertitel", { length: 300 }).notNull(),
+    darumGehts: text("darum_gehts").notNull(),
+    brauchenWir: jsonb("brauchen_wir").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+    zeitrahmen: varchar("zeitrahmen", { length: 200 }).notNull().default("-"),
+    aufwand: varchar("aufwand", { length: 200 }).notNull().default("-"),
+    kosten: text("kosten").notNull().default("Richtwert: bitte eintragen"),
+    anpacken: text("anpacken").notNull(),
+    beitrag: text("beitrag").notNull(),
+    danke: text("danke").notNull(),
+    kontakt: text("kontakt").notNull().default("Ansprechpartner steht noch nicht fest"),
+    bild: text("bild").notNull(),
+    status: projektStatusEnum("status").notNull().default("frei"),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    sortIdx: index("projekte_sort_idx").on(t.sortOrder),
+  })
+);
+
+export type Projekt = typeof projekte.$inferSelect;

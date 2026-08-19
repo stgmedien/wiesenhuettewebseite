@@ -1,4 +1,6 @@
-import { PROJEKTE } from "./data";
+import { asc } from "drizzle-orm";
+import { db } from "@/lib/db";
+import { projekte } from "@/lib/db/schema";
 import { ProjektGalerie } from "./ProjektGalerie";
 import { fraunces } from "./fonts";
 import styles from "./projekte.module.css";
@@ -6,6 +8,11 @@ import styles from "./projekte.module.css";
 // Versteckte Seite: nicht in Navigation/Sitemap, zusätzlich noindex/nofollow —
 // nur über den direkt geteilten Link erreichbar (z. B. Elternabend-Beamer,
 // WhatsApp an die Klasse). Siehe /wapelbad für das gleiche Muster.
+// Daten kommen live aus der DB (von Dana/Tanja im Manager-Bereich pflegbar) —
+// deshalb dynamic statt statisch gecacht, sonst sehen sie Aenderungen erst
+// nach einem Redeploy.
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Projekte rund um die Hütte · Wiesenhütte",
   description:
@@ -13,7 +20,9 @@ export const metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function ProjektePage() {
+export default async function ProjektePage() {
+  const alleProjekte = await db.select().from(projekte).orderBy(asc(projekte.sortOrder));
+
   return (
     <div className={`${styles.page} ${fraunces.variable}`}>
       <div className={styles.wrap}>
@@ -74,7 +83,7 @@ export default function ProjektePage() {
           </aside>
         </div>
 
-        <ProjektGalerie projekte={PROJEKTE} />
+        <ProjektGalerie projekte={alleProjekte} />
       </div>
     </div>
   );

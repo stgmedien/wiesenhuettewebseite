@@ -587,6 +587,14 @@
   text-align: center;
   transform: rotate(-7deg);
 }
+.sealTeils {
+  border-color: var(--pk-sun);
+  color: var(--pk-sun);
+}
+.sealVergeben {
+  border-color: rgba(247, 242, 233, 0.35);
+  color: rgba(247, 242, 233, 0.5);
+}
 .sealTop {
   font-family: var(--pk-mono);
   font-size: 6.5px;

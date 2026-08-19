@@ -169,6 +169,13 @@
       "when": 1786275225144,
       "tag": "0023_oval_madrox",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1787148098011,
+      "tag": "0024_secret_famine",
+      "breakpoints": true
     }
   ]
 }

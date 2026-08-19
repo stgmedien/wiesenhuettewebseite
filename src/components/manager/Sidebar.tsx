@@ -73,6 +73,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/m/wandertouren", label: "Wandertouren", Icon: Footprints },
       { href: "/m/empfehlungen", label: "Empfehlungen", Icon: MapPin },
       { href: "/m/community", label: "Anekdoten", Icon: MessageSquare },
+      { href: "/m/projekte", label: "Hütten-Projekte", Icon: Wrench },
     ],
   },
   {
