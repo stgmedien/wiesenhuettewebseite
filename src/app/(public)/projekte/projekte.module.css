@@ -44,17 +44,33 @@
   padding: 48px 22px 80px;
 }
 
-.headerGrid {
+/* Abschliessender Hinweis (Kennenlern-/Kooperationsspiele + Gruppendynamik-
+   Box) ganz am Seitenende -- ein eigener, per Trennlinie abgesetzter Block:
+   in einer Grid-Spalte neben der deutlich hoeheren Box liess die kurze
+   Notiz eine grosse, unschoene Luecke unter dem Text entstehen. align-items:
+   center gleicht den Hoehenunterschied aus. */
+.closing {
+  margin-top: 8px;
+  padding-top: 40px;
+  border-top: 1px solid var(--pk-line);
+}
+.closingGrid {
   display: grid;
-  grid-template-columns: 1fr minmax(240px, 300px);
-  gap: 32px;
-  align-items: start;
-  margin-bottom: 40px;
+  grid-template-columns: 1fr minmax(260px, 340px);
+  gap: 40px;
+  align-items: center;
 }
 @media (max-width: 760px) {
-  .headerGrid {
+  .closingGrid {
     grid-template-columns: 1fr;
   }
+}
+.closingText {
+  max-width: 52ch;
+  color: var(--pk-ink-soft);
+  font-size: 15px;
+  line-height: 1.7;
+  margin: 0;
 }
 
 .masthead {
@@ -82,14 +98,6 @@
   color: var(--pk-ink-soft);
   font-size: 15.5px;
   line-height: 1.65;
-}
-
-.masthead .leadIn {
-  font-family: var(--font-fraunces), Georgia, "Times New Roman", serif;
-  font-weight: 600;
-  font-size: 17px;
-  color: var(--pk-pine);
-  margin-top: 26px;
 }
 
 .gdBox {

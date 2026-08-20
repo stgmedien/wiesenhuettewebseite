@@ -27,54 +27,53 @@ export default function ProjektePage() {
             Projekt, von der Idee bis zur Umsetzung vor Ort. Material wie Farbe, Werkzeug oder
             Baumaterial übernimmt der Skiverein nach kurzer Abstimmung.
           </p>
-          <p className={styles.leadIn}>Das steht gerade zur Auswahl:</p>
         </header>
 
         <GelaendeKarte />
 
         <ProjektGalerie projekte={PROJEKTE} />
 
-        <div className={styles.headerGrid}>
-          <div className={styles.masthead}>
-            <p>
+        <div className={styles.closing}>
+          <div className={styles.closingGrid}>
+            <p className={styles.closingText}>
               Wichtig ist nur: Nehmt euch nicht zu viele Bausteine auf einmal vor. Zu einer guten
               Fahrt gehören ein Küchenteam, eine Runde durch Winterberg, Zeit füreinander und
               Kennenlern- sowie Kooperationsspiele — das trägt genauso zu einer guten Gruppe bei
               wie die Bauprojekte selbst.
             </p>
-          </div>
 
-          <aside className={styles.gdBox}>
-            <div className={styles.gdBadge}>🎲</div>
-            <p className={styles.gdEyebrow}>Gruppendynamik buchen</p>
-            <p className={styles.gdText}>
-              Kennenlern- und Kooperationsspiele für eure Gruppe — auf Anfrage, unabhängig von den
-              Bau-Bausteinen.
-            </p>
-            <div className={styles.gdCategories}>
-              <div className={styles.gdCategory}>
-                <span className={styles.gdCategoryTag}>🤝 Kennenlernen</span>
-                <span className={styles.gdCategoryEx}>z. B. Namensbingo, Blitzlicht-Runden</span>
+            <aside className={styles.gdBox}>
+              <div className={styles.gdBadge}>🎲</div>
+              <p className={styles.gdEyebrow}>Gruppendynamik buchen</p>
+              <p className={styles.gdText}>
+                Kennenlern- und Kooperationsspiele für eure Gruppe — auf Anfrage, unabhängig von
+                den Bau-Bausteinen.
+              </p>
+              <div className={styles.gdCategories}>
+                <div className={styles.gdCategory}>
+                  <span className={styles.gdCategoryTag}>🤝 Kennenlernen</span>
+                  <span className={styles.gdCategoryEx}>z. B. Namensbingo, Blitzlicht-Runden</span>
+                </div>
+                <div className={styles.gdCategory}>
+                  <span className={styles.gdCategoryTag}>🧩 Kooperation</span>
+                  <span className={styles.gdCategoryEx}>
+                    z. B. Turmbau-Challenge, Blindes Quadrat, Spinnennetz
+                  </span>
+                </div>
               </div>
-              <div className={styles.gdCategory}>
-                <span className={styles.gdCategoryTag}>🧩 Kooperation</span>
-                <span className={styles.gdCategoryEx}>
-                  z. B. Turmbau-Challenge, Blindes Quadrat, Spinnennetz
-                </span>
-              </div>
-            </div>
-            <p className={styles.gdListLabel}>Ansprechpartner</p>
-            <ul className={styles.gdList}>
-              <li>
-                <span className={styles.gdName}>[Name]</span>
-                <span className={styles.gdPhone}>[Telefonnummer]</span>
-              </li>
-              <li>
-                <span className={styles.gdName}>[Name]</span>
-                <span className={styles.gdPhone}>[Telefonnummer]</span>
-              </li>
-            </ul>
-          </aside>
+              <p className={styles.gdListLabel}>Ansprechpartner</p>
+              <ul className={styles.gdList}>
+                <li>
+                  <span className={styles.gdName}>[Name]</span>
+                  <span className={styles.gdPhone}>[Telefonnummer]</span>
+                </li>
+                <li>
+                  <span className={styles.gdName}>[Name]</span>
+                  <span className={styles.gdPhone}>[Telefonnummer]</span>
+                </li>
+              </ul>
+            </aside>
+          </div>
         </div>
       </div>
     </div>
