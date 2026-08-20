@@ -21,6 +21,7 @@ import { Kundenakte } from "./Kundenakte";
 import { findMailTemplateMeta } from "@/lib/automatic-mail-templates";
 import { CustomerContactForm } from "./CustomerContactForm";
 import { ResendMailsButton } from "./ResendMailsButton";
+import { ResendWelcomeButton } from "./ResendWelcomeButton";
 
 export const dynamic = "force-dynamic";
 
@@ -191,6 +192,7 @@ export default async function BookingDetail({ params }: Props) {
               />
             )}
             {customer && <ResendMailsButton bookingId={b.id} />}
+            {customer && customer.userId && <ResendWelcomeButton bookingId={b.id} />}
           </Section>
 
           <Section title="Aufenthalt">

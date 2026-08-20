@@ -5,7 +5,8 @@ import Link from "next/link";
 import { formatEuro } from "@/lib/pricing";
 import { formatDateLong } from "@/lib/utils";
 import { StatusPill } from "@/components/manager/StatusPill";
-import { getUnresolvedMailFailures } from "@/lib/mail-log";
+import { getUnresolvedMailFailures, dismissMailFailure } from "@/lib/mail-log";
+import { revalidatePath } from "next/cache";
 import { findMailTemplateMeta } from "@/lib/automatic-mail-templates";
 import { findPriceMismatches } from "@/lib/price-consistency";
 import {
@@ -208,13 +209,41 @@ export default async function Dashboard() {
             {mailFailures.map((f) => {
               const meta = findMailTemplateMeta(f.template);
               return (
-                <Row
+                <div
                   key={f.id}
-                  href={f.bookingId ? `/m/buchungen/${f.bookingId}` : "#"}
-                  date={f.sentAt.toISOString().slice(0, 10)}
-                  title={f.guestName}
-                  subtitle={`${f.bookingNumber} · ${meta?.label ?? f.template} · an ${f.to}${f.error ? ` · ${f.error}` : ""}`}
-                />
+                  className="flex items-center gap-3 py-3 border-b border-[var(--color-wh-winter-grey)] last:border-b-0"
+                >
+                  <Link
+                    href={f.bookingId ? `/m/buchungen/${f.bookingId}` : "#"}
+                    className="flex items-center gap-4 flex-1 min-w-0 no-underline text-[var(--color-wh-black)] hover:bg-[var(--color-wh-green-soft)]/40 -mx-2 px-2 py-1 rounded-md transition-colors"
+                  >
+                    <div className="text-xs uppercase tracking-wider text-[var(--color-wh-fg-muted)] min-w-[88px]">
+                      {new Date(f.sentAt).toLocaleDateString("de-DE", { day: "2-digit", month: "short" })}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold truncate">{f.guestName}</div>
+                      <div className="text-sm text-[var(--color-wh-fg-muted)] truncate">
+                        {f.bookingNumber} · {meta?.label ?? f.template} · an {f.to}
+                        {f.error ? ` · ${f.error}` : ""}
+                      </div>
+                    </div>
+                  </Link>
+                  <form
+                    action={async (fd) => {
+                      "use server";
+                      await dismissMailFailure(String(fd.get("id")));
+                      revalidatePath("/m/dashboard");
+                    }}
+                  >
+                    <input type="hidden" name="id" value={f.id} />
+                    <button
+                      type="submit"
+                      className="shrink-0 text-xs whitespace-nowrap rounded-full border border-[var(--color-wh-winter-grey)] px-3 py-1.5 hover:bg-white transition-colors"
+                    >
+                      Erledigt
+                    </button>
+                  </form>
+                </div>
               );
             })}
           </div>

@@ -18,29 +18,31 @@ export default function ProjektePage() {
   return (
     <div className={`${styles.page} ${fraunces.variable}`}>
       <div className={styles.wrap}>
+        <header className={styles.masthead}>
+          <p className={styles.eyebrow}>Wiesenhütte &middot; Projekte</p>
+          <h1>Was rund um die Hütte entsteht.</h1>
+          <p>
+            Rund um die Wiesenhütte entsteht in den nächsten Jahren einiges – und ihr könnt dabei
+            sein. Sucht euch als Klasse einen der Bausteine aus und macht daraus euer eigenes
+            Projekt, von der Idee bis zur Umsetzung vor Ort. Material wie Farbe, Werkzeug oder
+            Baumaterial übernimmt der Skiverein nach kurzer Abstimmung.
+          </p>
+          <p className={styles.leadIn}>Das steht gerade zur Auswahl:</p>
+        </header>
+
+        <GelaendeKarte />
+
+        <ProjektGalerie projekte={PROJEKTE} />
+
         <div className={styles.headerGrid}>
-          <header className={styles.masthead}>
-            <p className={styles.eyebrow}>Wiesenhütte &middot; Projekte</p>
-            <h1>Was rund um die Hütte entsteht.</h1>
-            <p>
-              Rund um die Wiesenhütte entsteht in den nächsten Jahren einiges — und ihr könnt
-              dabei sein. Die Hütte ist nicht nur ein Ort zum Skifahren oder Wandern, sie eignet
-              sich genauso gut fürs gemeinsame Anpacken. Sucht euch als Klasse einen der Bausteine
-              hier aus und macht daraus euer eigenes kleines Projekt: von der ersten Idee über den
-              Kostenvoranschlag bis zur Umsetzung vor Ort.
-            </p>
-            <p>
-              Nach eurer überzeugenden Kostenkalkulation übernimmt der Skiverein gerne Material
-              wie Farbe, Werkzeug oder Baumaterial — kurze Abstimmung mit uns vorausgesetzt.
-            </p>
+          <div className={styles.masthead}>
             <p>
               Wichtig ist nur: Nehmt euch nicht zu viele Bausteine auf einmal vor. Zu einer guten
               Fahrt gehören ein Küchenteam, eine Runde durch Winterberg, Zeit füreinander und
               Kennenlern- sowie Kooperationsspiele — das trägt genauso zu einer guten Gruppe bei
               wie die Bauprojekte selbst.
             </p>
-            <p className={styles.leadIn}>Das steht gerade zur Auswahl:</p>
-          </header>
+          </div>
 
           <aside className={styles.gdBox}>
             <div className={styles.gdBadge}>🎲</div>
@@ -74,10 +76,6 @@ export default function ProjektePage() {
             </ul>
           </aside>
         </div>
-
-        <GelaendeKarte />
-
-        <ProjektGalerie projekte={PROJEKTE} />
       </div>
     </div>
   );

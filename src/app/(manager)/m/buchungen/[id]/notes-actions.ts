@@ -6,7 +6,7 @@ import { notes, customers, activityLog } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
-import { resendBookingConfirmationMails } from "@/lib/booking-payment-confirmation";
+import { resendBookingConfirmationMails, resendWelcomeMail } from "@/lib/booking-payment-confirmation";
 import { getActiveInvoiceForBooking, reissueInvoiceForBooking } from "@/lib/invoice";
 
 async function requireManager() {
@@ -218,4 +218,34 @@ export async function resendGuestMails(
     return { ok: false, error: errors.join("; ") || "Unbekannter Fehler." };
   }
   return { ok: true, sent };
+}
+
+/**
+ * Verschickt die Willkommens-Mail (Konto + Magic-Link-Login) erneut — z. B.
+ * wenn sie beim Buchen an eine falsch getippte Adresse gebounced ist und die
+ * Adresse inzwischen korrigiert wurde.
+ */
+export async function resendWelcome(
+  bookingId: string
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const me = await requireManager();
+  const parsedId = z.string().uuid().safeParse(bookingId);
+  if (!parsedId.success) return { ok: false, error: "Ungültige Buchung." };
+
+  const result = await resendWelcomeMail(parsedId.data);
+
+  await db.insert(activityLog).values({
+    who: me,
+    what: result.sent
+      ? "Willkommens-Mail erneut gesendet"
+      : `Willkommens-Mail erneut senden fehlgeschlagen: ${result.error}`,
+    bookingId: parsedId.data,
+  });
+
+  revalidatePath(`/m/buchungen/${parsedId.data}`);
+
+  if (!result.sent) {
+    return { ok: false, error: result.error ?? "Unbekannter Fehler." };
+  }
+  return { ok: true };
 }
