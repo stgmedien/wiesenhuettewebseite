@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { emailLog, bookings, customers } from "@/lib/db/schema";
-import { and, desc, eq, gte, inArray, or } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, isNull, or } from "drizzle-orm";
 
 const DELIVERY_FAILURE_STATUSES = ["bounced", "blocked", "spam", "invalid"] as const;
 
@@ -30,6 +30,16 @@ export async function wasMailSent(bookingId: string, template: string): Promise<
     )
     .limit(1);
   return !!r[0];
+}
+
+/**
+ * Manuelle Quittierung im Dashboard ("Erledigt") -- fuer Faelle, die sich
+ * nie automatisch aufloesen (z.B. Vorlagen ohne Resend-Weg, siehe
+ * getUnresolvedMailFailures). Loescht den Log-Eintrag nicht, blendet ihn
+ * nur aus.
+ */
+export async function dismissMailFailure(id: string): Promise<void> {
+  await db.update(emailLog).set({ dismissedAt: new Date() }).where(eq(emailLog.id, id));
 }
 
 export type MailFailure = {
@@ -62,6 +72,7 @@ export async function getUnresolvedMailFailures(sinceDays = 14): Promise<MailFai
     .where(
       and(
         gte(emailLog.sentAt, since),
+        isNull(emailLog.dismissedAt),
         or(
           eq(emailLog.status, "failed"),
           inArray(emailLog.deliveryStatus, [...DELIVERY_FAILURE_STATUSES])

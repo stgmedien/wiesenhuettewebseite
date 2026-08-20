@@ -395,6 +395,10 @@ export const emailLog = pgTable("email_log", {
   // "volle Mail-Ansicht" im Manager-Tool statt nur Betreff/Empfaenger.
   // Nullable: Mails vor Einfuehrung dieses Felds haben keinen Inhalt mehr.
   bodyHtml: text("body_html"),
+  // Manuelle Quittierung im Dashboard ("Erledigt") -- fuer Faelle, die sich
+  // nie automatisch aufloesen (z.B. Vorlagen ohne Resend-Weg). Loescht den
+  // Log-Eintrag nicht, blendet ihn nur aus der Unresolved-Liste aus.
+  dismissedAt: timestamp("dismissed_at"),
 });
 
 // =============================================================

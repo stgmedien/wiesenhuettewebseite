@@ -16,9 +16,11 @@ import { bookings, customers, payments, activityLog } from "@/lib/db/schema";
 import { and, eq, inArray } from "drizzle-orm";
 import { sendMail } from "@/lib/mail/send";
 import { wasMailSent } from "@/lib/mail-log";
+import { createMagicLinkToken } from "@/lib/magic-link";
 import BookingConfirmedEmail from "@/lib/mail/templates/booking-confirmed";
 import BookingInternalEmail from "@/lib/mail/templates/booking-internal";
 import HuettenwartNewBookingEmail from "@/lib/mail/templates/huettenwart-booking-new";
+import WelcomeEmail from "@/lib/mail/templates/welcome";
 import { HUETTENWART_EMAIL, HUETTENWART_CC } from "@/lib/huettenwart";
 import { buildIcalInvite } from "@/lib/mail/ical";
 import { formatDateLong } from "@/lib/utils";
@@ -159,6 +161,47 @@ export async function resendBookingConfirmationMails(
   }
 
   return { sent, errors };
+}
+
+/**
+ * Sendet die Willkommens-Mail (Konto + Magic-Link-Login) erneut, mit der
+ * AKTUELLEN Kunden-E-Mail (z. B. nach Korrektur eines Tippfehlers) und einem
+ * frischen Magic-Link-Token — der urspruengliche ist nach 15 Minuten
+ * abgelaufen. Nur sinnvoll, wenn beim Buchen ein Kundenkonto angelegt wurde
+ * (customer.userId gesetzt); ohne Konto gab es nie eine Willkommens-Mail zu
+ * dieser Buchung.
+ */
+export async function resendWelcomeMail(bookingId: string): Promise<{ sent: boolean; error?: string }> {
+  const booking = (await db.select().from(bookings).where(eq(bookings.id, bookingId)).limit(1))[0];
+  if (!booking) return { sent: false, error: "Buchung nicht gefunden" };
+  const customer = booking.customerId
+    ? (await db.select().from(customers).where(eq(customers.id, booking.customerId)).limit(1))[0]
+    : null;
+  if (!customer) return { sent: false, error: "Kein Kundendatensatz" };
+  if (!customer.userId) return { sent: false, error: "Zu dieser Buchung wurde kein Kundenkonto angelegt" };
+
+  try {
+    const tokenRes = await createMagicLinkToken(customer.email);
+    const loginUrl =
+      "rateLimited" in tokenRes
+        ? `${baseUrl}/konto`
+        : `${baseUrl}/auth/magic?token=${encodeURIComponent(tokenRes.token)}`;
+    await sendMail({
+      to: customer.email,
+      subject: "Dein Wiesenhütten-Konto + Buchung",
+      template: "welcome_with_booking",
+      bookingId,
+      react: WelcomeEmail({
+        firstName: customer.firstName,
+        email: customer.email,
+        membershipPending: false,
+        loginUrl,
+      }),
+    });
+    return { sent: true };
+  } catch (err) {
+    return { sent: false, error: err instanceof Error ? err.message : String(err) };
+  }
 }
 
 export type ConfirmDepositParams = {
