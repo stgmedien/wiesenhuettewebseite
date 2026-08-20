@@ -100,14 +100,6 @@
   line-height: 1.65;
 }
 
-.masthead .leadIn {
-  font-family: var(--font-fraunces), Georgia, "Times New Roman", serif;
-  font-weight: 600;
-  font-size: 17px;
-  color: var(--pk-pine);
-  margin-top: 26px;
-}
-
 .gdBox {
   position: relative;
   background: var(--pk-card);

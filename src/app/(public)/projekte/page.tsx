@@ -27,7 +27,6 @@ export default function ProjektePage() {
             Projekt, von der Idee bis zur Umsetzung vor Ort. Material wie Farbe, Werkzeug oder
             Baumaterial übernimmt der Skiverein nach kurzer Abstimmung.
           </p>
-          <p className={styles.leadIn}>Das steht gerade zur Auswahl:</p>
         </header>
 
         <GelaendeKarte />
