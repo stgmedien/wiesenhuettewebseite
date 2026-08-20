@@ -31,6 +31,11 @@
   font-family: var(--pk-sans);
   line-height: 1.5;
   min-height: 100vh;
+  /* Die Gelaende-Karte bricht auf Handybreite bewusst per 100vw aus .wrap
+     aus (siehe .karteCard) -- ohne dieses overflow-x wuerde ein winziger
+     Rundungsfehler zwischen 100vw und der tatsaechlichen Breite (Scrollbar!)
+     die ganze Seite waagerecht scrollbar machen. */
+  overflow-x: hidden;
 }
 
 .wrap {
@@ -758,6 +763,9 @@
   border-radius: 17px;
   pointer-events: none;
 }
+.karteScroll {
+  position: relative;
+}
 .karteSvgWrap {
   position: relative;
 }
@@ -766,9 +774,44 @@
   height: auto;
   display: block;
 }
+.karteSwipeHint {
+  display: none;
+}
 @media (max-width: 640px) {
   .karteCard {
-    padding: 14px;
-    border-radius: 18px;
+    /* Full-bleed: bricht aus dem gepaddeten .wrap aus und geht bis an den
+       Bildschirmrand -- auf schmalen Screens sonst zu wenig Platz fuer die
+       fuer 1400px Breite gezeichneten Labels (siehe .page overflow-x unten). */
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    padding: 16px 0;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+  .karteCard::before {
+    display: none;
+  }
+  .karteScroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 16px;
+  }
+  .karteSvgWrap {
+    /* Erzwingt eine lesbare Mindestgroesse statt die fuer 1400px gezeichneten
+       Labels auf Handybreite zu zerquetschen -- dafuer wird die Karte
+       pannbar statt komplett auf einen Blick zu passen. */
+    min-width: 900px;
+  }
+  .karteSwipeHint {
+    display: block;
+    text-align: center;
+    font-family: var(--pk-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--pk-wood-deep);
+    opacity: 0.65;
+    margin: 10px 0 0;
   }
 }

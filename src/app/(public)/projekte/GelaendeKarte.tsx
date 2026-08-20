@@ -22,20 +22,40 @@ export function GelaendeKarte() {
       <p className={styles.karteLead}>
         Vom Zeltplatz im Wald bis zur Feuerstelle, vom Freisitz an der Hauswand bis zur Blühwiese
         an der Zufahrt — ein erster Überblick, bevor ihr euch für ein Projekt entscheidet. Zum
-        Entdecken: mit der Maus über die Punkte fahren.
+        Entdecken: über die Punkte fahren oder sie antippen.
       </p>
       <div className={styles.karteCard}>
-        <div className={styles.karteSvgWrap} dangerouslySetInnerHTML={{ __html: svg }} />
+        <div className={styles.karteScroll}>
+          <div className={styles.karteSvgWrap} dangerouslySetInnerHTML={{ __html: svg }} />
+        </div>
+        <p className={styles.karteSwipeHint} aria-hidden="true">
+          ◂ zum Erkunden wischen ▸
+        </p>
       </div>
       {/* Verlinkt die Karten-Icons mit den Projektkarten weiter unten (per
           data-key/data-projekt-key) -- ein Klick auf z. B. "Zeltplatz"
           scrollt zur passenden Karte und oeffnet sie, wie ein Klick auf die
           Karte selbst. Bewusst reines <script> statt React-State: die Karte
-          ist server-gerendertes, statisches SVG-Markup ohne eigene Insel. */}
+          ist server-gerendertes, statisches SVG-Markup ohne eigene Insel.
+
+          Auf Geraeten ohne Hover (matchMedia "hover: none", also praktisch
+          alle Touch-Geraete) braucht ein Tap zwei Stufen: der erste zeigt
+          das Tooltip/den hervorgehobenen Zustand (ersetzt das Hover, das es
+          dort ja nicht gibt), erst der zweite Tap auf denselben Punkt
+          scrollt weiter zur Projektkarte. Auf Geraeten mit Hover (Maus) hat
+          man das Tooltip vorher schon gesehen -- da navigiert ein Klick
+          weiterhin direkt, wie bisher. */}
       <Script id="gelaende-karte-links" strategy="afterInteractive">
         {`
-          document.querySelectorAll('.poi[data-key]').forEach(function (poi) {
+          var pois = document.querySelectorAll('.poi[data-key]');
+          var keineHoverFaehigkeit = window.matchMedia('(hover: none)').matches;
+          pois.forEach(function (poi) {
             poi.addEventListener('click', function () {
+              if (keineHoverFaehigkeit && !poi.classList.contains('is-active')) {
+                pois.forEach(function (p) { p.classList.remove('is-active'); });
+                poi.classList.add('is-active');
+                return;
+              }
               var key = poi.getAttribute('data-key');
               var karte = document.querySelector('[data-projekt-key="' + key + '"]');
               if (karte) {
