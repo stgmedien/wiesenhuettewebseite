@@ -3,9 +3,9 @@
   <style>
   .poi[data-key] { cursor: pointer; }
   .poi-badge { transition: transform 0.2s cubic-bezier(.34,1.56,.64,1); transform-box: fill-box; transform-origin: center; }
-  .poi:hover .poi-badge { transform: scale(1.22); }
+  .poi:hover .poi-badge, .poi.is-active .poi-badge { transform: scale(1.22); }
   .poi-tip { opacity: 0; transition: opacity 0.18s ease; }
-  .poi:hover .poi-tip { opacity: 1; }
+  .poi:hover .poi-tip, .poi.is-active .poi-tip { opacity: 1; }
   .sparkle { animation: twinkle 3.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
   @keyframes twinkle { 0%,100% { opacity: 0.25; } 50% { opacity: 0.8; } }
 </style>
