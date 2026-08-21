@@ -16,7 +16,6 @@ export function GelaendeKarte() {
   const svg = ladeKarteSvg();
   return (
     <section className={styles.karteSection}>
-      <p className={styles.karteEyebrow}>Wiesenhütte &middot; Rundgang übers Gelände</p>
       <h2 className={styles.karteTitle}>Das erwartet euch auf dem Gelände.</h2>
       <div className={styles.karteDivider} />
       <p className={styles.karteLead}>
