@@ -395,6 +395,34 @@ export const RECOMMENDATIONS: Recommendation[] = [
     imageAttribution: "Foto: Christiane Jodl · CC BY 2.0 · Wikimedia Commons",
   },
   {
+    id: "ranger-fuehrung",
+    category: "abenteuer",
+    name: "Ranger-Waldführung",
+    tagline: {
+      de: "Geführte Waldtour direkt ab der Hütte — für Schulklassen kostenfrei",
+      en: "Guided forest walk starting right at the cabin — free for school groups",
+      nl: "Begeleide boswandeling die start bij de hut — gratis voor schoolgroepen",
+    },
+    description: {
+      de: "Rangerinnen und Ranger sowie Waldpädagog:innen des Regionalforstamts Oberes Sauerland führen Gruppen direkt ab der Wiesenhütte durch den Wald. Themen wie Quellen und Bachläufe, Klimawandel, Wiederaufforstung oder die Geschichte der Forstwirtschaft werden individuell abgesprochen. Für Schulklassen und Begleitpersonen ist die Führung kostenfrei.",
+      en: "Rangers and forest educators from the Oberes Sauerland regional forestry office lead groups straight from the Wiesenhütte into the woods. Topics like springs and streams, climate change, reforestation or the history of forestry are arranged individually. Free of charge for school classes and chaperones.",
+      nl: "Rangers en boseducators van het Regionalforstamt Oberes Sauerland begeleiden groepen rechtstreeks vanaf de Wiesenhütte het bos in. Thema's zoals bronnen en beken, klimaatverandering, herbebossing of de geschiedenis van de bosbouw worden individueel afgesproken. Voor schoolklassen en begeleiders is de rondleiding gratis.",
+    },
+    insiderTip: {
+      de: "Frühzeitig anfragen — Termin, Treffpunkt und Thema werden persönlich mit dem Ranger abgestimmt.",
+      en: "Get in touch early — date, meeting point and topic are worked out personally with the ranger.",
+      nl: "Vraag op tijd aan — datum, ontmoetingspunt en thema worden persoonlijk met de ranger afgestemd.",
+    },
+    address: "Regionalforstamt Oberes Sauerland, Poststraße 7, 57392 Schmallenberg (Start ab der Hütte)",
+    distanceMinutesByCar: 0,
+    googleMapsUrl:
+      "https://www.google.com/maps/search/?api=1&query=Regionalforstamt+Oberes+Sauerland+Schmallenberg",
+    phone: "029729702-35",
+    season: "all",
+    gradient: "from-green-400/30 via-emerald-300/20 to-lime-200/10",
+    emoji: "🌲",
+  },
+  {
     id: "bikepark-winterberg",
     category: "abenteuer",
     name: "Bikepark Winterberg",

@@ -34,20 +34,20 @@ export default function ProjektePage() {
         <ProjektGalerie projekte={PROJEKTE} />
 
         <div className={styles.closing}>
-          <div className={styles.closingGrid}>
-            <p className={styles.closingText}>
-              Wichtig ist nur: Nehmt euch nicht zu viele Bausteine auf einmal vor. Zu einer guten
-              Fahrt gehören ein Küchenteam, eine Runde durch Winterberg, Zeit füreinander und
-              Kennenlern- sowie Kooperationsspiele — das trägt genauso zu einer guten Gruppe bei
-              wie die Bauprojekte selbst.
-            </p>
+          <p className={styles.closingText}>
+            Wichtig ist nur: Nehmt euch nicht zu viele Bausteine auf einmal vor. Zu einer guten
+            Fahrt gehören ein Küchenteam, eine Runde durch Winterberg, Zeit füreinander und
+            Kennenlern- sowie Kooperationsspiele — das trägt genauso zu einer guten Gruppe bei wie
+            die Bauprojekte selbst.
+          </p>
 
+          <div className={styles.closingGrid}>
             <aside className={styles.gdBox}>
               <div className={styles.gdBadge}>🎲</div>
               <p className={styles.gdEyebrow}>Gruppendynamik buchen</p>
               <p className={styles.gdText}>
-                Kennenlern- und Kooperationsspiele für eure Gruppe — auf Anfrage, unabhängig von
-                den Bau-Bausteinen.
+                Kennenlern- und Kooperationsspiele für eure Gruppe, angeleitet von externen
+                Teamer:innen — auf Anfrage, unabhängig von den Bau-Bausteinen.
               </p>
               <div className={styles.gdCategories}>
                 <div className={styles.gdCategory}>
@@ -70,6 +70,37 @@ export default function ProjektePage() {
                 <li>
                   <span className={styles.gdName}>[Name]</span>
                   <span className={styles.gdPhone}>[Telefonnummer]</span>
+                </li>
+              </ul>
+            </aside>
+
+            <aside className={styles.gdBox}>
+              <div className={styles.gdBadge}>🌲</div>
+              <p className={styles.gdEyebrow}>Naturerleben &amp; Nachhaltigkeit</p>
+              <p className={styles.gdText}>
+                Geführte Waldtouren mit Ranger:innen des Regionalforstamts Oberes Sauerland —
+                direkt ab der Hütte, für Schulklassen kostenfrei. 1 bis mehrere Stunden, bis 25
+                Personen pro Gruppe.
+              </p>
+              <div className={styles.gdCategories}>
+                <div className={styles.gdCategory}>
+                  <span className={styles.gdCategoryTag}>🌱 Ökosystem Wald</span>
+                  <span className={styles.gdCategoryEx}>
+                    z. B. Quellen &amp; Bachläufe, Klimawandel, Wiederaufforstung
+                  </span>
+                </div>
+                <div className={styles.gdCategory}>
+                  <span className={styles.gdCategoryTag}>🪵 Forstgeschichte</span>
+                  <span className={styles.gdCategoryEx}>
+                    z. B. Kohlenmeiler, Waldwirtschaft früher &amp; heute
+                  </span>
+                </div>
+              </div>
+              <p className={styles.gdListLabel}>Ansprechpartner</p>
+              <ul className={styles.gdList}>
+                <li>
+                  <span className={styles.gdName}>Regionalforstamt Oberes Sauerland</span>
+                  <span className={styles.gdPhone}>02972 9702-35</span>
                 </li>
               </ul>
             </aside>
