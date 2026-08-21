@@ -801,6 +801,10 @@ const FAQS = [
     a: "Handyempfang ist in Langewiese eingeschränkt — je nach Anbieter mal vorhanden, mal nicht. WLAN gibt es an der Hütte nicht. Das ist bewusst so: Ein Teil des Konzepts ist, für ein paar Tage wirklich dort zu sein. Erreichbar sind die begleitenden Lehrkräfte jederzeit — ein Notfallkontakt wird vor der Fahrt kommuniziert.",
   },
   {
+    q: "Gibt es geführte Waldtouren?",
+    a: "Ja — das Regionalforstamt Oberes Sauerland bietet Ranger-Führungen direkt ab der Hütte an, für Schulklassen kostenfrei. Themen wie Ökosystem Wald, Klimawandel oder Forstgeschichte werden individuell mit dem Ranger abgesprochen, Dauer 1 bis mehrere Stunden, Gruppengröße bis 25 Personen. Kontakt: Regionalforstamt Oberes Sauerland, Tel. 02972 9702-35.",
+  },
+  {
     q: "Wie passt das zum Schulprogramm des ESG?",
     a: "Das ESG ist ein evangelisches, humanistisches Gymnasium — eine Gütersloher Schule mit einem Profil, das Persönlichkeitsbildung, Verantwortung und Gemeinschaft ernst nimmt. Die Hüttenarbeit ist eine konkrete Übersetzung dieses Profils. Sie ist nicht zusätzlich zum Schulprogramm — sie ist Teil davon.",
   },

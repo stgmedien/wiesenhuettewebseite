@@ -56,9 +56,8 @@
 }
 .closingGrid {
   display: grid;
-  grid-template-columns: 1fr minmax(260px, 340px);
-  gap: 40px;
-  align-items: center;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
 }
 @media (max-width: 760px) {
   .closingGrid {
@@ -66,11 +65,11 @@
   }
 }
 .closingText {
-  max-width: 52ch;
+  max-width: 62ch;
   color: var(--pk-ink-soft);
   font-size: 15px;
   line-height: 1.7;
-  margin: 0;
+  margin: 0 0 32px;
 }
 
 .masthead {
