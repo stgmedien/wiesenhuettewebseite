@@ -25,7 +25,10 @@ const CHECKLIST_CHECKOUT = [
   { key: "bathroom_left_clean", label: "Bad/Toilette gereinigt" },
   { key: "trash_disposed", label: "Müll fachgerecht entsorgt" },
   { key: "windows_closed", label: "Alle Fenster geschlossen" },
-  { key: "heating_lowered", label: "Heizung auf Frostschutz reduziert" },
+  {
+    key: "heating_lowered",
+    label: "Heizung richtig eingestellt (Mitte Nov.–Mitte März: Stufe 1, sonst: Frostwächter)",
+  },
   { key: "lights_off", label: "Licht überall aus" },
   { key: "wood_stocked", label: "Brennholz nachgelegt" },
   { key: "key_returned", label: "Schlüssel im Schlüsselsafe zurückgelegt" },
