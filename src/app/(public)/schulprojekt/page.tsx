@@ -535,9 +535,11 @@ export default async function EsgPage() {
           </h2>
           <div className="prose-block max-w-3xl">
             <p>
-              Am ESG fährt <strong>die Mittelstufe</strong> zur Wiesenhütte. Wir fahren immer
-              <strong> unter der Woche, meist drei Tage</strong> — kompakt genug, dass es in den
-              Schulalltag passt, lang genug, dass etwas hängenbleibt.
+              Am ESG ist die Wiesenhütte eine Option für die Klassenfahrt in{" "}
+              <strong>Jahrgangsstufe 8</strong> — oder für andere Mittelstufen-Projekte. Wir fahren
+              immer <strong>unter der Woche, meist drei Nächte</strong>: vier Tage insgesamt, je ein
+              Tag für An- und Abreise — kompakt genug, dass es in den Schulalltag passt, lang genug,
+              dass etwas hängenbleibt.
             </p>
             <p>
               An der Hütte gestalten die Schüler:innen ihren Alltag selbst. Sie kochen für die
@@ -557,7 +559,7 @@ export default async function EsgPage() {
                 Selbst kochen, selbst heizen.
               </h3>
               <p className="text-[15px] leading-relaxed text-[var(--color-wh-black)] m-0">
-                Die Gruppe übernimmt die Hütte für drei Tage. Frühstück, Mittagessen, Abendbrot
+                Die Gruppe übernimmt die Hütte für drei Nächte. Frühstück, Mittagessen, Abendbrot
                 — alles wird gemeinsam gekocht. Wer einkauft, wer kocht, wer abspült: das
                 organisiert die Klasse. Holz machen, Feuer in der Lagerfeuerstelle,
                 aufräumen — auch das gehört dazu. Am Abend: Stockbrot, Lagerfeuer, Reflexion.
@@ -780,7 +782,7 @@ export default async function EsgPage() {
 const FAQS = [
   {
     q: "Wann finden die Hüttenfahrten statt?",
-    a: "Wir fahren <strong>immer unter der Woche</strong>, meist drei Tage. Das hält die Fahrt schulalltagstauglich und schont das Wochenende der Eltern.",
+    a: "Wir fahren <strong>immer unter der Woche</strong>, meist drei Nächte (vier Tage: je einer für An- und Abreise). Das hält die Fahrt schulalltagstauglich und schont das Wochenende der Eltern.",
   },
   {
     q: "Was kostet eine Hüttenfahrt für ESG-Lerngruppen?",
