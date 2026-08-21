@@ -276,7 +276,7 @@ export const PROJEKTE: Projekt[] = [
     titel: "Eine neue Treppe führt zum Werkzeugkeller.",
     untertitel: "Neue Treppe zum Werkzeugkeller",
     darumGehts:
-      "Der alte Kellerraum bekommt einen sicheren Zugang: eine neue Treppe hinunter – gebaut wie der Serpentinen-Pfad, mit Eisenpins, verdichteten Zweigen und Holzspänen als Belag.",
+      "Der alte Kellerraum bekommt einen sicheren Zugang: eine neue Treppe hinauf – gebaut wie der Serpentinen-Pfad, mit Eisenpins, verdichteten Zweigen und Holzspänen als Belag.",
     brauchenWir: [
       "Eisenpins zur Befestigung der Stufen",
       "Zweige zum Verdichten",
