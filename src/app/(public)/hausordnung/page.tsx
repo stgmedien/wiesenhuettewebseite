@@ -100,6 +100,13 @@ export default async function HausordnungPage() {
             <li>
               <strong>Müll:</strong> Bitte sauber trennen. Winterberg kontrolliert das streng.
             </li>
+            <li>
+              <strong>Energie sparen:</strong> Zieht die dicken Vorhänge zwischen den Geschossen
+              zu — das vermeidet Zugluft im ganzen Haus. Außentüren gerade bei kalten Temperaturen
+              zügig wieder schließen. Schlafräume müsst Ihr nicht überheizen: mit wärmerer
+              Kleidung oder einem dickeren Schlafsack bleibt es trotzdem gemütlich, spart aber
+              Energie.
+            </li>
           </ul>
         </Block>
 
@@ -117,7 +124,10 @@ export default async function HausordnungPage() {
             <li>Stühle bitte nicht auf die Tische hochstellen</li>
             <li>Geschirrspüler inklusive Besteckschublade ausgeräumt, Geschirr an seinem Platz</li>
             <li>Kühlschränke leer, Türen bitte offen lassen (gegen Schimmel und Gerüche)</li>
-            <li>Alle Heizkörper auf Stufe 1 (Frostschutz)</li>
+            <li>
+              Alle Heizkörper richtig eingestellt: Mitte Nov.–Mitte März auf Stufe 1, sonst auf
+              Frostwächter
+            </li>
             <li>
               Restmüll in die schwarzen Tonnen am Parkplatz oben, Papier/Kartons in die blaue
               Tonne, gelbe Säcke unter den Carport von Frau Brunhilde Hennecke (Bundesstraße 10)

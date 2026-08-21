@@ -6,11 +6,16 @@
  * welche Hausordnungs-Fassung zum Buchungszeitpunkt galt).
  */
 
-export const CURRENT_HAUSORDNUNG_VERSION = "2026-07";
+export const CURRENT_HAUSORDNUNG_VERSION = "2026-08";
 
 export const HAUSORDNUNG_HISTORY: Array<{ version: string; effectiveFrom: string }> = [
   { version: "2025-01", effectiveFrom: "2025-01-01" },
   // 2026-07: Kurkarten-Fristen präzisiert (Meldeschein spätestens T-14,
   // Toni-Anruf T-2), Nichtraucher-/Haustier-Passus ergänzt.
   { version: "2026-07", effectiveFrom: "2026-07-18" },
+  // 2026-08: Energiespar-Hinweis ergänzt (Vorhänge, Außentüren, Schlafräume
+  // nicht überheizen) und Heizungs-Checkliste bei Abreise korrigiert --
+  // nach Rueckspreache mit Luetgerts gilt "Stufe 1" nur im Winter (Mitte
+  // Nov.-Mitte Maerz), sonst reicht Frostwaechter (Muffbildung sonst).
+  { version: "2026-08", effectiveFrom: "2026-08-21" },
 ];
