@@ -709,26 +709,7 @@
 /* Gelaende-Karte: illustrierter Rundgang mit Hover-Icons (SVG bringt seine
    eigene Hover-Interaktion via <style> mit, hier nur der Rahmen drumherum). */
 .karteSection {
-  margin: 0 0 56px;
-}
-.karteEyebrow {
-  font-family: var(--pk-mono);
-  font-size: 11.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: var(--pk-wood-deep);
-  font-weight: 600;
-  margin: 0 0 12px;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-}
-.karteEyebrow::before {
-  content: "";
-  width: 22px;
-  height: 1.5px;
-  background: var(--pk-sun);
-  display: inline-block;
+  margin: 40px 0 56px;
 }
 .karteTitle {
   font-family: var(--font-fraunces), Georgia, "Times New Roman", serif;
