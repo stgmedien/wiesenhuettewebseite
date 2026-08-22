@@ -136,62 +136,6 @@
   color: var(--pk-ink-soft);
   margin: 0 0 16px;
 }
-.gdCategories {
-  display: grid;
-  gap: 10px;
-  margin-bottom: 16px;
-}
-.gdCategory {
-  background: var(--pk-paper);
-  border-radius: 8px;
-  padding: 9px 11px;
-}
-.gdCategoryTag {
-  display: block;
-  font-family: var(--font-fraunces), Georgia, "Times New Roman", serif;
-  font-weight: 600;
-  font-size: 12.5px;
-  color: var(--pk-pine);
-  margin-bottom: 2px;
-}
-.gdCategoryEx {
-  font-size: 11.5px;
-  line-height: 1.4;
-  color: var(--pk-ink-soft);
-}
-.gdListLabel {
-  font-family: var(--pk-mono);
-  font-size: 9.5px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--pk-wood-deep);
-  margin: 0 0 10px;
-  padding-top: 14px;
-  border-top: 1px dashed var(--pk-line);
-}
-.gdList {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 10px;
-}
-.gdList li {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-.gdName {
-  font-family: var(--font-fraunces), Georgia, "Times New Roman", serif;
-  font-weight: 600;
-  font-size: 13.5px;
-  color: var(--pk-ink);
-}
-.gdPhone {
-  font-family: var(--pk-mono);
-  font-size: 11.5px;
-  color: var(--pk-wood-deep);
-}
 
 /* ---------- Kachel-Galerie ---------- */
 .grid {
