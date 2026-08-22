@@ -63,6 +63,39 @@ export function FahrtenBaukasten() {
 
   return (
     <div>
+      <div className="mb-8 bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+          <p className={`text-[14px] font-semibold m-0 ${status.color}`}>{status.label}</p>
+          <p className="text-[13px] text-[var(--color-wh-fg-muted)] m-0">
+            {summe.toFixed(1)} / {TAGE_VERFUEGBAR} Tagen ausgewählt
+          </p>
+        </div>
+        <div className="h-2 rounded-full bg-[var(--color-wh-beige)] overflow-hidden mb-4">
+          <div
+            className={`h-full ${status.bar} transition-all`}
+            style={{ width: `${Math.min(100, (summe / TAGE_VERFUEGBAR) * 100)}%` }}
+          />
+        </div>
+        <p className="text-[12px] text-[var(--color-wh-fg-muted)] m-0 mb-4">
+          Grober Richtwert für eine 4-Tage-Fahrt (3 Nächte) — An- und Abreisetag sind hier schon
+          raus. Lässt sich zusätzlich mit den{" "}
+          <a href="/projekte" className="text-[var(--color-wh-deep-green)] font-semibold">
+            Bau-Bausteinen
+          </a>{" "}
+          rund um die Hütte kombinieren.
+        </p>
+        <a
+          href={buildMailto(gewaehlteModule, summe)}
+          className={`inline-flex h-11 px-6 items-center rounded-full font-semibold no-underline transition-colors ${
+            gewaehlteModule.length > 0
+              ? "bg-[var(--color-wh-deep-green)] text-white hover:bg-[var(--color-wh-deep-green-hover)]"
+              : "bg-[var(--color-wh-winter-grey)] text-[var(--color-wh-fg-muted)] pointer-events-none"
+          }`}
+        >
+          Auswahl anfragen{gewaehlteModule.length > 0 ? ` (${gewaehlteModule.length})` : ""}
+        </a>
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         {FAHRT_MODULE.map((m) => {
           const checked = !!ausgewaehlt[m.id];
@@ -136,39 +169,6 @@ export function FahrtenBaukasten() {
             </article>
           );
         })}
-      </div>
-
-      <div className="mt-8 bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-          <p className={`text-[14px] font-semibold m-0 ${status.color}`}>{status.label}</p>
-          <p className="text-[13px] text-[var(--color-wh-fg-muted)] m-0">
-            {summe.toFixed(1)} / {TAGE_VERFUEGBAR} Tagen ausgewählt
-          </p>
-        </div>
-        <div className="h-2 rounded-full bg-[var(--color-wh-beige)] overflow-hidden mb-4">
-          <div
-            className={`h-full ${status.bar} transition-all`}
-            style={{ width: `${Math.min(100, (summe / TAGE_VERFUEGBAR) * 100)}%` }}
-          />
-        </div>
-        <p className="text-[12px] text-[var(--color-wh-fg-muted)] m-0 mb-4">
-          Grober Richtwert für eine 4-Tage-Fahrt (3 Nächte) — An- und Abreisetag sind hier schon
-          raus. Lässt sich zusätzlich mit den{" "}
-          <a href="/projekte" className="text-[var(--color-wh-deep-green)] font-semibold">
-            Bau-Bausteinen
-          </a>{" "}
-          rund um die Hütte kombinieren.
-        </p>
-        <a
-          href={buildMailto(gewaehlteModule, summe)}
-          className={`inline-flex h-11 px-6 items-center rounded-full font-semibold no-underline transition-colors ${
-            gewaehlteModule.length > 0
-              ? "bg-[var(--color-wh-deep-green)] text-white hover:bg-[var(--color-wh-deep-green-hover)]"
-              : "bg-[var(--color-wh-winter-grey)] text-[var(--color-wh-fg-muted)] pointer-events-none"
-          }`}
-        >
-          Auswahl anfragen{gewaehlteModule.length > 0 ? ` (${gewaehlteModule.length})` : ""}
-        </a>
       </div>
     </div>
   );
