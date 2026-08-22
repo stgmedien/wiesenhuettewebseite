@@ -49,29 +49,9 @@ export default function ProjektePage() {
                 Kennenlern- und Kooperationsspiele für eure Gruppe, angeleitet von externen
                 Teamer:innen — auf Anfrage, unabhängig von den Bau-Bausteinen.
               </p>
-              <div className={styles.gdCategories}>
-                <div className={styles.gdCategory}>
-                  <span className={styles.gdCategoryTag}>🤝 Kennenlernen</span>
-                  <span className={styles.gdCategoryEx}>z. B. Namensbingo, Blitzlicht-Runden</span>
-                </div>
-                <div className={styles.gdCategory}>
-                  <span className={styles.gdCategoryTag}>🧩 Kooperation</span>
-                  <span className={styles.gdCategoryEx}>
-                    z. B. Turmbau-Challenge, Blindes Quadrat, Spinnennetz
-                  </span>
-                </div>
-              </div>
-              <p className={styles.gdListLabel}>Ansprechpartner</p>
-              <ul className={styles.gdList}>
-                <li>
-                  <span className={styles.gdName}>[Name]</span>
-                  <span className={styles.gdPhone}>[Telefonnummer]</span>
-                </li>
-                <li>
-                  <span className={styles.gdName}>[Name]</span>
-                  <span className={styles.gdPhone}>[Telefonnummer]</span>
-                </li>
-              </ul>
+              <a href="/fahrten" className={styles.spendenLink}>
+                Mehr erfahren &amp; anfragen →
+              </a>
             </aside>
 
             <aside className={styles.gdBox}>
@@ -79,30 +59,11 @@ export default function ProjektePage() {
               <p className={styles.gdEyebrow}>Naturerleben &amp; Nachhaltigkeit</p>
               <p className={styles.gdText}>
                 Geführte Waldtouren mit Ranger:innen des Regionalforstamts Oberes Sauerland —
-                direkt ab der Hütte, für Schulklassen kostenfrei. 1 bis mehrere Stunden, bis 25
-                Personen pro Gruppe.
+                direkt ab der Hütte, für Schulklassen kostenfrei.
               </p>
-              <div className={styles.gdCategories}>
-                <div className={styles.gdCategory}>
-                  <span className={styles.gdCategoryTag}>🌱 Ökosystem Wald</span>
-                  <span className={styles.gdCategoryEx}>
-                    z. B. Quellen &amp; Bachläufe, Klimawandel, Wiederaufforstung
-                  </span>
-                </div>
-                <div className={styles.gdCategory}>
-                  <span className={styles.gdCategoryTag}>🪵 Forstgeschichte</span>
-                  <span className={styles.gdCategoryEx}>
-                    z. B. Kohlenmeiler, Waldwirtschaft früher &amp; heute
-                  </span>
-                </div>
-              </div>
-              <p className={styles.gdListLabel}>Ansprechpartner</p>
-              <ul className={styles.gdList}>
-                <li>
-                  <span className={styles.gdName}>Regionalforstamt Oberes Sauerland</span>
-                  <span className={styles.gdPhone}>02972 9702-35</span>
-                </li>
-              </ul>
+              <a href="/fahrten" className={styles.spendenLink}>
+                Mehr erfahren &amp; anfragen →
+              </a>
             </aside>
           </div>
         </div>

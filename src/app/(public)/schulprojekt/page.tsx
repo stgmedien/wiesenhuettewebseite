@@ -802,7 +802,7 @@ const FAQS = [
   },
   {
     q: "Gibt es geführte Waldtouren?",
-    a: "Ja — das Regionalforstamt Oberes Sauerland bietet Ranger-Führungen direkt ab der Hütte an, für Schulklassen kostenfrei. Themen wie Ökosystem Wald, Klimawandel oder Forstgeschichte werden individuell mit dem Ranger abgesprochen, Dauer 1 bis mehrere Stunden, Gruppengröße bis 25 Personen. Kontakt: Regionalforstamt Oberes Sauerland, Tel. 02972 9702-35.",
+    a: "Ja — das Regionalforstamt Oberes Sauerland bietet Ranger-Führungen direkt ab der Hütte an, für Schulklassen kostenfrei. Themen wie Ökosystem Wald, Klimawandel oder Forstgeschichte werden individuell mit dem Ranger abgesprochen, Dauer 1 bis mehrere Stunden, Gruppengröße bis 25 Personen. Kontakt: Regionalforstamt Oberes Sauerland, Tel. 02972 9702-35. Mehr Angebote und Details: <a href=\"/fahrten\">Fahrten &amp; Erlebnisse</a>.",
   },
   {
     q: "Wie passt das zum Schulprogramm des ESG?",
