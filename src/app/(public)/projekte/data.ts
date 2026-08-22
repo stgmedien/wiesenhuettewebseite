@@ -179,11 +179,11 @@ export const PROJEKTE: Projekt[] = [
     titel: "Der Hang wird zum Bewegungsparcours.",
     untertitel: "Slackline, Hängeschaukel, Rutsche",
     darumGehts:
-      "Am Hang entsteht ein Bewegungsbereich: eine Slackline, eine lange Hängeschaukel an einem Baum und eine Metallrutsche, innen mit alten Teppichresten ausgelegt.",
+      "Am Hang entsteht ein Bewegungsbereich: eine Slackline, eine lange Hängeschaukel an einem Baum und eine Metallrutsche – ein Stück alter Teppich unterm Hosenboden, und es geht richtig schnell den Hang runter.",
     brauchenWir: [
       "Slackline",
       "Seil/Kette für die Hängeschaukel, stabiler Baum",
-      "Metallrutsche + Teppichreste zum Auslegen",
+      "Metallrutsche + Teppichreste zum Draufsetzen",
     ],
     zeitrahmen: "-",
     aufwand: "mittel",
