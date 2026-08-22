@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
-import { bookings, customers } from "@/lib/db/schema";
-import { eq, asc, desc, and } from "drizzle-orm";
+import { bookings, customers, emailLog } from "@/lib/db/schema";
+import { eq, asc, desc, and, inArray } from "drizzle-orm";
 import Link from "next/link";
 import { formatEuro } from "@/lib/pricing";
 import { StatusPill } from "@/components/manager/StatusPill";
@@ -52,6 +52,29 @@ export default async function BookingsListPage({
     .leftJoin(customers, eq(customers.id, bookings.customerId))
     .where(where)
     .orderBy(sortByBooked ? desc(bookings.createdAt) : asc(bookings.arrival));
+
+  // Fallback fuer avsCheckinLink: das Feld wird erst seit PR #204 (09.08.2026)
+  // beim Versand gespeichert. Aeltere Buchungen, bei denen die AVS-Mail
+  // nachweislich verschickt wurde (emailLog), haetten sonst faelschlich
+  // "Link nicht verschickt" gezeigt, obwohl der Gast die Mail laengst hat.
+  const bookingIds = rows.map((r) => r.id);
+  const avsSentBookingIds =
+    bookingIds.length > 0
+      ? new Set(
+          (
+            await db
+              .select({ bookingId: emailLog.bookingId })
+              .from(emailLog)
+              .where(
+                and(
+                  inArray(emailLog.bookingId, bookingIds),
+                  eq(emailLog.template, "avs-selfcheckin"),
+                  eq(emailLog.status, "sent")
+                )
+              )
+          ).map((e) => e.bookingId)
+        )
+      : new Set<string | null>();
 
   // Stornierte Buchungen raus aus der normalen Arbeits-Ansicht — sie sind fuer
   // den Tagesbetrieb irrelevant und wuerden die Liste sonst zumuellen. Eigenes
@@ -119,7 +142,11 @@ export default async function BookingsListPage({
       </div>
 
       <div className="mt-8 bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] overflow-hidden">
-        <BookingsTable rows={currentRows} emptyMessage="Keine Buchungen gefunden." />
+        <BookingsTable
+          rows={currentRows}
+          emptyMessage="Keine Buchungen gefunden."
+          avsSentBookingIds={avsSentBookingIds}
+        />
       </div>
 
       {oldRows.length > 0 && (
@@ -129,7 +156,7 @@ export default async function BookingsListPage({
             Ältere Buchungen — Abreise vor mehr als 7 Tagen ({oldRows.length})
           </summary>
           <div className="mt-4 bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] overflow-hidden">
-            <BookingsTable rows={oldRows} emptyMessage="" />
+            <BookingsTable rows={oldRows} emptyMessage="" avsSentBookingIds={avsSentBookingIds} />
           </div>
         </details>
       )}
@@ -141,7 +168,11 @@ export default async function BookingsListPage({
             Archiv — Stornierte Buchungen ({sortedStornoRows.length})
           </summary>
           <div className="mt-4 bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] overflow-hidden">
-            <BookingsTable rows={sortedStornoRows} emptyMessage="" />
+            <BookingsTable
+              rows={sortedStornoRows}
+              emptyMessage=""
+              avsSentBookingIds={avsSentBookingIds}
+            />
           </div>
         </details>
       )}
@@ -173,38 +204,35 @@ type BookingRow = {
 // "Nachfassen nötig" markiert wird (Vorstandswunsch, 22.08.2026).
 const KURKARTEN_NACHFASS_TAGE = 7;
 
-function kurkartenStatus(r: Pick<BookingRow, "avsCheckinLink" | "kurkartenPdfUrl" | "arrival">): {
-  label: string;
-  className: string;
-} {
+// avsSent: true, wenn avsCheckinLink gesetzt ist ODER (Fallback fuer
+// Buchungen von vor PR #204, 09.08.2026) eine "avs-selfcheckin"-Mail laut
+// emailLog nachweislich verschickt wurde.
+function kurkartenStatus(
+  r: Pick<BookingRow, "kurkartenPdfUrl" | "arrival">,
+  avsSent: boolean
+): { label: string; bg: string; fg: string } {
   if (r.kurkartenPdfUrl) {
-    return {
-      label: "Kurkarten erhalten",
-      className: "bg-[var(--color-wh-green-soft)] text-[var(--color-wh-deep-green)]",
-    };
+    return { label: "Kurkarten erhalten", bg: "#6FA05F", fg: "#F7F7F2" }; // grün
   }
-  if (!r.avsCheckinLink) {
-    return {
-      label: "Link nicht verschickt",
-      className: "bg-[var(--color-wh-snow)] text-[var(--color-wh-fg-muted)]",
-    };
+  if (!avsSent) {
+    return { label: "Link nicht verschickt", bg: "#f8d7d3", fg: "#a83228" }; // rot
   }
-  const tageBisAnreise = Math.ceil(
-    (new Date(r.arrival).getTime() - Date.now()) / 86_400_000
-  );
+  const tageBisAnreise = Math.ceil((new Date(r.arrival).getTime() - Date.now()) / 86_400_000);
   if (tageBisAnreise <= KURKARTEN_NACHFASS_TAGE) {
-    return {
-      label: "Nachfassen nötig",
-      className: "bg-[var(--color-wh-sunset)]/15 text-[var(--color-wh-sunset)] font-semibold",
-    };
+    return { label: "Nachfassen nötig", bg: "#faf0c8", fg: "#8a6d1f" }; // gelb
   }
-  return {
-    label: "Warte auf Rückmeldung",
-    className: "bg-[var(--color-wh-snow)] text-[var(--color-wh-fg-muted)]",
-  };
+  return { label: "Warte auf Rückmeldung", bg: "#f3d5cb", fg: "#B85C38" }; // orange
 }
 
-const BookingsTable = ({ rows, emptyMessage }: { rows: BookingRow[]; emptyMessage: string }) => (
+const BookingsTable = ({
+  rows,
+  emptyMessage,
+  avsSentBookingIds,
+}: {
+  rows: BookingRow[];
+  emptyMessage: string;
+  avsSentBookingIds: Set<string | null>;
+}) => (
   <div className="overflow-x-auto">
     <table className="w-full min-w-[720px] text-sm">
       <thead className="bg-[var(--color-wh-snow)] border-b border-[var(--color-wh-winter-grey)]">
@@ -267,9 +295,13 @@ const BookingsTable = ({ rows, emptyMessage }: { rows: BookingRow[]; emptyMessag
             </Td>
             <Td>
               {(() => {
-                const ks = kurkartenStatus(r);
+                const avsSent = !!r.avsCheckinLink || avsSentBookingIds.has(r.id);
+                const ks = kurkartenStatus(r, avsSent);
                 return (
-                  <span className={`inline-block rounded-full px-2.5 py-1 text-xs ${ks.className}`}>
+                  <span
+                    className="inline-block rounded-full px-2.5 py-1 text-xs font-semibold"
+                    style={{ background: ks.bg, color: ks.fg }}
+                  >
                     {ks.label}
                   </span>
                 );
