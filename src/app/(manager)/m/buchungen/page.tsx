@@ -41,6 +41,8 @@ export default async function BookingsListPage({
       depositCents: bookings.depositCents,
       stripePaymentIntentId: bookings.stripePaymentIntentId,
       createdAt: bookings.createdAt,
+      avsCheckinLink: bookings.avsCheckinLink,
+      kurkartenPdfUrl: bookings.kurkartenPdfUrl,
       customerFirst: customers.firstName,
       customerLast: customers.lastName,
       customerType: customers.type,
@@ -160,10 +162,47 @@ type BookingRow = {
   depositCents: number;
   stripePaymentIntentId: string | null;
   createdAt: Date;
+  avsCheckinLink: string | null;
+  kurkartenPdfUrl: string | null;
   customerFirst: string | null;
   customerLast: string | null;
   customerEmail: string | null;
 };
+
+// Tage bis zur Anreise, ab denen ein noch offener Kurkarten-Vorgang als
+// "Nachfassen nötig" markiert wird (Vorstandswunsch, 22.08.2026).
+const KURKARTEN_NACHFASS_TAGE = 7;
+
+function kurkartenStatus(r: Pick<BookingRow, "avsCheckinLink" | "kurkartenPdfUrl" | "arrival">): {
+  label: string;
+  className: string;
+} {
+  if (r.kurkartenPdfUrl) {
+    return {
+      label: "Kurkarten erhalten",
+      className: "bg-[var(--color-wh-green-soft)] text-[var(--color-wh-deep-green)]",
+    };
+  }
+  if (!r.avsCheckinLink) {
+    return {
+      label: "Link nicht verschickt",
+      className: "bg-[var(--color-wh-snow)] text-[var(--color-wh-fg-muted)]",
+    };
+  }
+  const tageBisAnreise = Math.ceil(
+    (new Date(r.arrival).getTime() - Date.now()) / 86_400_000
+  );
+  if (tageBisAnreise <= KURKARTEN_NACHFASS_TAGE) {
+    return {
+      label: "Nachfassen nötig",
+      className: "bg-[var(--color-wh-sunset)]/15 text-[var(--color-wh-sunset)] font-semibold",
+    };
+  }
+  return {
+    label: "Warte auf Rückmeldung",
+    className: "bg-[var(--color-wh-snow)] text-[var(--color-wh-fg-muted)]",
+  };
+}
 
 const BookingsTable = ({ rows, emptyMessage }: { rows: BookingRow[]; emptyMessage: string }) => (
   <div className="overflow-x-auto">
@@ -176,6 +215,7 @@ const BookingsTable = ({ rows, emptyMessage }: { rows: BookingRow[]; emptyMessag
           <Th>Gast</Th>
           <Th>Personen</Th>
           <Th>Gebucht am</Th>
+          <Th>Kurkarte</Th>
           <Th>Summe</Th>
           <Th>Bezahlt</Th>
         </tr>
@@ -183,7 +223,7 @@ const BookingsTable = ({ rows, emptyMessage }: { rows: BookingRow[]; emptyMessag
       <tbody>
         {rows.length === 0 && emptyMessage && (
           <tr>
-            <td colSpan={8} className="px-4 py-8 text-center text-[var(--color-wh-fg-muted)]">
+            <td colSpan={9} className="px-4 py-8 text-center text-[var(--color-wh-fg-muted)]">
               {emptyMessage}
             </td>
           </tr>
@@ -224,6 +264,16 @@ const BookingsTable = ({ rows, emptyMessage }: { rows: BookingRow[]; emptyMessag
               <div className="text-xs text-[var(--color-wh-fg-muted)]">
                 {new Date(r.createdAt).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })} Uhr
               </div>
+            </Td>
+            <Td>
+              {(() => {
+                const ks = kurkartenStatus(r);
+                return (
+                  <span className={`inline-block rounded-full px-2.5 py-1 text-xs ${ks.className}`}>
+                    {ks.label}
+                  </span>
+                );
+              })()}
             </Td>
             <Td>{formatEuro(r.totalCents + r.depositCents)}</Td>
             <Td>
