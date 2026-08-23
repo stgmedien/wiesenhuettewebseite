@@ -146,7 +146,10 @@ export default async function AGB() {
             <li>Mülltrennung gemäß den Vorgaben des Ortes Winterberg.</li>
             <li>Nachtruhe ab 22:00 Uhr.</li>
             <li>Keine privaten Feiern (Geburtstage, Hochzeiten, JGAs).</li>
-            <li>Bei Abreise: besenrein hinterlassen, Geschirrspüler ausgeräumt, Müll entsorgt.</li>
+            <li>
+              Bei Abreise: besenrein hinterlassen, Geschirrspüler fertig durchgelaufen und
+              ausgeräumt, Müll entsorgt.
+            </li>
           </ul>
           <p>
             Die vollständige Hausordnung findest Du unter{" "}
