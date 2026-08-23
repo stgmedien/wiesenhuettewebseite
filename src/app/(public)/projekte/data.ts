@@ -7,6 +7,11 @@ export type Projekt = {
   brauchenWir: string[];
   zeitrahmen: string;
   aufwand: string;
+  // Grober Richtwert in Tagesanteilen (1 = ganzer Tag), aus dem Freitext-Feld
+  // "aufwand" abgeleitet -- fuer den seitenuebergreifenden Fahrt-Baukasten
+  // (siehe src/lib/planungs-auswahl.ts). Bewusst grob, keine neue exakte
+  // Angabe wie bei "kosten" -- dient nur der Zeit-Einschaetzung.
+  tagesanteil: number;
   kosten: string;
   anpacken: string;
   beitrag: string;
@@ -34,6 +39,7 @@ export const PROJEKTE: Projekt[] = [
     ],
     zeitrahmen: "Start: sofort, höchste Priorität",
     aufwand: "Fundament durch Profis, danach 1–2 Tage Verschrauben mit der Fahrt",
+    tagesanteil: 1.5,
     kosten:
       "Richtwert Holzdeck ca. 2.500–4.000 € – Fundament separat, Angebot der Profis steht noch aus",
     anpacken:
@@ -58,6 +64,7 @@ export const PROJEKTE: Projekt[] = [
     ],
     zeitrahmen: "Parallel zum Zelt-Plateau",
     aufwand: "mittel",
+    tagesanteil: 0.5,
     kosten: "Richtwert: bitte eintragen",
     anpacken: "Wegbau am Hang – Pins setzen, Geäst verdichten, mit Holzspänen auffüllen.",
     beitrag: "Material (Eisenpins, Holzspäne) spenden.",
@@ -79,6 +86,7 @@ export const PROJEKTE: Projekt[] = [
     ],
     zeitrahmen: "-",
     aufwand: "mittel",
+    tagesanteil: 0.5,
     kosten: "Richtwert U-Steine: ca. 100–200 € (gebraucht günstiger als neu)",
     anpacken: "Ring anlegen, Gelände planieren, Bänke runtertragen, U-Steine setzen.",
     beitrag: "U-Steine spenden oder anliefern.",
@@ -101,6 +109,7 @@ export const PROJEKTE: Projekt[] = [
     ],
     zeitrahmen: "-",
     aufwand: "mittel bis groß",
+    tagesanteil: 1,
     kosten: "Richtwert: bitte eintragen",
     anpacken: "Vom Geländer bis zur Rückenlehne – handwerklich das vielseitigste Projekt der Liste.",
     beitrag: "Material (Holz, Farbe, Stahlseil) spenden.",
@@ -122,6 +131,7 @@ export const PROJEKTE: Projekt[] = [
     ],
     zeitrahmen: "-",
     aufwand: "mittel",
+    tagesanteil: 0.5,
     kosten: "Richtwert U-Steine (9–10 Stück): ca. 100–200 €, dazu Holz für Sitzflächen/Lehnen",
     anpacken: "Bauen nach vorliegender Skizze – Maße nehmen, U-Steine setzen, Holz ablängen und montieren.",
     beitrag: "Holz oder U-Steine spenden.",
@@ -144,6 +154,7 @@ export const PROJEKTE: Projekt[] = [
     ],
     zeitrahmen: "Aussaat idealerweise März–Mai oder August–Oktober",
     aufwand: "Ein bis zwei Tage Anlage, danach 1–2× jährlich mähen",
+    tagesanteil: 1.5,
     kosten: "Saatgut ggf. über ein kommunales Programm kostenlos – noch zu klären",
     anpacken:
       "Fläche herrichten, einsäen, die zwei Bäumchen versetzen oder entfernen – klassische Draußenarbeit für eine Fahrt.",
@@ -166,6 +177,7 @@ export const PROJEKTE: Projekt[] = [
     ],
     zeitrahmen: "Anlage an einem Tag, danach laufende Pflege",
     aufwand: "klein bis mittel",
+    tagesanteil: 0.4,
     kosten: "Richtwert: bitte eintragen (Sponsoring evtl. möglich)",
     anpacken: "Kräuter aussuchen, Beet anlegen – ideal für eine Fahrt mit Interesse an Garten oder Kochen.",
     beitrag: "Setzlinge oder Erde spenden.",
@@ -187,6 +199,7 @@ export const PROJEKTE: Projekt[] = [
     ],
     zeitrahmen: "-",
     aufwand: "mittel",
+    tagesanteil: 0.5,
     kosten: "Richtwert: Slackline-Set ca. 30–80 €, Hängeschaukel-Set ca. 50–150 €",
     anpacken: "Aufbau und sichere Befestigung der Geräte am Hang.",
     beitrag: "Slackline, Rutsche oder Material spenden.",
@@ -203,6 +216,7 @@ export const PROJEKTE: Projekt[] = [
     brauchenWir: ["Entwurf/Motiv entwickeln", "Wetterfeste Fassadenfarbe", "Pinsel, Abdeckmaterial"],
     zeitrahmen: "Ein Wochenende, wetterabhängig",
     aufwand: "klein bis mittel",
+    tagesanteil: 0.6,
     kosten: "Richtwert: bitte eintragen",
     anpacken: "Entwurf gestalten und die Mauer gemeinsam bemalen – sichtbar für jeden, der zur Hütte kommt.",
     beitrag: "Farbe und Material spenden.",
@@ -220,6 +234,7 @@ export const PROJEKTE: Projekt[] = [
     brauchenWir: ["Faltbare Tischtennisplatte", "Partybox/Lautsprecher", "Neues Regal"],
     zeitrahmen: "-",
     aufwand: "klein",
+    tagesanteil: 0.25,
     kosten: "Richtwert faltbare Outdoor-Tischtennisplatte: ca. 470–800 €",
     anpacken: "Raum einrichten, Regal bauen.",
     beitrag: "Tischtennisplatte oder Partybox als Sachspende.",
@@ -241,6 +256,7 @@ export const PROJEKTE: Projekt[] = [
     ],
     zeitrahmen: "-",
     aufwand: "klein bis mittel",
+    tagesanteil: 0.35,
     kosten: "Richtwert Zarges-Box: ca. 100–235 € je nach Zustand (neu ca. 235 €, gebraucht günstiger)",
     anpacken: "Spiele selbst bauen, Boxen befüllen und beschriften.",
     beitrag: "Zarges-Box oder Material spenden.",
@@ -263,6 +279,7 @@ export const PROJEKTE: Projekt[] = [
     ],
     zeitrahmen: "Pflanzung im Herbst oder zeitigen Frühjahr",
     aufwand: "klein bis mittel",
+    tagesanteil: 0.5,
     kosten: "Richtwert je Baum ab ca. 35 € (Baumschule) – bei 6 Bäumen ab ca. 210 €",
     anpacken: "Rankgerüst aufstellen, Bäume setzen, Reihe entlang der Grenze anlegen.",
     beitrag: "Obstbäume, Rankgerüst oder Stützpfähle spenden.",
@@ -284,6 +301,7 @@ export const PROJEKTE: Projekt[] = [
     ],
     zeitrahmen: "-",
     aufwand: "mittel",
+    tagesanteil: 0.5,
     kosten: "Richtwert: bitte eintragen",
     anpacken:
       "Stufen setzen, mit Eisenpins sichern, Zweige verdichten, mit Holzspänen auffüllen – gleiche Technik wie beim Serpentinen-Pfad.",
@@ -306,6 +324,7 @@ export const PROJEKTE: Projekt[] = [
     ],
     zeitrahmen: "-",
     aufwand: "mittel",
+    tagesanteil: 0.5,
     kosten: "Richtwert: bitte eintragen – Sponsor gesucht",
     anpacken: "Keller herrichten, Regale bauen, einräumen.",
     beitrag: "Sponsoring für Werkzeug oder Regale.",

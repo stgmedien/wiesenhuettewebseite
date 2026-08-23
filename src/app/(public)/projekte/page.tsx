@@ -1,6 +1,7 @@
 import { PROJEKTE } from "./data";
 import { ProjektGalerie } from "./ProjektGalerie";
 import { GelaendeKarte } from "./GelaendeKarte";
+import { PlanungsWidget } from "./PlanungsWidget";
 import { fraunces } from "./fonts";
 import styles from "./projekte.module.css";
 
@@ -68,6 +69,8 @@ export default function ProjektePage() {
           </div>
         </div>
       </div>
+
+      <PlanungsWidget />
     </div>
   );
 }
