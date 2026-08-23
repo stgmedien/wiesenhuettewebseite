@@ -686,13 +686,13 @@ export default async function EsgPage() {
             <PhaseCard
               num="02"
               title="An der Hütte"
-              subtitle="Drei Tage gemeinsam"
+              subtitle="Gemeinsam an der Hütte"
               points={[
                 "Selbstversorgung: kochen, abspülen, Holz machen",
                 "Tagesblock: Wandern, Werken, Projekt",
                 "Bewegung im Sauerland-Wald",
                 "Stockbrot, Lagerfeuer, Gespräche",
-                "Reflexion am Abend, kein Minutenplan",
+                "Reflexion am Abend",
               ]}
             />
             <PhaseCard
@@ -709,10 +709,9 @@ export default async function EsgPage() {
           </div>
 
           <p className="prose-block max-w-3xl mt-12 text-[15px] text-[var(--color-wh-fg-muted)] italic">
-            Wir geben bewusst keinen Minutenplan vor. Jede Klasse füllt die drei Tage anders —
-            mit ihrer Lehrkraft, mit ihrem Projekt, mit ihrem eigenen Rhythmus. Was bleibt, ist:
-            morgens gemeinsam frühstücken, abends ans Lagerfeuer, dazwischen das, was die
-            Gruppe sich vorgenommen hat.
+            Jede Klasse füllt den Aufenthalt anders — mit ihrer Lehrkraft, mit ihrem Projekt, mit
+            ihrem eigenen Rhythmus. Was bleibt, ist: morgens gemeinsam frühstücken, abends ans
+            Lagerfeuer, dazwischen das, was die Gruppe sich vorgenommen hat.
           </p>
         </div>
       </section>
