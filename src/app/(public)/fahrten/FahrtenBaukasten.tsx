@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Clock, Users, Wallet, MapPin, Info } from "lucide-react";
+import Link from "next/link";
+import { Clock, Users, Wallet, MapPin, Info, ArrowRight } from "lucide-react";
 import { FAHRT_MODULE, type FahrtModul, type FahrtBadge } from "./data";
 
 // Grober Richtwert, kein exaktes Zeitbudget: eine 4-Tage-Fahrt (3 Nächte)
@@ -102,6 +103,7 @@ export function FahrtenBaukasten() {
           return (
             <article
               key={m.id}
+              id={m.id}
               className={`bg-white border rounded-[var(--radius-card)] p-6 flex flex-col transition-colors ${
                 checked ? "border-[var(--color-wh-deep-green)] ring-1 ring-[var(--color-wh-deep-green)]" : "border-[var(--color-wh-winter-grey)]"
               }`}
@@ -131,6 +133,15 @@ export function FahrtenBaukasten() {
                 <p className="text-[12.5px] text-[var(--color-wh-fg-muted)] mb-3">
                   <strong className="text-[var(--color-wh-black)]">Themen wählbar:</strong> {m.themen}
                 </p>
+              )}
+
+              {m.detailHref && (
+                <Link
+                  href={m.detailHref}
+                  className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[var(--color-wh-deep-green)] no-underline mb-3 hover:text-[var(--color-wh-sunset)] transition-colors"
+                >
+                  {m.detailLabel ?? "Mehr erfahren"} <ArrowRight size={13} />
+                </Link>
               )}
 
               {m.links && (

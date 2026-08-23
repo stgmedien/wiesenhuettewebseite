@@ -17,6 +17,10 @@ export type FahrtModul = {
   wayfind: string;
   vorlauf?: string;
   links?: { label: string; href: string }[];
+  // Verlinkung auf eine ausführliche Anleitungsseite (z. B. /fahrten/geocaching),
+  // wenn die Kurzbeschreibung hier nicht reicht.
+  detailHref?: string;
+  detailLabel?: string;
 };
 
 export const FAHRT_MODULE: FahrtModul[] = [
@@ -88,6 +92,23 @@ export const FAHRT_MODULE: FahrtModul[] = [
     gruppe: "Kleingruppen im Wettlauf",
     kosten: "kostenarm — Smartphones oder GPS-Geräte genügen",
     wayfind: "Ab Hütte & Umgebung",
+    detailHref: "/fahrten/geocaching",
+    detailLabel: "Vollständige Anleitung",
+  },
+  {
+    id: "waldbaden",
+    titel: "Waldbaden Richtung Ochsenstallsgraben",
+    badge: "selbst",
+    badgeNote: "Selbst gestaltbar · kostenfrei",
+    vision:
+      "Bewusst und langsam durch den Wald gehen, mit allen Sinnen. Eine angeleitete Ruhe-Runde ab der Hütte mit sieben Stationen — Gegenpol zum getakteten Schulalltag, kein Sport, kein Streckenziel.",
+    tagesanteil: 0.3,
+    dauer: "60 bis 120 Minuten",
+    gruppe: "klassenweise, in Begleitung der Lehrkraft",
+    kosten: "kostenfrei",
+    wayfind: "Ab Hütte Richtung Ochsenstallsgraben · ganzjährig, wetterabhängig",
+    detailHref: "/fahrten/waldbaden",
+    detailLabel: "Vollständige Anleitung",
   },
   {
     id: "nachtwanderung",
