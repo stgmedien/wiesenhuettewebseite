@@ -122,7 +122,13 @@ export default async function HausordnungPage() {
           <ul className="space-y-1.5">
             <li>Besenrein, mit der Einrichtung zurück an ihrem ursprünglichen Platz</li>
             <li>Stühle bitte nicht auf die Tische hochstellen</li>
-            <li>Geschirrspüler inklusive Besteckschublade ausgeräumt, Geschirr an seinem Platz</li>
+            <li>
+              Geschirrspüler fertig durchgelaufen und ausgeräumt (inkl. Besteckschublade),
+              Geschirr an seinem Platz — reicht die Zeit nicht mehr, bitte die letzten Teile von
+              Hand spülen. Läuft die Maschine bei Abreise noch, trennen wir die Stromverbindung im
+              Haus; das Reinigungsteam muss sie dann neu starten und ausräumen. Dafür behalten wir
+              uns eine Pauschale von 50 € von der Kaution vor.
+            </li>
             <li>Kühlschränke leer, Türen bitte offen lassen (gegen Schimmel und Gerüche)</li>
             <li>
               Alle Heizkörper richtig eingestellt: Mitte Nov.–Mitte März auf Stufe 1, sonst auf
