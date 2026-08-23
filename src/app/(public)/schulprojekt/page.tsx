@@ -654,6 +654,21 @@ export default async function EsgPage() {
                 email="lei@esg-guetersloh.de"
               />
             </div>
+
+            <div className="mt-8 bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-5 sm:p-6 max-w-2xl">
+              <p className="text-[15px] sm:text-base leading-relaxed text-[var(--color-wh-black)] m-0">
+                <strong>Sucht ihr konkrete Ideen für die Fahrt selbst?</strong> Ranger-Touren,
+                Erlebnispädagogik, ein Ausflug nach Winterberg oder ein eigener
+                Geocaching-Parcours — die Angebote rund um die Hütte sammeln wir auf einer
+                eigenen Seite.{" "}
+                <Link
+                  href="/fahrten"
+                  className="text-[var(--color-wh-deep-green)] font-semibold underline underline-offset-2 hover:no-underline"
+                >
+                  Fahrten &amp; Erlebnisse →
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
       </section>
