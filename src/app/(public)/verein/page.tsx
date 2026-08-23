@@ -160,7 +160,7 @@ const COPY: Record<Locale, Copy> = {
       { year: "1968", title: "Heizungsanlage", body: "Die Skibusse befördern 453 Personen nach Langewiese — ein Jahr später schon 661." },
       { year: "1972", title: "Grundstückskauf", body: "Etwa 2.000 m² inklusive Hang." },
       { year: "1986", title: "Letzter Erweiterungsbau", body: "Seitdem 33 Schlafplätze in 5 Schlafzimmern, Esszimmer und Wohnzimmer, voll ausgestattete Küche, Sanitäranlagen, Skikeller." },
-      { year: "Heute", title: "Verein in Bewegung", body: "Skigymnastik, Vereinsfahrten, Renovierungswochenenden, ESG-Projekte — getragen von Ehrenamt und Generationen." },
+      { year: "Heute", title: "Verein in Bewegung", body: "Skigymnastik, Vereinsfahrten, Renovierungswochenenden, Schulprojekte — getragen von Ehrenamt und Generationen." },
     ],
     member: {
       eyebrow: "Mitgliedschaft",
@@ -243,7 +243,7 @@ const COPY: Record<Locale, Copy> = {
       { year: "1968", title: "Heating system", body: "The ski buses carried 453 people to Langewiese — a year later already 661." },
       { year: "1972", title: "Land purchase", body: "About 2,000 m² including the slope." },
       { year: "1986", title: "Last major extension", body: "Since then: 33 beds in 5 bedrooms, 2 common rooms, fully equipped kitchen, bathrooms, ski cellar." },
-      { year: "Today", title: "A club in motion", body: "Ski gymnastics, club trips, renovation weekends, ESG school projects — carried by volunteer work and generations." },
+      { year: "Today", title: "A club in motion", body: "Ski gymnastics, club trips, renovation weekends, school projects — carried by volunteer work and generations." },
     ],
     member: {
       eyebrow: "Membership",
@@ -326,7 +326,7 @@ const COPY: Record<Locale, Copy> = {
       { year: "1968", title: "Verwarmingsinstallatie", body: "De skibussen vervoerden 453 personen naar Langewiese — een jaar later al 661." },
       { year: "1972", title: "Grondaankoop", body: "Ongeveer 2.000 m² inclusief helling." },
       { year: "1986", title: "Laatste grote uitbreiding", body: "Sindsdien 33 slaapplaatsen in 5 slaapkamers, 2 verblijfsruimtes, volledig ingerichte keuken, sanitair, skikelder." },
-      { year: "Vandaag", title: "Een vereniging in beweging", body: "Skigymnastiek, verenigingsreizen, renovatieweekenden, ESG-schoolprojecten — gedragen door vrijwilligers en generaties." },
+      { year: "Vandaag", title: "Een vereniging in beweging", body: "Skigymnastiek, verenigingsreizen, renovatieweekenden, schoolprojecten — gedragen door vrijwilligers en generaties." },
     ],
     member: {
       eyebrow: "Lidmaatschap",

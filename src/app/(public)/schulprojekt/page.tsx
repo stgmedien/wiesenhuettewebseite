@@ -13,13 +13,13 @@ import { getServerLocale } from "@/lib/i18n";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "ESG-Projekt · Wiesenhütte als Lernort",
+  title: "Klassenfahrten · Wiesenhütte als Lernort",
   description:
-    "Schülerinnen und Schüler der Mittelstufe des ESG Gütersloh nutzen die Wiesenhütte als pädagogischen Lernort. Selbstorganisation, Naturerfahrung, Verantwortung — abseits des Klassenzimmers.",
+    "Die Wiesenhütte ist seit Jahrzehnten Klassenfahrtziel Gütersloher Schulen. Selbstorganisation, Naturerfahrung, Verantwortung — abseits des Klassenzimmers.",
 };
 
 const TOC = [
-  { id: "einstieg", label: "Eine Schule, eine Hütte" },
+  { id: "einstieg", label: "Warum die Hütte" },
   { id: "tagebuch", label: "Projekttagebuch" },
   { id: "jahrgaenge", label: "Was Mittelstufe an der Hütte tut" },
   { id: "anekdoten", label: "Anekdoten der Schüler:innen" },
@@ -87,7 +87,7 @@ export default async function EsgPage() {
       >
         <Image
           src="/media/photos/kollaboration_esg_skifreunde.png"
-          alt="Kollaboration zwischen Evangelisch Stiftischem Gymnasium und Skifreunden Gütersloh"
+          alt="Schülerinnen und Schüler bei einem Projekt an der Wiesenhütte"
           fill
           priority
           className="object-cover object-center"
@@ -97,10 +97,10 @@ export default async function EsgPage() {
         <div className="absolute inset-x-0 bottom-0 px-6 sm:px-8 pb-6 sm:pb-10 md:pb-12">
           <div className="max-w-[1080px] mx-auto">
             <div className="text-[10px] sm:text-xs uppercase tracking-wider font-semibold text-white/90">
-              ESG · Evangelisch Stiftisches Gymnasium
+              Klassenfahrten an der Wiesenhütte
             </div>
             <h1 className="text-[26px] sm:text-[40px] md:text-[56px] lg:text-[60px] mt-1.5 sm:mt-2 leading-[1.1] sm:leading-[1.05] text-white drop-shadow-md font-display font-bold">
-              Eine Schule, eine Hütte,<br className="hidden sm:block" /> ein gemeinsames Lernen.
+              Seit Jahrzehnten das Klassenfahrtziel<br className="hidden sm:block" /> Gütersloher Schulen.
             </h1>
           </div>
         </div>
@@ -112,12 +112,12 @@ export default async function EsgPage() {
       <section id="einstieg" className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-16 sm:py-20">
         <div className="max-w-[1080px] mx-auto">
           <p className="text-base sm:text-[18px] leading-relaxed text-[var(--color-wh-black)] max-w-2xl">
-            Die Wiesenhütte in Langewiese gehört dem Verein Skifreunde Gütersloh e.V. — und
-            steht allen offen: Vereine, Familien, Schulen und andere Gruppen buchen sie als
-            Selbstversorgerhütte. Das Evangelisch Stiftische Gymnasium, eine Gütersloher
-            Schule, nutzt sie seit einigen Jahren als außerschulischen Lernort und darf sie
-            dabei aktiv mitgestalten. Ein Vorrecht ist das nicht: Diesen Gestaltungsraum
-            öffnen wir gern auch für andere Schulen.
+            Die Wiesenhütte in Langewiese gehört dem Verein Skifreunde Gütersloh e.V. und ist
+            seit Jahrzehnten ein Klassenfahrtziel Gütersloher Schulen. Als Skiverein ist es uns
+            wichtig, dass das so bleibt — deshalb öffnen wir die Hütte aktiv als außerschulischen
+            Lernort. Den Anfang hat vor einigen Jahren das Evangelisch Stiftische Gymnasium
+            gemacht; der Rahmen, den wir daraus entwickelt haben, steht seitdem jeder
+            Gütersloher Schule offen.
           </p>
           <p className="text-base sm:text-[18px] leading-relaxed text-[var(--color-wh-black)] max-w-2xl mt-4">
             Hier gilt eine einfache Beobachtung: <strong>Manches lernt man nur dort, wo das
@@ -480,9 +480,9 @@ export default async function EsgPage() {
               </p>
             </div>
 
-            {/* ESG */}
+            {/* ESG als Fallbeispiel */}
             <h4 className="font-display font-bold text-[20px] text-[var(--color-wh-deep-green)] mt-10 mb-3">
-              Was das ESG hier möglich macht
+              Ein Beispiel: die Klassenfahrt am ESG
             </h4>
             <div className="prose-block max-w-3xl">
               <p>
@@ -519,7 +519,7 @@ export default async function EsgPage() {
           <p className="text-[15px] text-[var(--color-wh-fg-muted)] italic mt-8 border-t border-[var(--color-wh-winter-grey)] pt-6">
             <strong>Mehr Einträge folgen.</strong> Die Klassen, AGs und Stufen, die nach der Hütte
             zurückkommen, sind eingeladen, eigene Beiträge fürs Projekttagebuch zu schreiben. So
-            entsteht über Jahre eine kleine Chronik der Wiesenhütte als ESG-Lernort.
+            entsteht über Jahre eine kleine Chronik der Wiesenhütte als Lernort.
           </p>
         </div>
       </section>

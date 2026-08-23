@@ -3,16 +3,18 @@
 // Seitenuebergreifende Fahrt-Planung: was auf /fahrten oder /projekte
 // angehakt wird, landet in derselben, im Browser gespeicherten Auswahl --
 // so zaehlt sich der Zeitbedarf beider Seiten zu EINER Auslastungsanzeige
-// zusammen, statt zwei getrennte Zahlen zu zeigen (Wunsch aus dem Chat,
-// 23.08.2026: "Projekte mit in die Zeit reinrechnen").
+// zusammen (Wunsch aus dem Chat, 23.08.2026: "Projekte mit in die Zeit
+// reinrechnen"). /projekte ist aber bewusst nicht oeffentlich verlinkt --
+// darum kennt dieser Hook selbst NUR die rohe id-Auswahl, nicht die
+// Fahrten-/Projekt-Inhalte: jede Seite loest ihre eigenen ids gegen ihre
+// eigenen (bereits importierten) Daten auf. So landen Projekt-Inhalte nie
+// im JS-Bundle von /fahrten, das oeffentlich erreichbar ist.
 //
 // Bewusst nur im Browser (localStorage), kein Server-Zustand: es geht um
 // eine unverbindliche Planungshilfe fuer die anfragende Lehrkraft, nicht
 // um eine echte Buchung/Reservierung.
 
 import { useCallback, useSyncExternalStore } from "react";
-import { FAHRT_MODULE } from "@/app/(public)/fahrten/data";
-import { PROJEKTE } from "@/app/(public)/projekte/data";
 
 const STORAGE_KEY = "wh-fahrtplan-v1";
 const CHANGE_EVENT = "wh-fahrtplan-change";
@@ -99,22 +101,18 @@ export function usePlanungsAuswahl() {
     schreibeSpeicher(naechste);
   }, []);
 
-  const fahrtModule = FAHRT_MODULE.filter((m) => auswahl.fahrten.includes(m.id));
-  const projektModule = PROJEKTE.filter((p) => auswahl.projekte.includes(p.key));
-  const summe =
-    fahrtModule.reduce((s, m) => s + m.tagesanteil, 0) +
-    projektModule.reduce((s, p) => s + p.tagesanteil, 0);
-  const anzahl = fahrtModule.length + projektModule.length;
-
-  return { auswahl, toggleFahrt, toggleProjekt, fahrtModule, projektModule, summe, anzahl };
+  return { auswahl, toggleFahrt, toggleProjekt };
 }
 
 export type { Auswahl };
 
-export function planungsStatus(summe: number): { label: string; color: string; bar: string } {
+export function planungsStatus(
+  summe: number,
+  zeroLabel = "Wählt Angebote aus, um eure Fahrt zusammenzustellen."
+): { label: string; color: string; bar: string } {
   if (summe === 0) {
     return {
-      label: "Wählt Angebote und Bau-Bausteine aus, um eure Fahrt zusammenzustellen.",
+      label: zeroLabel,
       color: "text-[var(--color-wh-fg-muted)]",
       bar: "bg-[var(--color-wh-winter-grey)]",
     };

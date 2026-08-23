@@ -124,8 +124,8 @@ export default function MemberWelcomeEmail({
             bis zum Adventskaffee
           </Text>
           <Text style={text}>
-            Und das Beste: Dein Beitrag wirkt. Er hält die Hütte in Schuss, trägt das
-            Schulprojekt mit dem ESG mit und ermöglicht Projekte wie das neue
+            Und das Beste: Dein Beitrag wirkt. Er hält die Hütte in Schuss, trägt die
+            Schulprojekte mit Gütersloher Schulen mit und ermöglicht Projekte wie das neue
             Zeltpodest.
           </Text>
           <Section style={{ margin: "24px 0 8px 0" }}>

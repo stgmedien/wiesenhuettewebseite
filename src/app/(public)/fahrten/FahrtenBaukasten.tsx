@@ -13,19 +13,14 @@ const BADGE_STYLE: Record<FahrtBadge, string> = {
 
 const MAIL_TO = "hello@wiesenhuette.de";
 
-function buildMailto(
-  fahrtTitel: string[],
-  projektTitel: string[],
-  summe: number
-): string {
+function buildMailto(fahrtTitel: string[], summe: number): string {
   const subject = "Fahrten-Anfrage Wiesenhütte";
-  const alle = [...fahrtTitel.map((t) => `– ${t}`), ...projektTitel.map((t) => `– ${t} (Bau-Baustein)`)];
   const body = [
     "Hallo,",
     "",
-    "wir überlegen, folgende Angebote und Bau-Bausteine in unsere Fahrt einzubauen:",
+    "wir überlegen, folgende Angebote in unsere Fahrt einzubauen:",
     "",
-    alle.join("\n") || "(noch nichts ausgewählt)",
+    fahrtTitel.map((t) => `– ${t}`).join("\n") || "(noch nichts ausgewählt)",
     "",
     `Grobe Gesamtauslastung: ca. ${summe.toFixed(1)} von ${TAGE_VERFUEGBAR} verfügbaren Tagen.`,
     "",
@@ -38,7 +33,10 @@ function buildMailto(
 }
 
 export function FahrtenBaukasten() {
-  const { auswahl, toggleFahrt, fahrtModule, projektModule, summe, anzahl } = usePlanungsAuswahl();
+  const { auswahl, toggleFahrt } = usePlanungsAuswahl();
+  const gewaehlteModule = FAHRT_MODULE.filter((m) => auswahl.fahrten.includes(m.id));
+  const summe = gewaehlteModule.reduce((s, m) => s + m.tagesanteil, 0);
+  const anzahl = gewaehlteModule.length;
   const status = planungsStatus(summe);
 
   return (
@@ -58,22 +56,11 @@ export function FahrtenBaukasten() {
         </div>
         <p className="text-[12px] text-[var(--color-wh-fg-muted)] m-0 mb-4">
           Grober Richtwert für eine 4-Tage-Fahrt (3 Nächte) — An- und Abreisetag sind hier schon
-          raus. Zählt zusammen mit den{" "}
-          <Link href="/projekte" className="text-[var(--color-wh-deep-green)] font-semibold">
-            Bau-Bausteinen
-          </Link>{" "}
-          rund um die Hütte — dort ebenfalls ankreuzbar, die Auswahl gilt seitenübergreifend.
+          raus.
         </p>
-        {projektModule.length > 0 && (
-          <p className="text-[12.5px] text-[var(--color-wh-fg-muted)] m-0 mb-4">
-            <strong className="text-[var(--color-wh-black)]">Schon von den Bau-Bausteinen dabei:</strong>{" "}
-            {projektModule.map((p) => p.titel).join(", ")}
-          </p>
-        )}
         <a
           href={buildMailto(
-            fahrtModule.map((m) => m.titel),
-            projektModule.map((p) => p.titel),
+            gewaehlteModule.map((m) => m.titel),
             summe
           )}
           className={`inline-flex h-11 px-6 items-center rounded-full font-semibold no-underline transition-colors ${
