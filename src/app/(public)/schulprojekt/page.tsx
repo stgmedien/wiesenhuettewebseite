@@ -591,7 +591,7 @@ export default async function EsgPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-10">
             <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 sm:p-7">
               <div className="text-xs uppercase tracking-wider text-[var(--color-wh-deep-green)] font-semibold mb-2">
                 Alltag gestalten
@@ -621,6 +621,26 @@ export default async function EsgPage() {
                 Das ist die Erlaubnisstruktur der Hüttenarbeit: Schüler:innen denken, Verein
                 trägt mit. Die Feuerstelle der Klasse 9e ist genau so entstanden (siehe
                 Projekttagebuch oben).
+              </p>
+            </div>
+
+            <div className="bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6 sm:p-7">
+              <div className="text-xs uppercase tracking-wider text-[var(--color-wh-deep-green)] font-semibold mb-2">
+                Aktivitäten dazubuchen
+              </div>
+              <h3 className="font-display font-bold text-[22px] text-[var(--color-wh-deep-green)] mt-0 mb-3">
+                Mehr als Kochen und Bauen.
+              </h3>
+              <p className="text-[15px] leading-relaxed text-[var(--color-wh-black)] m-0">
+                Ranger-Touren durch den Bergwald, Erlebnispädagogik-Tage, ein Ausflug nach
+                Winterberg oder selbst gestaltete Formate wie Geocaching und Waldbaden — die
+                Angebote rund um die Hütte lassen sich frei mit dem eigenen Programm kombinieren.{" "}
+                <Link
+                  href="/fahrten"
+                  className="text-[var(--color-wh-deep-green)] font-semibold underline underline-offset-2 hover:no-underline"
+                >
+                  Alle Angebote →
+                </Link>
               </p>
             </div>
           </div>
