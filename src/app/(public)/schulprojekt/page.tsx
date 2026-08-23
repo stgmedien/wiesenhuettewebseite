@@ -107,6 +107,47 @@ export default async function EsgPage() {
       </div>
 
       {/* ---------------------------------------------------------------- */}
+      {/* Angebots-Band — was konkret buchbar ist, bewusst direkt unter dem */}
+      {/* Hero, nicht erst am Seitenende (Wunsch aus dem Chat) */}
+      {/* ---------------------------------------------------------------- */}
+      <section className="bg-[var(--color-wh-deep-green)] px-6 sm:px-8 py-10 sm:py-14">
+        <div className="max-w-[1080px] mx-auto">
+          <p className="text-[11px] sm:text-xs uppercase tracking-wider font-semibold text-white/80 mb-2">
+            Das gibt&apos;s an der Hütte zu buchen
+          </p>
+          <h2 className="font-display font-bold text-[24px] sm:text-[30px] text-white mb-4 leading-tight">
+            Ranger-Touren, Erlebnispädagogik, ein Tag in Winterberg — und mehr.
+          </h2>
+          <div className="flex flex-wrap gap-2 mb-5">
+            {[
+              "Ranger-Tour",
+              "Erlebnispädagogik & Teambuilding",
+              "Ein Tag in Winterberg",
+              "Geocaching",
+              "Waldbaden",
+              "Nachtwanderung",
+            ].map((label) => (
+              <span
+                key={label}
+                className="inline-flex items-center rounded-full px-3.5 py-1.5 text-[13px] font-medium bg-white/10 text-white border border-white/25"
+              >
+                {label}
+              </span>
+            ))}
+          </div>
+          <p className="text-[15px] sm:text-base leading-relaxed text-white/90 max-w-2xl mb-6">
+            Angeleitete Formate und selbst gestaltbare Angebote — kombinierbar zur eigenen Fahrt.
+          </p>
+          <Link
+            href="/fahrten"
+            className="inline-flex h-11 px-6 items-center rounded-full font-semibold no-underline bg-white text-[var(--color-wh-deep-green)] hover:bg-[var(--color-wh-beige)] transition-colors"
+          >
+            Alle Fahrten-Angebote ansehen →
+          </Link>
+        </div>
+      </section>
+
+      {/* ---------------------------------------------------------------- */}
       {/* 1. Einstieg — Lead-Text */}
       {/* ---------------------------------------------------------------- */}
       <section id="einstieg" className="bg-[var(--color-wh-beige)] px-6 sm:px-8 py-16 sm:py-20">
@@ -653,21 +694,6 @@ export default async function EsgPage() {
                 role="Vorstand Skifreunde · Lehrkraft ESG"
                 email="lei@esg-guetersloh.de"
               />
-            </div>
-
-            <div className="mt-8 bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-5 sm:p-6 max-w-2xl">
-              <p className="text-[15px] sm:text-base leading-relaxed text-[var(--color-wh-black)] m-0">
-                <strong>Sucht ihr konkrete Ideen für die Fahrt selbst?</strong> Ranger-Touren,
-                Erlebnispädagogik, ein Ausflug nach Winterberg oder ein eigener
-                Geocaching-Parcours — die Angebote rund um die Hütte sammeln wir auf einer
-                eigenen Seite.{" "}
-                <Link
-                  href="/fahrten"
-                  className="text-[var(--color-wh-deep-green)] font-semibold underline underline-offset-2 hover:no-underline"
-                >
-                  Fahrten &amp; Erlebnisse →
-                </Link>
-              </p>
             </div>
           </div>
         </div>
