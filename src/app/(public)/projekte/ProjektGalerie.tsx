@@ -2,17 +2,19 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { X } from "lucide-react";
+import { X, Check } from "lucide-react";
 import type { Projekt } from "./data";
 import styles from "./projekte.module.css";
 import { fraunces } from "./fonts";
 import { ProjektAnfrageForm } from "./ProjektAnfrageForm";
+import { usePlanungsAuswahl } from "@/lib/planungs-auswahl";
 
 export function ProjektGalerie({ projekte }: { projekte: Projekt[] }) {
   const [activeKey, setActiveKey] = useState<string | null>(null);
   const lastFocused = useRef<HTMLElement | null>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const active = projekte.find((p) => p.key === activeKey) ?? null;
+  const { auswahl, toggleProjekt } = usePlanungsAuswahl();
 
   useEffect(() => {
     if (!active) return;
@@ -48,6 +50,26 @@ export function ProjektGalerie({ projekte }: { projekte: Projekt[] }) {
               <img src={p.bild} alt="" />
               <span className={styles.tileNr}>{p.nr}</span>
               {p.key === "plateau" && <span className={styles.tileFirst}>startet zuerst</span>}
+              <span
+                role="checkbox"
+                aria-checked={auswahl.projekte.includes(p.key)}
+                aria-label={`${p.titel} in die Fahrt-Planung aufnehmen`}
+                className={`${styles.tilePlan} ${auswahl.projekte.includes(p.key) ? styles.tilePlanActive : ""}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleProjekt(p.key);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleProjekt(p.key);
+                  }
+                }}
+                tabIndex={0}
+              >
+                {auswahl.projekte.includes(p.key) && <Check size={13} strokeWidth={3} />}
+              </span>
             </span>
             <span className={styles.tileBody}>
               <span className={styles.tileTitle}>{p.titel}</span>

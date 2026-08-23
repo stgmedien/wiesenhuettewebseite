@@ -1,15 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Clock, Users, Wallet, MapPin, Info, ArrowRight } from "lucide-react";
-import { FAHRT_MODULE, type FahrtModul, type FahrtBadge } from "./data";
-
-// Grober Richtwert, kein exaktes Zeitbudget: eine 4-Tage-Fahrt (3 Nächte)
-// hat An- und Abreisetag, bleiben ~2 volle Tage für Programm. Dient nur
-// dazu, der Lehrkraft ein Gefuehl fuer "passt das zusammen" zu geben --
-// siehe Feedback zur Berechenbarkeit auf /projekte.
-const TAGE_VERFUEGBAR = 2;
+import { FAHRT_MODULE, type FahrtBadge } from "./data";
+import { usePlanungsAuswahl, planungsStatus, TAGE_VERFUEGBAR } from "@/lib/planungs-auswahl";
 
 const BADGE_STYLE: Record<FahrtBadge, string> = {
   schule: "bg-[var(--color-wh-deep-green)] text-white",
@@ -19,15 +13,19 @@ const BADGE_STYLE: Record<FahrtBadge, string> = {
 
 const MAIL_TO = "hello@wiesenhuette.de";
 
-function buildMailto(gewaehlt: FahrtModul[], summe: number): string {
+function buildMailto(
+  fahrtTitel: string[],
+  projektTitel: string[],
+  summe: number
+): string {
   const subject = "Fahrten-Anfrage Wiesenhütte";
-  const zeilen = gewaehlt.map((m) => `– ${m.titel}`).join("\n");
+  const alle = [...fahrtTitel.map((t) => `– ${t}`), ...projektTitel.map((t) => `– ${t} (Bau-Baustein)`)];
   const body = [
     "Hallo,",
     "",
-    "wir überlegen, folgende Angebote in unsere Fahrt einzubauen:",
+    "wir überlegen, folgende Angebote und Bau-Bausteine in unsere Fahrt einzubauen:",
     "",
-    zeilen || "(noch nichts ausgewählt)",
+    alle.join("\n") || "(noch nichts ausgewählt)",
     "",
     `Grobe Gesamtauslastung: ca. ${summe.toFixed(1)} von ${TAGE_VERFUEGBAR} verfügbaren Tagen.`,
     "",
@@ -40,27 +38,8 @@ function buildMailto(gewaehlt: FahrtModul[], summe: number): string {
 }
 
 export function FahrtenBaukasten() {
-  const [ausgewaehlt, setAusgewaehlt] = useState<Record<string, boolean>>({});
-
-  const gewaehlteModule = useMemo(
-    () => FAHRT_MODULE.filter((m) => ausgewaehlt[m.id]),
-    [ausgewaehlt]
-  );
-  const summe = useMemo(
-    () => gewaehlteModule.reduce((s, m) => s + m.tagesanteil, 0),
-    [gewaehlteModule]
-  );
-
-  const status =
-    summe === 0
-      ? { label: "Wählt Angebote aus, um eure Fahrt zusammenzustellen.", color: "text-[var(--color-wh-fg-muted)]", bar: "bg-[var(--color-wh-winter-grey)]" }
-      : summe <= 1.5
-        ? { label: "Gut machbar neben den Bau-Bausteinen.", color: "text-[var(--color-wh-deep-green)]", bar: "bg-[var(--color-wh-deep-green)]" }
-        : summe <= TAGE_VERFUEGBAR
-          ? { label: "Knapp, aber passt in den Rahmen.", color: "text-[var(--color-wh-wood)]", bar: "bg-[var(--color-wh-wood)]" }
-          : { label: "Das wird eng — überlegt, was ihr streicht.", color: "text-[var(--color-wh-sunset)]", bar: "bg-[var(--color-wh-sunset)]" };
-
-  const toggle = (id: string) => setAusgewaehlt((prev) => ({ ...prev, [id]: !prev[id] }));
+  const { auswahl, toggleFahrt, fahrtModule, projektModule, summe, anzahl } = usePlanungsAuswahl();
+  const status = planungsStatus(summe);
 
   return (
     <div>
@@ -79,27 +58,37 @@ export function FahrtenBaukasten() {
         </div>
         <p className="text-[12px] text-[var(--color-wh-fg-muted)] m-0 mb-4">
           Grober Richtwert für eine 4-Tage-Fahrt (3 Nächte) — An- und Abreisetag sind hier schon
-          raus. Lässt sich zusätzlich mit den{" "}
-          <a href="/projekte" className="text-[var(--color-wh-deep-green)] font-semibold">
+          raus. Zählt zusammen mit den{" "}
+          <Link href="/projekte" className="text-[var(--color-wh-deep-green)] font-semibold">
             Bau-Bausteinen
-          </a>{" "}
-          rund um die Hütte kombinieren.
+          </Link>{" "}
+          rund um die Hütte — dort ebenfalls ankreuzbar, die Auswahl gilt seitenübergreifend.
         </p>
+        {projektModule.length > 0 && (
+          <p className="text-[12.5px] text-[var(--color-wh-fg-muted)] m-0 mb-4">
+            <strong className="text-[var(--color-wh-black)]">Schon von den Bau-Bausteinen dabei:</strong>{" "}
+            {projektModule.map((p) => p.titel).join(", ")}
+          </p>
+        )}
         <a
-          href={buildMailto(gewaehlteModule, summe)}
+          href={buildMailto(
+            fahrtModule.map((m) => m.titel),
+            projektModule.map((p) => p.titel),
+            summe
+          )}
           className={`inline-flex h-11 px-6 items-center rounded-full font-semibold no-underline transition-colors ${
-            gewaehlteModule.length > 0
+            anzahl > 0
               ? "bg-[var(--color-wh-deep-green)] text-white hover:bg-[var(--color-wh-deep-green-hover)]"
               : "bg-[var(--color-wh-winter-grey)] text-[var(--color-wh-fg-muted)] pointer-events-none"
           }`}
         >
-          Auswahl anfragen{gewaehlteModule.length > 0 ? ` (${gewaehlteModule.length})` : ""}
+          Auswahl anfragen{anzahl > 0 ? ` (${anzahl})` : ""}
         </a>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         {FAHRT_MODULE.map((m) => {
-          const checked = !!ausgewaehlt[m.id];
+          const checked = auswahl.fahrten.includes(m.id);
           return (
             <article
               key={m.id}
@@ -118,7 +107,7 @@ export function FahrtenBaukasten() {
                   <input
                     type="checkbox"
                     checked={checked}
-                    onChange={() => toggle(m.id)}
+                    onChange={() => toggleFahrt(m.id)}
                     className="w-4 h-4 accent-[var(--color-wh-deep-green)] cursor-pointer"
                   />
                   Dabei

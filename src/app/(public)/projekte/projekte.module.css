@@ -19,6 +19,7 @@
   --pk-wood: #9c7a4d;
   --pk-wood-deep: #6b4e30;
   --pk-sun: #ce9a4a;
+  --pk-warn: #b5482f;
   --pk-line: #d8cdbc;
   --pk-cream: #f7f2e9;
   --pk-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -207,6 +208,35 @@
   padding: 3px 10px;
   border-radius: 999px;
   font-weight: 600;
+}
+.tilePlan {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(20, 26, 22, 0.55);
+  border: 1.5px solid rgba(247, 242, 233, 0.75);
+  color: var(--pk-cream);
+  cursor: pointer;
+  transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+.tilePlan:hover {
+  transform: scale(1.08);
+  border-color: var(--pk-cream);
+}
+.tilePlan:focus-visible {
+  outline: 2px solid var(--pk-sun);
+  outline-offset: 2px;
+}
+.tilePlanActive {
+  background: var(--pk-pine);
+  border-color: var(--pk-pine);
+  color: var(--pk-cream);
 }
 .tileBody {
   padding: 14px 16px 18px;
@@ -746,4 +776,145 @@
     opacity: 0.65;
     margin: 10px 0 0;
   }
+}
+
+/* ---------- Planungs-Widget ---------- */
+.planWrap {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  font-family: var(--pk-sans);
+}
+.planPill {
+  all: unset;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: var(--pk-pine-deep);
+  color: var(--pk-cream);
+  padding: 11px 16px;
+  border-radius: 999px;
+  box-shadow: 0 14px 30px -14px rgba(20, 26, 22, 0.55);
+  font-size: 13.5px;
+  font-weight: 600;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.planPill:hover,
+.planPill:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 36px -14px rgba(20, 26, 22, 0.65);
+}
+.planPillDot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--pk-sun);
+  color: var(--pk-pine-deep);
+  font-family: var(--pk-mono);
+  font-size: 11.5px;
+  font-weight: 700;
+}
+.planPanel {
+  width: min(320px, calc(100vw - 36px));
+  background: var(--pk-card);
+  border: 1px solid var(--pk-line);
+  border-radius: 16px;
+  box-shadow: 0 20px 46px -18px rgba(20, 26, 22, 0.5);
+  padding: 16px 18px 18px;
+}
+.planPanelHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.planPanelTitle {
+  font-family: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-size: 15px;
+  color: var(--pk-pine-deep);
+  margin: 0;
+}
+.planPanelClose {
+  all: unset;
+  cursor: pointer;
+  color: var(--pk-ink-soft);
+  line-height: 1;
+  padding: 2px;
+}
+.planPanelClose:hover {
+  color: var(--pk-ink);
+}
+.planStatus {
+  font-size: 12.5px;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+.planBar {
+  height: 7px;
+  border-radius: 999px;
+  background: var(--pk-line);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.planBarFill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.25s ease;
+}
+.planList {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+.planItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--pk-ink);
+  background: var(--pk-paper);
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+.planItemRemove {
+  all: unset;
+  cursor: pointer;
+  color: var(--pk-ink-soft);
+  font-family: var(--pk-mono);
+  font-size: 13px;
+  line-height: 1;
+  padding: 0 2px;
+}
+.planItemRemove:hover {
+  color: var(--pk-warn);
+}
+.planLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--pk-pine);
+  text-decoration: none;
+}
+.planLink:hover {
+  color: var(--pk-pine-deep);
 }
