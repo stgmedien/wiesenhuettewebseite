@@ -124,9 +124,10 @@ export default async function HausordnungPage() {
             <li>Stühle bitte nicht auf die Tische hochstellen</li>
             <li>
               Geschirrspüler fertig durchgelaufen und ausgeräumt (inkl. Besteckschublade),
-              Geschirr an seinem Platz — reicht die Zeit nicht mehr, bitte die letzten Teile von
-              Hand spülen. Läuft die Maschine bei Abreise noch, trennen wir die Stromverbindung im
-              Haus; das Reinigungsteam muss sie dann neu starten und ausräumen. Dafür behalten wir
+              Geschirr an seinem Platz — bei Zeitnot bitte die letzten Teile von Hand spülen.
+              Beim Verlassen der Hütte wird die Stromverbindung getrennt: Eine noch laufende
+              Maschine bleibt dann mitten im Programm stehen, und das Reinigungsteam muss vor Ort
+              länger bleiben, um sie neu durchlaufen zu lassen und auszuräumen. Dafür behalten wir
               uns eine Pauschale von 50 € von der Kaution vor.
             </li>
             <li>Kühlschränke leer, Türen bitte offen lassen (gegen Schimmel und Gerüche)</li>
