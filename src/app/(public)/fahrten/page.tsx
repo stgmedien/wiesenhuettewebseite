@@ -40,12 +40,7 @@ export default async function FahrtenPage() {
             </h2>
             <p className="text-[15px] leading-relaxed text-[var(--color-wh-black)] m-0 mb-3">
               Zu einer gelungenen Klassenfahrt gehören Bewegung, Naturerfahrung, Zeit füreinander —
-              und ein, zwei gemeinsame Erlebnisse, die im Kopf bleiben. Die Angebote hier lassen
-              sich mit den{" "}
-              <Link href="/projekte" className="text-[var(--color-wh-sunset)] font-semibold">
-                Bau-Bausteinen
-              </Link>{" "}
-              auf dem Gelände kombinieren.
+              und ein, zwei gemeinsame Erlebnisse, die im Kopf bleiben.
             </p>
             <p className="text-[15px] leading-relaxed text-[var(--color-wh-black)] m-0">
               Nehmt euch nicht zu viel auf einmal vor: lieber ein Angebot richtig erleben als drei

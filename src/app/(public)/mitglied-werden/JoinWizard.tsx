@@ -130,7 +130,7 @@ const COPY: Record<Locale, {
       {
         icon: "school",
         title: "Schüler:innen lernen mit Kopf und Hand",
-        body: "Klassen des ESG bauen, schrauben und wachsen an der Hütte — Dein Beitrag trägt das Schulprojekt mit.",
+        body: "Schulklassen aus Gütersloh bauen, schrauben und wachsen an der Hütte — Dein Beitrag trägt die Schulprojekte mit.",
       },
       {
         icon: "hammer",
@@ -213,7 +213,7 @@ const COPY: Record<Locale, {
       {
         icon: "school",
         title: "Students learn with head and hands",
-        body: "ESG school classes build, fix and grow at the cabin — your fee helps carry the school project.",
+        body: "School classes from Gütersloh build, fix and grow at the cabin — your fee helps carry the school projects.",
       },
       {
         icon: "hammer",
@@ -295,7 +295,7 @@ const COPY: Record<Locale, {
       {
         icon: "school",
         title: "Leerlingen leren met hoofd en handen",
-        body: "Schoolklassen van het ESG bouwen, sleutelen en groeien bij de hut — jouw bijdrage draagt het schoolproject mee.",
+        body: "Schoolklassen uit Gütersloh bouwen, sleutelen en groeien bij de hut — jouw bijdrage draagt de schoolprojecten mee.",
       },
       {
         icon: "hammer",

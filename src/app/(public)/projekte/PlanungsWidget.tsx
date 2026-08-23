@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { ClipboardList, X, ArrowRight } from "lucide-react";
 import { usePlanungsAuswahl, TAGE_VERFUEGBAR } from "@/lib/planungs-auswahl";
+import { FAHRT_MODULE } from "../fahrten/data";
+import { PROJEKTE } from "./data";
 import styles from "./projekte.module.css";
 
 const BAR_FARBE = {
@@ -22,7 +24,13 @@ function pkStatus(summe: number): { label: string; ton: keyof typeof BAR_FARBE }
 
 export function PlanungsWidget() {
   const [offen, setOffen] = useState(false);
-  const { toggleFahrt, toggleProjekt, fahrtModule, projektModule, summe, anzahl } = usePlanungsAuswahl();
+  const { auswahl, toggleFahrt, toggleProjekt } = usePlanungsAuswahl();
+  const fahrtModule = FAHRT_MODULE.filter((m) => auswahl.fahrten.includes(m.id));
+  const projektModule = PROJEKTE.filter((p) => auswahl.projekte.includes(p.key));
+  const summe =
+    fahrtModule.reduce((s, m) => s + m.tagesanteil, 0) +
+    projektModule.reduce((s, p) => s + p.tagesanteil, 0);
+  const anzahl = fahrtModule.length + projektModule.length;
 
   if (anzahl === 0 && !offen) return null;
 
