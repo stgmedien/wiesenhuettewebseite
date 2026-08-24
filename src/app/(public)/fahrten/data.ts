@@ -97,7 +97,7 @@ export const FAHRT_MODULE: FahrtModul[] = [
   },
   {
     id: "waldbaden",
-    titel: "Waldbaden Richtung Ochsenstallsgraben",
+    titel: "Waldbaden ab der Hütte",
     badge: "selbst",
     badgeNote: "Selbst gestaltbar · kostenfrei",
     vision:
@@ -106,7 +106,7 @@ export const FAHRT_MODULE: FahrtModul[] = [
     dauer: "60 bis 120 Minuten",
     gruppe: "klassenweise, in Begleitung der Lehrkraft",
     kosten: "kostenfrei",
-    wayfind: "Ab Hütte Richtung Ochsenstallsgraben · ganzjährig, wetterabhängig",
+    wayfind: "Ab Hütte, Richtung frei wählbar · ganzjährig, wetterabhängig",
     detailHref: "/fahrten/waldbaden",
     detailLabel: "Vollständige Anleitung",
   },
