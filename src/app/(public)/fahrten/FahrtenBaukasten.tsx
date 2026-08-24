@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { Clock, Users, Wallet, MapPin, Info, ArrowRight } from "lucide-react";
+import { Clock, Users, Wallet, MapPin, Info, ArrowRight, CalendarDays } from "lucide-react";
 import { FAHRT_MODULE, type FahrtBadge } from "./data";
 import { usePlanungsAuswahl, planungsStatus, TAGE_VERFUEGBAR } from "@/lib/planungs-auswahl";
+import { TagesplanModal } from "@/components/public/TagesplanModal";
 
 const BADGE_STYLE: Record<FahrtBadge, string> = {
   schule: "bg-[var(--color-wh-deep-green)] text-white",
@@ -38,6 +40,7 @@ export function FahrtenBaukasten() {
   const summe = gewaehlteModule.reduce((s, m) => s + m.tagesanteil, 0);
   const anzahl = gewaehlteModule.length;
   const status = planungsStatus(summe);
+  const [planOffen, setPlanOffen] = useState(false);
 
   return (
     <div>
@@ -58,20 +61,35 @@ export function FahrtenBaukasten() {
           Grober Richtwert für eine 4-Tage-Fahrt (3 Nächte) — An- und Abreisetag sind hier schon
           raus.
         </p>
-        <a
-          href={buildMailto(
-            gewaehlteModule.map((m) => m.titel),
-            summe
-          )}
-          className={`inline-flex h-11 px-6 items-center rounded-full font-semibold no-underline transition-colors ${
-            anzahl > 0
-              ? "bg-[var(--color-wh-deep-green)] text-white hover:bg-[var(--color-wh-deep-green-hover)]"
-              : "bg-[var(--color-wh-winter-grey)] text-[var(--color-wh-fg-muted)] pointer-events-none"
-          }`}
-        >
-          Auswahl anfragen{anzahl > 0 ? ` (${anzahl})` : ""}
-        </a>
+        <div className="flex flex-wrap gap-3">
+          <a
+            href={buildMailto(
+              gewaehlteModule.map((m) => m.titel),
+              summe
+            )}
+            className={`inline-flex h-11 px-6 items-center rounded-full font-semibold no-underline transition-colors ${
+              anzahl > 0
+                ? "bg-[var(--color-wh-deep-green)] text-white hover:bg-[var(--color-wh-deep-green-hover)]"
+                : "bg-[var(--color-wh-winter-grey)] text-[var(--color-wh-fg-muted)] pointer-events-none"
+            }`}
+          >
+            Auswahl anfragen{anzahl > 0 ? ` (${anzahl})` : ""}
+          </a>
+          <button
+            type="button"
+            onClick={() => setPlanOffen(true)}
+            className="inline-flex items-center gap-2 h-11 px-6 rounded-full font-semibold border border-[var(--color-wh-winter-grey)] text-[var(--color-wh-deep-green)] hover:bg-[var(--color-wh-beige)] transition-colors"
+          >
+            <CalendarDays size={16} /> Als Tagesplan anzeigen
+          </button>
+        </div>
       </div>
+
+      <TagesplanModal
+        open={planOffen}
+        onClose={() => setPlanOffen(false)}
+        fahrtItems={gewaehlteModule.map((m) => ({ titel: m.titel, tagesanteil: m.tagesanteil }))}
+      />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         {FAHRT_MODULE.map((m) => {

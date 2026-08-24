@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ClipboardList, X, ArrowRight } from "lucide-react";
+import { ClipboardList, X, ArrowRight, CalendarDays } from "lucide-react";
 import { usePlanungsAuswahl, TAGE_VERFUEGBAR } from "@/lib/planungs-auswahl";
 import { FAHRT_MODULE } from "../fahrten/data";
 import { PROJEKTE } from "./data";
+import { TagesplanModal } from "@/components/public/TagesplanModal";
 import styles from "./projekte.module.css";
 
 const BAR_FARBE = {
@@ -24,6 +25,7 @@ function pkStatus(summe: number): { label: string; ton: keyof typeof BAR_FARBE }
 
 export function PlanungsWidget() {
   const [offen, setOffen] = useState(false);
+  const [planOffen, setPlanOffen] = useState(false);
   const { auswahl, toggleFahrt, toggleProjekt } = usePlanungsAuswahl();
   const fahrtModule = FAHRT_MODULE.filter((m) => auswahl.fahrten.includes(m.id));
   const projektModule = PROJEKTE.filter((p) => auswahl.projekte.includes(p.key));
@@ -107,6 +109,17 @@ export function PlanungsWidget() {
           <Link href="/fahrten" className={styles.planLink}>
             Zur Fahrten-Planung <ArrowRight size={13} />
           </Link>
+
+          {anzahl > 0 && (
+            <button
+              type="button"
+              onClick={() => setPlanOffen(true)}
+              className={styles.planLink}
+              style={{ marginTop: 10, background: "none", border: "none", cursor: "pointer", padding: 0 }}
+            >
+              <CalendarDays size={13} /> Als Tagesplan anzeigen
+            </button>
+          )}
         </div>
       )}
 
@@ -115,6 +128,13 @@ export function PlanungsWidget() {
         Fahrt-Planung
         {anzahl > 0 && <span className={styles.planPillDot}>{summe.toFixed(1)}</span>}
       </button>
+
+      <TagesplanModal
+        open={planOffen}
+        onClose={() => setPlanOffen(false)}
+        fahrtItems={fahrtModule.map((m) => ({ titel: m.titel, tagesanteil: m.tagesanteil }))}
+        projektItems={projektModule.map((p) => ({ titel: p.titel, tagesanteil: p.tagesanteil }))}
+      />
     </div>
   );
 }
