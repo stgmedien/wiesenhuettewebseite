@@ -46,6 +46,9 @@ export default function ManualBookingForm() {
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" name="soloUse" className="w-4 h-4 accent-[var(--color-wh-deep-green)]" /> Allein-/Exklusivnutzung (+50 €)
       </label>
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" name="skipCleaningBuffer" className="w-4 h-4 accent-[var(--color-wh-deep-green)]" /> Ohne Reinigungspuffer (nur für diese Buchung, z.&nbsp;B. bei direkter Übergabe)
+      </label>
 
       <h3 className="text-[20px] m-0 mt-4">Gast</h3>
 
