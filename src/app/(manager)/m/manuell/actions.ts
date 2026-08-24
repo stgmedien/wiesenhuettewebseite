@@ -20,6 +20,7 @@ const schema = z.object({
   pupils: z.coerce.number().int().min(0).default(0),
   teachers: z.coerce.number().int().min(0).default(0),
   soloUse: z.coerce.boolean().default(false),
+  skipCleaningBuffer: z.coerce.boolean().default(false),
   customerType: z.enum(["privat", "mitglied", "verein", "firma"]).default("privat"),
   firstName: z.string().min(1).max(120),
   lastName: z.string().min(1).max(120),
@@ -43,7 +44,7 @@ export async function createManualBooking(formData: FormData): Promise<{ ok: boo
 
   const raw: Record<string, unknown> = {};
   formData.forEach((v, k) => {
-    if (k === "soloUse") {
+    if (k === "soloUse" || k === "skipCleaningBuffer") {
       raw[k] = v === "on" || v === "true";
     } else {
       raw[k] = v;
@@ -73,7 +74,11 @@ export async function createManualBooking(formData: FormData): Promise<{ ok: boo
     return { ok: false, error: issues.map((i) => i.message).join(" ") };
   }
 
-  const free = await isRangeAvailable({ arrival: d.arrival, departure: d.departure });
+  const free = await isRangeAvailable(
+    { arrival: d.arrival, departure: d.departure },
+    undefined,
+    { ignoreCleaningBuffer: d.skipCleaningBuffer }
+  );
   if (!free) return { ok: false, error: "Zeitraum ist bereits belegt." };
 
   const breakdown = calculatePrice({
@@ -146,7 +151,7 @@ export async function createManualBooking(formData: FormData): Promise<{ ok: boo
 
   await db.insert(activityLog).values({
     who: session.user?.name ?? session.user?.email ?? "Manager",
-    what: `Manuelle Buchung ${bookingNumber} angelegt (${totalPersons} P · ${breakdown.nights} N)`,
+    what: `Manuelle Buchung ${bookingNumber} angelegt (${totalPersons} P · ${breakdown.nights} N)${d.skipCleaningBuffer ? " — ohne Reinigungspuffer" : ""}`,
     bookingId: inserted[0].id,
   });
 

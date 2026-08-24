@@ -41,12 +41,13 @@ const BLOCKING_STATUSES = [
  */
 export const isRangeAvailable = async (
   range: DateRange,
-  excludeBookingId?: string
+  excludeBookingId?: string,
+  opts?: { ignoreCleaningBuffer?: boolean }
 ): Promise<boolean> => {
   const arrival = toIso(range.arrival);
   const departure = toIso(range.departure);
   const settings = await getSiteSettings();
-  const cleaningDays = settings.cleaningDaysAfterDeparture;
+  const cleaningDays = opts?.ignoreCleaningBuffer ? 0 : settings.cleaningDaysAfterDeparture;
 
   // Belegung gilt bis EINSCHLIESSLICH Abreisetag (der Abreisetag ist der letzte
   // Buchungstag — Gäste reisen an dem Tag ab), die Reinigung erfolgt am/an den
