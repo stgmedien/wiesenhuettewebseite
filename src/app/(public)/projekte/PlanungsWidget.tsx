@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ClipboardList, X, ArrowRight, CalendarDays } from "lucide-react";
+import { ClipboardList, X, ArrowRight, Printer } from "lucide-react";
 import { usePlanungsAuswahl, TAGE_VERFUEGBAR } from "@/lib/planungs-auswahl";
 import { FAHRT_MODULE } from "../fahrten/data";
 import { PROJEKTE } from "./data";
-import { TagesplanModal } from "@/components/public/TagesplanModal";
+import { ProgrammUebersichtModal } from "@/components/public/ProgrammUebersicht";
 import styles from "./projekte.module.css";
 
 const BAR_FARBE = {
@@ -117,7 +117,7 @@ export function PlanungsWidget() {
               className={styles.planLink}
               style={{ marginTop: 10, background: "none", border: "none", cursor: "pointer", padding: 0 }}
             >
-              <CalendarDays size={13} /> Als Tagesplan anzeigen
+              <Printer size={13} /> Übersicht ausdrucken
             </button>
           )}
         </div>
@@ -129,7 +129,7 @@ export function PlanungsWidget() {
         {anzahl > 0 && <span className={styles.planPillDot}>{summe.toFixed(1)}</span>}
       </button>
 
-      <TagesplanModal
+      <ProgrammUebersichtModal
         open={planOffen}
         onClose={() => setPlanOffen(false)}
         fahrtItems={fahrtModule.map((m) => ({ titel: m.titel, tagesanteil: m.tagesanteil }))}
