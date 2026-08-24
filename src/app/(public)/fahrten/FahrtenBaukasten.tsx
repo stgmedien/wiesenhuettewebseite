@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Clock, Users, Wallet, MapPin, Info, ArrowRight, CalendarDays } from "lucide-react";
+import { Clock, Users, Wallet, MapPin, Info, ArrowRight, Printer } from "lucide-react";
 import { FAHRT_MODULE, type FahrtBadge } from "./data";
 import { usePlanungsAuswahl, planungsStatus, TAGE_VERFUEGBAR } from "@/lib/planungs-auswahl";
-import { TagesplanModal } from "@/components/public/TagesplanModal";
+import { ProgrammUebersichtModal } from "@/components/public/ProgrammUebersicht";
 
 const BADGE_STYLE: Record<FahrtBadge, string> = {
   schule: "bg-[var(--color-wh-deep-green)] text-white",
@@ -80,12 +80,12 @@ export function FahrtenBaukasten() {
             onClick={() => setPlanOffen(true)}
             className="inline-flex items-center gap-2 h-11 px-6 rounded-full font-semibold border border-[var(--color-wh-winter-grey)] text-[var(--color-wh-deep-green)] hover:bg-[var(--color-wh-beige)] transition-colors"
           >
-            <CalendarDays size={16} /> Als Tagesplan anzeigen
+            <Printer size={16} /> Übersicht ausdrucken
           </button>
         </div>
       </div>
 
-      <TagesplanModal
+      <ProgrammUebersichtModal
         open={planOffen}
         onClose={() => setPlanOffen(false)}
         fahrtItems={gewaehlteModule.map((m) => ({ titel: m.titel, tagesanteil: m.tagesanteil }))}

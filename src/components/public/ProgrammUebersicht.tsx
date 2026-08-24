@@ -1,12 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import { createPortal } from "react-dom";
 import { X, Printer } from "lucide-react";
 
 type PlanItem = { titel: string; tagesanteil: number };
 
-export function TagesplanModal({
+export function ProgrammUebersichtModal({
   open,
   onClose,
   fahrtItems,
@@ -17,31 +16,28 @@ export function TagesplanModal({
   fahrtItems: PlanItem[];
   projektItems?: PlanItem[];
 }) {
-  const [naechte, setNaechte] = useState(3);
-
   if (!open) return null;
 
-  const tage = naechte + 1;
   const alleItems = [...fahrtItems, ...(projektItems ?? [])];
 
   return createPortal(
     <div
-      id="tagesplan-druck"
+      id="programm-druck"
       className="fixed inset-0 z-[100] bg-black/40 flex items-start sm:items-center justify-center overflow-y-auto p-4 sm:p-8"
     >
       <style>{`
         @media print {
           body * { visibility: hidden; }
-          #tagesplan-druck, #tagesplan-druck * { visibility: visible; }
-          #tagesplan-druck {
+          #programm-druck, #programm-druck * { visibility: visible; }
+          #programm-druck {
             position: absolute; inset: 0; background: white; padding: 24px;
             overflow: visible;
           }
-          #tagesplan-druck .no-print { display: none !important; }
+          #programm-druck .no-print { display: none !important; }
         }
       `}</style>
 
-      <div className="bg-white rounded-[var(--radius-card,16px)] max-w-[820px] w-full p-6 sm:p-8 relative">
+      <div className="bg-white rounded-[var(--radius-card,16px)] max-w-[640px] w-full p-6 sm:p-8 relative">
         <button
           type="button"
           onClick={onClose}
@@ -55,25 +51,13 @@ export function TagesplanModal({
           Wiesenhütte
         </p>
         <h2 className="font-display font-bold text-[24px] sm:text-[28px] text-[var(--color-wh-deep-green,#2F4A35)] mt-0 mb-1">
-          Tagesplan-Vorschlag
+          Programm-Übersicht
         </h2>
         <p className="text-[14px] text-[var(--color-wh-fg-muted,#5b5b56)] mb-6">
-          Zum Ausdrucken und von Hand ausfüllen — frei anpassbar an eure Fahrt.
+          Eure Auswahl zum Ausdrucken und Mitnehmen.
         </p>
 
-        <label className="no-print flex items-center gap-2 text-sm mb-6">
-          Anzahl Nächte:
-          <input
-            type="number"
-            min={1}
-            max={10}
-            value={naechte}
-            onChange={(e) => setNaechte(Math.min(10, Math.max(1, Number(e.target.value) || 1)))}
-            className="w-16 h-9 px-2 rounded-md border border-[var(--color-wh-winter-grey,#C8CEC4)]"
-          />
-        </label>
-
-        {alleItems.length > 0 && (
+        {alleItems.length > 0 ? (
           <div className="mb-6">
             <p className="text-[13px] font-semibold uppercase tracking-wider text-[var(--color-wh-deep-green,#2F4A35)] mb-2">
               Eure Auswahl
@@ -86,43 +70,11 @@ export function TagesplanModal({
               ))}
             </ul>
           </div>
+        ) : (
+          <p className="text-[14px] text-[var(--color-wh-fg-muted,#5b5b56)] mb-6">
+            Noch nichts ausgewählt.
+          </p>
         )}
-
-        <table className="w-full border-collapse text-[13px] mb-6">
-          <thead>
-            <tr>
-              <th className="text-left border border-[var(--color-wh-winter-grey,#C8CEC4)] p-2 bg-[var(--color-wh-beige,#EFE6D8)] w-28">
-                Tag
-              </th>
-              <th className="text-left border border-[var(--color-wh-winter-grey,#C8CEC4)] p-2 bg-[var(--color-wh-beige,#EFE6D8)]">
-                Vormittag
-              </th>
-              <th className="text-left border border-[var(--color-wh-winter-grey,#C8CEC4)] p-2 bg-[var(--color-wh-beige,#EFE6D8)]">
-                Nachmittag
-              </th>
-              <th className="text-left border border-[var(--color-wh-winter-grey,#C8CEC4)] p-2 bg-[var(--color-wh-beige,#EFE6D8)]">
-                Abend
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {Array.from({ length: tage }, (_, i) => {
-              const nr = i + 1;
-              const label =
-                nr === 1 ? `Tag ${nr} · Anreise` : nr === tage ? `Tag ${nr} · Abreise` : `Tag ${nr}`;
-              return (
-                <tr key={nr}>
-                  <td className="border border-[var(--color-wh-winter-grey,#C8CEC4)] p-2 align-top font-semibold">
-                    {label}
-                  </td>
-                  <td className="border border-[var(--color-wh-winter-grey,#C8CEC4)] h-16 p-2 align-top" />
-                  <td className="border border-[var(--color-wh-winter-grey,#C8CEC4)] h-16 p-2 align-top" />
-                  <td className="border border-[var(--color-wh-winter-grey,#C8CEC4)] h-16 p-2 align-top" />
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
 
         <div className="bg-[var(--color-wh-beige,#EFE6D8)] rounded-[var(--radius-md,10px)] p-4 mb-6">
           <p className="text-[13px] font-semibold uppercase tracking-wider text-[var(--color-wh-deep-green,#2F4A35)] mb-2">
@@ -136,7 +88,7 @@ export function TagesplanModal({
               ausgeräumt sein (siehe Hausordnung)
             </li>
             <li>Ein paar freie Blöcke ohne festes Programm lassen</li>
-            <li>Langewiese erkunden — Fußballplatz und Spielplatz sind direkt im Ort, kostenfrei</li>
+            <li>Fußballplatz und Spielplatz ausprobieren — direkt im Ort, kostenfrei</li>
           </ul>
         </div>
 
