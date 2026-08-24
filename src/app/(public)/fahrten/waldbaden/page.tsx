@@ -6,10 +6,17 @@ import { getServerLocale } from "@/lib/i18n";
 export const metadata = {
   title: "Waldbaden ab der Wiesenhütte · Wiesenhütte",
   description:
-    "Anleitung für Lehrkräfte: eine Waldbaden-Runde ab der Hütte Richtung Ochsenstallsgraben, mit sieben Stationen und Einladungen zum Vorlesen.",
+    "Anleitung für Lehrkräfte: eine Waldbaden-Runde ab der Hütte in frei wählbarer Richtung, mit sieben Stationen und Einladungen zum Vorlesen.",
 };
 
 const HERO_TAGS = ["60–120 Minuten", "ganzjährig", "ohne Vorkenntnisse", "Start direkt an der Hütte"];
+
+const DIRS = [
+  { klein: "Norden · Kamm", name: "Über den Rothaarsteig", desc: "Höhenweg mit weiten Fernsichten, Richtung Lenneplätze und Kahler Asten. Wenig Steigung, viel Himmel." },
+  { klein: "Nordwesten · Tal", name: "Ins Lennetal", desc: "Hinaus entlang der jungen Lenne. Die verlässlichste Wahl, wenn ihr Wasser erleben wollt — die Lenne ist ein echter Quellbach." },
+  { klein: "Osten · Abstieg", name: "Zum Ochsenstallsgraben", desc: "Stiller Talabstieg Richtung Zwistmühle. Führt der Graben Wasser, ein schöner Rastplatz — sonst einfach ein Stück weiter." },
+  { klein: "Südwesten · Höhe", name: "Über den Grenzweg", desc: "Sanfte, offene Grünlandhänge zu den Nachbardörfern Hoheleye und Mollseifen. Gut bei großer Gruppe und Lust auf Weite." },
+];
 
 const EVIDENCE = [
   "niedrigerer Blutdruck & Puls, sinkendes Cortisol – teils schon nach einer Stunde",
@@ -30,14 +37,14 @@ const STOPS: { num: string; phase: string; title: string; text: string; invite: 
     num: "1",
     phase: "Aufbruch · weg vom Verkehr",
     title: "Weg vom Weg",
-    text: "Von der Hütte in die vom Verkehr abgewandte Richtung starten und die ersten Meter auf dem steigungsarmen Plateau gehen, hinaus Richtung Ochsenstallsgraben. Hier passiert das Tempo-Umschalten.",
+    text: "Von der Hütte in die vom Verkehr abgewandte Richtung starten und die ersten Meter ruhig gehen, hinaus in die gewählte Richtung. Hier passiert das Tempo-Umschalten.",
     invite: "Das Gehen selbst spüren — wie der Fuß abrollt, wie sich der Boden verändert. Nichts kommentieren, nur bemerken.",
   },
   {
     num: "2",
-    phase: "Abstieg · hinein ins Tal",
-    title: "Der Hang",
-    text: "Der Weg fällt zum Talgrund ab. Es gibt eine steilere Linie und — auf halber Hanghöhe — eine flachere, hangparallele Variante; wählt nach Kondition und Gruppe.",
+    phase: "Unterwegs · in den Wald hinein",
+    title: "In den Wald hinein",
+    text: "Der Weg führt euch tiefer in den Wald — mal eben über die Hochfläche, mal in einen Hang hinein, je nach Richtung. Wählt Tempo und Route nach Gruppe und Kondition; es gibt kein „zu langsam“.",
     invite: "Kurz die Augen schließen und zählen, wie viele verschiedene Geräusche sich unterscheiden lassen. Wind, Wasser, Vögel, die eigenen Schritte.",
     inviteLabel: "Hören",
   },
@@ -51,18 +58,18 @@ const STOPS: { num: string; phase: string; title: string; text: string; invite: 
   },
   {
     num: "4",
-    phase: "Talgrund · Wendepunkt",
+    phase: "Halt · der längere Aufenthalt",
     title: "Der stille Wendepunkt",
-    text: "Weiter unten wird es ruhiger und kühler — hier liegt der natürliche Wendepunkt und das Herzstück der Runde. Sucht euch eine geeignete Stelle: Führt der Graben Wasser, ist das Ufer ideal; ist er trocken, geht einfach ein Stück weiter, bis ihr einen ruhigen, einladenden Ort findet. Dort verteilt sich die Gruppe, jede:r kommt für sich zur Ruhe.",
+    text: "Etwa auf der Hälfte sucht ihr euch den ruhigsten Punkt der Runde — hier liegt der natürliche Wendepunkt und das Herzstück des Waldbadens. Sucht euch eine geeignete Stelle: Ist Wasser in der Nähe, ist das Ufer ideal; sonst genügt jeder ruhige, einladende Ort — geht notfalls einfach ein Stück weiter. Dort verteilt sich die Gruppe, jede:r kommt für sich zur Ruhe.",
     invite:
       "„Sucht euch jetzt jede:r einen Platz, der dich besonders anspricht — ein Stein, ein Baumstumpf, eine weiche Stelle im Moos, das Ufer, falls Wasser da ist. Geht ruhig so weit auseinander, dass ihr für euch seid, aber in Rufweite bleibt. Setz oder stell dich hin und bleib fünf bis zehn Minuten einfach da: den Geräuschen lauschen, Rinde und Moos ertasten, an Erde oder Nadeln riechen, den Blick weich werden lassen. Du musst nichts leisten und nichts richtig machen — wenn die Gedanken abschweifen, kehr freundlich zu einem Geräusch zurück.“ Ein leises, vorher vereinbartes Signal holt am Ende alle wieder zusammen.",
     inviteLabel: "der eigene Platz",
   },
   {
     num: "5",
-    phase: "Rückweg · bergan",
+    phase: "Rückweg",
     title: "Schweigend zurück",
-    text: "Zurück geht es wieder bergauf — ruhiger Puls, aufrechter Gang. Der Rückweg ist bewusst ohne Gespräch, damit die Wirkung nicht gleich „zerredet“ wird.",
+    text: "Zurück geht es denselben Weg — ruhiger Puls, aufrechter Gang. Der Rückweg ist bewusst ohne Gespräch, damit die Wirkung nicht gleich „zerredet“ wird.",
     invite: "Ein Detail von deinem Platz mitnehmen (ein Wort, ein Bild) und es beim Aufstieg immer wieder aufrufen, statt zu planen.",
   },
   {
@@ -76,10 +83,10 @@ const STOPS: { num: string; phase: string; title: string; text: string; invite: 
 
 const PRAXIS = [
   { h: "Dauer & Tempo", p: "60–120 Minuten reichen. Bewusst langsam — die kurze Strecke ist Absicht, kein Mangel. Keine Leistungsziele." },
-  { h: "Ausrüstung", p: "Festes, wetterfestes Schuhwerk und Kleidung nach Zwiebelprinzip. Der Talgrund ist kühler und feuchter als das Plateau. Wenig mitnehmen." },
+  { h: "Ausrüstung", p: "Festes, wetterfestes Schuhwerk und Kleidung nach Zwiebelprinzip. Im Wald und in Tallagen ist es kühler und feuchter als auf den offenen Höhen. Wenig mitnehmen." },
   { h: "Reizklima & Wetter", p: "Die Hochlage bringt Wind und Wetterwechsel. Bei Sturm, Gewitter oder Glätte nicht durchführen — Totholzflächen bergen zusätzlich Astbruchgefahr." },
   { h: "Stille & Handy", p: "Handy aus, nicht nur lautlos. In der Gruppe möglichst schweigend gehen; Gespräche erst am Ende. Fotografieren stört den Fluss — bewusst sparsam." },
-  { h: "Barrierearmut & Varianten", p: "Wer den Abstieg meiden will, bleibt auf der hangparallelen Variante oder auf dem Plateau und macht dort den Sitzplatz. Der Rückweg ist bergauf — Tempo anpassen." },
+  { h: "Barrierearmut & Varianten", p: "Wer wenig Steigung möchte, wählt eine ebene Richtung über die Hochfläche oder den Kamm statt eines Talwegs. Länge frei wählbar — auch eine kurze Runde wirkt. Tempo immer an die langsamste Person anpassen." },
   { h: "Fachliche Ergänzung", p: "Wer die Themen Wald, Wasser und Wiederaufforstung vertiefen will: Ranger-Touren von Wald und Holz NRW starten nach Absprache ebenfalls ab der Hütte — gut kombinierbar, aber inhaltlich eigenständig." },
 ];
 
@@ -109,14 +116,17 @@ export default async function WaldbadenPage() {
           </Link>
           <div className="eyebrow mb-3">Selbst gestaltbar · für Lehrkräfte</div>
           <h1 className="text-[36px] sm:text-[52px] m-0 mb-4 leading-[1.05] font-display font-bold text-[var(--color-wh-deep-green)]">
-            Waldbaden ab der Hütte
+            Waldbaden ab der Hütte — in jede Richtung
           </h1>
           <p className="text-[16px] sm:text-[18px] leading-relaxed max-w-2xl text-[var(--color-wh-black)] m-0">
             Bewusst und langsam durch den Wald gehen und ihn mit allen Sinnen aufnehmen. Schon ein
             ruhiger Aufenthalt unter Bäumen kann Anspannung lösen, den Kopf klären und die
             Stimmung heben. Diese Anleitung führt Schritt für Schritt — damit ihr eure Klasse ab
-            der Hütte durch eine kleine Waldbaden-Runde Richtung Ochsenstallsgraben begleiten
-            könnt.
+            der Hütte durch eine kleine Waldbaden-Runde begleiten könnt. Startet in jede Richtung,
+            weg vom Verkehr; welche Wege sich besonders eignen, steht weiter unten.
+          </p>
+          <p className="font-mono text-xs text-[var(--color-wh-deep-green)]/70 tracking-wide mt-4 mb-0">
+            ⌖ N 51° 09.151′ · E 008° 27.816′ — Start an der Wiesenhütte
           </p>
           <div className="flex flex-wrap gap-2 mt-6">
             {HERO_TAGS.map((t) => (
@@ -230,20 +240,47 @@ export default async function WaldbadenPage() {
             Der Weg als Anleitung
           </div>
           <h2 className="font-display font-bold text-[26px] sm:text-[30px] mt-0 mb-4">
-            Ab der Hütte Richtung Ochsenstallsgraben
+            Eure Runde — in jede Richtung möglich
           </h2>
           <p className="text-[15px] text-white/85 max-w-[64ch] mb-3">
-            Die Route führt bewusst <strong className="text-white">nicht</strong> über den Weg an
-            der Bundesstraße, sondern von der Hütte weg vom Verkehr, ostwärts vom Hochplateau
-            hinab in Richtung Ochsenstallsgraben — in einen ruhigen, tiefer gelegenen
-            Waldabschnitt — und denselben Weg wieder zurück. Der Abstieg gliedert die sieben
-            Stationen von selbst. An jeder Station lädst du die Schüler:innen zu einer kurzen
-            Übung ein und gibst ihnen Zeit — die Sätze unter „Einladung“ kannst du direkt vorlesen
-            oder frei nachsprechen.
+            Waldbaden gelingt auf jedem ruhigen Weg. Startet von der Hütte bewusst weg von der
+            Bundesstraße und wählt die Richtung nach Wetter, Gruppe und gewünschter Ruhe — die
+            sieben Stationen unten passen auf jede Route. Ihr geht ein Stück hinaus, macht an
+            einem stillen Punkt den längeren Halt und kehrt auf demselben Weg zurück.
           </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+            {DIRS.map((d) => (
+              <div
+                key={d.name}
+                className="bg-white/10 border-l-[3px] border-[var(--color-wh-beige)] rounded-r-md px-4 py-3.5"
+              >
+                <span className="block font-mono text-[10px] uppercase tracking-wider text-[var(--color-wh-beige)]/75 mb-1">
+                  {d.klein}
+                </span>
+                <h4 className="font-display font-semibold text-white uppercase text-sm tracking-wide m-0 mb-1.5">
+                  {d.name}
+                </h4>
+                <p className="text-sm text-white/85 m-0">{d.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-[var(--color-wh-beige)]/10 border border-dashed border-[var(--color-wh-beige)]/50 rounded-[var(--radius-card)] px-5 py-4 text-[14px] text-white/90 mb-8">
+            <strong className="text-[var(--color-wh-beige)]">Kurz zur Wahl:</strong> Wer Wasser
+            möchte, ist Richtung Lenne am sichersten; wer Weite und Blicke sucht, geht über den
+            Kamm; wer es besonders still und schattig mag, steigt zum Ochsenstallsgraben ab. In
+            Schutzgebieten bitte auf den Wegen bleiben.
+          </div>
+
+          <p className="text-[15px] text-white/85 max-w-[64ch] mb-8">
+            An jeder Station lädst du die Schüler:innen zu einer kurzen Übung ein und gibst ihnen
+            Zeit — die Sätze unter „Einladung“ kannst du direkt vorlesen oder frei nachsprechen.
+          </p>
+
           <div className="flex justify-between max-w-[420px] font-display text-xs uppercase tracking-wide text-[var(--color-wh-beige)] mb-8">
-            <span>▲ Start · Hochplateau</span>
-            <span>Talgrund · Wendepunkt ▼</span>
+            <span>● Start · an der Hütte</span>
+            <span>Wendepunkt · Umkehr ◆</span>
           </div>
 
           <div className="relative pl-11 flex flex-col gap-8 before:content-[''] before:absolute before:left-[13px] before:top-1.5 before:bottom-6 before:w-[2px] before:bg-[repeating-linear-gradient(var(--color-wh-beige)_0_10px,transparent_10px_18px)]">
@@ -268,10 +305,11 @@ export default async function WaldbadenPage() {
           </div>
 
           <div className="mt-10 bg-[var(--color-wh-beige)]/10 border border-dashed border-[var(--color-wh-beige)]/50 rounded-[var(--radius-card)] px-5 py-4 text-[14px] text-white/90">
-            <strong className="text-[var(--color-wh-beige)]">Vor Ort festlegen:</strong> Der genaue
-            Pfad von der Hüttentür bis zum Wendepunkt sollte einmal abgegangen und — wo nötig —
-            dezent markiert werden (Abzweige, die steilere vs. die hangparallele Variante, ein
-            guter, ruhiger Wendepunkt — idealerweise am Wasser, falls der Graben welches führt).
+            <strong className="text-[var(--color-wh-beige)]">Vor Ort festlegen:</strong> Legt die
+            Richtung und einen ruhigen Wendepunkt einmal vorab fest und geht den Weg — wo nötig —
+            vorher ab. So könnt ihr Tempo, Halte und einen guten Rastplatz (idealerweise mit
+            etwas Wasser in der Nähe) sicher einplanen und die Anleitung später mit konkreten
+            Wegangaben oder einer kleinen Karte ergänzen.
           </div>
         </div>
       </section>

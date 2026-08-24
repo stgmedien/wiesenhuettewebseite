@@ -11,6 +11,13 @@ export const metadata = {
 
 const HERO_TAGS = ["ab ca. 8 Jahren", "1–3 Stunden", "ganzjährig", "Start an der Hütte"];
 
+const DIRS = [
+  { klein: "Norden · Kamm", name: "Über den Rothaarsteig", desc: "Weite Höhenwege mit Fernsicht — gute Sichtachsen und klare Wegpunkte für eine übersichtliche Runde." },
+  { klein: "Nordwesten · Tal", name: "Ins Lennetal", desc: "Abwechslungsreicher Talweg entlang der jungen Lenne; Wasser eignet sich gut als Motiv für eine Station." },
+  { klein: "Osten · Abstieg", name: "Zum Ochsenstallsgraben", desc: "Stiller Talabstieg Richtung Zwistmühle — kompakt und knackig, gut für eine kürzere Runde." },
+  { klein: "Südwesten · Höhe", name: "Über den Grenzweg", desc: "Offene Grünlandhänge zu den Nachbardörfern Hoheleye und Mollseifen — weitläufig, ideal für größere Gruppen." },
+];
+
 const CACHE_TYPES = [
   { name: "Traditional", desc: "Behälter liegt direkt an den angegebenen Koordinaten. Der Klassiker für den Einstieg." },
   { name: "Multi", desc: "Mehrere Stationen führen nacheinander zum Finale." },
@@ -87,6 +94,9 @@ export default async function GeocachingPage() {
             Mit Smartphone oder GPS-Gerät versteckte „Schätze“ aufspüren — oder für die eigene
             Gruppe einen Parcours legen. Draußen, in Bewegung, mit Köpfchen: ideal für Klassen,
             Familien und Gruppen an der Wiesenhütte.
+          </p>
+          <p className="font-mono text-xs text-[var(--color-wh-deep-green)]/70 tracking-wide mt-4 mb-0">
+            ⌖ N 51° 09.151′ · E 008° 27.816′ — Start an der Wiesenhütte
           </p>
           <div className="flex flex-wrap gap-2 mt-6">
             {HERO_TAGS.map((t) => (
@@ -251,10 +261,27 @@ export default async function GeocachingPage() {
             <strong className="text-white">eigenen, zeitlich begrenzten Parcours</strong> ab der
             Hütte legen und danach wieder einsammeln. Das umgeht die Genehmigungsfragen für
             dauerhafte Caches, schont die Natur und lässt sich didaktisch füllen — als
-            Team-Aufgabe, Fach-Rallye oder Kennenlern-Runde. Führt ihn bewusst{" "}
-            <strong className="text-white">weg von der Bundesstraße</strong>, z. B. Richtung
-            Ochsenstallsgraben oder in den Dorfbereich mit Barfußpfad.
+            Team-Aufgabe, Fach-Rallye oder Kennenlern-Runde. Legt ihn bewusst{" "}
+            <strong className="text-white">weg von der Bundesstraße</strong> — die Richtung wählt
+            ihr nach Gruppe und Gelände.
           </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+            {DIRS.map((d) => (
+              <div
+                key={d.name}
+                className="bg-white/10 border-l-[3px] border-[var(--color-wh-beige)] rounded-r-md px-4 py-3.5"
+              >
+                <span className="block font-mono text-[10px] uppercase tracking-wider text-[var(--color-wh-beige)]/75 mb-1">
+                  {d.klein}
+                </span>
+                <h4 className="font-display font-semibold text-white uppercase text-sm tracking-wide m-0 mb-1.5">
+                  {d.name}
+                </h4>
+                <p className="text-sm text-white/85 m-0">{d.desc}</p>
+              </div>
+            ))}
+          </div>
 
           <div className="flex flex-col gap-5 mb-8">
             <Waypoint code="Waypoint 01 · Start" title="An der Hütte briefen">
