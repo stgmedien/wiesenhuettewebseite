@@ -11,7 +11,7 @@ const QUOTE: Record<Locale, { text: string; author: string; role: string }> = {
   de: {
     text: "Ich besuche die Hütte berufsbedingt mit Jugendgruppen seit knapp 20 Jahren. Es ist der perfekte, urige Rückzugsort für gemeinschaftliches Zusammensein und besondere Momente jenseits von Handy und Social Media — hier gibt es schlechten Empfang. Ein Ort, an dem Jugendliche noch unbeschwert sie selbst sein können und dürfen.",
     author: "Sebastian Habura",
-    role: "Fachbereich 3 · Stadtjugendpflege, Stadt Allendorf",
+    role: "Stadtjugendpflege, Stadt Allendorf",
   },
   en: {
     text: "For almost 20 years, my work has brought me to this cabin with youth groups. It's the perfect, rustic retreat for time together and special moments away from phones and social media — reception is poor here. A place where young people can still be unapologetically themselves.",
