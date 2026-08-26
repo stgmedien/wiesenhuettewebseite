@@ -48,7 +48,7 @@ export const PROJEKTE: Projekt[] = [
       "Material fürs Holzdeck oder ein Kostenbeitrag zum Fundament helfen, früher zu starten.",
     danke: "Wer hier mitbaut, hat seinen eigenen Platz – jedes Mal wieder, wenn er zurückkommt.",
     kontakt: "Bei Marcus Kühle, Julian oder Teckentrupp",
-    bild: "/media/projekte/plateau.svg",
+    bild: "/media/projekte/plateau.jpg",
   },
   {
     key: "pfad",
@@ -70,7 +70,7 @@ export const PROJEKTE: Projekt[] = [
     beitrag: "Material (Eisenpins, Holzspäne) spenden.",
     danke: "Ohne sicheren Weg kein Zeltplatz – wer hier baut, macht beides erst möglich.",
     kontakt: "Bei Marcus Kühle",
-    bild: "/media/projekte/pfad.svg",
+    bild: "/media/projekte/pfad.jpg",
   },
   {
     key: "feuerstelle",
@@ -92,7 +92,7 @@ export const PROJEKTE: Projekt[] = [
     beitrag: "U-Steine spenden oder anliefern.",
     danke: "Der Platz, an dem abends alle sitzen – sichtbarer geht Mitmachen kaum.",
     kontakt: "Ansprechpartner steht noch nicht fest",
-    bild: "/media/projekte/feuerstelle.svg",
+    bild: "/media/projekte/feuerstelle.jpg",
   },
   {
     key: "dachterrasse",
@@ -137,7 +137,7 @@ export const PROJEKTE: Projekt[] = [
     beitrag: "Holz oder U-Steine spenden.",
     danke: "Eine feste Bank, die bleibt – jede Fahrt danach sitzt auf eurer Arbeit.",
     kontakt: "Ansprechpartner steht noch nicht fest",
-    bild: "/media/projekte/terrasse.svg",
+    bild: "/media/projekte/terrasse.jpg",
   },
   {
     key: "bluehwiese",
@@ -161,7 +161,7 @@ export const PROJEKTE: Projekt[] = [
     beitrag: "Saatgut oder Gartenwerkzeug spenden.",
     danke: "Was ihr sät, blüht noch, wenn ihr längst in der nächsten Klasse seid.",
     kontakt: "Ansprechpartner steht noch nicht fest",
-    bild: "/media/projekte/bluehwiese.svg",
+    bild: "/media/projekte/bluehwiese.jpg",
   },
   {
     key: "kraeuter",
@@ -183,7 +183,7 @@ export const PROJEKTE: Projekt[] = [
     beitrag: "Setzlinge oder Erde spenden.",
     danke: "Was hier wächst, landet irgendwann in der Hüttenküche.",
     kontakt: "Ansprechpartner steht noch nicht fest",
-    bild: "/media/projekte/kraeuter.svg",
+    bild: "/media/projekte/kraeuter.jpg",
   },
   {
     key: "bewegungshang",
@@ -205,14 +205,14 @@ export const PROJEKTE: Projekt[] = [
     beitrag: "Slackline, Rutsche oder Material spenden.",
     danke: "Der Hang, an dem jede Fahrt als Erstes hinrennt.",
     kontakt: "Ansprechpartner steht noch nicht fest",
-    bild: "/media/projekte/bewegungshang.svg",
+    bild: "/media/projekte/bewegungshang.jpg",
   },
   {
     key: "mauer",
     nr: "WH-09",
     titel: "Die Einfahrtsmauer bekommt ein Gesicht.",
     untertitel: "Mauergestaltung an der Einfahrt",
-    darumGehts: "Die Mauer an der Einfahrt wird bemalt – ein sichtbares, kreatives Projekt direkt am Eingang der Hütte.",
+    darumGehts: "Die Mauer an der Einfahrt wird bemalt – ein sichtbares, kreatives Projekt direkt am Eingang der Hütte. Alternativ oder zusätzlich lässt sie sich auch beranken, mit Kletterpflanzen wie Efeu oder wildem Wein.",
     brauchenWir: ["Entwurf/Motiv entwickeln", "Wetterfeste Fassadenfarbe", "Pinsel, Abdeckmaterial"],
     zeitrahmen: "Ein Wochenende, wetterabhängig",
     aufwand: "klein bis mittel",
@@ -222,7 +222,7 @@ export const PROJEKTE: Projekt[] = [
     beitrag: "Farbe und Material spenden.",
     danke: "Das Erste, was jeder Gast von der Hütte sieht.",
     kontakt: "Ansprechpartner steht noch nicht fest",
-    bild: "/media/projekte/mauer.svg",
+    bild: "/media/projekte/mauer.jpg",
   },
   {
     key: "tischtennis",
@@ -308,7 +308,7 @@ export const PROJEKTE: Projekt[] = [
     beitrag: "Material (Eisenpins, Holzspäne) spenden.",
     danke: "Der erste Schritt zu allem, was danach im Werkzeugkeller entsteht.",
     kontakt: "Ansprechpartner steht noch nicht fest",
-    bild: "/media/projekte/oelkeller_treppe.svg",
+    bild: "/media/projekte/oelkeller_treppe.jpg",
   },
   {
     key: "oelkeller_instand",

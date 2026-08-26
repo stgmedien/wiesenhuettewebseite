@@ -124,7 +124,6 @@ export function ProjektGalerie({ projekte }: { projekte: Projekt[] }) {
                     </span>
                   </div>
                   <h2 className={styles.heroTitle}>{active.titel}</h2>
-                  <div className={styles.heroSub}>{active.untertitel}</div>
                 </div>
               </div>
 
