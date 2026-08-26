@@ -42,6 +42,7 @@ export const GLOBAL_MAIL_VARIABLES: MailVariable[] = [
   { name: "paidAmount", description: "Bereits bezahlt", example: "710,00 €", group: "Zahlung" },
   { name: "remainderAmount", description: "Restbetrag", example: "710,00 €", group: "Zahlung" },
   { name: "depositAmount", description: "Kaution", example: "300,00 €", group: "Zahlung" },
+  { name: "kurtaxeAmount", description: "Kurtaxe", example: "10,80 €", group: "Zahlung" },
   { name: "invoiceNumber", description: "Rechnungs-Nr (falls vorhanden)", example: "WH-2026-00042", group: "Zahlung" },
 
   // Sonstiges

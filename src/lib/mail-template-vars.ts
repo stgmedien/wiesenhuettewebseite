@@ -38,7 +38,13 @@ export const buildBookingVars = async (
   // stornierte Rechnungsnummer in Gast-Mails landen.
   const activeInvoice = await getActiveInvoiceForBooking(b.id);
 
-  const remainder = Math.max(0, b.subtotalCents - Math.min(b.paidCents, b.subtotalCents));
+  // b.subtotalCents ist bewusst OHNE Kaution und OHNE Kurtaxe (siehe pricing.ts) --
+  // der tatsaechlich vom Gast geschuldete Betrag ist Zwischensumme + Kaution +
+  // Kurtaxe. Vorher fehlten hier Kaution und Kurtaxe komplett (z.B. 662,00 €
+  // statt 972,80 € bei einer manuellen Buchung mit 300 € Kaution + 10,80 €
+  // Kurtaxe -- in der Praxis aufgefallen).
+  const totalCents = b.subtotalCents + b.depositCents + b.kurtaxeCents;
+  const remainder = Math.max(0, totalCents - Math.min(b.paidCents, totalCents));
   const guestFirst = customer?.firstName ?? "";
   const guestLast = customer?.lastName ?? "";
 
@@ -61,10 +67,11 @@ export const buildBookingVars = async (
     purpose: b.purpose ?? "",
     bookingUrl: `${baseUrl()}/konto/buchungen/${b.id}`,
 
-    totalAmount: formatEuro(b.subtotalCents),
+    totalAmount: formatEuro(totalCents),
     paidAmount: formatEuro(b.paidCents),
     remainderAmount: formatEuro(remainder),
     depositAmount: formatEuro(b.depositCents),
+    kurtaxeAmount: formatEuro(b.kurtaxeCents),
     invoiceNumber: activeInvoice?.invoiceNumber ?? "",
   };
 };
