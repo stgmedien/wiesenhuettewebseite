@@ -1,10 +1,29 @@
 import Link from "next/link";
 import Image from "next/image";
 import { DonationSection } from "@/components/public/huette/DonationSection";
+import { FeaturedQuote } from "@/components/public/FeaturedQuote";
 import { getServerLocale } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n-shared";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { lodgingBusinessSchema } from "@/lib/seo";
+
+const QUOTE: Record<Locale, { text: string; author: string; role: string }> = {
+  de: {
+    text: "Ich besuche die Hütte berufsbedingt mit Jugendgruppen seit knapp 20 Jahren. Es ist der perfekte, urige Rückzugsort für gemeinschaftliches Zusammensein und besondere Momente jenseits von Handy und Social Media — hier gibt es schlechten Empfang. Ein Ort, an dem Jugendliche noch unbeschwert sie selbst sein können und dürfen.",
+    author: "Sebastian Habura",
+    role: "Fachbereich 3 · Stadtjugendpflege, Stadt Allendorf",
+  },
+  en: {
+    text: "For almost 20 years, my work has brought me to this cabin with youth groups. It's the perfect, rustic retreat for time together and special moments away from phones and social media — reception is poor here. A place where young people can still be unapologetically themselves.",
+    author: "Sebastian Habura",
+    role: "Youth Services, City of Allendorf",
+  },
+  nl: {
+    text: "Ik bezoek de hut al bijna 20 jaar beroepsmatig met jeugdgroepen. Het is de perfecte, rustieke plek voor samenzijn en bijzondere momenten, ver van telefoon en social media — het bereik is hier slecht. Een plek waar jongeren nog onbezorgd zichzelf kunnen en mogen zijn.",
+    author: "Sebastian Habura",
+    role: "Jeugdwerk, Stad Allendorf",
+  },
+};
 
 export const metadata = {
   title: "Die Hütte · Wiesenhütte Langewiese",
@@ -607,6 +626,16 @@ export default async function HuettePage({
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="bg-[var(--color-wh-snow)] px-6 sm:px-8 pb-16 sm:pb-24">
+        <div className="max-w-[1080px] mx-auto">
+          <FeaturedQuote
+            text={QUOTE[locale].text}
+            author={QUOTE[locale].author}
+            role={QUOTE[locale].role}
+          />
         </div>
       </section>
 
