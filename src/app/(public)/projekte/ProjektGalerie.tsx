@@ -46,8 +46,12 @@ export function ProjektGalerie({ projekte }: { projekte: Projekt[] }) {
             }}
           >
             <span className={styles.tileImgBox}>
+              {/* Kachel-Vorschau bewusst immer das einheitliche Platzhalter-SVG,
+                  unabhaengig davon, ob es fuer dieses Projekt schon ein echtes
+                  Foto gibt -- das haelt die Uebersicht einheitlich. Das echte
+                  Foto (falls vorhanden) zeigt erst das Modal (active.bild unten). */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={p.bild} alt="" />
+              <img src={`/media/projekte/${p.key}.svg`} alt="" />
               <span className={styles.tileNr}>{p.nr}</span>
               {p.key === "plateau" && <span className={styles.tileFirst}>startet zuerst</span>}
               <span
