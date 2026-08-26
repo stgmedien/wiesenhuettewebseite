@@ -60,9 +60,9 @@ const FAQS: QA[] = [
       nl: "Is er beddengoed? Wat moet ik meenemen?",
     },
     a: {
-      de: "Die Hütte stellt nur Kopfkissen (ohne Bezug). Selbst mitzubringen sind: 1 Bettlaken, 1 Kopfkissenbezug und 1 Schlafsack oder eine Decke mit Bezug. Außerdem ratsam: Geschirrtücher, Toilettenpapier für den Anfang sowie Mehrfachsteckdosen und ein Verlängerungskabel, falls Du Strom für Aktivitäten brauchst — die Elektrik der Hütte ist noch nicht ganz in der Moderne angekommen.",
-      en: "The cabin provides pillows only (without covers). Please bring: 1 fitted sheet, 1 pillowcase and 1 sleeping bag or duvet with cover. Also handy: tea towels, some toilet paper to start, and a power strip plus extension cord if you need electricity for activities — the cabin's wiring hasn't quite caught up with modern times.",
-      nl: "De hut levert alleen kussens (zonder sloop). Zelf meenemen: 1 hoeslaken, 1 kussensloop en 1 slaapzak of dekbed met overtrek. Handig: theedoeken, wat toiletpapier voor het begin, en een stekkerdoos plus verlengsnoer als je stroom nodig hebt voor activiteiten — de elektra van de hut is nog niet helemaal bij de tijd.",
+      de: "Die Hütte stellt nur Kopfkissen (ohne Bezug). Selbst mitzubringen sind: 1 Spannbetttuch, 1 Kopfkissenbezug und 1 Schlafsack oder eine Decke mit Bezug. Die grauen Bezüge auf den Matratzen sind Matratzenschoner, kein Ersatz fürs eigene Spannbetttuch. Außerdem ratsam: Geschirrtücher, Toilettenpapier für den Anfang sowie Mehrfachsteckdosen und ein Verlängerungskabel, falls Du Strom für Aktivitäten brauchst — die Elektrik der Hütte ist noch nicht ganz in der Moderne angekommen.",
+      en: "The cabin provides pillows only (without covers). Please bring: 1 fitted sheet, 1 pillowcase and 1 sleeping bag or duvet with cover. The grey covers on the mattresses are protectors, not a substitute for your own fitted sheet. Also handy: tea towels, some toilet paper to start, and a power strip plus extension cord if you need electricity for activities — the cabin's wiring hasn't quite caught up with modern times.",
+      nl: "De hut levert alleen kussens (zonder sloop). Zelf meenemen: 1 hoeslaken, 1 kussensloop en 1 slaapzak of dekbed met overtrek. De grijze hoezen op de matrassen zijn matrasbeschermers, geen vervanging voor je eigen hoeslaken. Handig: theedoeken, wat toiletpapier voor het begin, en een stekkerdoos plus verlengsnoer als je stroom nodig hebt voor activiteiten — de elektra van de hut is nog niet helemaal bij de tijd.",
     },
   },
   {
