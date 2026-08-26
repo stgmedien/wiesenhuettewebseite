@@ -7,7 +7,7 @@
 import { db } from "@/lib/db";
 import { bookings, customers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { formatEuro } from "@/lib/pricing";
+import { formatEuro, RULES } from "@/lib/pricing";
 import { formatDateLong } from "@/lib/utils";
 import { getActiveInvoiceForBooking } from "@/lib/invoice";
 
@@ -21,6 +21,15 @@ const fmtShort = (iso: string | Date) => {
     month: "2-digit",
     year: "numeric",
   });
+};
+
+// Anreise minus 14 Tage, aus den lokalen Datumskomponenten (nicht ueber
+// new Date(isoString) + UTC-Parsing, siehe toLocalIso-Kommentar in utils.ts).
+const minusDaysFromIso = (iso: string, days: number): Date => {
+  const [y, m, d] = iso.split("-").map(Number);
+  const date = new Date(y, (m ?? 1) - 1, d ?? 1);
+  date.setDate(date.getDate() - days);
+  return date;
 };
 
 export const buildBookingVars = async (
@@ -45,6 +54,17 @@ export const buildBookingVars = async (
   // Kurtaxe -- in der Praxis aufgefallen).
   const totalCents = b.subtotalCents + b.depositCents + b.kurtaxeCents;
   const remainder = Math.max(0, totalCents - Math.min(b.paidCents, totalCents));
+
+  // Standard-Zahlungssplit (siehe buchen/actions.ts + T-14-Cron): Anzahlung
+  // (50 % der Zwischensumme) ist heute faellig, Kaution + Kurtaxe werden NICHT
+  // bei Buchung eingezogen, sondern zusammen mit der Restzahlung bei T-14
+  // (Vorstandsbeschluss). Gilt nur fuer den Normalfall (Anreise >= 14 Tage
+  // entfernt) -- bei kurzfristigen Buchungen wird abweichend alles sofort
+  // faellig, das bildet dieser Split hier nicht ab.
+  const prepaymentCents = Math.round((b.subtotalCents * RULES.prepaymentPercent) / 100);
+  const restzahlungCents = b.subtotalCents - prepaymentCents + b.depositCents + b.kurtaxeCents;
+  const restzahlungDate = minusDaysFromIso(b.arrival, 14);
+
   const guestFirst = customer?.firstName ?? "";
   const guestLast = customer?.lastName ?? "";
 
@@ -72,6 +92,9 @@ export const buildBookingVars = async (
     remainderAmount: formatEuro(remainder),
     depositAmount: formatEuro(b.depositCents),
     kurtaxeAmount: formatEuro(b.kurtaxeCents),
+    prepaymentAmount: formatEuro(prepaymentCents),
+    restzahlungAmount: formatEuro(restzahlungCents),
+    restzahlungDate: formatDateLong(restzahlungDate),
     invoiceNumber: activeInvoice?.invoiceNumber ?? "",
   };
 };
