@@ -47,8 +47,9 @@ export default async function HausordnungPage() {
             </li>
             <li>
               <strong>Bettwäsche:</strong> Gestellt wird nur ein Kopfkissen. Selbst mitzubringen
-              sind ein Bettlaken, ein Kopfkissenbezug sowie ein Schlafsack oder eine Decke mit
-              Bezug.
+              sind ein Spannbetttuch, ein Kopfkissenbezug sowie ein Schlafsack oder eine Decke mit
+              Bezug. Die grauen Bezüge auf den Matratzen sind Matratzenschoner — kein Ersatz fürs
+              eigene Spannbetttuch.
             </li>
             <li>
               <strong>Ankunft:</strong> Es gibt keine feste Ankunftszeit. Meldet Euch bitte
