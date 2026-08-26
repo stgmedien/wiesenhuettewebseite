@@ -385,11 +385,13 @@
   margin: auto 0 3px;
   letter-spacing: -0.01em;
   text-wrap: balance;
-}
-.heroSub {
-  font-size: 12px;
-  letter-spacing: 0.02em;
-  opacity: 0.92;
+  /* globals.css setzt "h1,h2,h3,h4 { color: var(--color-wh-deep-green) }"
+     global -- das ueberschreibt die von .heroContent vererbte Cream-Farbe,
+     weil ein Typselektor direkt auf dem Element immer vor Vererbung
+     gewinnt. Hier explizit zuruecksetzen, sonst ist die Ueberschrift auf
+     Fotos (statt der alten einfarbigen Platzhalter-SVGs) kaum lesbar. */
+  color: var(--pk-cream);
+  text-shadow: 0 1px 2px rgba(20, 26, 22, 0.85), 0 2px 14px rgba(20, 26, 22, 0.55);
 }
 
 .body {
