@@ -42,6 +42,10 @@ export const GLOBAL_MAIL_VARIABLES: MailVariable[] = [
   { name: "paidAmount", description: "Bereits bezahlt", example: "710,00 €", group: "Zahlung" },
   { name: "remainderAmount", description: "Restbetrag", example: "710,00 €", group: "Zahlung" },
   { name: "depositAmount", description: "Kaution", example: "300,00 €", group: "Zahlung" },
+  { name: "kurtaxeAmount", description: "Kurtaxe", example: "10,80 €", group: "Zahlung" },
+  { name: "prepaymentAmount", description: "Anzahlung (50 % der Zwischensumme, heute fällig)", example: "331,00 €", group: "Zahlung" },
+  { name: "restzahlungAmount", description: "Restzahlung (Rest-Zwischensumme + Kaution + Kurtaxe, fällig 14 Tage vor Anreise)", example: "641,80 €", group: "Zahlung" },
+  { name: "restzahlungDate", description: "Fälligkeitsdatum der Restzahlung (Anreise − 14 Tage)", example: "Fr, 23. Januar 2026", group: "Zahlung" },
   { name: "invoiceNumber", description: "Rechnungs-Nr (falls vorhanden)", example: "WH-2026-00042", group: "Zahlung" },
 
   // Sonstiges
