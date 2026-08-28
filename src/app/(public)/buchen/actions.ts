@@ -629,13 +629,15 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
       locale: STRIPE_LOCALE[locale],
       ...(stripeCustomerId ? { customer: stripeCustomerId } : { customer_email: effectiveEmail }),
       billing_address_collection: "auto",
-      // Session läuft nach 24 h ab (Stripe-Maximum) — Gäste sollen in Ruhe
-      // Rücksprache halten können, ohne dass der Zahlungslink verfällt.
-      // Die Buchung blockt die Tage als "angefragt"; bei Ablauf/Abbruch wird
-      // sie über den checkout.session.expired-Webhook (+ Cron-Safety-Net)
-      // wieder freigegeben, damit verwaiste Buchungen keine Termine
-      // dauerblockieren.
-      expires_at: Math.floor(Date.now() / 1000) + 24 * 60 * 60,
+      // Session läuft nach 2 h ab. War frueher 24h ("Gaeste sollen in Ruhe
+      // Ruecksprache halten"), aber genau das blockte Termine unnoetig lang:
+      // ein Gast, der das Fenster nur schliesst statt aktiv abzubrechen,
+      // sperrte die Tage einen ganzen Tag lang fuer andere -- konkret
+      // aufgefallen, als ein Interessent deshalb zu einer anderen Huette
+      // ausgewichen ist. Die Buchung blockt die Tage als "angefragt"; bei
+      // Ablauf/Abbruch wird sie ueber den checkout.session.expired-Webhook
+      // (+ Cron-Safety-Net) wieder freigegeben.
+      expires_at: Math.floor(Date.now() / 1000) + 2 * 60 * 60,
       line_items: [
         {
           quantity: 1,
