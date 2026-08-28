@@ -16,10 +16,11 @@ const SOFT_DELETE_DAYS = 30;
 const ANON_PREFIX = "[Anonymisiert nach DSGVO-Antrag]";
 // Safety-Net: verwaiste, unbezahlte Standard-Buchungen (Checkout nie
 // abgeschlossen) nach dieser Frist freigeben. Der checkout.session.expired-
-// Webhook erledigt das i.d.R. direkt bei Session-Ablauf; dies fängt verpasste
-// Events ab. MUSS größer sein als die Checkout-Gültigkeit (24 h, siehe
-// expires_at in buchen/actions.ts) — sonst storniert der Cron Buchungen,
-// deren Zahlungslink noch gültig ist, und gibt belegte Tage doppelt frei.
+// Webhook erledigt das i.d.R. direkt bei Session-Ablauf (nach 2h, siehe
+// expires_at in buchen/actions.ts) — dies faengt nur verpasste Events ab,
+// als taeglicher Backstop. MUSS groesser sein als die Checkout-Gueltigkeit
+// — sonst storniert der Cron Buchungen, deren Zahlungslink noch gueltig
+// ist, und gibt belegte Tage doppelt frei.
 const STALE_BOOKING_HOURS = 25;
 
 /**
