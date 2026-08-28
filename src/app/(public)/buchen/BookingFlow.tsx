@@ -155,6 +155,7 @@ const BF_COPY = {
     restzahlung: "Restzahlung von",
     restzahlungBody: "(inkl. Kaution + Kurtaxe) wird 14 Tage vor Anreise automatisch eingezogen — separate Zahlungsaufforderung kommt vorher per Mail. Die Kaution wird innerhalb von 14 Tagen nach mangelfreier Abreise zurückerstattet.",
     kurtaxeNote: "Hinweis: Die Kurtaxe Hochsauerland (2,70 € pro Person ab 16 Jahren und Nacht) ist in der Restzahlung enthalten — wir führen sie an die Kurverwaltung Winterberg ab.",
+    holdNotice: "Hinweis: Der Zeitraum ist ab jetzt 30 Minuten lang für Dich reserviert. Schließt Du die Buchung in dieser Zeit nicht ab, wird er danach automatisch wieder freigegeben.",
     stornoH: "Stornierungs-Regelwerk",
     stornoToday: (d: number, p: number) => `Bei Storno heute (${d} Tage vor Anreise): ${p}% Rückerstattung`,
     stornoTodayNoDays: (p: number) => `Bei Storno heute: ${p}% Rückerstattung`,
@@ -315,6 +316,7 @@ const BF_COPY = {
     restzahlung: "Remaining amount of",
     restzahlungBody: "(incl. damage deposit + tourist tax) is charged automatically 14 days before arrival — a separate payment notice is emailed beforehand. The damage deposit is refunded within 14 days of a clean departure.",
     kurtaxeNote: "Note: The Hochsauerland tourist tax (€2.70 per guest aged 16+ per night) is included in the remaining payment — we remit it to the Winterberg tourist office.",
+    holdNotice: "Note: This date range is reserved for you for 30 minutes from now. If you don't complete the booking within this time, it will automatically become available again.",
     stornoH: "Cancellation policy",
     stornoToday: (d: number, p: number) => `If cancelled today (${d} days before arrival): ${p}% refund`,
     stornoTodayNoDays: (p: number) => `If cancelled today: ${p}% refund`,
@@ -471,6 +473,7 @@ const BF_COPY = {
     restzahlung: "Restbedrag van",
     restzahlungBody: "(incl. borg + toeristenbelasting) wordt 14 dagen vóór aankomst automatisch geïncasseerd — een apart betaalverzoek volgt vooraf per e-mail. De borg wordt binnen 14 dagen na schadevrije afreis terugbetaald.",
     kurtaxeNote: "Let op: De toeristenbelasting Hochsauerland (€ 2,70 per persoon vanaf 16 jaar per nacht) zit in de restbetaling — wij dragen deze af aan de Kurverwaltung Winterberg.",
+    holdNotice: "Let op: Deze periode is vanaf nu 30 minuten voor je gereserveerd. Rond je de boeking niet binnen deze tijd af, dan wordt de periode daarna automatisch weer vrijgegeven.",
     stornoH: "Annuleringsregeling",
     stornoToday: (d: number, p: number) => `Bij annulering vandaag (${d} dagen vóór aankomst): ${p}% terugbetaling`,
     stornoTodayNoDays: (p: number) => `Bij annulering vandaag: ${p}% terugbetaling`,
@@ -1120,6 +1123,7 @@ export const BookingFlow = ({
 
             {/* Storno-Regelwerk klar im UI */}
             <CancellationPolicyBox arrival={arrival} tt={tt} locale={locale} />
+            <p className="m-0 text-sm text-[var(--color-wh-fg-muted)]">{tt.holdNotice}</p>
             {error && (
               <div className="bg-[var(--color-wh-sunset)]/10 text-[var(--color-wh-sunset)] rounded-[var(--radius-md)] p-4 text-sm font-medium">
                 {error}

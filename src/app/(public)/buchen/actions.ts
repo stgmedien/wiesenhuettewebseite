@@ -629,15 +629,17 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
       locale: STRIPE_LOCALE[locale],
       ...(stripeCustomerId ? { customer: stripeCustomerId } : { customer_email: effectiveEmail }),
       billing_address_collection: "auto",
-      // Session läuft nach 2 h ab. War frueher 24h ("Gaeste sollen in Ruhe
-      // Ruecksprache halten"), aber genau das blockte Termine unnoetig lang:
-      // ein Gast, der das Fenster nur schliesst statt aktiv abzubrechen,
-      // sperrte die Tage einen ganzen Tag lang fuer andere -- konkret
-      // aufgefallen, als ein Interessent deshalb zu einer anderen Huette
-      // ausgewichen ist. Die Buchung blockt die Tage als "angefragt"; bei
-      // Ablauf/Abbruch wird sie ueber den checkout.session.expired-Webhook
-      // (+ Cron-Safety-Net) wieder freigegeben.
-      expires_at: Math.floor(Date.now() / 1000) + 2 * 60 * 60,
+      // Session läuft nach 30 min ab (Stripe-Minimum). War frueher 24h
+      // ("Gaeste sollen in Ruhe Ruecksprache halten"), aber genau das
+      // blockte Termine unnoetig lang: ein Gast, der das Fenster nur
+      // schliesst statt aktiv abzubrechen, sperrte die Tage einen ganzen
+      // Tag lang fuer andere -- konkret aufgefallen, als ein Interessent
+      // deshalb zu einer anderen Huette ausgewichen ist. Die Buchung blockt
+      // die Tage als "angefragt"; bei Ablauf/Abbruch wird sie ueber den
+      // checkout.session.expired-Webhook (+ Cron-Safety-Net) wieder
+      // freigegeben. Die 30 min werden dem Gast im UI angezeigt (tt.holdNotice
+      // in BookingFlow.tsx), damit er weiss, wie lange die Reservierung gilt.
+      expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
       line_items: [
         {
           quantity: 1,
