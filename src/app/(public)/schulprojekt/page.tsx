@@ -107,19 +107,20 @@ export default async function EsgPage() {
           </h2>
           <div className="flex flex-wrap gap-2 mb-5">
             {[
-              "Ranger-Tour",
-              "Erlebnispädagogik & Teambuilding",
-              "Ein Tag in Winterberg",
-              "Geocaching",
-              "Waldbaden",
-              "Nachtwanderung",
-            ].map((label) => (
-              <span
+              { label: "Ranger-Tour", href: "/fahrten#ranger" },
+              { label: "Erlebnispädagogik & Teambuilding", href: "/fahrten#erlebnispaedagogik" },
+              { label: "Ein Tag in Winterberg", href: "/fahrten#winterberg" },
+              { label: "Geocaching", href: "/fahrten/geocaching" },
+              { label: "Waldbaden", href: "/fahrten/waldbaden" },
+              { label: "Nachtwanderung", href: "/fahrten#nachtwanderung" },
+            ].map(({ label, href }) => (
+              <Link
                 key={label}
-                className="inline-flex items-center rounded-full px-3.5 py-1.5 text-[13px] font-medium bg-white/10 text-white border border-white/25"
+                href={href}
+                className="inline-flex items-center rounded-full px-3.5 py-1.5 text-[13px] font-medium bg-white/10 text-white border border-white/25 no-underline hover:bg-white/20 transition-colors"
               >
                 {label}
-              </span>
+              </Link>
             ))}
           </div>
           <p className="text-[15px] sm:text-base leading-relaxed text-white/90 max-w-2xl mb-6">
