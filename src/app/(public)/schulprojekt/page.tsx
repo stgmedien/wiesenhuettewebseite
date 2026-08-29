@@ -79,30 +79,17 @@ export default async function EsgPage() {
     <div>
       <DeOnlyBanner locale={locale} />
       {/* ---------------------------------------------------------------- */}
-      {/* HERO BILD — Kollaboration ESG × Wiesenhütte */}
+      {/* HERO — Text auf Vereinsfarbe statt Foto (ESG-Kollaborationsbild */}
+      {/* rausgenommen, Erzählung soll Gütersloh + Skiverein sein) */}
       {/* ---------------------------------------------------------------- */}
-      <div
-        className="relative w-full bg-[var(--color-wh-deep-green)] min-h-[380px] sm:min-h-0 sm:aspect-[16/9] md:aspect-[21/9]"
-        style={{ maxHeight: "560px" }}
-      >
-        <Image
-          src="/media/photos/kollaboration_esg_skifreunde.png"
-          alt="Schülerinnen und Schüler bei einem Projekt an der Wiesenhütte"
-          fill
-          priority
-          className="object-cover object-center"
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[rgba(47,74,53,0.78)] via-[rgba(47,74,53,0.25)] to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 px-6 sm:px-8 pb-6 sm:pb-10 md:pb-12">
-          <div className="max-w-[1080px] mx-auto">
-            <div className="text-[10px] sm:text-xs uppercase tracking-wider font-semibold text-white/90">
-              Klassenfahrten an der Wiesenhütte
-            </div>
-            <h1 className="text-[26px] sm:text-[40px] md:text-[56px] lg:text-[60px] mt-1.5 sm:mt-2 leading-[1.1] sm:leading-[1.05] text-white drop-shadow-md font-display font-bold">
-              Seit Jahrzehnten das Klassenfahrtziel<br className="hidden sm:block" /> Gütersloher Schulen.
-            </h1>
+      <div className="w-full bg-[var(--color-wh-deep-green)] px-6 sm:px-8 py-14 sm:py-20">
+        <div className="max-w-[1080px] mx-auto">
+          <div className="text-[10px] sm:text-xs uppercase tracking-wider font-semibold text-white/90">
+            Klassenfahrten an der Wiesenhütte
           </div>
+          <h1 className="text-[26px] sm:text-[40px] md:text-[56px] lg:text-[60px] mt-1.5 sm:mt-2 leading-[1.1] sm:leading-[1.05] text-white font-display font-bold">
+            Seit Jahrzehnten das Klassenfahrtziel<br className="hidden sm:block" /> Gütersloher Schulen.
+          </h1>
         </div>
       </div>
 
@@ -863,10 +850,6 @@ const FAQS = [
   {
     q: "Gibt es geführte Waldtouren?",
     a: "Ja — das Regionalforstamt Oberes Sauerland bietet Ranger-Führungen direkt ab der Hütte an, für Schulklassen kostenfrei. Themen wie Ökosystem Wald, Klimawandel oder Forstgeschichte werden individuell mit dem Ranger abgesprochen, Dauer 1 bis mehrere Stunden, Gruppengröße bis 25 Personen. Kontakt: Regionalforstamt Oberes Sauerland, Tel. 02972 9702-35. Mehr Angebote und Details: <a href=\"/fahrten\">Fahrten &amp; Erlebnisse</a>.",
-  },
-  {
-    q: "Wie passt das zum Schulprogramm des ESG?",
-    a: "Das ESG ist ein evangelisches, humanistisches Gymnasium — eine Gütersloher Schule mit einem Profil, das Persönlichkeitsbildung, Verantwortung und Gemeinschaft ernst nimmt. Die Hüttenarbeit ist eine konkrete Übersetzung dieses Profils. Sie ist nicht zusätzlich zum Schulprogramm — sie ist Teil davon.",
   },
   {
     q: "Wer trägt die Hütte?",
