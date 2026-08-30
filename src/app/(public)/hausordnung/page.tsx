@@ -86,17 +86,29 @@ export default async function HausordnungPage() {
           </div>
           <ul>
             <li>
-              <strong>Rauchen &amp; Haustiere:</strong> Das Haus ist komplett rauchfrei. Aus
-              Rücksicht auf Allergiker:innen sind Haustiere leider nicht erlaubt.
+              <strong>Rauchen:</strong> Das Haus ist komplett rauchfrei. Für draußen stehen Euch im
+              Vorratsraum Aschenbecher als verschließbare Gläser zur Verfügung — ein kippenfreier
+              Eingang sieht einfach schöner aus.
+            </li>
+            <li>
+              <strong>Haustiere:</strong> Aus Rücksicht auf Allergiker:innen sind Haustiere leider
+              nicht erlaubt.
             </li>
             <li>
               <strong>Schuhe:</strong> Drinnen bitte nur mit Hausschuhen. Mit Skischuhen kommt Ihr
               ausschließlich über den Kellereingang rein.
             </li>
             <li>
+              <strong>Möbel:</strong> Die Holzstühle aus dem Haus bleiben drinnen. Für draußen gibt
+              es jede Menge Stühle und Tische im Keller.
+            </li>
+            <li>
+              <strong>Küche:</strong> Den Backofen bitte nur mit Backpapier benutzen.
+            </li>
+            <li>
               <strong>Schlafräume:</strong> Aus hygienischen Gründen bitte keine Lebensmittel,
-              Süßigkeiten oder Getränke mit hineinnehmen und den Müll wieder heraus. Handys aus
-              Sicherheitsgründen bitte auch nicht dort aufladen.
+              Süßigkeiten oder Getränke außer Wasser mit hineinnehmen und den Müll wieder heraus.
+              Handys aus Sicherheitsgründen bitte auch nicht dort aufladen.
             </li>
             <li>
               <strong>Müll:</strong> Bitte sauber trennen. Winterberg kontrolliert das streng.
@@ -111,34 +123,49 @@ export default async function HausordnungPage() {
           </ul>
         </Block>
 
-        <Block title="Vor der Abreise">
+        <Block title="Checkliste An &amp; Abreise">
+          <p className="font-semibold mb-1">Bei der Anreise</p>
+          <ul className="space-y-1.5">
+            <li>Betten beziehen</li>
+            <li>Feuerwehr-Meldeliste ausgefüllt aufhängen (siehe oben)</li>
+          </ul>
+
+          <p className="font-semibold mt-6 mb-1">Bei der Abreise</p>
           <p>
             Ist während Eures Aufenthalts etwas kaputtgegangen, sagt es dem Hüttenwart bitte vor
             der Schlüsselübergabe — Sachschäden protokollieren wir dann gemeinsam und stellen sie
             in Rechnung. Bei größerem Mehraufwand (Reinigung, Aufräumen, liegengebliebener Müll)
             behalten wir uns vor, einen entsprechenden Teil der Kaution einzubehalten.
           </p>
-          <p className="font-semibold mt-4 mb-1">Checkliste bei Abreise</p>
-          <p className="mt-0">So hinterlasst Ihr die Hütte am liebsten:</p>
+          <p className="mt-4 mb-1">So hinterlasst Ihr die Hütte am liebsten:</p>
           <ul className="space-y-1.5">
             <li>Besenrein, mit der Einrichtung zurück an ihrem ursprünglichen Platz</li>
             <li>Stühle bitte nicht auf die Tische hochstellen</li>
+            <li>Alle Fenster geschlossen</li>
+            <li>
+              Alle Heizkörper richtig eingestellt: Mitte Nov.–Mitte März auf Stufe 1, sonst auf
+              Frostwächter
+            </li>
             <li>
               Geschirrspüler fertig durchgelaufen und ausgeräumt (inkl. Besteckschublade),
               Geschirr an seinem Platz — bei Zeitnot bitte die letzten Teile von Hand spülen.
               Beim Verlassen der Hütte wird die Stromverbindung getrennt: Eine noch laufende
               Maschine bleibt dann mitten im Programm stehen, und das Reinigungsteam muss vor Ort
               länger bleiben, um sie neu durchlaufen zu lassen und auszuräumen. Dafür behalten wir
-              uns eine Pauschale von 50 € von der Kaution vor.
+              uns eine Pauschale von 50 € von der Kaution vor. Tipp: Für das Frühstücksgeschirr vom
+              letzten Tag reicht das Feinprogramm mit Turbo — geht schneller.
             </li>
+            <li>Backofen ausgewischt</li>
             <li>Kühlschränke leer, Türen bitte offen lassen (gegen Schimmel und Gerüche)</li>
+            <li>Küchentücher zum Trocknen in der Küche aufgehängt</li>
+            <li>Stühle und Tische von draußen wieder zurück in den Keller</li>
+            <li>Grill gereinigt</li>
+            <li>Feuerstelle sauber hinterlassen</li>
+            <li>Kippen-Gläser gereinigt und zurück im Vorratsraum</li>
             <li>
-              Alle Heizkörper richtig eingestellt: Mitte Nov.–Mitte März auf Stufe 1, sonst auf
-              Frostwächter
-            </li>
-            <li>
-              Restmüll in die schwarzen Tonnen am Parkplatz oben, Papier/Kartons in die blaue
-              Tonne, gelbe Säcke unter den Carport von Frau Brunhilde Hennecke (Bundesstraße 10)
+              Restmüll in die schwarzen Tonnen am Parkplatz oben, Papier/Kartons zerkleinert in die
+              blaue Tonne (damit auch für die nächste Gruppe noch Platz ist), gelbe Säcke unter dem
+              Carport beim Nachbarn, Bundesstraße 10
             </li>
             <li>Alle Lebensmittel-Reste, Getränke, Leergut und sonstigen Müll bitte mitnehmen</li>
             <li>
@@ -149,7 +176,7 @@ export default async function HausordnungPage() {
               Adresse: Vorm Rohrbach 1 (um die Ecke).
             </li>
           </ul>
-          <p className="text-sm text-[var(--color-wh-fg-muted)] mt-4">
+          <p className="font-bold mt-4">
             Die Abnahme der Hütte für die Erstattung der Kaution erfolgt durch den Hüttenwart bei
             der Schlüsselübergabe und abschließend durch das Reinigungs-Team.
           </p>

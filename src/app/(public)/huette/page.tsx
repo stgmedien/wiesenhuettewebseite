@@ -87,7 +87,7 @@ const COPY: Record<Locale, Copy> = {
     },
     rooms: {
       heading: "Schlafzimmer",
-      bedNote: "Wichtig: Wir stellen NUR Kopfkissen (ohne Bezug). Bettdecken mit Bezug oder Schlafsäcke UND Kopfkissenbezüge bitte selbst mitbringen.",
+      bedNote: "Wichtig: Wir stellen NUR Kopfkissen (ohne Bezug). Ein Spannbetttuch, Kopfkissenbezüge sowie Bettdecken mit Bezug oder Schlafsäcke bitte selbst mitbringen. Die grauen Bezüge auf den Matratzen sind Matratzenschoner — kein Ersatz fürs eigene Spannbetttuch.",
       items: [
         { name: "Naturtraum", floor: "1. Etage", detail: "8 Schlafplätze in Etagenbetten" },
         { name: "Waldblick", floor: "Dachgeschoss", detail: "4 Schlafplätze in Bodenbetten · über Innentreppe mit Naturtraum verbunden" },
@@ -226,7 +226,7 @@ const COPY: Record<Locale, Copy> = {
     },
     rooms: {
       heading: "Bedrooms",
-      bedNote: "Important: We provide PILLOWS ONLY (no covers). Please bring your own duvet with cover or sleeping bag — plus pillowcases for the pillows we provide.",
+      bedNote: "Important: We provide PILLOWS ONLY (no covers). Please bring your own fitted sheet, pillowcases, and a duvet with cover or sleeping bag. The grey covers on the mattresses are mattress protectors — not a substitute for your own fitted sheet.",
       items: [
         { name: "Naturtraum (\"Nature dream\")", floor: "1st floor", detail: "8 beds in bunk beds" },
         { name: "Waldblick (\"Forest view\")", floor: "Attic", detail: "4 beds on the floor · connected to Naturtraum by an internal staircase" },
@@ -365,7 +365,7 @@ const COPY: Record<Locale, Copy> = {
     },
     rooms: {
       heading: "Slaapkamers",
-      bedNote: "Belangrijk: Wij voorzien ALLEEN kopkussens (zonder sloop). Dekbedden met overtrek of slaapzakken graag zelf meenemen — plus kussenslopen voor de kussens die wij leveren.",
+      bedNote: "Belangrijk: Wij voorzien ALLEEN kopkussens (zonder sloop). Breng zelf een hoeslaken, kussenslopen en een dekbed met overtrek of slaapzak mee. De grijze hoezen op de matrassen zijn matrasbeschermers — geen vervanging voor je eigen hoeslaken.",
       items: [
         { name: "Naturtraum (\"Natuurdroom\")", floor: "1e verdieping", detail: "8 slaapplaatsen in stapelbedden" },
         { name: "Waldblick (\"Bosuitzicht\")", floor: "Zolder", detail: "4 slaapplaatsen op de vloer · via interne trap verbonden met Naturtraum" },
