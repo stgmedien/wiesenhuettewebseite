@@ -112,9 +112,13 @@ export function buildPackliste(input: PackInput): PackCategory[] {
   } else {
     schuhe.push(
       { name: "Wanderschuhe" },
-      { name: "Leichte Schuhe / Sandalen für drinnen + draußen" }
+      { name: "Leichte Schuhe / Sandalen für draußen" }
     );
   }
+  schuhe.push({
+    name: "Hausschuhe",
+    hint: "PFLICHT drinnen laut Hausordnung — mit Skischuhen geht's nur über den Kellereingang",
+  });
   cats.push({ title: "Schuhe", items: schuhe });
 
   // ----- Schlafen + Hygiene -----
@@ -126,6 +130,7 @@ export function buildPackliste(input: PackInput): PackCategory[] {
     { name: "Spannbetttuch + Kopfkissenbezug", hint: "Matratzen sind mit einem grauen Matratzenschoner bezogen — ersetzt kein eigenes Spannbetttuch. Kopfkissen sind vorhanden, Bezug bitte mitbringen." },
     { name: "Handtuch" },
     { name: "Kulturbeutel (Zahnpasta, Bürste, Shampoo, Deo)" },
+    { name: "Toilettenpapier", hint: "Die Hütte stellt nur die erste Garnitur — für den weiteren Bedarf bitte selbst mitbringen" },
     { name: "Sonnencreme", hint: isWinter ? "Auch im Winter (Schnee reflektiert)" : "Mindestens LSF 30" },
   ];
   cats.push({ title: "Schlafen & Hygiene", items: schlafen });
@@ -170,6 +175,7 @@ export function buildPackliste(input: PackInput): PackCategory[] {
     { name: "Lieblings-Gewürze / Olivenöl", shared: true },
     { name: "Kaffee + Filter (falls nicht eingekauft)", shared: true },
     { name: "Tee-Auswahl", shared: true },
+    { name: "Backpapier", shared: true, hint: "Der Backofen darf laut Hausordnung nur damit benutzt werden" },
     { name: "Erste-Hilfe-Set", shared: true, hint: "Pflaster, Verbandmaterial, Schere, Pinzette" },
     { name: "Mehrfachsteckdosen + Verlängerungskabel", shared: true, hint: "Falls Strom für Aktivitäten gebraucht wird — die Elektrik ist noch nicht ganz in der Moderne angekommen" },
   ];
