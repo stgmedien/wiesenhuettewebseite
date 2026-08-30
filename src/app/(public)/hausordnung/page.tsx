@@ -25,11 +25,6 @@ export default async function HausordnungPage() {
           e.V.
         </p>
         <p className="leading-relaxed">
-          Das Haus ist eine Nichtraucher-Unterkunft. Um auch Allergiker:innen einen unbeschwerten
-          Aufenthalt zu garantieren, sind Haustiere bei uns nicht gestattet. Vielen Dank für Eure
-          Rücksichtnahme.
-        </p>
-        <p className="leading-relaxed">
           Wir freuen uns über jede Gruppe, die zu uns passt. Was nicht zu uns passt: Event- oder
           reine Partynutzung. Übermäßiger Alkoholkonsum, laute Feiern, Verhalten, das die
           Nachbarschaft stört oder die Hütte in Mitleidenschaft zieht, kann im Zweifel zum Verweis
@@ -41,9 +36,10 @@ export default async function HausordnungPage() {
             <li>
               <strong>Kurkarte:</strong> Spätestens 14 Tage vorher füllt Ihr bitte den digitalen
               Meldeschein aus (Link per E-Mail von uns) — das ist gesetzlich vorgeschrieben
-              (Meldepflicht und Kurbeitrag der Stadt Winterberg, ab 16 Jahren). AVS schickt Euch
-              danach automatisch die fertigen Kurkarten zu; bringt sie zur Anreise mit, digital
-              reicht.
+              (Meldepflicht und Kurbeitrag der Stadt Winterberg, ab 16 Jahren). Danach schicken wir
+              Euch die fertigen Kurkarten als PDF zu, zusammen mit der Feuerwehr-Meldeliste — bitte
+              druckt beide aus und bringt sie zur Anreise mit. Kein eigener Drucker? Meldet Euch
+              einfach bei uns, dann druckt Toni Klauke die Kurkarten für Euch aus.
             </li>
             <li>
               <strong>Bettwäsche:</strong> Gestellt wird nur ein Kopfkissen. Selbst mitzubringen
@@ -103,6 +99,13 @@ export default async function HausordnungPage() {
               es jede Menge Stühle und Tische im Keller.
             </li>
             <li>
+              <strong>Feuerstelle:</strong> Nie unbeaufsichtigt lassen, ausreichend Wasser
+              griffbereit halten und die Glut vor dem Schlafengehen vollständig löschen. Bei
+              erhöhter Waldbrandgefahr (z. B. anhaltende Trockenheit) kann offenes Feuer behördlich
+              untersagt sein — im Zweifel vorher beim Hüttenwart oder dem Regionalforstamt Oberes
+              Sauerland (Tel. 02972 9702-35) nachfragen.
+            </li>
+            <li>
               <strong>Küche:</strong> Den Backofen bitte nur mit Backpapier benutzen.
             </li>
             <li>
@@ -156,7 +159,7 @@ export default async function HausordnungPage() {
               letzten Tag reicht das Feinprogramm mit Turbo — geht schneller.
             </li>
             <li>Backofen ausgewischt</li>
-            <li>Kühlschränke leer, Türen bitte offen lassen (gegen Schimmel und Gerüche)</li>
+            <li>Kühlschränke leer und ausgeschaltet, Türen bitte offen lassen (gegen Schimmel und Gerüche)</li>
             <li>Küchentücher zum Trocknen in der Küche aufgehängt</li>
             <li>Stühle und Tische von draußen wieder zurück in den Keller</li>
             <li>Grill gereinigt</li>
