@@ -123,15 +123,21 @@ export default async function HausordnungPage() {
           </ul>
         </Block>
 
-        <Block title="Vor der Abreise">
+        <Block title="Checkliste An &amp; Abreise">
+          <p className="font-semibold mb-1">Bei der Anreise</p>
+          <ul className="space-y-1.5">
+            <li>Betten beziehen</li>
+            <li>Feuerwehr-Meldeliste ausgefüllt aufhängen (siehe oben)</li>
+          </ul>
+
+          <p className="font-semibold mt-6 mb-1">Bei der Abreise</p>
           <p>
             Ist während Eures Aufenthalts etwas kaputtgegangen, sagt es dem Hüttenwart bitte vor
             der Schlüsselübergabe — Sachschäden protokollieren wir dann gemeinsam und stellen sie
             in Rechnung. Bei größerem Mehraufwand (Reinigung, Aufräumen, liegengebliebener Müll)
             behalten wir uns vor, einen entsprechenden Teil der Kaution einzubehalten.
           </p>
-          <p className="font-semibold mt-4 mb-1">Checkliste bei Abreise</p>
-          <p className="mt-0">So hinterlasst Ihr die Hütte am liebsten:</p>
+          <p className="mt-4 mb-1">So hinterlasst Ihr die Hütte am liebsten:</p>
           <ul className="space-y-1.5">
             <li>Besenrein, mit der Einrichtung zurück an ihrem ursprünglichen Platz</li>
             <li>Stühle bitte nicht auf die Tische hochstellen</li>
