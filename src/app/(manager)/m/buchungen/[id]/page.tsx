@@ -16,6 +16,7 @@ import { PersonsPriceEditor } from "./PersonsPriceEditor";
 import { ManagerMessage } from "./ManagerMessage";
 import { DepositHoldControl } from "./DepositHoldControl";
 import { InvoiceControl } from "./InvoiceControl";
+import { RebookControl } from "./RebookControl";
 import { getInvoiceForBooking } from "./invoice-actions";
 import { Kundenakte } from "./Kundenakte";
 import { findMailTemplateMeta } from "@/lib/automatic-mail-templates";
@@ -386,6 +387,7 @@ export default async function BookingDetail({ params }: Props) {
             )}
 
             <InvoiceControl bookingId={b.id} existing={existingInvoice} />
+            <RebookControl bookingId={b.id} bookingStatus={b.status} />
           </Section>
         </aside>
       </div>
