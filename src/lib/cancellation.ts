@@ -13,6 +13,7 @@
  */
 
 import type { Locale } from "@/lib/i18n-shared";
+import { CANCELLATION_TIERS as PRICING_TIERS } from "@/lib/pricing";
 
 export type CancellationTier = {
   daysBeforeArrival: number;
@@ -41,12 +42,17 @@ const TIER_LABELS: Record<Locale, [string, string, string, string]> = {
   ],
 };
 
-const buildTiers = (locale: Locale): CancellationTier[] => [
-  { daysBeforeArrival: 60, refundPercent: 100, label: TIER_LABELS[locale][0] },
-  { daysBeforeArrival: 31, refundPercent: 70, label: TIER_LABELS[locale][1] },
-  { daysBeforeArrival: 14, refundPercent: 50, label: TIER_LABELS[locale][2] },
-  { daysBeforeArrival: 0, refundPercent: 0, label: TIER_LABELS[locale][3] },
-];
+// Tage-Schwellen + Gebühren-Prozent kommen jetzt aus pricing.ts (einzige
+// Quelle der Wahrheit) statt hier von Hand dupliziert zu werden -- sonst
+// koennten beide Stellen bei einer kuenftigen Staffel-Aenderung
+// auseinanderlaufen. refundPercent ist einfach die Umkehrung von
+// PRICING_TIERS[i].percent (Gebuehr).
+const buildTiers = (locale: Locale): CancellationTier[] =>
+  PRICING_TIERS.map((t, i) => ({
+    daysBeforeArrival: t.minDaysBefore,
+    refundPercent: 100 - t.percent,
+    label: TIER_LABELS[locale][i],
+  }));
 
 /** Backwards-compatible Default-Export (DE). */
 export const CANCELLATION_TIERS: CancellationTier[] = buildTiers("de");
