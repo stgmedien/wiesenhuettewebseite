@@ -4,15 +4,25 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { CalendarClock, Loader2 } from "lucide-react";
 import { rebookBooking } from "./rebook-actions";
+import { AvailabilityCalendar } from "@/app/(public)/buchen/AvailabilityCalendar";
 
 type Props = {
   bookingId: string;
   bookingStatus: string;
+  bookedDates: string[];
+  cleaningDates: string[];
+  wartungDates: string[];
 };
 
 const NOT_REBOOKABLE = new Set(["storniert", "abgereist", "angereist"]);
 
-export function RebookControl({ bookingId, bookingStatus }: Props) {
+export function RebookControl({
+  bookingId,
+  bookingStatus,
+  bookedDates,
+  cleaningDates,
+  wartungDates,
+}: Props) {
   const [open, setOpen] = useState(false);
   const [newArrival, setNewArrival] = useState("");
   const [newDeparture, setNewDeparture] = useState("");
@@ -68,25 +78,18 @@ export function RebookControl({ bookingId, bookingStatus }: Props) {
         Bereits erhaltene Zahlungen wandern mit auf die neue Buchung.
       </p>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-        <label className="block">
-          <span className="block text-xs text-[var(--color-wh-fg-muted)] mb-1">Neue Anreise</span>
-          <input
-            type="date"
-            value={newArrival}
-            onChange={(e) => setNewArrival(e.target.value)}
-            className="w-full rounded-lg border border-[var(--color-wh-winter-grey)] bg-white px-3 py-2 text-sm focus:border-[var(--color-wh-deep-green)] focus:outline-none"
-          />
-        </label>
-        <label className="block">
-          <span className="block text-xs text-[var(--color-wh-fg-muted)] mb-1">Neue Abreise</span>
-          <input
-            type="date"
-            value={newDeparture}
-            onChange={(e) => setNewDeparture(e.target.value)}
-            className="w-full rounded-lg border border-[var(--color-wh-winter-grey)] bg-white px-3 py-2 text-sm focus:border-[var(--color-wh-deep-green)] focus:outline-none"
-          />
-        </label>
+      <div className="mb-3 rounded-lg border border-[var(--color-wh-winter-grey)] bg-white p-2">
+        <AvailabilityCalendar
+          bookedDates={bookedDates}
+          cleaningDates={cleaningDates}
+          wartungDates={wartungDates}
+          arrival={newArrival}
+          departure={newDeparture}
+          onSelect={(a, d) => {
+            setNewArrival(a);
+            setNewDeparture(d);
+          }}
+        />
       </div>
 
       <div className="space-y-2 mb-3">
