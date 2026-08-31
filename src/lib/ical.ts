@@ -109,7 +109,7 @@ export const buildBelegungIcs = ({
     const endD = isoToIcalDate(r.endExclusive);
     lines.push(
       "BEGIN:VEVENT",
-      `UID:wh-${startD}-${endD}@wiesenhuette.com`,
+      `UID:wh-${startD}-${endD}@wiesenhuette.de`,
       `DTSTAMP:${dtstamp}`,
       `DTSTART;VALUE=DATE:${startD}`,
       `DTEND;VALUE=DATE:${endD}`,
