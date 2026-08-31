@@ -17,6 +17,7 @@ import { ManagerMessage } from "./ManagerMessage";
 import { DepositHoldControl } from "./DepositHoldControl";
 import { InvoiceControl } from "./InvoiceControl";
 import { RebookControl } from "./RebookControl";
+import { getBookingBlocks } from "@/lib/availability";
 import { getInvoiceForBooking } from "./invoice-actions";
 import { Kundenakte } from "./Kundenakte";
 import { findMailTemplateMeta } from "@/lib/automatic-mail-templates";
@@ -39,7 +40,21 @@ export default async function BookingDetail({ params }: Props) {
   if (!b) notFound();
 
   // Alle Folge-Queries sind unabhaengig voneinander → parallel (Issue #86)
-  const [customerRows, pmts, bookingNotes, existingInvoice, avsSent, availableTemplates, mailHistory] =
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const horizon = new Date(today);
+  horizon.setDate(horizon.getDate() + 720); // ~2 Jahre, wie /buchen
+
+  const [
+    customerRows,
+    pmts,
+    bookingNotes,
+    existingInvoice,
+    avsSent,
+    availableTemplates,
+    mailHistory,
+    bookingBlocks,
+  ] =
     await Promise.all([
       b.customerId
         ? db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1)
@@ -89,6 +104,7 @@ export default async function BookingDetail({ params }: Props) {
         .from(emailLog)
         .where(eq(emailLog.bookingId, id))
         .orderBy(desc(emailLog.sentAt)),
+      getBookingBlocks(today, horizon),
     ]);
   const customer = customerRows[0] ?? null;
   const avsLastSentAt = avsSent[0] ? new Date(avsSent[0].sentAt).toLocaleString("de-DE") : null;
@@ -387,7 +403,13 @@ export default async function BookingDetail({ params }: Props) {
             )}
 
             <InvoiceControl bookingId={b.id} existing={existingInvoice} />
-            <RebookControl bookingId={b.id} bookingStatus={b.status} />
+            <RebookControl
+              bookingId={b.id}
+              bookingStatus={b.status}
+              bookedDates={Array.from(bookingBlocks.booked)}
+              cleaningDates={Array.from(bookingBlocks.cleaning)}
+              wartungDates={Array.from(bookingBlocks.wartung)}
+            />
           </Section>
         </aside>
       </div>
