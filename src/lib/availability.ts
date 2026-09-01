@@ -206,17 +206,50 @@ const getBookingBlocksRaw = unstable_cache(
  * Categorized blocking days between `from` and `to` (inclusive).
  * Used by the public booking calendar to render different shades.
  * Dünner Wrapper um die gecachte Roh-Variante: rekonstruiert die Sets.
+ *
+ * `excludeBookingId` blendet die eigenen Tage einer Buchung wieder frei —
+ * fürs Umbuchen-Tool: die alte Buchung besetzt bis zum Absenden noch ihren
+ * Zeitraum, der beim Auswählen des NEUEN Zeitraums aber nicht als belegt
+ * angezeigt werden soll (sie wird ja im selben Schritt storniert).
  */
 export const getBookingBlocks = async (
   from: Date | string,
-  to: Date | string
+  to: Date | string,
+  excludeBookingId?: string
 ): Promise<BookingBlocks> => {
   const raw = await getBookingBlocksRaw(toIso(from), toIso(to));
-  return {
-    booked: new Set(raw.booked),
-    cleaning: new Set(raw.cleaning),
-    wartung: new Set(raw.wartung),
-  };
+  const booked = new Set(raw.booked);
+  const cleaning = new Set(raw.cleaning);
+  const wartung = new Set(raw.wartung);
+
+  if (excludeBookingId) {
+    const found = await db
+      .select({ arrival: bookings.arrival, departure: bookings.departure, status: bookings.status })
+      .from(bookings)
+      .where(eq(bookings.id, excludeBookingId))
+      .limit(1);
+    const ex = found[0];
+    if (ex && ex.status !== "wartung") {
+      const settings = await getSiteSettings();
+      const start = new Date(toIso(ex.arrival));
+      const end = new Date(toIso(ex.departure));
+      const cur = new Date(start);
+      while (cur <= end) {
+        booked.delete(cur.toISOString().slice(0, 10));
+        cur.setDate(cur.getDate() + 1);
+      }
+      const c = new Date(end);
+      c.setDate(c.getDate() + 1);
+      const clEnd = new Date(c);
+      clEnd.setDate(clEnd.getDate() + settings.cleaningDaysAfterDeparture);
+      while (c < clEnd) {
+        cleaning.delete(c.toISOString().slice(0, 10));
+        c.setDate(c.getDate() + 1);
+      }
+    }
+  }
+
+  return { booked, cleaning, wartung };
 };
 
 /**

@@ -104,7 +104,7 @@ export default async function BookingDetail({ params }: Props) {
         .from(emailLog)
         .where(eq(emailLog.bookingId, id))
         .orderBy(desc(emailLog.sentAt)),
-      getBookingBlocks(today, horizon),
+      getBookingBlocks(today, horizon, id),
     ]);
   const customer = customerRows[0] ?? null;
   const avsLastSentAt = avsSent[0] ? new Date(avsSent[0].sentAt).toLocaleString("de-DE") : null;
