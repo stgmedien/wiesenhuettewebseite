@@ -25,6 +25,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { bookings, payments, activityLog, invoices } from "@/lib/db/schema";
 import { eq, and, ne } from "drizzle-orm";
+import { MANUAL_REST_MARKER } from "@/lib/payment-markers";
 import { auth } from "@/lib/auth";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { BOOKING_BLOCKS_TAG, isRangeAvailable } from "@/lib/availability";
@@ -225,6 +226,13 @@ export async function rebookBooking(raw: z.infer<typeof schema>): Promise<Rebook
         cleaningOptedIn: old.cleaningOptedIn,
         soloUse: old.soloUse,
         source: "Manuell",
+        // Self-Check-in-Link ist an den Gast gebunden, nicht an Datum/
+        // Personenzahl -- kann unveraendert weiterverwendet werden (siehe
+        // Kommentar an avsCheckinLink in schema.ts). Kurkarten-PDF und
+        // Feuerwehr-Meldeliste dagegen NICHT uebernehmen: die haengen an
+        // den konkreten (jetzt geaenderten) Anreise-/Personendaten und
+        // muessen fuer den neuen Zeitraum frisch erzeugt werden.
+        avsCheckinLink: old.avsCheckinLink,
         ...legacyCols,
         createdAt: newCreatedAt,
         internalNotes: `Umgebucht von ${old.bookingNumber} (ursprünglich ${formatDateLong(old.arrival)} – ${formatDateLong(old.departure)}), Modus: ${mode === "altvertrag" ? "Alt-Vertrag (Konditionen übernommen)" : "Neu-Vertrag (aktuelle Konditionen)"}.`,
@@ -239,6 +247,26 @@ export async function rebookBooking(raw: z.infer<typeof schema>): Promise<Rebook
       .update(payments)
       .set({ bookingId: newBookingId })
       .where(eq(payments.bookingId, old.id));
+
+    // Eine noch offene Altsystem-Restzahlung (siehe payment-markers.ts) traegt
+    // den ALTEN Betrag -- ohne Anpassung wuerde die T-21-Erinnerungsmail
+    // (daily-mail-jobs) spaeter den falschen (zu hohen/niedrigen) Betrag
+    // fuers neue Datum/Personenzahl verschicken. Neu berechnen: neue Summe
+    // (inkl. Kaution/Kurtaxe) minus bereits Bezahltes.
+    const newRemainderCents = Math.max(
+      0,
+      breakdown.subtotalCents + breakdown.depositCents + breakdown.kurtaxeCents - old.paidCents
+    );
+    await tx
+      .update(payments)
+      .set({ amountCents: newRemainderCents })
+      .where(
+        and(
+          eq(payments.bookingId, newBookingId),
+          eq(payments.method, MANUAL_REST_MARKER),
+          eq(payments.status, "offen")
+        )
+      );
 
     await tx.insert(activityLog).values([
       {
