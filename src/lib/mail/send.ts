@@ -19,14 +19,6 @@ const getTransporter = (): nodemailer.Transporter => {
     throw new Error("SMTP_HOST / SMTP_USER / SMTP_PASSWORD not set");
   }
 
-  // TEMP-DEBUG (siehe Mail-Ausfall-Untersuchung 04.09.2026): SMTP_USER
-  // maskiert geloggt, um zu sehen, welches Konto tatsaechlich authentifiziert
-  // -- Env-Var-Werte sind als "Secret" markiert und im Dashboard nicht mehr
-  // einsehbar. Vor Merge wieder entfernen.
-  console.log(
-    `[mail-debug] host=${host} port=${port} secure=${secure} user=${user.slice(0, 3)}***${user.slice(-8)}`
-  );
-
   transporter = nodemailer.createTransport({
     host,
     port,
@@ -77,7 +69,6 @@ export const sendMail = async (args: SendMailArgs): Promise<void> => {
   const text = await render(args.react, { plainText: true });
 
   const from = process.env.MAIL_FROM ?? "Wiesenhütte <noreply@wiesenhuette.de>";
-  console.log(`[mail-debug] from="${from}" template=${args.template}`); // TEMP-DEBUG, siehe getTransporter()
   // Standard-Antwortadresse: hello@ statt noreply@, damit Gästeantworten
   // tatsaechlich ankommen — ausser bei den obigen sicherheitsrelevanten
   // Vorlagen, und ausser der Aufrufer hat schon selbst eine gesetzt (z. B.
