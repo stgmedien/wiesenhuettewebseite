@@ -17,6 +17,7 @@ export type AnalyticsEvent =
   | "booking_step_contact" // Schritt „Kontaktdaten" erreicht
   | "booking_step_review" // Schritt „Uebersicht & Zahlung" erreicht
   | "booking_checkout_start" // Stripe-Checkout / Anfrage ausgeloest
+  | "booking_manual_transfer_created" // Selbstbedienungs-Buchung per klass. Ueberweisung angelegt
   | "booking_review_requested" // Privatfeier → Vorstands-Pruefung statt Zahlung
   | "booking_school_deferred" // Schulgruppe → Zahlung spaeter
   // Mitgliedschaft

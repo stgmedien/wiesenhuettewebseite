@@ -8,6 +8,7 @@ import { calculatePrice, formatEuro, RULES, type Persons } from "@/lib/pricing";
 import { toLocalIso, daysUntilLocalDate } from "@/lib/utils";
 import { daysUntil, getCancellationTier, getCancellationTiers } from "@/lib/cancellation";
 import { createBookingAndCheckout, previewDiscountAction } from "./actions";
+import { createManualTransferBooking, type ManualTransferResult } from "./manual-transfer-actions";
 import { track } from "@/lib/analytics";
 import { AvailabilityCalendar } from "./AvailabilityCalendar";
 
@@ -88,7 +89,7 @@ const BF_COPY = {
     steps: ["Zeitraum & Personen", "Anlass", "Kontakt", "Übersicht"],
     s0H: "Wann?",
     paymentMethodNote:
-      "Zahlung per Kredit-/Debitkarte (Stripe): Ihr zahlt die Anzahlung jetzt online, die Restzahlung inkl. Kaution und Kurtaxe wird 14 Tage vor Anreise automatisch von derselben Karte abgebucht — ohne dass Ihr Euch noch einmal einloggen müsst. Falls Euer Verein nur per Überweisung zahlen kann (z. B. reines Vereinskonto ohne Karte), meldet Euch bitte vorher bei uns unter hello@wiesenhuette.de — wir finden gemeinsam eine Lösung.",
+      "Zahlung per Kredit-/Debitkarte (Stripe): Ihr zahlt die Anzahlung jetzt online, die Restzahlung inkl. Kaution und Kurtaxe wird 14 Tage vor Anreise automatisch von derselben Karte abgebucht — ohne dass Ihr Euch noch einmal einloggen müsst. Vereine, Klassenfahrten und Schulfahrten (z. B. AG, SV) können bei Stripe auch per SEPA-Überweisung zahlen; wer stattdessen klassisch auf unser Vereinskonto überweisen möchte, findet diese Option am Ende der Buchung in der Übersicht.",
     s1H: "Wer kommt?",
     s1AnlassH: "Anlass",
     s2H: "Eure Daten",
@@ -168,6 +169,23 @@ const BF_COPY = {
     overview: "Übersicht",
     payNow: "Jetzt zahlen",
     redirecting: "Leite weiter ...",
+    manualTransferButton: "Per klassischer Überweisung buchen",
+    manualTransferSubmitting: "Buchung wird angelegt ...",
+    manualTransferOverviewNote:
+      "Vereine, Klassenfahrten und Schulfahrten (z. B. AG, SV) können bei Stripe automatisch auch per SEPA-Überweisung zahlen. Wer stattdessen klassisch auf unser Vereinskonto überweisen möchte, kann das hier direkt tun — ohne Rückfrage per Mail.",
+    manualTransferLeadTooShort:
+      "Klassische Überweisung ist ab 21 Tagen Vorlauf bis zur Anreise möglich — dafür ist es hier schon zu kurzfristig. Bitte nutzt stattdessen Stripe (auch per SEPA-Überweisung möglich).",
+    manualTransferConfirmTitle: "Buchung eingegangen!",
+    manualTransferConfirmIntro: "Eure Buchungsnummer:",
+    manualTransferConfirmBankTitle: "Bitte überweist die Anzahlung zeitnah auf folgendes Konto:",
+    manualTransferConfirmBank: "Bank",
+    manualTransferConfirmIban: "IBAN",
+    manualTransferConfirmKontoinhaber: "Kontoinhaber",
+    manualTransferConfirmVerwendungszweck: "Verwendungszweck",
+    manualTransferConfirmAnzahlung: "Anzahlung (jetzt zu überweisen)",
+    manualTransferConfirmRestzahlung: "Restzahlung (inkl. Kaution + Kurtaxe), fällig bis",
+    manualTransferConfirmReminderNote:
+      "Ihr müsst Euch um nichts weiter kümmern — wir schicken rechtzeitig vor der Frist automatisch eine Erinnerungsmail mit allen Daten erneut zu.",
     // Persons / pricing
     personsRange: (n: number, max: number) => `${n} Personen · Maximalbelegung ${max}.`,
     valDepartureMissing: "Bitte auch den Abreisetag im Kalender wählen.",
@@ -249,7 +267,7 @@ const BF_COPY = {
     steps: ["Dates & guests", "Purpose", "Contact", "Summary"],
     s0H: "When?",
     paymentMethodNote:
-      "Payment by credit/debit card (Stripe): you pay the deposit online now, and the remaining balance (incl. damage deposit and tourist tax) is charged automatically to the same card 14 days before arrival — no need to log in again. If your club can only pay by bank transfer (e.g. a club account with no card), please contact us beforehand at hello@wiesenhuette.de — we'll find a solution together.",
+      "Payment by credit/debit card (Stripe): you pay the deposit online now, and the remaining balance (incl. damage deposit and tourist tax) is charged automatically to the same card 14 days before arrival — no need to log in again. Clubs, class trips and school trips (e.g. clubs/societies) can also pay via SEPA bank transfer through Stripe; if you'd rather transfer directly to our club account, you'll find that option at the end of the booking, in the summary.",
     s1H: "Who's coming?",
     s1AnlassH: "Purpose",
     s2H: "Your details",
@@ -329,6 +347,23 @@ const BF_COPY = {
     overview: "Summary",
     payNow: "Pay now",
     redirecting: "Redirecting ...",
+    manualTransferButton: "Book via classic bank transfer",
+    manualTransferSubmitting: "Creating booking ...",
+    manualTransferOverviewNote:
+      "Clubs, class trips and school trips (e.g. clubs/societies) can also pay Stripe via SEPA bank transfer automatically. If you'd rather transfer directly to our club account, you can do that right here — no need to email us first.",
+    manualTransferLeadTooShort:
+      "Classic bank transfer is available from 21 days before arrival — this booking is too short-notice for that. Please use Stripe instead (SEPA transfer is also available there).",
+    manualTransferConfirmTitle: "Booking received!",
+    manualTransferConfirmIntro: "Your booking number:",
+    manualTransferConfirmBankTitle: "Please transfer the deposit soon to this account:",
+    manualTransferConfirmBank: "Bank",
+    manualTransferConfirmIban: "IBAN",
+    manualTransferConfirmKontoinhaber: "Account holder",
+    manualTransferConfirmVerwendungszweck: "Reference",
+    manualTransferConfirmAnzahlung: "Deposit (transfer now)",
+    manualTransferConfirmRestzahlung: "Remaining balance (incl. deposit & tourist tax), due by",
+    manualTransferConfirmReminderNote:
+      "You don't need to do anything else — we'll automatically send a reminder email with all the details again before the deadline.",
     personsRange: (n: number, max: number) => `${n} guests · maximum ${max}.`,
     valDepartureMissing: "Please also pick the departure day in the calendar.",
     valMinNights: "Minimum stay: 2 nights — please pick a later departure day.",
@@ -406,7 +441,7 @@ const BF_COPY = {
     steps: ["Periode & personen", "Aanleiding", "Contact", "Overzicht"],
     s0H: "Wanneer?",
     paymentMethodNote:
-      "Betaling per krediet-/debitkaart (Stripe): je betaalt de aanbetaling nu online, het resterende bedrag (incl. borg en toeristenbelasting) wordt 14 dagen vóór aankomst automatisch van dezelfde kaart afgeschreven — je hoeft niet opnieuw in te loggen. Kan jouw vereniging alleen per overschrijving betalen (bijv. een verenigingsrekening zonder kaart)? Neem dan vooraf contact met ons op via hello@wiesenhuette.de — samen vinden we een oplossing.",
+      "Betaling per krediet-/debitkaart (Stripe): je betaalt de aanbetaling nu online, het resterende bedrag (incl. borg en toeristenbelasting) wordt 14 dagen vóór aankomst automatisch van dezelfde kaart afgeschreven — je hoeft niet opnieuw in te loggen. Verenigingen, klassenreizen en schoolreizen (bijv. AG, SV) kunnen bij Stripe ook per SEPA-overschrijving betalen; wil je liever rechtstreeks naar onze verenigingsrekening overschrijven, dan vind je die optie aan het einde van de boeking, in het overzicht.",
     s1H: "Wie komt er?",
     s1AnlassH: "Aanleiding",
     s2H: "Jullie gegevens",
@@ -486,6 +521,23 @@ const BF_COPY = {
     overview: "Overzicht",
     payNow: "Nu betalen",
     redirecting: "Doorsturen ...",
+    manualTransferButton: "Boeken via klassieke overschrijving",
+    manualTransferSubmitting: "Boeking wordt aangemaakt ...",
+    manualTransferOverviewNote:
+      "Verenigingen, klassenreizen en schoolreizen (bijv. AG, SV) kunnen bij Stripe ook automatisch per SEPA-overschrijving betalen. Wil je liever rechtstreeks naar onze verenigingsrekening overschrijven, dan kan dat hier direct — zonder eerst te mailen.",
+    manualTransferLeadTooShort:
+      "Klassieke overschrijving is mogelijk vanaf 21 dagen vóór aankomst — dat is hier al te kort dag. Gebruik in dat geval Stripe (SEPA-overschrijving is daar ook mogelijk).",
+    manualTransferConfirmTitle: "Boeking ontvangen!",
+    manualTransferConfirmIntro: "Je boekingsnummer:",
+    manualTransferConfirmBankTitle: "Maak de aanbetaling binnenkort over naar deze rekening:",
+    manualTransferConfirmBank: "Bank",
+    manualTransferConfirmIban: "IBAN",
+    manualTransferConfirmKontoinhaber: "Rekeninghouder",
+    manualTransferConfirmVerwendungszweck: "Omschrijving",
+    manualTransferConfirmAnzahlung: "Aanbetaling (nu over te maken)",
+    manualTransferConfirmRestzahlung: "Resterend bedrag (incl. borg & toeristenbelasting), verschuldigd vóór",
+    manualTransferConfirmReminderNote:
+      "Je hoeft verder niets te doen — we sturen op tijd vóór de deadline automatisch nogmaals een herinneringsmail met alle gegevens.",
     personsRange: (n: number, max: number) => `${n} personen · maximaal ${max}.`,
     valDepartureMissing: "Kies ook de vertrekdag in de kalender.",
     valMinNights: "Minimaal 2 nachten — kies een latere vertrekdag.",
@@ -627,6 +679,13 @@ export const BookingFlow = ({
   const [submitting, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
+  const [manualTransferSubmitting, startManualTransferTransition] = useTransition();
+  const [manualTransferError, setManualTransferError] = useState<string | null>(null);
+  const [manualTransferSuccess, setManualTransferSuccess] = useState<Extract<
+    ManualTransferResult,
+    { ok: true }
+  > | null>(null);
+
   const blockedSet = useMemo(() => new Set(blockedDates), [blockedDates]);
 
   const totalPersons =
@@ -693,6 +752,14 @@ export const BookingFlow = ({
   const fullPaymentRequired = !!arrival && daysUntilLocalDate(arrival) < 14;
   const prepayPercent = isSchoolPurpose ? 10 : 50;
 
+  // Klassische Ueberweisung (Selbstbedienung) -- nur fuer klasse/schul/verein,
+  // NICHT firma (siehe manual-transfer-actions.ts, MANUAL_TRANSFER_PURPOSES).
+  // Mindestvorlauf 21 Tage, sonst laege die dort kommunizierte T-14-Frist
+  // schon in der Vergangenheit.
+  const manualTransferEligible =
+    purposeCategory === "klasse" || purposeCategory === "schul" || purposeCategory === "verein";
+  const manualTransferLeadOk = !!arrival && daysUntilLocalDate(arrival) >= 21;
+
   // Feld-Validität (für Inline-Fehler in Schritt 2).
   const firstNameValid = firstName.trim().length > 0;
   const lastNameValid = lastName.trim().length > 0;
@@ -746,6 +813,47 @@ export const BookingFlow = ({
         });
         window.location.href = res.checkoutUrl;
       }
+    });
+  };
+
+  // Klassische Ueberweisung: kein Redirect -- schliesst synchron mit einem
+  // Klick ab, Erfolg wird lokal als Bestaetigungs-Panel angezeigt.
+  const submitManualTransfer = () => {
+    setManualTransferError(null);
+    startManualTransferTransition(async () => {
+      const res = await createManualTransferBooking({
+        arrival,
+        departure,
+        persons,
+        soloUse,
+        customerType,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: email.trim().toLowerCase(),
+        phone: phone.trim(),
+        company: company.trim() || null,
+        institution: institution.trim() || null,
+        street: street.trim() || null,
+        zip: zip.trim() || null,
+        city: city.trim() || null,
+        purpose: composePurpose(purposeCategory, tt) ?? "",
+        purposeCategory: (purposeCategory || undefined) as PurposeKey | undefined,
+        customerMessage: customerMessage.trim() || null,
+        discountCode:
+          discountState.status === "valid" ? discountState.code : discountCode.trim() || null,
+        acceptedTerms: true,
+        locale,
+      });
+      if (!res.ok) {
+        setManualTransferError(res.error);
+        return;
+      }
+      track("booking_manual_transfer_created", {
+        nights: breakdown?.nights,
+        total: breakdown ? Math.round(breakdown.subtotalCents / 100) : null,
+        purpose: purposeCategory || null,
+      });
+      setManualTransferSuccess(res);
     });
   };
 
@@ -1050,7 +1158,7 @@ export const BookingFlow = ({
           </div>
         )}
 
-        {step === 3 && breakdown && (
+        {step === 3 && breakdown && !manualTransferSuccess && (
           <div className="mt-8 space-y-6">
             <h3 className="text-[22px] sm:text-[24px] m-0">{tt.s3H}</h3>
             <ReviewBlock
@@ -1129,6 +1237,38 @@ export const BookingFlow = ({
                 {error}
               </div>
             )}
+
+            {manualTransferEligible && (
+              <div className="rounded-[var(--radius-card)] bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)] p-5 text-sm space-y-3">
+                <p className="m-0 text-[var(--color-wh-fg-muted)]">{tt.manualTransferOverviewNote}</p>
+                {manualTransferLeadOk ? (
+                  <>
+                    {manualTransferError && (
+                      <div className="bg-[var(--color-wh-sunset)]/10 text-[var(--color-wh-sunset)] rounded-[var(--radius-md)] p-3 text-sm font-medium">
+                        {manualTransferError}
+                      </div>
+                    )}
+                    <Button
+                      variant="secondary"
+                      onClick={submitManualTransfer}
+                      disabled={manualTransferSubmitting}
+                      iconRight={
+                        manualTransferSubmitting ? (
+                          <Loader2 className="animate-spin" size={18} />
+                        ) : undefined
+                      }
+                    >
+                      {manualTransferSubmitting ? tt.manualTransferSubmitting : tt.manualTransferButton}
+                    </Button>
+                  </>
+                ) : (
+                  <p className="m-0 text-[var(--color-wh-fg-muted)] italic">
+                    {tt.manualTransferLeadTooShort}
+                  </p>
+                )}
+              </div>
+            )}
+
             <div className="flex flex-col sm:flex-row justify-between gap-3 pt-2">
               <Button
                 variant="secondary"
@@ -1158,6 +1298,13 @@ export const BookingFlow = ({
                 })()}
               </Button>
             </div>
+          </div>
+        )}
+
+        {step === 3 && manualTransferSuccess && (
+          <div className="mt-8 space-y-6">
+            <h3 className="text-[22px] sm:text-[24px] m-0">{tt.manualTransferConfirmTitle}</h3>
+            <ManualTransferConfirmationPanel result={manualTransferSuccess} tt={tt} locale={locale} />
           </div>
         )}
       </div>
@@ -1612,6 +1759,39 @@ const ReviewBlock = ({
       </div>
       <div className="text-[var(--color-wh-fg-muted)]">{email}</div>
     </div>
+  </div>
+);
+
+const ManualTransferConfirmationPanel = ({
+  result,
+  tt,
+  locale,
+}: {
+  result: Extract<ManualTransferResult, { ok: true }>;
+  tt: BfCopy;
+  locale: "de" | "en" | "nl";
+}) => (
+  <div className="rounded-[var(--radius-card)] bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)] p-5 text-sm text-[var(--color-wh-black)] space-y-4">
+    <p className="m-0 font-semibold text-base">
+      {tt.manualTransferConfirmIntro} <span className="font-mono">{result.bookingNumber}</span>
+    </p>
+    <div>
+      <p className="m-0 mb-2">{tt.manualTransferConfirmBankTitle}</p>
+      <div className="bg-[var(--color-wh-snow)] border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-md)] p-3 font-mono text-sm space-y-1">
+        <div>{tt.manualTransferConfirmBank}: {result.bank}</div>
+        <div>{tt.manualTransferConfirmIban}: {result.iban}</div>
+        <div>{tt.manualTransferConfirmKontoinhaber}: {result.kontoinhaber}</div>
+        <div>{tt.manualTransferConfirmVerwendungszweck}: {result.bookingNumber}</div>
+      </div>
+    </div>
+    <p className="m-0">
+      <strong>{formatEuro(result.anzahlungCents, locale)}</strong> — {tt.manualTransferConfirmAnzahlung}
+    </p>
+    <p className="m-0">
+      <strong>{formatEuro(result.restzahlungCents, locale)}</strong> —{" "}
+      {tt.manualTransferConfirmRestzahlung} {result.restzahlungDeadlineIso}
+    </p>
+    <p className="m-0 text-[var(--color-wh-fg-muted)]">{tt.manualTransferConfirmReminderNote}</p>
   </div>
 );
 
