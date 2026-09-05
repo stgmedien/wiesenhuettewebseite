@@ -10,6 +10,7 @@ import {
   Text,
   Hr,
 } from "@react-email/components";
+import { CLUB_BANK_DETAILS } from "@/lib/bank-details";
 
 type Props = {
   firstName: string;
@@ -23,6 +24,13 @@ type Props = {
   deadline: string;
   /** Zuletzt gespeicherter AVS-SelfCheck-in-Link, falls schon einer verschickt wurde. */
   avsCheckinLink?: string | null;
+  /**
+   * Tatsaechlich gezahlte/offene Anzahlung dieser Buchung, falls eine eigene
+   * anzahlung-Payment-Zeile existiert (z.B. Selbstbedienungs-Ueberweisungs-
+   * Buchung). Fehlt sie, war es ein alter, pauschaler 100€-Alt-Vertrag ohne
+   * eigene Zeile -- dann bleibt der bisherige feste Text erhalten.
+   */
+  prepaymentCents?: number | null;
 };
 
 const main = { backgroundColor: "#F7F7F2", padding: "40px 0" };
@@ -82,6 +90,7 @@ export default function RestzahlungRequestEmail({
   depositCents,
   deadline,
   avsCheckinLink,
+  prepaymentCents,
 }: Props) {
   return (
     <Html>
@@ -110,7 +119,8 @@ export default function RestzahlungRequestEmail({
               Offener Betrag: <strong>{eur(remainderCents)}</strong>
               <br />
               <span style={{ fontSize: "13px", color: "#5b5b56" }}>
-                inkl. {eur(depositCents)} Kaution · Eure Anzahlung von 100,00 € ist bereits
+                inkl. {eur(depositCents)} Kaution · Eure Anzahlung von{" "}
+                {prepaymentCents != null ? eur(prepaymentCents) : "100,00 €"} ist bereits
                 verrechnet.
               </span>
             </Text>
@@ -129,11 +139,11 @@ export default function RestzahlungRequestEmail({
             }}
           >
             <Text style={{ ...text, margin: 0 }}>
-              Sparkasse Gütersloh
+              {CLUB_BANK_DETAILS.bank}
               <br />
-              IBAN: DE13 4785 0065 0008 0013 31
+              IBAN: {CLUB_BANK_DETAILS.iban}
               <br />
-              Kontoinhaber: Skifreunde Gütersloh e.V.
+              Kontoinhaber: {CLUB_BANK_DETAILS.kontoinhaber}
               <br />
               Verwendungszweck: {bookingNumber}
             </Text>

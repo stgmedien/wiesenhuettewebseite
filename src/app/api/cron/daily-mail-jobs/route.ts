@@ -539,6 +539,16 @@ export async function GET(req: Request) {
     try {
       const deadlineDate = new Date(`${b.arrival}T00:00:00`);
       deadlineDate.setDate(deadlineDate.getDate() - 14);
+      // Echte Anzahlung-Zeile? (z.B. Selbstbedienungs-Ueberweisungs-Buchung
+      // mit berechneter Anzahlung) -- sonst faellt das Template auf den
+      // festen "100,00 €"-Text der alten Pauschal-Altvertraege zurueck.
+      const anzahlungRow = (
+        await db
+          .select({ amountCents: payments.amountCents })
+          .from(payments)
+          .where(and(eq(payments.bookingId, b.id), eq(payments.kind, "anzahlung")))
+          .limit(1)
+      )[0];
       await sendMail({
         to: customer.email,
         subject: `Restzahlung Eurer Wiesenhütten-Buchung ${b.bookingNumber}`,
@@ -554,6 +564,7 @@ export async function GET(req: Request) {
           depositCents: b.depositCents,
           deadline: formatDateLong(deadlineDate.toISOString().slice(0, 10)),
           avsCheckinLink: b.avsCheckinLink,
+          prepaymentCents: anzahlungRow?.amountCents ?? null,
         }),
       });
       // Marker entschärfen → kein erneuter Versand (zusätzlich zur alreadySent-Idempotenz).
