@@ -105,7 +105,9 @@ export const PRICES = {
   pupilCents: 600,             // 6,00 € — Kinder/Schüler bis 16 J. · Vereinsmitglied (−50 %)
 
   // Pauschalen
-  energyFlatPerNightCents: 2200,      // 22,00 € pro Nacht (gesamt)
+  // 30,00 € pro Nacht (gesamt) — nur in den Wintermonaten (Vorstandsbeschluss
+  // 09/2026, siehe calculatePrice() fuer die Saison-Logik).
+  energyFlatPerNightCents: 3000,
   cleaningCents: 19000,               // 190,00 € einmalig (PFLICHT)
   soloSurchargeCents: 5000,           // 50,00 € Aufschlag bei Allein-/Exklusivnutzung
   depositCents: 30000,                // 300,00 € Kaution (Erstattung in 14 Tagen)
@@ -283,9 +285,21 @@ export const calculatePrice = (input: PriceInput): PriceBreakdown => {
     p.children * childCents * nights +
     p.pupils * pupilCents * nights;
 
-  // Energie ist seit 2026 in den Übernachtungspreisen enthalten — keine separate
-  // Pauschale mehr. Feld bleibt (=0) für persistierte Bestandsbuchungen erhalten.
-  const energyFlatCents = 0;
+  // Energie-Zuschlag Winter (Vorstandsbeschluss 09/2026): 30,00 €/Nacht in den
+  // Wintermonaten Oktober-Maerz, fuer den GESAMTEN Aufenthalt sobald der
+  // Anreisetag in diesem Zeitraum liegt — keine Teil-Verrechnung bei
+  // Aufenthalten ueber die Grenze hinweg. Anreise-basiert wie die
+  // DB-Saison-Aufloesung fuer Tarife (siehe resolveActiveSeason() in
+  // pricing-tariffs.ts), hier aber bewusst als fester Code-Zeitraum statt
+  // DB-Saison, weil kein weiterer saisonaler Preis daran haengt.
+  const arrivalMonthDay =
+    typeof input.arrival === "string"
+      ? input.arrival.slice(5, 10)
+      : `${String(input.arrival.getMonth() + 1).padStart(2, "0")}-${String(
+          input.arrival.getDate()
+        ).padStart(2, "0")}`;
+  const isEnergySurchargeSeason = arrivalMonthDay >= "10-01" || arrivalMonthDay <= "03-31";
+  const energyFlatCents = isEnergySurchargeSeason ? PRICES.energyFlatPerNightCents * nights : 0;
   const cleaningCents = PRICES.cleaningCents; // Pflicht
   const soloSurchargeCents = input.soloUse ? PRICES.soloSurchargeCents : 0;
   const extrasCents = (input.extras ?? []).reduce((acc, e) => acc + e.totalCents, 0);
@@ -313,6 +327,7 @@ export const calculatePrice = (input: PriceInput): PriceBreakdown => {
 
   const subtotalCents =
     accommodationCents +
+    energyFlatCents +
     cleaningCents +
     soloSurchargeCents +
     minOccupancySurchargeCents +
@@ -369,6 +384,15 @@ export const calculatePrice = (input: PriceInput): PriceBreakdown => {
       qty: p.pupils * nights,
       unitCents: pupilCents,
       totalCents: p.pupils * pupilCents * nights,
+    });
+  }
+  if (energyFlatCents > 0) {
+    lines.push({
+      label: L.energyFlat,
+      detail: L.detailNightsAt(nights, formatEuro(PRICES.energyFlatPerNightCents, input.locale)),
+      qty: nights,
+      unitCents: PRICES.energyFlatPerNightCents,
+      totalCents: energyFlatCents,
     });
   }
   lines.push({
