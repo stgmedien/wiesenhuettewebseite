@@ -74,6 +74,9 @@ export default function ManualBookingForm() {
       </div>
 
       <Input id="purpose" name="purpose" label="Anlass (optional)" />
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" name="schoolTrip" className="w-4 h-4 accent-[var(--color-wh-deep-green)]" /> Klassen-/Schulfahrt — 10&nbsp;% statt 50&nbsp;% Anzahlung
+      </label>
       <Textarea id="internalNotes" name="internalNotes" label="Interne Notizen (nicht an den Gast)" />
 
       {error && (

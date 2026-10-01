@@ -10,6 +10,7 @@ import { auth } from "@/lib/auth";
 import { generateBookingNumber } from "@/lib/utils";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { BOOKING_BLOCKS_TAG } from "@/lib/availability";
+import { isSchoolPurposeLabel } from "@/lib/school-deposit";
 
 const schema = z.object({
   arrival: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -21,6 +22,7 @@ const schema = z.object({
   teachers: z.coerce.number().int().min(0).default(0),
   soloUse: z.coerce.boolean().default(false),
   skipCleaningBuffer: z.coerce.boolean().default(false),
+  schoolTrip: z.coerce.boolean().default(false),
   customerType: z.enum(["privat", "mitglied", "verein", "firma"]).default("privat"),
   firstName: z.string().min(1).max(120),
   lastName: z.string().min(1).max(120),
@@ -44,7 +46,7 @@ export async function createManualBooking(formData: FormData): Promise<{ ok: boo
 
   const raw: Record<string, unknown> = {};
   formData.forEach((v, k) => {
-    if (k === "soloUse" || k === "skipCleaningBuffer") {
+    if (k === "soloUse" || k === "skipCleaningBuffer" || k === "schoolTrip") {
       raw[k] = v === "on" || v === "true";
     } else {
       raw[k] = v;
@@ -111,6 +113,17 @@ export async function createManualBooking(formData: FormData): Promise<{ ok: boo
     customerId = ins[0].id;
   }
 
+  // Option "Klassen-/Schulfahrt": Die Anzahlungs-Quote (10 % statt 50 %) wird
+  // am Anlass-Text erkannt (prepayPercentForPurpose) — eine eigene Spalte gibt
+  // es dafuer nicht. Deshalb das Label voranstellen, falls es noch fehlt.
+  const purposeText = d.purpose?.trim() || null;
+  const purpose =
+    d.schoolTrip && !isSchoolPurposeLabel(purposeText)
+      ? purposeText
+        ? `Klassenfahrt · ${purposeText}`
+        : "Klassenfahrt"
+      : purposeText;
+
   const bookingNumber = generateBookingNumber();
   const totalPersons =
     persons.adults + persons.members + persons.children + persons.pupils + persons.teachers;
@@ -130,7 +143,7 @@ export async function createManualBooking(formData: FormData): Promise<{ ok: boo
       pupils: persons.pupils,
       teachers: persons.teachers,
       persons: totalPersons,
-      purpose: d.purpose ?? null,
+      purpose,
       accommodationCents: breakdown.accommodationCents,
       kurtaxeCents: breakdown.kurtaxeCents,
       energyFlatCents: breakdown.energyFlatCents,
