@@ -8,7 +8,7 @@ type Props = {
   departure: string;
   persons: number;
   nights: number;
-  prepaymentEuroLabel: string; // 50 % Anzahlung, bereits formatiert
+  prepaymentEuroLabel: string; // 10 % Anzahlung, bereits formatiert
   depositDueDateLabel: string; // wann die Anzahlung faellig wird (A-30, formatiert)
 };
 
@@ -79,7 +79,7 @@ export default function SchoolBookingReceivedEmail({
             <Text style={{ ...text, fontWeight: 600, margin: "4px 0 12px" }}>
               {arrival} bis {departure} · {nights} Nächte · {persons} Personen
             </Text>
-            <Text style={{ ...muted, margin: 0 }}>Anzahlung (50 %)</Text>
+            <Text style={{ ...muted, margin: 0 }}>Anzahlung (10 %)</Text>
             <Text style={{ ...text, fontWeight: 600, margin: "4px 0 0" }}>{prepaymentEuroLabel}</Text>
           </Section>
 

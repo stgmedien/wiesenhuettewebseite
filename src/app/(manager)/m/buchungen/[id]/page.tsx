@@ -21,6 +21,7 @@ import { getBookingBlocks } from "@/lib/availability";
 import { getInvoiceForBooking } from "./invoice-actions";
 import { Kundenakte } from "./Kundenakte";
 import { findMailTemplateMeta } from "@/lib/automatic-mail-templates";
+import { SENSITIVE_TEMPLATES } from "@/lib/mail/send";
 import { CustomerContactForm } from "./CustomerContactForm";
 import { ResendMailsButton } from "./ResendMailsButton";
 import { ResendWelcomeButton } from "./ResendWelcomeButton";
@@ -473,10 +474,17 @@ export default async function BookingDetail({ params }: Props) {
                           >
                             Öffnen
                           </a>
+                        ) : SENSITIVE_TEMPLATES.has(m.template) ? (
+                          <span
+                            className="text-xs text-[var(--color-wh-fg-muted)] italic"
+                            title="Die Mail wurde normal verschickt. Der Inhalt wird aus Sicherheitsgründen nicht gespeichert, weil er einen Login-Link enthält."
+                          >
+                            Login-Mail — Inhalt nicht gespeichert
+                          </span>
                         ) : (
                           <span
                             className="text-xs text-[var(--color-wh-fg-muted)] italic"
-                            title="Verschickt vor Einführung dieser Funktion oder aus Sicherheitsgründen ausgeschlossen (z. B. Login-Mails) — kein Inhalt gespeichert."
+                            title="Verschickt vor Einführung dieser Funktion — kein Inhalt gespeichert."
                           >
                             kein Inhalt
                           </span>

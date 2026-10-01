@@ -53,6 +53,28 @@ const BASE_URL =
 export const schoolPrepaymentCents = (subtotalCents: number): number =>
   Math.round((subtotalCents * 10) / 100);
 
+// Das DB-Feld `purpose` enthaelt nur das (lokalisierte) Anlass-Label aus dem
+// Buchungsflow bzw. Freitext aus der manuellen Buchung — die Kategorie selbst
+// wird nicht gespeichert. Fuer Buchungen OHNE anzahlung-Payment-Zeile (manuell
+// angelegt, Checkout gescheitert) wird der Schul-Anlass deshalb hierueber erkannt.
+const SCHOOL_PURPOSE_LABELS = [
+  "klassenfahrt",
+  "schulfahrt",
+  "class trip",
+  "school trip",
+  "klassenreis",
+  "schoolreis",
+];
+
+export const isSchoolPurposeLabel = (purpose?: string | null): boolean => {
+  const p = purpose?.trim().toLowerCase();
+  return !!p && SCHOOL_PURPOSE_LABELS.some((label) => p.includes(label));
+};
+
+/** Anzahlungs-Anteil in % fuer eine gespeicherte Buchung: Schulgruppen 10, sonst 50. */
+export const prepayPercentForPurpose = (purpose?: string | null): number =>
+  isSchoolPurposeLabel(purpose) ? 10 : 50;
+
 /**
  * Stripe-expires_at fuer den Anzahlungs-Link: bis zum Auto-Storno-Tag (A-16),
  * begrenzt auf Stripes erlaubtes Fenster [jetzt+1 h, jetzt+30 Tage].

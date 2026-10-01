@@ -6,7 +6,7 @@ type Props = {
   institution: string;
   arrival: string;
   departure: string;
-  prepaymentEuroLabel: string; // 50 % Anzahlung, bereits formatiert
+  prepaymentEuroLabel: string; // 10 % Anzahlung, bereits formatiert
   checkoutUrl: string;
   deadlineLabel: string; // Zahlungsfrist (A-16, formatiert)
 };
