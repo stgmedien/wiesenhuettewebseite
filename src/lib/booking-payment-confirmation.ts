@@ -25,7 +25,7 @@ import { HUETTENWART_EMAIL, HUETTENWART_CC } from "@/lib/huettenwart";
 import { buildIcalInvite } from "@/lib/mail/ical";
 import { formatDateLong } from "@/lib/utils";
 import { createInvoiceForBooking } from "@/lib/invoice";
-import { prepayPercentForPurpose } from "@/lib/school-deposit";
+import { prepayPercentForBooking } from "@/lib/school-deposit";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.wiesenhuette.de";
 
@@ -51,11 +51,11 @@ export function buildBookingConfirmedEmailProps(params: {
   const subtotal = booking.subtotalCents;
   const firstPayment = pmtRows.find((p) => p.kind === "anzahlung" || p.kind === "vollzahlung");
   const restRow = pmtRows.find((p) => p.kind === "restzahlung");
-  // Ohne anzahlung-Zeile (manuelle Buchung, gescheiterter Checkout) nach Anlass
-  // rechnen — Schul-/Klassenfahrten zahlen 10 %, nicht die 50 % des Standardflows.
+  // Ohne anzahlung-Zeile (manuelle Buchung, gescheiterter Checkout): im Manager
+  // festgelegte Quote, sonst nach Anlass (Schul-/Klassenfahrt 10 %, sonst 50 %).
   const prepayment =
     firstPayment?.amountCents ??
-    Math.round((subtotal * prepayPercentForPurpose(booking.purpose)) / 100);
+    Math.round((subtotal * prepayPercentForBooking(booking)) / 100);
   const remainder = restRow?.amountCents ?? subtotal - prepayment;
   return {
     bookingNumber: booking.bookingNumber,

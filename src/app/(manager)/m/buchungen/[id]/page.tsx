@@ -22,6 +22,8 @@ import { getInvoiceForBooking } from "./invoice-actions";
 import { Kundenakte } from "./Kundenakte";
 import { findMailTemplateMeta } from "@/lib/automatic-mail-templates";
 import { SENSITIVE_TEMPLATES } from "@/lib/mail/send";
+import { PREPAY_PERCENT_OPTIONS, prepayPercentForBooking } from "@/lib/school-deposit";
+import { PrepayPercentSelect } from "./PrepayPercentSelect";
 import { CustomerContactForm } from "./CustomerContactForm";
 import { ResendMailsButton } from "./ResendMailsButton";
 import { ResendWelcomeButton } from "./ResendWelcomeButton";
@@ -356,6 +358,19 @@ export default async function BookingDetail({ params }: Props) {
               <span>Gesamt</span>
               <span className="text-[var(--color-wh-deep-green)]">
                 {formatEuro(b.subtotalCents + b.depositCents + b.kurtaxeCents)}
+              </span>
+            </div>
+            <div className="flex justify-between items-center gap-3 text-sm mt-3">
+              <span className="flex items-center gap-2">
+                Anzahlung
+                <PrepayPercentSelect
+                  bookingId={b.id}
+                  current={prepayPercentForBooking(b)}
+                  options={PREPAY_PERCENT_OPTIONS}
+                />
+              </span>
+              <span>
+                {formatEuro(Math.round((b.subtotalCents * prepayPercentForBooking(b)) / 100))}
               </span>
             </div>
             <div className="flex justify-between text-sm mt-3">

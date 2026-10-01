@@ -254,6 +254,11 @@ export const bookings = pgTable(
     //    T-16 wenn unbezahlt. Nach Zahlung laeuft die normale Restzahlungs-
     //    Pipeline (T-14 Off-Session) wie gehabt.
     paymentMode: varchar("payment_mode", { length: 20 }).notNull().default("standard"),
+    // Vom Vorstand im Manager festgelegte Anzahlungsquote in % (z. B. 10 statt
+    // 50). null = Standard (Schul-/Klassenfahrt 10 %, sonst 50 %). Bestimmt nur
+    // den in Mails ausgewiesenen Anzahlungsbetrag, solange keine anzahlung-
+    // Payment-Zeile existiert (die hat immer Vorrang).
+    prepayPercent: integer("prepay_percent"),
     // Vorstands-Pruefung vor Stripe-Checkout (Phase B). Greift, wenn der
     // Gast als Anlass "Private Feier" gewaehlt hat. Stripe-Session wird
     // dann erst nach Freigabe erzeugt.
