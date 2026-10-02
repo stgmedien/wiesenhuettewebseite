@@ -23,7 +23,12 @@ import { db } from "@/lib/db";
 import { bookings, payments } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { stripe } from "@/lib/stripe";
-import { getOrCreateStripeCustomer, BANK_TRANSFER_PM_OPTIONS } from "@/lib/stripe-bank-transfer";
+import {
+  getOrCreateStripeCustomer,
+  BANK_TRANSFER_PM_OPTIONS,
+  isBankTransferActive,
+  bankTransferPmTypes,
+} from "@/lib/stripe-bank-transfer";
 
 export type BookingRow = typeof bookings.$inferSelect;
 
@@ -110,9 +115,11 @@ export async function getOrCreateDepositCheckout(
   let session;
   try {
     const stripeCustomerId = await getOrCreateStripeCustomer(customerEmail);
+    // Capability-Gate: Überweisung nur, wenn in Stripe freigeschaltet.
+    const btActive = await isBankTransferActive();
     session = await stripe.checkout.sessions.create({
       mode: "payment",
-      payment_method_types: ["card", "customer_balance"],
+      payment_method_types: bankTransferPmTypes(btActive),
       locale: "de",
       customer: stripeCustomerId,
       billing_address_collection: "auto",
@@ -140,7 +147,7 @@ export async function getOrCreateDepositCheckout(
       // T-14-Cron stattdessen einen Zahlungslink.
       payment_method_options: {
         card: { setup_future_usage: "off_session" },
-        ...BANK_TRANSFER_PM_OPTIONS,
+        ...(btActive ? BANK_TRANSFER_PM_OPTIONS : {}),
       },
       payment_intent_data: {
         metadata: { bookingId: booking.id, bookingNumber: booking.bookingNumber },

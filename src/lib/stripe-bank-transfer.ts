@@ -17,6 +17,45 @@
 
 import { stripe } from "@/lib/stripe";
 
+// ---------------------------------------------------------------------------
+// Capability-Gate (Hotfix 10/2026): Stripe lehnt Checkout-Sessions mit
+// customer_balance HART ab, solange die Zahlungsmethode im Dashboard nicht
+// freigeschaltet ist ("payment method type provided: customer_balance is
+// invalid … not activated"). Genau das ließ im Sept. 2026 Gruppen-Checkouts
+// scheitern (WH-2026-8039, WH-2026-2307). Deshalb: Überweisung nur anbieten,
+// wenn das Konto die Capability `bank_transfer_payments` als aktiv meldet.
+// Gecacht (10 Min.), fail-closed — im Zweifel nur Karte. Sobald der Vorstand
+// die Freischaltung in Stripe abschließt, greift das automatisch, ohne Deploy.
+// ---------------------------------------------------------------------------
+let capabilityCache: { active: boolean; checkedAt: number } | null = null;
+const CAPABILITY_TTL_MS = 10 * 60 * 1000;
+
+export async function isBankTransferActive(): Promise<boolean> {
+  if (process.env.BANK_TRANSFER_FORCE === "off") return false;
+  const now = Date.now();
+  if (capabilityCache && now - capabilityCache.checkedAt < CAPABILITY_TTL_MS) {
+    return capabilityCache.active;
+  }
+  try {
+    // Eigenes Konto: stripe-node verlangt bei accounts.retrieve eine ID, das
+    // eigene Konto liefert der Endpoint GET /v1/account (ohne ID).
+    const account = (await stripe.rawRequest("get", "/v1/account", {})) as unknown as {
+      capabilities?: Record<string, string | undefined>;
+    };
+    const active = account.capabilities?.bank_transfer_payments === "active";
+    capabilityCache = { active, checkedAt: now };
+    return active;
+  } catch (err) {
+    console.error("[bank-transfer] Capability-Check fehlgeschlagen — nur Karte:", err);
+    capabilityCache = { active: false, checkedAt: now };
+    return false;
+  }
+}
+
+/** Zahlungsarten für Checkout-Sessions: Karte immer, Überweisung nur wenn aktiv. */
+export const bankTransferPmTypes = (active: boolean): ("card" | "customer_balance")[] =>
+  active ? ["card", "customer_balance"] : ["card"];
+
 /** Gruppen, denen wir Banküberweisung anbieten (klassische Vereins-/Schulkassen). */
 export const isBankTransferEligible = (
   customerType: string | null | undefined,

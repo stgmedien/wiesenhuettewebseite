@@ -9,6 +9,7 @@ import {
   isBankTransferEligible,
   getOrCreateStripeCustomer,
   BANK_TRANSFER_PM_OPTIONS,
+  isBankTransferActive,
 } from "@/lib/stripe-bank-transfer";
 import { db } from "@/lib/db";
 import { bookings, customers, payments, activityLog, users, bookingAttempts } from "@/lib/db/schema";
@@ -618,7 +619,10 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
     // Überweisung → Banküberweisung (virtuelle deutsche IBAN, automatische
     // Zuordnung durch Stripe) zusätzlich zur Karte anbieten. Braucht zwingend
     // ein Stripe-Customer-Objekt statt customer_email/customer_creation.
-    const offerBankTransfer = isBankTransferEligible(data.customerType, isSchoolPurpose);
+    // … aber nur, wenn Stripe die Methode auch freigeschaltet hat (sonst
+    // lehnt Stripe die ganze Session ab — Capability-Gate, siehe Helper).
+    const offerBankTransfer =
+      isBankTransferEligible(data.customerType, isSchoolPurpose) && (await isBankTransferActive());
     const stripeCustomerId = offerBankTransfer
       ? await getOrCreateStripeCustomer(effectiveEmail, `${data.firstName} ${data.lastName}`)
       : null;

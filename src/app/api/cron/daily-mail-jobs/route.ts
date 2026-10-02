@@ -24,7 +24,11 @@ import { buildKurkartenFilename } from "@/lib/kurkarten";
 import { HUETTENWART_EMAIL, HUETTENWART_CC } from "@/lib/huettenwart";
 import RestzahlungRequestEmail from "@/lib/mail/templates/restzahlung-request";
 import { MANUAL_REST_MARKER, MANUAL_REST_SENT_MARKER } from "@/lib/payment-markers";
-import { BANK_TRANSFER_PM_OPTIONS } from "@/lib/stripe-bank-transfer";
+import {
+  BANK_TRANSFER_PM_OPTIONS,
+  isBankTransferActive,
+  bankTransferPmTypes,
+} from "@/lib/stripe-bank-transfer";
 import AvsReminderInternalEmail from "@/lib/mail/templates/avs-reminder-internal";
 import MailFailureDigestEmail from "@/lib/mail/templates/mail-failure-digest";
 import RestzahlungConfirmedEmail from "@/lib/mail/templates/restzahlung-confirmed";
@@ -321,12 +325,14 @@ export async function GET(req: Request) {
             ? (await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1))[0]
             : null;
           if (!btCustomer) continue;
+          // Capability-Gate: Überweisung nur, wenn in Stripe freigeschaltet.
+          const btActive = await isBankTransferActive();
           const linkSession = await stripe.checkout.sessions.create({
             mode: "payment",
-            payment_method_types: ["card", "customer_balance"],
+            payment_method_types: bankTransferPmTypes(btActive),
             locale: "de",
             customer: originalPi.customer as string,
-            payment_method_options: BANK_TRANSFER_PM_OPTIONS,
+            ...(btActive ? { payment_method_options: BANK_TRANSFER_PM_OPTIONS } : {}),
             line_items: [
               {
                 quantity: 1,
