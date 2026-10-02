@@ -75,8 +75,8 @@ export default async function HausordnungPage() {
           <div className="rounded-[var(--radius-md)] border-l-4 border-[var(--color-wh-sunset)] bg-[var(--color-wh-beige)] px-4 py-3">
             <p className="m-0">
               <strong>Ruhe &amp; Rücksicht:</strong> Die Hütte liegt am Rand des Dorfes mit
-              Nachbarn ringsum. Ab 22:00 Uhr gilt besonders draußen eine Ruhezeit, auch an der
-              Feuerstelle und auf dem Freisitz. Bitte keine lauten Feiern und reduziert Gespräche
+              Nachbarn ringsum. Ab 22:00 Uhr gilt besonders draußen eine Ruhezeit, auch
+              auf dem Freisitz. Bitte keine lauten Feiern und reduziert Gespräche
               und Musik ab 22 Uhr auf Zimmerlautstärke.
             </p>
           </div>
@@ -99,11 +99,9 @@ export default async function HausordnungPage() {
               es jede Menge Stühle und Tische im Keller.
             </li>
             <li>
-              <strong>Feuerstelle:</strong> Nie unbeaufsichtigt lassen, ausreichend Wasser
-              griffbereit halten und die Glut vor dem Schlafengehen vollständig löschen. Bei
-              erhöhter Waldbrandgefahr (z. B. anhaltende Trockenheit) kann offenes Feuer behördlich
-              untersagt sein — im Zweifel vorher beim Hüttenwart oder dem Regionalforstamt Oberes
-              Sauerland (Tel. 02972 9702-35) nachfragen.
+              <strong>Offenes Feuer:</strong> Offenes Feuer ist auf dem Gelände derzeit nicht
+              gestattet. Das gilt auch für die vorhandene Feuerstelle sowie für mitgebrachte
+              Feuerschalen und Feuerkörbe.
             </li>
             <li>
               <strong>Küche:</strong> Den Backofen bitte nur mit Backpapier benutzen.
@@ -163,7 +161,6 @@ export default async function HausordnungPage() {
             <li>Küchentücher zum Trocknen in der Küche aufgehängt</li>
             <li>Stühle und Tische von draußen wieder zurück in den Keller</li>
             <li>Grill gereinigt</li>
-            <li>Feuerstelle sauber hinterlassen</li>
             <li>Kippen-Gläser gereinigt und zurück im Vorratsraum</li>
             <li>
               Restmüll in die schwarzen Tonnen am Parkplatz oben, Papier/Kartons zerkleinert in die
