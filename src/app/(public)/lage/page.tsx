@@ -204,13 +204,13 @@ const COPY: Record<Locale, Copy> = {
       noteEyebrow: "Nähere Umgebung",
       noteTitle: "Verstecken auf dem Gelände, Fußball gleich nebenan.",
       noteBody:
-        "Verstecken, Toben, ein Lagerfeuer am Abend — auf dem eigenen Gelände ist schon einiges möglich. Braucht Euer Spiel mehr Rasen, ist der Rest nur einen kurzen Fußweg entfernt. Viel Spaß in Langewiese!",
+        "Verstecken, Toben, Rodeln im Winter — auf dem eigenen Gelände ist schon einiges möglich. Braucht Euer Spiel mehr Rasen, ist der Rest nur einen kurzen Fußweg entfernt. Viel Spaß in Langewiese!",
       cards: [
         {
           emoji: "🌳",
           title: "Eigenes Gelände",
           meta: "direkt vor der Tür",
-          detail: "Wiese und Wald am Hang, knapp ein halbes Fußballfeld groß — bestens zum Verstecken, Toben oder für ein Lagerfeuer am Abend.",
+          detail: "Wiese und Wald am Hang, knapp ein halbes Fußballfeld groß — bestens zum Verstecken und Toben.",
         },
         {
           emoji: "🛝",
@@ -370,13 +370,13 @@ const COPY: Record<Locale, Copy> = {
       noteEyebrow: "Nearby",
       noteTitle: "Hide-and-seek on our grounds, football right next door.",
       noteBody:
-        "Hide-and-seek, running around, an evening campfire — our own grounds already cover a lot. If your game needs more open grass, the rest is just a short walk away. Have fun in Langewiese!",
+        "Hide-and-seek, running around, sledding in winter — our own grounds already cover a lot. If your game needs more open grass, the rest is just a short walk away. Have fun in Langewiese!",
       cards: [
         {
           emoji: "🌳",
           title: "Our Own Grounds",
           meta: "right outside the door",
-          detail: "Meadow and forest on the hillside, just under half a football pitch — perfect for hide-and-seek, running around, or an evening campfire.",
+          detail: "Meadow and forest on the hillside, just under half a football pitch — perfect for hide-and-seek and running around.",
         },
         {
           emoji: "🛝",
@@ -505,13 +505,13 @@ const COPY: Record<Locale, Copy> = {
       noteEyebrow: "Vlakbij",
       noteTitle: "Verstoppertje op ons terrein, voetbal net ernaast.",
       noteBody:
-        "Verstoppertje, rondrennen, een avondkampvuur — op ons eigen terrein kan al veel. Heeft jullie spel meer grasveld nodig, dan is de rest maar een kort stukje lopen. Veel plezier in Langewiese!",
+        "Verstoppertje, rondrennen, sleeën in de winter — op ons eigen terrein kan al veel. Heeft jullie spel meer grasveld nodig, dan is de rest maar een kort stukje lopen. Veel plezier in Langewiese!",
       cards: [
         {
           emoji: "🌳",
           title: "Ons eigen terrein",
           meta: "direct voor de deur",
-          detail: "Weide en bos op de helling, net geen half voetbalveld groot — uitstekend voor verstoppertje, rondrennen of een avondkampvuur.",
+          detail: "Weide en bos op de helling, net geen half voetbalveld groot — uitstekend voor verstoppertje en rondrennen.",
         },
         {
           emoji: "🛝",

@@ -29,9 +29,9 @@ export const PROJEKTE: Projekt[] = [
     key: "plateau",
     nr: "WH-01",
     titel: "Ein ebener Platz zum Zelten entsteht.",
-    untertitel: "Zelt-Plateau an der Feuerstelle — startet zuerst",
+    untertitel: "Zelt-Plateau unterhalb der Hütte — startet zuerst",
     darumGehts:
-      "Unterhalb der Hütte, direkt bei der Feuerstelle, entsteht ein ebener Platz zum Zelten – ca. 6,5 × 4 m, mit Blick in die Ferne. Das Fundament im Fels – Stahlträger einbetonieren – bereiten Profis vor. Danach geht es für die Fahrt vor allem darum, die Holzbretter auf das fertige Fundament zu schrauben. Von allen Projekten rund um die Hütte ist das hier das wichtigste und steht deshalb ganz oben auf der Liste: Mehr Schlafplätze draußen entlasten das Haus – und wer will, verbringt die Nacht im Zelt auf der Wiese.",
+      "Unterhalb der Hütte entsteht ein ebener Platz zum Zelten – ca. 6,5 × 4 m, mit Blick in die Ferne. Das Fundament im Fels – Stahlträger einbetonieren – bereiten Profis vor. Danach geht es für die Fahrt vor allem darum, die Holzbretter auf das fertige Fundament zu schrauben. Von allen Projekten rund um die Hütte ist das hier das wichtigste und steht deshalb ganz oben auf der Liste: Mehr Schlafplätze draußen entlasten das Haus – und wer will, verbringt die Nacht im Zelt auf der Wiese.",
     brauchenWir: [
       "Fundament im Fels (Stahlträger einbetonieren) – wird vorab von Profis vorbereitet",
       "Holzbretter zuschneiden und auf das Fundament schrauben",
@@ -71,28 +71,6 @@ export const PROJEKTE: Projekt[] = [
     danke: "Ohne sicheren Weg kein Zeltplatz – wer hier baut, macht beides erst möglich.",
     kontakt: "Bei Marcus Kühle",
     bild: "/media/projekte/pfad.jpg",
-  },
-  {
-    key: "feuerstelle",
-    nr: "WH-03",
-    titel: "Rund um die Feuerstelle wird es eben und gemütlich.",
-    untertitel: "Feuerstelle-Umfeld einebnen und einrichten",
-    darumGehts:
-      "Rechts von der Hütte aus gesehen wird das Gelände um die Feuerstelle arrondiert und eingeebnet. Die alten Bänke vom Freisitz wandern hier runter, dazu entstehen feste Sitzgelegenheiten mit U-Steinen.",
-    brauchenWir: [
-      "Gelände einebnen (rechte Seite von der Hütte aus)",
-      "Alte Bänke vom Freisitz runtertragen",
-      "U-Steine für neue Sitzgelegenheiten",
-    ],
-    zeitrahmen: "-",
-    aufwand: "mittel",
-    tagesanteil: 0.5,
-    kosten: "Richtwert U-Steine: ca. 100–200 € (gebraucht günstiger als neu)",
-    anpacken: "Ring anlegen, Gelände planieren, Bänke runtertragen, U-Steine setzen.",
-    beitrag: "U-Steine spenden oder anliefern.",
-    danke: "Der Platz, an dem abends alle sitzen – sichtbarer geht Mitmachen kaum.",
-    kontakt: "Ansprechpartner steht noch nicht fest",
-    bild: "/media/projekte/feuerstelle.jpg",
   },
   {
     key: "dachterrasse",

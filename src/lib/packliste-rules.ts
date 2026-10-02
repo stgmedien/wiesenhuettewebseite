@@ -13,7 +13,7 @@
  */
 
 export type Season = "winter" | "uebergang" | "sommer";
-export type Activity = "wandern" | "ski" | "lagerfeuer" | "klassenfahrt";
+export type Activity = "wandern" | "ski" | "klassenfahrt";
 
 export type PackInput = {
   season: Season;
@@ -42,7 +42,6 @@ export const SEASON_LABEL: Record<Season, string> = {
 export const ACTIVITY_LABEL: Record<Activity, string> = {
   wandern: "Wandern",
   ski: "Ski / Langlauf",
-  lagerfeuer: "Lagerfeuer-Abend",
   klassenfahrt: "Klassenfahrt / Gruppe",
 };
 
@@ -55,7 +54,6 @@ export function buildPackliste(input: PackInput): PackCategory[] {
   const longStay = nights >= 4;
   const hasSki = activities.includes("ski");
   const hasHike = activities.includes("wandern");
-  const hasLagerfeuer = activities.includes("lagerfeuer");
   const isClass = activities.includes("klassenfahrt");
 
   // ----- Kategorie: Kleidung -----
@@ -182,13 +180,6 @@ export function buildPackliste(input: PackInput): PackCategory[] {
   if (hasHike) {
     shared.push(
       { name: "Wanderkarte oder offline-Komoot/Outdooractive", shared: true, hint: "GPX-Tracks unter /wandertouren" }
-    );
-  }
-  if (hasLagerfeuer) {
-    shared.push(
-      { name: "Stockbrot-Teig oder fertige Stockbrote", shared: true },
-      { name: "Würstchen / vegetarische Alternativen", shared: true },
-      { name: "Marshmallows", shared: true, hint: "Für später am Abend" }
     );
   }
   if (isWinter) {

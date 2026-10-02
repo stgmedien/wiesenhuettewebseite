@@ -130,7 +130,7 @@ export function CommunitySubmitForm({
             name="title"
             type="text"
             maxLength={200}
-            placeholder="z.B. Die Nacht am Lagerfeuer"
+            placeholder="z.B. Der Abend am langen Tisch"
             className={inputBase}
           />
         </div>

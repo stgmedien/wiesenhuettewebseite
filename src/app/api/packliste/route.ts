@@ -10,11 +10,11 @@ export const dynamic = "force-dynamic";
 const inputSchema = z.object({
   season: z.enum(["winter", "uebergang", "sommer"]),
   nights: z.coerce.number().int().min(1).max(21),
-  activities: z.array(z.enum(["wandern", "ski", "lagerfeuer", "klassenfahrt"])).default([]),
+  activities: z.array(z.enum(["wandern", "ski", "klassenfahrt"])).default([]),
 });
 
 /**
- * GET /api/packliste?season=winter&nights=3&activities=wandern,lagerfeuer
+ * GET /api/packliste?season=winter&nights=3&activities=wandern,ski
  *   → application/pdf Download mit persönlicher Packliste.
  */
 export async function GET(req: NextRequest) {

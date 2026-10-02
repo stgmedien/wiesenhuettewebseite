@@ -140,7 +140,7 @@ const COPY: Record<Locale, Copy> = {
       "Energie & Heizung — seit 2026 ohne Zuschlag",
       "Voll ausgestattete Selbstversorger-Küche",
       "33 Schlafplätze in 5 Zimmern",
-      "Esszimmer und Wohnzimmer, Skikeller, Feuerstelle",
+      "Esszimmer und Wohnzimmer, Skikeller",
     ],
     examplesHeading: "So rechnet sich das",
     examplesLead:
@@ -194,7 +194,7 @@ const COPY: Record<Locale, Copy> = {
       "Energy & heating — no surcharge since 2026",
       "Fully equipped self-catering kitchen",
       "33 beds in 5 rooms",
-      "Lounges, ski cellar, fire pit",
+      "Lounges, ski cellar",
     ],
     examplesHeading: "How it adds up",
     examplesLead:
@@ -248,7 +248,7 @@ const COPY: Record<Locale, Copy> = {
       "Energie & verwarming — sinds 2026 zonder toeslag",
       "Volledig uitgeruste zelfverzorgingskeuken",
       "33 slaapplaatsen in 5 kamers",
-      "Verblijfsruimtes, skikelder, vuurplaats",
+      "Verblijfsruimtes, skikelder",
     ],
     examplesHeading: "Zo telt het op",
     examplesLead:

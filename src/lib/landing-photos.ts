@@ -6,7 +6,7 @@
  *
  * Aspect-Verhaeltnis pro Area:
  *   - "feature"  : 16:10  (Hero-Tile, doppelt breit)
- *   - "atmos"    : 4:5    (hochformatig, Lagerfeuer)
+ *   - "atmos"    : 4:5    (hochformatig, Abendrunde)
  *   - "wide"     : 16:9   (Landschafts-Format)
  *   - "portrait" : 3:4    (eher hoch)
  *   - "square"   : 1:1
@@ -43,13 +43,13 @@ export const BENTO_TILES: GalleryTile[] = [
     },
   },
   {
-    src: "/media/photos/feuerstelle_8.jpg",
-    alt: "Lagerfeuer am Abend vor der Wiesenhütte",
+    src: "/media/photos/projektfahrten/karten_spielen.jpeg",
+    alt: "Gruppe spielt abends Karten am großen Tisch in der Wiesenhütte",
     area: "atmos",
     caption: {
-      de: { lead: "Abendrunde", sub: "Lagerfeuer, Stockbrot, lange Gespräche" },
-      en: { lead: "Evening fire", sub: "Campfire, roasting sticks, long conversations" },
-      nl: { lead: "Avondvuur", sub: "Kampvuur, stokbrood, lange gesprekken" },
+      de: { lead: "Abendrunde", sub: "Karten, Spiele, lange Gespräche" },
+      en: { lead: "Evening round", sub: "Cards, games, long conversations" },
+      nl: { lead: "Avondronde", sub: "Kaarten, spellen, lange gesprekken" },
     },
   },
   {
@@ -103,13 +103,13 @@ export const BENTO_TILES: GalleryTile[] = [
     },
   },
   {
-    src: "/media/photos/feuerstelle_6.jpg",
-    alt: "Lagerfeuer vor der Wiesenhütte in der Abenddämmerung",
+    src: "/media/photos/nature-1.jpg",
+    alt: "Natur rund um die Wiesenhütte",
     area: "small-3",
     caption: {
-      de: { lead: "Abend an der Hütte" },
-      en: { lead: "Evening at the cabin" },
-      nl: { lead: "Avond bij de hut" },
+      de: { lead: "Natur vor der Tür" },
+      en: { lead: "Nature on the doorstep" },
+      nl: { lead: "Natuur voor de deur" },
     },
   },
   {
