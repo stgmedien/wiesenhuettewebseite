@@ -7,7 +7,8 @@
 import { db } from "@/lib/db";
 import { bookings, customers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { formatEuro, RULES } from "@/lib/pricing";
+import { formatEuro } from "@/lib/pricing";
+import { prepayPercentForBooking } from "@/lib/school-deposit";
 import { formatDateLong } from "@/lib/utils";
 import { getActiveInvoiceForBooking } from "@/lib/invoice";
 
@@ -56,12 +57,12 @@ export const buildBookingVars = async (
   const remainder = Math.max(0, totalCents - Math.min(b.paidCents, totalCents));
 
   // Standard-Zahlungssplit (siehe buchen/actions.ts + T-14-Cron): Anzahlung
-  // (50 % der Zwischensumme) ist heute faellig, Kaution + Kurtaxe werden NICHT
+  // (50 % der Zwischensumme, Schul-/Klassenfahrten 10 %) ist heute faellig, Kaution + Kurtaxe werden NICHT
   // bei Buchung eingezogen, sondern zusammen mit der Restzahlung bei T-14
   // (Vorstandsbeschluss). Gilt nur fuer den Normalfall (Anreise >= 14 Tage
   // entfernt) -- bei kurzfristigen Buchungen wird abweichend alles sofort
   // faellig, das bildet dieser Split hier nicht ab.
-  const prepaymentCents = Math.round((b.subtotalCents * RULES.prepaymentPercent) / 100);
+  const prepaymentCents = Math.round((b.subtotalCents * prepayPercentForBooking(b)) / 100);
   const restzahlungCents = b.subtotalCents - prepaymentCents + b.depositCents + b.kurtaxeCents;
   const restzahlungDate = minusDaysFromIso(b.arrival, 14);
 

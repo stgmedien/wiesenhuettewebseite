@@ -51,7 +51,7 @@ export type SendMailArgs = {
 // mit Zugriff auf das Archiv-Postfach), NIE im Klartext gespeichert (gleicher
 // Grund) und bekommen KEINE Standard-Antwortadresse — eine Antwort auf einen
 // Login-Link ist ohnehin nutzlos, da niemand sie vor Ablauf des Links liest.
-const SENSITIVE_TEMPLATES = new Set([
+export const SENSITIVE_TEMPLATES = new Set([
   "magic_link",
   "welcome",
   "welcome_with_booking",

@@ -5,7 +5,7 @@ type Props = {
   bookingNumber: string;
   institution: string;
   arrival: string;
-  prepaymentEuroLabel: string; // 50 % Anzahlung, bereits formatiert
+  prepaymentEuroLabel: string; // 10 % Anzahlung, bereits formatiert
   checkoutUrl: string;
   deadlineLabel: string; // Zahlungsfrist (A-16, formatiert)
   stornoFeeLabel: string; // drohende Stornogebuehr, bereits formatiert

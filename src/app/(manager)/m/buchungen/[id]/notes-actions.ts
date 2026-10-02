@@ -2,12 +2,13 @@
 
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { notes, customers, activityLog } from "@/lib/db/schema";
+import { notes, customers, activityLog, bookings } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { resendBookingConfirmationMails, resendWelcomeMail } from "@/lib/booking-payment-confirmation";
 import { getActiveInvoiceForBooking, reissueInvoiceForBooking } from "@/lib/invoice";
+import { PREPAY_PERCENT_OPTIONS } from "@/lib/school-deposit";
 
 async function requireManager() {
   const session = await auth();
@@ -247,5 +248,36 @@ export async function resendWelcome(
   if (!result.sent) {
     return { ok: false, error: result.error ?? "Unbekannter Fehler." };
   }
+  return { ok: true };
+}
+
+/**
+ * Anzahlungsquote einer Buchung festlegen (z. B. 10 % statt 50 %). Bestimmt
+ * den in der Buchungsbestätigung ausgewiesenen Anzahlungsbetrag; bereits
+ * erfasste Zahlungen bleiben unberührt.
+ */
+export async function setPrepayPercent(
+  bookingId: string,
+  percent: number
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const me = await requireManager();
+  const parsedId = z.string().uuid().safeParse(bookingId);
+  if (!parsedId.success) return { ok: false, error: "Ungültige Buchung." };
+  if (!(PREPAY_PERCENT_OPTIONS as readonly number[]).includes(percent)) {
+    return { ok: false, error: "Ungültige Anzahlungsquote." };
+  }
+
+  await db
+    .update(bookings)
+    .set({ prepayPercent: percent, updatedAt: new Date() })
+    .where(eq(bookings.id, parsedId.data));
+
+  await db.insert(activityLog).values({
+    who: me,
+    what: `Anzahlungsquote auf ${percent} % gesetzt`,
+    bookingId: parsedId.data,
+  });
+
+  revalidatePath(`/m/buchungen/${parsedId.data}`);
   return { ok: true };
 }
