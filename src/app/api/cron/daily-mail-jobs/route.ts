@@ -29,6 +29,7 @@ import {
   isBankTransferActive,
   bankTransferPmTypes,
 } from "@/lib/stripe-bank-transfer";
+import BankTransferStatusEmail from "@/lib/mail/templates/bank-transfer-status";
 import AvsReminderInternalEmail from "@/lib/mail/templates/avs-reminder-internal";
 import MailFailureDigestEmail from "@/lib/mail/templates/mail-failure-digest";
 import RestzahlungConfirmedEmail from "@/lib/mail/templates/restzahlung-confirmed";
@@ -126,6 +127,7 @@ export async function GET(req: Request) {
     bankTransferRestLinkSent: 0,
     avsReminderSent: 0,
     mailFailureDigestSent: 0,
+    bankTransferMonitor: "" as string,
   };
 
   // ---------- T-21: Zahlungserinnerung (1 Woche vor Auto-Einzug bei T-14) ----------
@@ -992,6 +994,44 @@ export async function GET(req: Request) {
     }
   } catch (err) {
     console.error("[cron] birthday query failed:", err);
+  }
+
+  // ---------- Stripe-Banküberweisung: Freischaltungs-Monitor ----------
+  // Die Zahlungsmethode hängt an einer persönlichen Identitätsprüfung der
+  // Vorständin in Stripe. Damit das nicht liegen bleibt: wöchentliche interne
+  // Erinnerung solange inaktiv, einmalige "jetzt aktiv"-Meldung danach.
+  // Idempotenz über emailLog (Template + Zeitfenster). Best-effort.
+  try {
+    const internalTo = process.env.MAIL_INTERNAL_TO;
+    if (internalTo) {
+      const btActive = await isBankTransferActive();
+      const template = btActive ? "bank-transfer-activated" : "bank-transfer-pending-reminder";
+      const windowStart = btActive ? new Date(0) : new Date(Date.now() - 7 * 86_400_000);
+      const recent = await db
+        .select({ id: emailLog.id })
+        .from(emailLog)
+        .where(and(eq(emailLog.template, template), gte(emailLog.sentAt, windowStart)))
+        .limit(1);
+      if (!recent[0]) {
+        await sendMail({
+          to: internalTo,
+          subject: btActive
+            ? "🎉 Stripe-Banküberweisung ist jetzt aktiv — Gruppen können überweisen"
+            : "Erinnerung: Stripe-Banküberweisung noch nicht freigeschaltet (Tanja)",
+          template,
+          react: BankTransferStatusEmail({ active: btActive }),
+        });
+        if (btActive) {
+          await db.insert(activityLog).values({
+            who: "Cron",
+            what: "Stripe-Banküberweisung (customer_balance) ist jetzt aktiv — Gruppen-Checkouts bieten ab sofort SEPA-Überweisung an.",
+          });
+        }
+        stats.bankTransferMonitor = template;
+      }
+    }
+  } catch (err) {
+    console.error("[cron] bank-transfer monitor failed:", err);
   }
 
   return NextResponse.json({ ok: true, date: isoDayOffset(0), stats });
