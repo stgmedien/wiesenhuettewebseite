@@ -210,7 +210,7 @@ function PacklisteSection({ token, items }: { token: string; items: HubEntryView
 
       {items.length === 0 ? (
         <p className="text-sm text-[var(--color-wh-fg-muted)] italic mb-4">
-          Noch ganz leer — fangt an, z.&nbsp;B. mit „Grillkohle“, „Stockbrot-Teig“ oder
+          Noch ganz leer — fangt an, z.&nbsp;B. mit „Grillkohle“, „Brötchen“ oder
           „Bluetooth-Box“.
         </p>
       ) : (

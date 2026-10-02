@@ -303,8 +303,8 @@ export default function BookingConfirmedEmail({
           <Text style={smallText}>
             Wiesenhütte der Skifreunde Gütersloh e.V., Bundesstraße 6, 59955 Winterberg-Langewiese
             (Hochsauerland). Selbstversorgerhütte mit 33 Schlafplätzen in 5 Schlafzimmern,
-            Esszimmer und Wohnzimmer, voll ausgestatteter Küche, Sanitärbereich, Skikeller,
-            Feuerstelle und Außenbereich.
+            Esszimmer und Wohnzimmer, voll ausgestatteter Küche, Sanitärbereich, Skikeller
+            und Außenbereich.
           </Text>
 
           <Heading as="h4" style={h2}>§ 3 Mietdauer & Belegung</Heading>

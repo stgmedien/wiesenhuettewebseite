@@ -28,11 +28,6 @@ const TOC = [
   { id: "fragen", label: "Häufige Elternfragen" },
 ];
 
-const FEUERSTELLE_BILDER = [1, 2, 3, 4, 5, 6, 7, 8].map((i) => ({
-  src: `/media/photos/feuerstelle_${i}.jpg`,
-  alt: `Feuerstelle vor der Wiesenhütte — Bauphase ${i}`,
-}));
-
 const PROJEKTFAHRT_BILDER = [
   { src: "/media/photos/projektfahrten/zusammen_essen_kochen.jpeg", alt: "Schüler:innen kochen zusammen in der Hütten-Küche" },
   { src: "/media/photos/projektfahrten/fruestueck_gemeinsam.jpeg", alt: "Gemeinsames Frühstück am großen Tisch" },
@@ -151,7 +146,7 @@ export default async function EsgPage() {
           <p className="text-base sm:text-[18px] leading-relaxed text-[var(--color-wh-black)] max-w-2xl mt-4">
             Hier gilt eine einfache Beobachtung: <strong>Manches lernt man nur dort, wo das
             Klassenzimmer aufhört.</strong> Wenn Lerngruppen für ein paar Tage selbst kochen,
-            Holz schichten, am Lagerfeuer Stockbrot drehen und miteinander durch Konflikte
+            Holz schichten, abends lange zusammensitzen und miteinander durch Konflikte
             gehen, geschieht etwas, das zu Persönlichkeitsbildung wird — und nicht nur zu
             Stoff. Genau dafür gibt es die Hütte.
           </p>
@@ -207,7 +202,7 @@ export default async function EsgPage() {
             <p className="text-[17px] leading-relaxed text-[var(--color-wh-black)]">
               In Langewiese wird gebaut, geschraubt, gestrichen und ab und zu auch wieder
               abgerissen. Was hier entsteht, hat einen Zweck und bleibt stehen: Eine
-              Feuerstelle wärmt, eine Baumbank trägt. Das verändert das Lernen. Es gibt
+              Baumbank trägt, ein Vogelhaus wird bezogen. Das verändert das Lernen. Es gibt
               keine Noten — dafür Wetter, Materialkosten und Mitschüler:innen, auf die man
               sich verlassen muss. Wer mitmacht, merkt meist von selbst, dass sich Kopf und
               Hand hier nicht trennen lassen und dass ein Projekt nur so gut wird wie die
@@ -225,87 +220,10 @@ export default async function EsgPage() {
             </p>
           </div>
 
-          {/* Eintrag 1: Feuerstelle der Klasse 9e */}
+          {/* Eintrag 1: Projektfahrt der 9b */}
           <article className="mb-20">
             <div className="text-xs uppercase tracking-wider text-[var(--color-wh-deep-green)] font-semibold mb-2">
               Eintrag 1
-            </div>
-            <h3 className="text-[28px] sm:text-[32px] mt-0 mb-6 leading-tight">
-              Die Feuerstelle der Klasse 9e.
-            </h3>
-
-            {/* Galerie 8 Bilder — klickbar mit Lightbox-Carousel */}
-            <div className="mb-8">
-              <PhotoGallery
-                images={FEUERSTELLE_BILDER}
-                gridClassName="grid-cols-2 sm:grid-cols-4"
-                sizes="(min-width: 640px) 250px, 50vw"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div>
-                <h4 className="font-semibold text-[18px] text-[var(--color-wh-deep-green)] mb-2">
-                  Was war das Projekt?
-                </h4>
-                <p className="prose-block">
-                  Im Schuljahr 2024/25 hat die Klasse 9e des ESG eine neue Feuerstelle vor der
-                  Wiesenhütte geplant, gebaut und an die Schul- und Vereinsgemeinschaft
-                  übergeben. Heute ist sie der Ort, an dem nahezu jede Hüttenfahrt einen ihrer
-                  wichtigsten Abende verbringt.
-                </p>
-
-                <h4 className="font-semibold text-[18px] text-[var(--color-wh-deep-green)] mt-6 mb-2">
-                  Wie ist es entstanden?
-                </h4>
-                <p className="prose-block">
-                  Die Idee kam aus einer Klassenkonferenz: Vor der Hütte fehlte ein Ort, an dem man
-                  abends sitzen kann. Aus dieser Beobachtung wurde im Unterricht ein
-                  Projektauftrag. Die Klasse hat in Kleingruppen gearbeitet:
-                </p>
-                <ul className="prose-block list-disc pl-5 mt-2 space-y-1.5">
-                  <li>
-                    <strong>Recherche & Genehmigung:</strong> Auflagen für eine offene Feuerstelle
-                    in Langewiese, Verhandlung mit Gemeinde und Skifreunden Gütersloh.
-                  </li>
-                  <li>
-                    <strong>Entwurf:</strong> Skizzen, Materialliste, Bauablauf — Mathematik,
-                    Kunst und Werken in dieser Phase verschränkt.
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="font-semibold text-[18px] text-[var(--color-wh-deep-green)] mb-2">
-                  Was wurde dabei gelernt?
-                </h4>
-                <ul className="prose-block list-disc pl-5 space-y-3">
-                  <li>
-                    Wie viele Steine es braucht, bis eine Feuerstelle steht. Wie schwer eine
-                    Schubkarre voll Sand ist. Wie genau eine Wasserwaage sein muss.
-                  </li>
-                  <li>
-                    Projektmanagement im Kleinen: Phasenplanung, Zuständigkeiten, Pufferzeiten,
-                    Umgang mit dem Wetter.
-                  </li>
-                  <li>
-                    Wie sich ein Erfolg anfühlt, der nicht in einer Note endet. Und wer in
-                    einer Krise einspringt, wenn jemand keine Lust mehr hat.
-                  </li>
-                  <li>
-                    Eine Woche körperliche Arbeit, in der Schüler:innen, die im Klassenraum
-                    oft eher still sind, plötzlich Schlüsselrollen übernommen haben.
-                  </li>
-                </ul>
-
-              </div>
-            </div>
-          </article>
-
-          {/* Eintrag 2: Projektfahrt der 9b */}
-          <article className="mb-20 border-t border-[var(--color-wh-winter-grey)] pt-12">
-            <div className="text-xs uppercase tracking-wider text-[var(--color-wh-deep-green)] font-semibold mb-2">
-              Eintrag 2
             </div>
             <h3 className="text-[28px] sm:text-[32px] mt-0 mb-3 leading-tight">
               Projektfahrt der 9b — Mehr als eine Klassenfahrt.
@@ -572,8 +490,7 @@ export default async function EsgPage() {
             </p>
             <p>
               An der Hütte gestalten die Schüler:innen ihren Alltag selbst. Sie kochen für die
-              Gruppe, schichten Holz, machen Feuer, drehen am Abend Stockbrot über der
-              Glut, grillen, räumen auf. Selbstversorgung ist nicht nebenbei — sie ist Teil des
+              Gruppe, schichten Holz, decken den Tisch, räumen auf. Selbstversorgung ist nicht nebenbei — sie ist Teil des
               Programms. Wer für zwölf Hungrige Mittagessen kocht, lernt Verantwortung anders
               als im Hauswirtschafts-Stundenplan.
             </p>
@@ -590,8 +507,8 @@ export default async function EsgPage() {
               <p className="text-[15px] leading-relaxed text-[var(--color-wh-black)] m-0">
                 Die Gruppe übernimmt die Hütte für drei Nächte. Frühstück, Mittagessen, Abendbrot
                 — alles wird gemeinsam gekocht. Wer einkauft, wer kocht, wer abspült: das
-                organisiert die Klasse. Holz machen, Feuer in der Lagerfeuerstelle,
-                aufräumen — auch das gehört dazu. Am Abend: Stockbrot, Lagerfeuer, Reflexion.
+                organisiert die Klasse. Holz machen, aufräumen — auch das gehört dazu. Am Abend:
+                Spiele, Gespräche, Reflexion.
               </p>
             </div>
 
@@ -603,12 +520,11 @@ export default async function EsgPage() {
                 Schüler:innen pitchen ihre Ideen.
               </h3>
               <p className="text-[15px] leading-relaxed text-[var(--color-wh-black)] m-0">
-                Wenn eine Klasse ein Projekt an der Hütte anstoßen will — Feuerstelle bauen, Raum
+                Wenn eine Klasse ein Projekt an der Hütte anstoßen will — eine Bank bauen, Raum
                 renovieren, Naturweg anlegen — pitcht sie ihre Idee dem Vorstand der Skifreunde
                 Gütersloh. Der Vorstand steht mit Rat, Tat und (wo nötig) Finanzierung zur Seite.
                 Das ist die Erlaubnisstruktur der Hüttenarbeit: Schüler:innen denken, Verein
-                trägt mit. Die Feuerstelle der Klasse 9e ist genau so entstanden (siehe
-                Projekttagebuch oben).
+                trägt mit.
               </p>
             </div>
 
@@ -740,7 +656,7 @@ export default async function EsgPage() {
                 "Selbstversorgung: kochen, abspülen, Holz machen",
                 "Tagesblock: Wandern, Werken, Projekt",
                 "Bewegung im Sauerland-Wald",
-                "Stockbrot, Lagerfeuer, Gespräche",
+                "Spiele, Gespräche, gemeinsame Abende",
                 "Reflexion am Abend",
               ]}
             />
@@ -759,8 +675,8 @@ export default async function EsgPage() {
 
           <p className="prose-block max-w-3xl mt-12 text-[15px] text-[var(--color-wh-fg-muted)] italic">
             Jede Klasse füllt den Aufenthalt anders — mit ihrer Lehrkraft, mit ihrem Projekt, mit
-            ihrem eigenen Rhythmus. Was bleibt, ist: morgens gemeinsam frühstücken, abends ans
-            Lagerfeuer, dazwischen das, was die Gruppe sich vorgenommen hat.
+            ihrem eigenen Rhythmus. Was bleibt, ist: morgens gemeinsam frühstücken, abends
+            zusammensitzen, dazwischen das, was die Gruppe sich vorgenommen hat.
           </p>
         </div>
       </section>

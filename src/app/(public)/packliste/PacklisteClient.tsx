@@ -10,7 +10,7 @@ import {
 } from "@/lib/packliste-rules";
 import type { Locale } from "@/lib/i18n-shared";
 
-const ACTIVITIES: Activity[] = ["wandern", "ski", "lagerfeuer", "klassenfahrt"];
+const ACTIVITIES: Activity[] = ["wandern", "ski", "klassenfahrt"];
 const SEASONS: Season[] = ["winter", "uebergang", "sommer"];
 
 const inputBase =
@@ -54,7 +54,6 @@ const COPY: Record<Locale, Copy> = {
     activityNames: {
       wandern: "Wandern",
       ski: "Ski / Langlauf",
-      lagerfeuer: "Lagerfeuer-Abend",
       klassenfahrt: "Klassenfahrt / Gruppe",
     },
   },
@@ -75,7 +74,6 @@ const COPY: Record<Locale, Copy> = {
     activityNames: {
       wandern: "Hiking",
       ski: "Skiing / cross-country",
-      lagerfeuer: "Campfire evening",
       klassenfahrt: "School trip / group",
     },
   },
@@ -96,7 +94,6 @@ const COPY: Record<Locale, Copy> = {
     activityNames: {
       wandern: "Wandelen",
       ski: "Skiën / langlaufen",
-      lagerfeuer: "Kampvuuravond",
       klassenfahrt: "Schoolreis / groep",
     },
   },
@@ -106,7 +103,7 @@ export function PacklisteClient({ locale }: { locale: Locale }) {
   const c = COPY[locale];
   const [season, setSeason] = useState<Season>(detectSeasonForToday());
   const [nights, setNights] = useState(3);
-  const [activities, setActivities] = useState<Activity[]>(["wandern", "lagerfeuer"]);
+  const [activities, setActivities] = useState<Activity[]>(["wandern"]);
 
   const input: PackInput = { season, nights, activities };
 

@@ -104,24 +104,6 @@
         
     </g>
     
-    <g class="poi" data-key="feuerstelle">
-      
-      <g class="poi-badge">
-        <circle cx="899.8" cy="508.7" r="18.0" fill="#fbf7ef" stroke="#c1531f" stroke-width="2"/>
-        <g transform="translate(888.6,497.5) scale(0.938)" color="#c1531f">
-          <path d="M12 3c-3.5 4.5-6 7.7-6 11a6 6 0 0 0 12 0c0-3.3-2.5-6.5-6-11Z" fill="currentColor" stroke="none"/><path d="M12 21a3.6 3.6 0 0 0 3.6-3.6c0-1.2-.7-2.1-.7-2.1.1 1.6-.9 2.5-1.9 2.5-1.1 0-2-.9-2-2 0-.8.3-1.3.3-1.3-2 .7-2.9 2-2.9 3.4A3.6 3.6 0 0 0 12 21Z" fill="#F2C879" stroke="none"/>
-        </g>
-      </g>
-      <text x="899.8" y="540.7" text-anchor="middle" font-size="14" font-weight="600"
-            fill="#241f1a" stroke="#f7f2e9" stroke-width="3.5" paint-order="stroke"
-            style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">Feuerstelle</text>
-      
-        <text class="poi-tip" x="899.8" y="556.7" text-anchor="middle" font-size="11.5" font-style="italic"
-              fill="#6b4e30" stroke="#f7f2e9" stroke-width="3" paint-order="stroke"
-              style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">Lagerfeuer & Stockbrot</text>
-        
-    </g>
-    
     <g class="poi" data-key="bluehwiese">
       
       <g class="poi-badge">

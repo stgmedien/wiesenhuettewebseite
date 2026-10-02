@@ -19,7 +19,7 @@ export function GelaendeKarte() {
       <h2 className={styles.karteTitle}>Das erwartet euch auf dem Gelände.</h2>
       <div className={styles.karteDivider} />
       <p className={styles.karteLead}>
-        Vom Zeltplatz im Wald bis zur Feuerstelle, vom Freisitz an der Hauswand bis zur Blühwiese
+        Vom Zeltplatz im Wald über den Freisitz an der Hauswand bis zur Blühwiese
         an der Zufahrt — ein erster Überblick, bevor ihr euch für ein Projekt entscheidet. Zum
         Entdecken: über die Punkte fahren oder sie antippen.
       </p>

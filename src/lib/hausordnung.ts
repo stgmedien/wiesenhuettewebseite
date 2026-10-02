@@ -6,7 +6,7 @@
  * welche Hausordnungs-Fassung zum Buchungszeitpunkt galt).
  */
 
-export const CURRENT_HAUSORDNUNG_VERSION = "2026-08";
+export const CURRENT_HAUSORDNUNG_VERSION = "2026-10";
 
 export const HAUSORDNUNG_HISTORY: Array<{ version: string; effectiveFrom: string }> = [
   { version: "2025-01", effectiveFrom: "2025-01-01" },
@@ -18,4 +18,9 @@ export const HAUSORDNUNG_HISTORY: Array<{ version: string; effectiveFrom: string
   // nach Rueckspreache mit Luetgerts gilt "Stufe 1" nur im Winter (Mitte
   // Nov.-Mitte Maerz), sonst reicht Frostwaechter (Muffbildung sonst).
   { version: "2026-08", effectiveFrom: "2026-08-21" },
+  // 2026-10: Offenes Feuer auf dem Gelaende vorerst untersagt (auch an der
+  // vorhandenen Feuerstelle) -- Genehmigung nach § 47 LFoG NRW (100 m
+  // Waldabstand) ist ungeklaert. Feuerstellen-Regeln und Abreise-Checkpunkt
+  // entfallen.
+  { version: "2026-10", effectiveFrom: "2026-10-02" },
 ];

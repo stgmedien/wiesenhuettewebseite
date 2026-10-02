@@ -28,7 +28,7 @@ const QUOTE: Record<Locale, { text: string; author: string; role: string }> = {
 export const metadata = {
   title: "Die Hütte · Wiesenhütte Langewiese",
   description:
-    "33 Schlafplätze in 5 Schlafzimmern, voll ausgestattete Küche, Esszimmer und Wohnzimmer, Skikeller, Feuerstelle. Selbstversorgerhütte für Gruppen in Langewiese, Hochsauerland.",
+    "33 Schlafplätze in 5 Schlafzimmern, voll ausgestattete Küche, Esszimmer und Wohnzimmer, Skikeller. Selbstversorgerhütte für Gruppen in Langewiese, Hochsauerland.",
 };
 
 type Copy = {
@@ -83,7 +83,7 @@ const COPY: Record<Locale, Copy> = {
     desc: {
       eyebrow: "Beschreibung",
       h2: "Zwei Vollgeschosse, Dachboden, Untergeschoss.",
-      body: "Die Wiesenhütte liegt etwa 50 m unterhalb der Bundesstraße am Hang in Langewiese, einem Höhendorf bei Winterberg im Hochsauerland. Sie ist eine Selbstversorgerhütte für Vereins-, Schul-, Klassen- und Gruppenfahrten. Atmosphäre: bewusst entschleunigt, gemeinsames Kochen, Abende an der Feuerstelle, Natur direkt vor der Tür.",
+      body: "Die Wiesenhütte liegt etwa 50 m unterhalb der Bundesstraße am Hang in Langewiese, einem Höhendorf bei Winterberg im Hochsauerland. Sie ist eine Selbstversorgerhütte für Vereins-, Schul-, Klassen- und Gruppenfahrten. Atmosphäre: bewusst entschleunigt, gemeinsames Kochen, lange Abende, Natur direkt vor der Tür.",
     },
     rooms: {
       heading: "Schlafzimmer",
@@ -125,7 +125,7 @@ const COPY: Record<Locale, Copy> = {
       },
       aussen: {
         heading: "Außenbereich",
-        items: ["Freisitz", "Baumbank", "Selbstgebaute Feuerstelle", "Eigener Rodelhang neben der Hütte"],
+        items: ["Freisitz", "Baumbank", "Eigener Rodelhang neben der Hütte"],
       },
       heat: {
         heading: "Heizung & Verpflegung",
@@ -222,7 +222,7 @@ const COPY: Record<Locale, Copy> = {
     desc: {
       eyebrow: "Description",
       h2: "Two full floors, attic, basement.",
-      body: "The Wiesenhütte sits about 50 m below the main road on a hillside in Langewiese, a highland village near Winterberg in the Hochsauerland. It is a self-catering cabin for clubs, schools, classes and groups. The atmosphere is intentionally slow: cooking together, evenings at the fire pit, nature right outside the door.",
+      body: "The Wiesenhütte sits about 50 m below the main road on a hillside in Langewiese, a highland village near Winterberg in the Hochsauerland. It is a self-catering cabin for clubs, schools, classes and groups. The atmosphere is intentionally slow: cooking together, long evenings, nature right outside the door.",
     },
     rooms: {
       heading: "Bedrooms",
@@ -264,7 +264,7 @@ const COPY: Record<Locale, Copy> = {
       },
       aussen: {
         heading: "Outdoors",
-        items: ["Patio seating", "Log bench", "Self-built fire pit", "Private sledding slope next to the cabin"],
+        items: ["Patio seating", "Log bench", "Private sledding slope next to the cabin"],
       },
       heat: {
         heading: "Heating & catering",
@@ -361,7 +361,7 @@ const COPY: Record<Locale, Copy> = {
     desc: {
       eyebrow: "Beschrijving",
       h2: "Twee volledige verdiepingen, zolder, kelder.",
-      body: "De Wiesenhütte ligt ongeveer 50 m onder de hoofdweg op een helling in Langewiese, een hooggelegen dorp bij Winterberg in het Hochsauerland. Het is een zelfvoorzienende hut voor verenigingen, scholen, klassen en groepen. De sfeer is bewust rustig: samen koken, avonden bij de vuurplaats, natuur direct voor de deur.",
+      body: "De Wiesenhütte ligt ongeveer 50 m onder de hoofdweg op een helling in Langewiese, een hooggelegen dorp bij Winterberg in het Hochsauerland. Het is een zelfvoorzienende hut voor verenigingen, scholen, klassen en groepen. De sfeer is bewust rustig: samen koken, lange avonden, natuur direct voor de deur.",
     },
     rooms: {
       heading: "Slaapkamers",
@@ -403,7 +403,7 @@ const COPY: Record<Locale, Copy> = {
       },
       aussen: {
         heading: "Buitengebied",
-        items: ["Terras", "Boombank", "Zelfgebouwde vuurplaats", "Eigen sleehelling naast de hut"],
+        items: ["Terras", "Boombank", "Eigen sleehelling naast de hut"],
       },
       heat: {
         heading: "Verwarming & maaltijden",
