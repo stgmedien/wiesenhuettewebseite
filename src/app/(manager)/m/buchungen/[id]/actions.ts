@@ -8,7 +8,12 @@ import { auth } from "@/lib/auth";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { BOOKING_BLOCKS_TAG } from "@/lib/availability";
 import { MANUAL_REST_MARKER } from "@/lib/payment-markers";
-import { getOrCreateStripeCustomer, BANK_TRANSFER_PM_OPTIONS } from "@/lib/stripe-bank-transfer";
+import {
+  getOrCreateStripeCustomer,
+  BANK_TRANSFER_PM_OPTIONS,
+  isBankTransferActive,
+  bankTransferPmTypes,
+} from "@/lib/stripe-bank-transfer";
 import { stripe } from "@/lib/stripe";
 import { sendMail } from "@/lib/mail/send";
 import ManagerMessageEmail from "@/lib/mail/templates/manager-message";
@@ -249,9 +254,11 @@ export async function sendBookingMessage(
       customer.email,
       `${customer.firstName} ${customer.lastName}`
     );
+    // Capability-Gate: Überweisung nur, wenn in Stripe freigeschaltet.
+    const btActive = await isBankTransferActive();
     const stripeSession = await stripe.checkout.sessions.create({
       mode: "payment",
-      payment_method_types: ["card", "customer_balance"],
+      payment_method_types: bankTransferPmTypes(btActive),
       locale: "de",
       customer: stripeCustomerId,
       line_items: [
@@ -277,7 +284,7 @@ export async function sendBookingMessage(
       // Speicherung läuft über payment_method_options.card.
       payment_method_options: {
         card: { setup_future_usage: "off_session" },
-        ...BANK_TRANSFER_PM_OPTIONS,
+        ...(btActive ? BANK_TRANSFER_PM_OPTIONS : {}),
       },
       payment_intent_data: {
         metadata: { bookingId: booking.id, bookingNumber: booking.bookingNumber },
