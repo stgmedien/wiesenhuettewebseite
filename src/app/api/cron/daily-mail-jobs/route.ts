@@ -594,9 +594,9 @@ export async function GET(req: Request) {
   // ihre Inhalte (Adresse, Hausordnung-Erinnerung) stecken jetzt in der
   // restzahlung-confirmed-Mail bei T-14. Toni bekommt seine Erinnerung
   // weiterhin eine Woche vor Anreise, unabhaengig davon. Kurkarten +
-  // Feuerwehr-Meldeliste haengen hier NICHT mehr dran — die bekommt Toni
-  // automatisch sofort beim Kurkarten-Upload (siehe kurkarten-upload/
-  // route.ts), unabhaengig vom Anreisedatum.
+  // Feuerwehr-Meldeliste haengen hier NICHT mehr dran — die gehen mit der
+  // T-3-Erinnerung an Gast und Toni raus (siehe unten; bei Upload nach T-3
+  // sofort ueber kurkarten-upload/route.ts).
   const t7 = isoDayOffset(7);
   const t7Bookings = await db
     .select()
