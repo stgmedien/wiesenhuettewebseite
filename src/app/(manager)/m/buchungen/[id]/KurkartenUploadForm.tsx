@@ -106,10 +106,11 @@ export function KurkartenUploadForm({
 
   return (
     <div className="mt-5 pt-5 border-t border-[var(--color-wh-winter-grey)]">
-      <p className="text-sm font-medium mb-1">Kurkarten-PDF für Toni</p>
+      <p className="text-sm font-medium mb-1">Kurkarten-PDF für Gast und Toni</p>
       <p className="text-xs text-[var(--color-wh-fg-muted)] mb-3">
-        Sammel-PDF aus dem AVS-Portal hier hochladen — sie wird der T-7-Mail an Toni automatisch
-        beigefügt. Die Feuerwehr-Meldeliste wird dabei automatisch aus den Namen erzeugt.
+        Sammel-PDF aus dem AVS-Portal hier hochladen. Sie geht 3 Tage vor Anreise automatisch mit
+        der letzten Erinnerung an den Gast und an Toni raus — bei späterem Upload sofort. Die
+        Feuerwehr-Meldeliste wird dabei automatisch aus den Namen erzeugt und mitgeschickt.
       </p>
 
       {kurkartenUrl ? (
