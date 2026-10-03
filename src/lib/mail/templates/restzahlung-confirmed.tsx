@@ -117,8 +117,9 @@ export default function RestzahlungConfirmedEmail({
             <Text style={{ ...text, margin: "0 0 8px 0" }}>
               <strong>Kurkarten:</strong> Solltet Ihr den digitalen Meldeschein noch nicht
               ausgefüllt haben — bitte jetzt nachholen (Link kam per separater Mail von uns). Das
-              ist gesetzlich vorgeschrieben (Meldepflicht und Kurbeitrag der Stadt Winterberg,
-              Pflicht ab 16 Jahren). Eure Kurkarten schicken wir Euch separat zu, sobald sie
+              ist gesetzlich vorgeschrieben (Meldepflicht und Kurbeitrag der Stadt Winterberg).
+              Bitte tragt alle Mitreisenden einzeln ein, auch Kinder — der Kurbeitrag fällt
+              erst ab 16 Jahren an. Eure Kurkarten schicken wir Euch separat zu, sobald sie
               fertig sind.
             </Text>
             <Text style={{ ...text, margin: "0 0 8px 0" }}>

@@ -159,8 +159,9 @@ export default function RestzahlungRequestEmail({
                 </Button>
               </Section>
               <Text style={muted}>
-                Bitte für alle Erwachsenen (ab 16 Jahre) die vollständigen Namen eintragen — das
-                ist Voraussetzung für die Kurtaxe-Abrechnung mit Winterberg. Falls der Button nicht
+                Bitte alle Mitreisenden einzeln mit Vor- und Nachname eintragen, auch Kinder —
+                das ist Voraussetzung für Kurkarten und Kurtaxe-Abrechnung mit Winterberg
+                (Kurbeitrag erst ab 16 Jahren). Falls der Button nicht
                 funktioniert, nutzt diesen Link:
                 <br />
                 {avsCheckinLink}

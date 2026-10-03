@@ -36,7 +36,8 @@ export default async function HausordnungPage() {
             <li>
               <strong>Kurkarte:</strong> Spätestens 14 Tage vorher füllt Ihr bitte den digitalen
               Meldeschein aus (Link per E-Mail von uns) — das ist gesetzlich vorgeschrieben
-              (Meldepflicht und Kurbeitrag der Stadt Winterberg, ab 16 Jahren). Danach schicken wir
+              (Meldepflicht und Kurbeitrag der Stadt Winterberg). Bitte tragt dort alle Mitreisenden
+              einzeln ein, auch Kinder — der Kurbeitrag fällt erst ab 16 Jahren an. Danach schicken wir
               Euch die fertigen Kurkarten als PDF zu, zusammen mit der Feuerwehr-Meldeliste — bitte
               druckt beide aus und bringt sie zur Anreise mit. Kein eigener Drucker? Meldet Euch
               einfach bei uns, dann druckt Toni Klauke die Kurkarten für Euch aus.

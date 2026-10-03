@@ -144,9 +144,9 @@ const FAQS: QA[] = [
       nl: "Hoe zit het met de toeristenbelasting (Kurtaxe)?",
     },
     a: {
-      de: "Die Kurtaxe Hochsauerland (2,70 € pro Person ab 16 Jahren und Nacht) wird zusammen mit der Restzahlung eingezogen und von uns an die Kurverwaltung Winterberg abgeführt — Du musst Dich um nichts Extra kümmern.",
-      en: "The Hochsauerland guest tax (€2.70 per guest aged 16+ per night) is collected together with the remaining payment and remitted by us to the Winterberg tourist office — nothing extra for you to do.",
-      nl: "De toeristenbelasting Hochsauerland (€ 2,70 per persoon vanaf 16 jaar per nacht) wordt samen met de restbetaling geïncasseerd en door ons afgedragen aan de Kurverwaltung Winterberg — jij hoeft verder niets te doen.",
+      de: "Die Kurtaxe Hochsauerland (2,70 € pro Person ab 16 Jahren und Nacht) wird zusammen mit der Restzahlung eingezogen und von uns an die Kurverwaltung Winterberg abgeführt. Vor der Anreise füllt Ihr den digitalen Meldeschein aus (Link per E-Mail von uns) und tragt dort alle Mitreisenden einzeln ein, auch Kinder — danach bekommt Ihr Eure Kurkarten von uns.",
+      en: "The Hochsauerland guest tax (€2.70 per guest aged 16+ per night) is collected together with the remaining payment and remitted by us to the Winterberg tourist office. Before arrival you fill in the digital registration form (we email you the link) and enter every guest individually, including children — we then send you your visitor cards (Kurkarten).",
+      nl: "De toeristenbelasting Hochsauerland (€ 2,70 per persoon vanaf 16 jaar per nacht) wordt samen met de restbetaling geïncasseerd en door ons afgedragen aan de Kurverwaltung Winterberg. Vóór aankomst vullen jullie het digitale meldformulier in (link per e-mail van ons) en voeren jullie alle medereizigers afzonderlijk in, ook kinderen — daarna ontvangen jullie de kurkarten van ons.",
     },
   },
   {
