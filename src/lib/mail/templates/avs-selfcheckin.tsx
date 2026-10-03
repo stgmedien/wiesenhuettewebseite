@@ -103,10 +103,14 @@ export default function AvsSelfCheckinEmail({
           >
             <Text style={{ ...text, margin: 0 }}>
               <strong>Gut zu wissen:</strong>
-              <br />– Es genügt, wenn Du als Buchende:r die Daten ausfüllst — Mitreisende werden
-              nur in Anzahl erfasst.
-              <br />– Eure <strong>Kurkarten</strong> bekommt Ihr anschließend automatisch per
-              E-Mail von AVS zugesendet — bitte zur Anreise mitbringen (digital oder ausgedruckt).
+              <br />– Du als Buchende:r trägst Dich mit Namen und Anschrift ein.
+              <br />– Bitte tragt dann <strong>alle Mitreisenden einzeln als Begleitpersonen</strong>{" "}
+              ein, auch Kinder — jeweils mit Vor- und Nachname und der passenden Kategorie:
+              Erwachsen (ab 16 Jahren), Kind (4–15 Jahre) oder Kleinkind (0–3 Jahre). Am besten
+              legt Ihr Euch die Teilnehmerliste vorher bereit.
+              <br />– Kinder sind vom Kurbeitrag befreit.
+              <br />– Eure <strong>Kurkarten</strong> schicken wir Euch vor der Anreise per E-Mail
+              zu — bitte zur Anreise mitbringen (digital oder ausgedruckt).
             </Text>
           </Section>
           <Hr style={{ borderColor: "#C8CEC4", margin: "32px 0 16px" }} />

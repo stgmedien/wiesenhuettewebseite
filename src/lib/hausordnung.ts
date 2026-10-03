@@ -21,6 +21,7 @@ export const HAUSORDNUNG_HISTORY: Array<{ version: string; effectiveFrom: string
   // 2026-10: Offenes Feuer auf dem Gelaende vorerst untersagt (auch an der
   // vorhandenen Feuerstelle) -- Genehmigung nach § 47 LFoG NRW (100 m
   // Waldabstand) ist ungeklaert. Feuerstellen-Regeln und Abreise-Checkpunkt
-  // entfallen.
+  // entfallen. Nachtrag 03.10.2026 (ohne Versionssprung, Klarstellung): im
+  // digitalen Meldeschein alle Mitreisenden einzeln eintragen, auch Kinder.
   { version: "2026-10", effectiveFrom: "2026-10-02" },
 ];
