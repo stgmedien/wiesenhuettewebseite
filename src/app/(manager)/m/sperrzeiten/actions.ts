@@ -9,6 +9,7 @@ import { auth } from "@/lib/auth";
 import { generateBookingNumber } from "@/lib/utils";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { BOOKING_BLOCKS_TAG } from "@/lib/availability";
+import { RESERVATION_PREFIX, WARTUNG_PREFIX } from "@/lib/reservation";
 
 async function requireManager() {
   const session = await auth();
@@ -21,6 +22,9 @@ const schema = z.object({
   from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   purpose: z.string().min(1).max(255),
+  // "sperrzeit" = Wartung/Eigennutzung, "reservierung" = geplante eigene
+  // Fahrt (z. B. ESG) — siehe src/lib/reservation.ts.
+  kind: z.enum(["sperrzeit", "reservierung"]).default("sperrzeit"),
 });
 
 export async function createSperrzeit(formData: FormData) {
@@ -30,11 +34,13 @@ export async function createSperrzeit(formData: FormData) {
     from: formData.get("from"),
     to: formData.get("to"),
     purpose: formData.get("purpose"),
+    kind: formData.get("kind") ?? undefined,
   });
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues.map((i) => i.message).join(", ") };
   }
-  const { from, to, purpose } = parsed.data;
+  const { from, to, purpose, kind } = parsed.data;
+  const isReservierung = kind === "reservierung";
   if (new Date(to) <= new Date(from)) {
     return { ok: false, error: "Bis-Datum muss nach Von-Datum liegen." };
   }
@@ -86,7 +92,7 @@ export async function createSperrzeit(formData: FormData) {
       pupils: 0,
       teachers: 0,
       persons: 0,
-      purpose: `WARTUNG: ${purpose}`,
+      purpose: `${isReservierung ? RESERVATION_PREFIX : WARTUNG_PREFIX}${purpose}`,
       accommodationCents: 0,
       kurtaxeCents: 0,
       energyFlatCents: 0,
@@ -105,7 +111,7 @@ export async function createSperrzeit(formData: FormData) {
 
   await db.insert(activityLog).values({
     who: session.user?.name ?? session.user?.email ?? "Manager",
-    what: `Sperrzeit angelegt: ${from} → ${to} (${purpose})`,
+    what: `${isReservierung ? "Reservierung" : "Sperrzeit"} angelegt: ${from} → ${to} (${purpose})`,
     bookingId: inserted[0].id,
   });
 

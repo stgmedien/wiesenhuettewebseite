@@ -6,7 +6,12 @@ import { Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { createManualBooking } from "./actions";
 
-export default function ManualBookingForm() {
+export default function ManualBookingForm({
+  reservation = null,
+}: {
+  /** Reservierung, die durch diese Buchung ersetzt wird (Zeitraum/Anlass vorbelegt). */
+  reservation?: { id: string; arrival: string; departure: string; label: string } | null;
+}) {
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
@@ -29,8 +34,9 @@ export default function ManualBookingForm() {
     <form onSubmit={onSubmit} className="space-y-6 bg-white border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-6">
       <h3 className="text-[20px] m-0">Zeitraum & Belegung</h3>
       <div className="grid grid-cols-2 gap-4">
-        <Input id="arrival" name="arrival" label="Anreise" type="date" required />
-        <Input id="departure" name="departure" label="Abreise" type="date" required />
+        <Input id="arrival" name="arrival" label="Anreise" type="date" defaultValue={reservation?.arrival} required />
+        <Input id="departure" name="departure" label="Abreise" type="date" defaultValue={reservation?.departure} required />
+        {reservation && <input type="hidden" name="reservationId" value={reservation.id} />}
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -73,7 +79,7 @@ export default function ManualBookingForm() {
         <Input id="phone" name="phone" type="tel" label="Telefon" />
       </div>
 
-      <Input id="purpose" name="purpose" label="Anlass (optional)" />
+      <Input id="purpose" name="purpose" label="Anlass (optional)" defaultValue={reservation?.label} />
       <label className="flex items-center gap-3 text-sm">
         Anzahlung
         <select
