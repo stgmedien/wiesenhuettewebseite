@@ -274,6 +274,15 @@ export default async function BookingDetail({ params }: Props) {
               <div className="text-[var(--color-wh-fg-muted)] text-sm">Noch keine Zahlung erfasst.</div>
             ) : (
               <PaymentsTable
+                restExtras={{
+                  // Wie beim T-14-Einzug: nur, was noch nicht als erhalten verbucht ist.
+                  kautionCents: pmts.some((p) => p.kind === "kaution" && p.status === "erhalten")
+                    ? 0
+                    : b.depositCents,
+                  kurtaxeCents: pmts.some((p) => p.kind === "kurtaxe" && p.status === "erhalten")
+                    ? 0
+                    : b.kurtaxeCents,
+                }}
                 rows={pmts.map((p) => ({
                   id: p.id,
                   kind: p.kind,
