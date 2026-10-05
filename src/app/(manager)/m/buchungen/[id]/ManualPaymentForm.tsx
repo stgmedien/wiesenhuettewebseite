@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { parseEuroInput } from "@/lib/utils";
 import { recordManualPayment } from "./actions";
 import { MANUAL_REST_MARKER } from "@/lib/payment-markers";
 
@@ -39,9 +40,9 @@ export function ManualPaymentForm({
 
   const submit = () => {
     setErr(null);
-    const amt = parseFloat(amount.replace(",", "."));
+    const amt = parseEuroInput(amount);
     if (!amt || amt <= 0) {
-      setErr("Bitte einen Betrag größer 0 angeben.");
+      setErr("Bitte einen gültigen Betrag größer 0 angeben, z. B. 1.371,50.");
       return;
     }
     start(async () => {
