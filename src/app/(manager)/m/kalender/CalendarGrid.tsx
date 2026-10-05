@@ -19,6 +19,7 @@ const STATUS_COLOR: Record<string, string> = {
   angereist: "#2F4A35",
   abgereist: "#C8CEC4",
   wartung: "#111111",
+  reserviert: "#C9B8E8",
 };
 
 const STATUS_FG: Record<string, string> = {
@@ -28,6 +29,7 @@ const STATUS_FG: Record<string, string> = {
   angereist: "#F7F7F2",
   abgereist: "#2F4A35",
   wartung: "#F7F7F2",
+  reserviert: "#4A3B6B",
 };
 
 type Event = {

@@ -6,6 +6,9 @@ const COLORS: Record<string, { bg: string; fg: string; label: string }> = {
   abgereist: { bg: "#C8CEC4", fg: "#2F4A35", label: "Abgereist" },
   storniert: { bg: "#f3d5cb", fg: "#B85C38", label: "Storniert" },
   wartung: { bg: "#111111", fg: "#F7F7F2", label: "Wartung" },
+  // Anzeige-Status fuer Reservierungen (in der DB "wartung" + Praefix, siehe
+  // src/lib/reservation.ts).
+  reserviert: { bg: "#C9B8E8", fg: "#4A3B6B", label: "Reserviert" },
 };
 
 // Teilzahlungs-Variante von "bezahlt": Der Webhook setzt den Status schon

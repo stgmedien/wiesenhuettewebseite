@@ -4,6 +4,7 @@ import { eq, gte, lte, and, ne } from "drizzle-orm";
 import { CalendarGrid } from "./CalendarGrid";
 import { getSiteSettings } from "@/lib/settings";
 import { getReleasedCleaningDates } from "@/lib/cleaning-overrides";
+import { isReservation, sperrzeitLabel } from "@/lib/reservation";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Kalender · Wiesenhütte Manager" };
@@ -29,6 +30,7 @@ export default async function CalendarPage({ searchParams }: Props) {
       arrival: bookings.arrival,
       departure: bookings.departure,
       persons: bookings.persons,
+      purpose: bookings.purpose,
       customerFirst: customers.firstName,
       customerLast: customers.lastName,
     })
@@ -45,14 +47,17 @@ export default async function CalendarPage({ searchParams }: Props) {
   const events = list.map((b) => ({
     id: b.id,
     bookingNumber: b.bookingNumber,
-    status: b.status,
+    // Reservierungen bekommen im Kalender eine eigene Farbe.
+    status: isReservation(b) ? "reserviert" : b.status,
     arrival: b.arrival,
     departure: b.departure,
     persons: b.persons,
     title:
-      b.customerFirst || b.customerLast
-        ? `${b.customerFirst ?? ""} ${b.customerLast ?? ""}`.trim()
-        : b.bookingNumber,
+      b.status === "wartung" && sperrzeitLabel(b.purpose)
+        ? `${isReservation(b) ? "Reserviert" : "Sperrzeit"} · ${sperrzeitLabel(b.purpose)}`
+        : b.customerFirst || b.customerLast
+          ? `${b.customerFirst ?? ""} ${b.customerLast ?? ""}`.trim()
+          : b.bookingNumber,
   }));
 
   const { cleaningDaysAfterDeparture } = await getSiteSettings();
@@ -61,7 +66,7 @@ export default async function CalendarPage({ searchParams }: Props) {
   // bereits durch den Query-Filter oben ausgeschlossen.
   const cleaningDates = new Set<string>();
   for (const e of list) {
-    if (e.status === "wartung") continue;
+    if (e.status === "wartung" && !isReservation(e)) continue;
     const dep = new Date(e.departure);
     for (let i = 0; i < cleaningDaysAfterDeparture; i++) {
       const d = new Date(dep);

@@ -4,6 +4,7 @@ import { bookings } from "./db/schema";
 import { and, gte, lte, ne, or, eq } from "drizzle-orm";
 import { getSiteSettings } from "./settings";
 import { getReleasedCleaningDates } from "./cleaning-overrides";
+import { isReservation } from "@/lib/reservation";
 
 /** Cache-Tag — bei jeder Buchungs-/Sperrzeit-Mutation via
  *  revalidateTag("booking-blocks") invalidieren. */
@@ -75,6 +76,7 @@ export const isRangeAvailable = async (
       arrival: bookings.arrival,
       departure: bookings.departure,
       status: bookings.status,
+      purpose: bookings.purpose,
     })
     .from(bookings)
     .where(
@@ -90,7 +92,9 @@ export const isRangeAvailable = async (
     // Wartung bekommt keinen Reinigungs-Puffer danach, belegt aber ebenfalls
     // bis einschließlich End-Tag. Gäste-Buchungen: Abreisetag belegt + danach
     // Reinigung → +1 für den (inklusiven) Abreisetag.
-    let cleaningForExisting = c.status === "wartung" ? 0 : cleaningDays;
+    // Reservierungen (geplante eigene Fahrten) zaehlen wie ein Aufenthalt.
+    let cleaningForExisting =
+      c.status === "wartung" && !isReservation(c) ? 0 : cleaningDays;
     const depIso = toIso(c.departure);
     let existingEffectiveEnd = addDaysIso(depIso, cleaningForExisting + 1);
     // Freigegebene Reinigungstage am Ende des Puffers wegkürzen (Tag für Tag),
@@ -139,6 +143,7 @@ const getBookingBlocksRaw = unstable_cache(
       arrival: bookings.arrival,
       departure: bookings.departure,
       status: bookings.status,
+      purpose: bookings.purpose,
     })
     .from(bookings)
     .where(
@@ -154,7 +159,9 @@ const getBookingBlocksRaw = unstable_cache(
   const wartung = new Set<string>();
 
   for (const row of rows) {
-    const isWartung = row.status === "wartung";
+    // Reservierungen erscheinen oeffentlich als "belegt" (mit Reinigungstag),
+    // nicht als "Wartung".
+    const isWartung = row.status === "wartung" && !isReservation(row);
     const start = new Date(toIso(row.arrival));
     const end = new Date(toIso(row.departure));
 

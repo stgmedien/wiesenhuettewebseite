@@ -10,6 +10,7 @@ import { auth } from "@/lib/auth";
 import { generateBookingNumber } from "@/lib/utils";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { BOOKING_BLOCKS_TAG } from "@/lib/availability";
+import { isReservation, sperrzeitLabel } from "@/lib/reservation";
 
 const schema = z.object({
   arrival: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -30,6 +31,8 @@ const schema = z.object({
   company: z.string().optional().nullable(),
   purpose: z.string().optional().nullable(),
   internalNotes: z.string().optional().nullable(),
+  // Gesetzt, wenn die Buchung eine Reservierung ersetzt ("In Buchung umwandeln").
+  reservationId: z.string().uuid().optional(),
 });
 
 async function requireManager() {
@@ -75,9 +78,21 @@ export async function createManualBooking(formData: FormData): Promise<{ ok: boo
     return { ok: false, error: issues.map((i) => i.message).join(" ") };
   }
 
+  // Wird eine Reservierung umgewandelt, belegt sie den Zeitraum noch selbst —
+  // sie zaehlt bei der Verfuegbarkeitspruefung nicht mit und wird nach dem
+  // Anlegen der Buchung storniert.
+  let reservation: typeof bookings.$inferSelect | null = null;
+  if (d.reservationId) {
+    reservation =
+      (await db.select().from(bookings).where(eq(bookings.id, d.reservationId)).limit(1))[0] ?? null;
+    if (!reservation || !isReservation(reservation)) {
+      return { ok: false, error: "Die Reservierung wurde nicht gefunden oder ist keine Reservierung mehr." };
+    }
+  }
+
   const free = await isRangeAvailable(
     { arrival: d.arrival, departure: d.departure },
-    undefined,
+    reservation?.id,
     { ignoreCleaningBuffer: d.skipCleaningBuffer }
   );
   if (!free) return { ok: false, error: "Zeitraum ist bereits belegt." };
@@ -156,6 +171,26 @@ export async function createManualBooking(formData: FormData): Promise<{ ok: boo
     what: `Manuelle Buchung ${bookingNumber} angelegt (${totalPersons} P · ${breakdown.nights} N)${d.skipCleaningBuffer ? " — ohne Reinigungspuffer" : ""}`,
     bookingId: inserted[0].id,
   });
+
+  if (reservation) {
+    await db
+      .update(bookings)
+      .set({ status: "storniert", updatedAt: new Date() })
+      .where(eq(bookings.id, reservation.id));
+    await db.insert(activityLog).values([
+      {
+        who: session.user?.name ?? session.user?.email ?? "Manager",
+        what: `Reservierung „${sperrzeitLabel(reservation.purpose)}“ in Buchung ${bookingNumber} umgewandelt`,
+        bookingId: reservation.id,
+      },
+      {
+        who: session.user?.name ?? session.user?.email ?? "Manager",
+        what: `Entstanden aus Reservierung „${sperrzeitLabel(reservation.purpose)}“ (${reservation.bookingNumber})`,
+        bookingId: inserted[0].id,
+      },
+    ]);
+    revalidatePath("/m/sperrzeiten");
+  }
 
   revalidatePath("/m/buchungen");
   revalidatePath("/m/dashboard");
