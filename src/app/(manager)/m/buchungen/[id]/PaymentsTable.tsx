@@ -39,7 +39,19 @@ const eur = (c: number) =>
 const inputCls =
   "w-full rounded-lg border border-[var(--color-wh-winter-grey)] bg-white px-3 py-2 text-sm focus:border-[var(--color-wh-deep-green)] focus:outline-none";
 
-export function PaymentsTable({ rows }: { rows: PaymentRow[] }) {
+export function PaymentsTable({
+  rows,
+  restExtras,
+}: {
+  rows: PaymentRow[];
+  /**
+   * Kaution/Kurtaxe, die zusammen mit der noch offenen Restzahlung fällig
+   * werden (T-14-Abbuchung bzw. Überweisung). Die Restzahlungs-Zeile selbst
+   * enthält nur die Rest-Miete — ohne diesen Hinweis sah der offene Betrag
+   * zu niedrig aus.
+   */
+  restExtras?: { kautionCents: number; kurtaxeCents: number };
+}) {
   const [editId, setEditId] = useState<string | null>(null);
 
   return (
@@ -62,7 +74,26 @@ export function PaymentsTable({ rows }: { rows: PaymentRow[] }) {
               <td>{label(KINDS, p.kind)}</td>
               <td>{p.method ?? "—"}</td>
               <td>{label(STATUSES, p.status)}</td>
-              <td className="text-right font-semibold">{eur(p.amountCents)}</td>
+              <td className="text-right font-semibold">
+                {eur(p.amountCents)}
+                {p.kind === "restzahlung" &&
+                  p.status === "offen" &&
+                  restExtras &&
+                  restExtras.kautionCents + restExtras.kurtaxeCents > 0 && (
+                    <div className="text-xs font-normal text-[var(--color-wh-fg-muted)] whitespace-nowrap">
+                      fällig gesamt{" "}
+                      {eur(p.amountCents + restExtras.kautionCents + restExtras.kurtaxeCents)}
+                      <br />
+                      inkl.{" "}
+                      {[
+                        restExtras.kautionCents > 0 && `${eur(restExtras.kautionCents)} Kaution`,
+                        restExtras.kurtaxeCents > 0 && `${eur(restExtras.kurtaxeCents)} Kurtaxe`,
+                      ]
+                        .filter(Boolean)
+                        .join(" + ")}
+                    </div>
+                  )}
+              </td>
               <td className="text-right">
                 <button
                   type="button"
