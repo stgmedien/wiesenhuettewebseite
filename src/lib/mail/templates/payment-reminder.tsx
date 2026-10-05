@@ -10,12 +10,17 @@ import {
   Text,
   Hr,
 } from "@react-email/components";
+import { CLUB_BANK_DETAILS } from "@/lib/bank-details";
 
 type Props = {
   firstName: string;
   bookingNumber: string;
   arrival: string;
+  /** Gesamter noch offener Betrag inkl. Kaution und Kurtaxe. */
   remainderCents: number;
+  /** Im offenen Betrag enthaltene Kaution/Kurtaxe (null = nicht ausweisen). */
+  depositCents?: number | null;
+  kurtaxeCents?: number | null;
   daysUntilArrival: number;
   paymentLink?: string | null;
   autoChargePlanned: boolean;
@@ -75,6 +80,8 @@ export default function PaymentReminderEmail({
   bookingNumber,
   arrival,
   remainderCents,
+  depositCents,
+  kurtaxeCents,
   daysUntilArrival,
   paymentLink,
   autoChargePlanned,
@@ -93,6 +100,19 @@ export default function PaymentReminderEmail({
             Eure Anreise ist am <strong>{arrival}</strong>. Vor der Anreise wird die Restzahlung
             für Eure Buchung <strong>{bookingNumber}</strong> in Höhe von{" "}
             <strong>{eur(remainderCents)}</strong> fällig.
+            {depositCents || kurtaxeCents ? (
+              <>
+                {" "}
+                Darin enthalten:{" "}
+                {[
+                  depositCents ? `${eur(depositCents)} Kaution` : null,
+                  kurtaxeCents ? `${eur(kurtaxeCents)} Kurtaxe` : null,
+                ]
+                  .filter(Boolean)
+                  .join(" und ")}
+                .
+              </>
+            ) : null}
           </Text>
           <Text style={muted}>
             Kurzer Hinweis: Die Kurtaxe wurde von der Gemeinde zwischenzeitlich leicht angehoben —
@@ -122,11 +142,31 @@ export default function PaymentReminderEmail({
                 Bitte zahle den Betrag rechtzeitig vor Anreise — die Buchung verfällt 48 Stunden
                 nach Fälligkeit, wenn keine Zahlung eingeht.
               </Text>
-              {paymentLink && (
+              {paymentLink ? (
                 <Section style={{ margin: "24px 0" }}>
                   <Button style={button} href={paymentLink}>
                     Jetzt {eur(remainderCents)} zahlen
                   </Button>
+                </Section>
+              ) : (
+                <Section
+                  style={{
+                    backgroundColor: "#EFE6D8",
+                    borderLeft: "4px solid #2F4A35",
+                    padding: "16px 20px",
+                    borderRadius: "12px",
+                    margin: "20px 0",
+                  }}
+                >
+                  <Text style={{ ...text, margin: 0 }}>
+                    <strong>Überweisung an:</strong>
+                    <br />
+                    {CLUB_BANK_DETAILS.kontoinhaber}
+                    <br />
+                    {CLUB_BANK_DETAILS.bank} · IBAN: {CLUB_BANK_DETAILS.iban}
+                    <br />
+                    Verwendungszweck: {bookingNumber}
+                  </Text>
                 </Section>
               )}
             </>

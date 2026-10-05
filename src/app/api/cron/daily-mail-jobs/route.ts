@@ -136,9 +136,33 @@ export async function GET(req: Request) {
     .where(and(eq(bookings.arrival, t21), eq(bookings.status, "bezahlt")));
   for (const b of t21Bookings) {
     if (await alreadySent(b.id, "payment_reminder")) continue;
-    const remainder = b.subtotalCents - b.paidCents + 0; // ohne Kaution, paidCents enthielt Anzahlung
-    const remainderCents = Math.max(0, b.subtotalCents - Math.min(b.paidCents, b.subtotalCents));
+    // Offener Betrag = alles, was vor Anreise noch faellig ist: Rest-Miete +
+    // Kaution + Kurtaxe. Frueher stand hier nur Zwischensumme − Gezahltes —
+    // Kartenzahler merkten das nicht (T-14 zieht den vollen Betrag ein),
+    // Ueberweiser bekamen aber eine um Kaution + Kurtaxe zu niedrige Zahl
+    // genannt (aufgefallen 10/2026: 425,00 € statt 784,40 €).
+    const totalDueCents = b.subtotalCents + b.depositCents + b.kurtaxeCents;
+    const remainderCents = Math.max(0, totalDueCents - Math.min(b.paidCents, totalDueCents));
     if (remainderCents <= 0) continue;
+    // Altsystem-Buchungen bekommen ihre eigene Zahlungsaufforderung mit dem
+    // von Hand eingetragenen Restbetrag (siehe unten) — keine zweite Mail mit
+    // womoeglich abweichender Summe.
+    const hasManualRest = (
+      await db
+        .select({ id: payments.id })
+        .from(payments)
+        .where(
+          and(
+            eq(payments.bookingId, b.id),
+            eq(payments.method, MANUAL_REST_MARKER),
+            eq(payments.status, "offen")
+          )
+        )
+        .limit(1)
+    ).length > 0;
+    if (hasManualRest) continue;
+    // Kaution/Kurtaxe nur ausweisen, wenn sie sicher noch komplett offen sind.
+    const extrasOpen = b.paidCents <= b.subtotalCents;
     const customer = b.customerId
       ? (await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1))[0]
       : null;
@@ -154,6 +178,8 @@ export async function GET(req: Request) {
           bookingNumber: b.bookingNumber,
           arrival: formatDateLong(b.arrival),
           remainderCents,
+          depositCents: extrasOpen ? b.depositCents : null,
+          kurtaxeCents: extrasOpen ? b.kurtaxeCents : null,
           daysUntilArrival: 21,
           paymentLink: null,
           autoChargePlanned: !!b.stripePaymentIntentId,

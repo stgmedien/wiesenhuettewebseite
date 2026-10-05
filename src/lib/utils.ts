@@ -52,3 +52,31 @@ export const daysUntilLocalDate = (iso: string): number => {
   today.setHours(0, 0, 0, 0);
   return Math.round((target.getTime() - today.getTime()) / 86_400_000);
 };
+
+/**
+ * Liest einen von Hand eingetippten Euro-Betrag in deutscher ODER englischer
+ * Schreibweise: "1.371,50", "1371,50", "1371.50", "1,371.50", "1.371" (= 1371).
+ * Ein einfaches replace(",", ".") machte aus "1.371,50" den Betrag 1,37 € —
+ * so ging am 11.09.2026 eine Zahlungsaufforderung ueber 1,37 € raus.
+ * Gibt NaN zurueck, wenn die Eingabe kein eindeutiger Betrag ist.
+ */
+export const parseEuroInput = (raw: string): number => {
+  let s = raw.replace(/[€\s]/g, "");
+  if (!/^\d[\d.,]*$/.test(s)) return NaN;
+  const lastComma = s.lastIndexOf(",");
+  const lastDot = s.lastIndexOf(".");
+  if (lastComma >= 0 && lastDot >= 0) {
+    // Beide Zeichen: das spaetere ist das Dezimaltrennzeichen.
+    const decimal = lastComma > lastDot ? "," : ".";
+    const thousands = decimal === "," ? "." : ",";
+    s = s.split(thousands).join("").replace(decimal, ".");
+  } else if (lastComma >= 0) {
+    if (s.indexOf(",") !== lastComma) return NaN;
+    s = s.replace(",", ".");
+  } else if (lastDot >= 0 && /^\d{1,3}(\.\d{3})+$/.test(s)) {
+    // Nur Punkte in Dreiergruppen: deutsche Tausenderpunkte ("1.371" = 1371).
+    s = s.split(".").join("");
+  }
+  if (!/^\d+(\.\d{1,2})?$/.test(s)) return NaN;
+  return Number(s);
+};
