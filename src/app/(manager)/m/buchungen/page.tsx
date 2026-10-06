@@ -39,6 +39,7 @@ export default async function BookingsListPage({
       totalCents: bookings.subtotalCents,
       paidCents: bookings.paidCents,
       depositCents: bookings.depositCents,
+      kurtaxeCents: bookings.kurtaxeCents,
       stripePaymentIntentId: bookings.stripePaymentIntentId,
       createdAt: bookings.createdAt,
       avsCheckinLink: bookings.avsCheckinLink,
@@ -191,6 +192,7 @@ type BookingRow = {
   totalCents: number;
   paidCents: number;
   depositCents: number;
+  kurtaxeCents: number;
   stripePaymentIntentId: string | null;
   createdAt: Date;
   avsCheckinLink: string | null;
@@ -270,7 +272,7 @@ const BookingsTable = ({
               <StatusPill
                 status={r.status}
                 paidCents={r.paidCents}
-                dueCents={r.totalCents + r.depositCents}
+                dueCents={r.totalCents + r.depositCents + r.kurtaxeCents}
                 manual={!r.stripePaymentIntentId}
               />
             </Td>
@@ -307,11 +309,14 @@ const BookingsTable = ({
                 );
               })()}
             </Td>
-            <Td>{formatEuro(r.totalCents + r.depositCents)}</Td>
+            {/* Gesamtforderung inkl. Kaution UND Kurtaxe — wie auf der
+                Buchungsseite und im Dashboard. Ohne Kurtaxe sah jede voll
+                bezahlte Buchung nach Überzahlung aus. */}
+            <Td>{formatEuro(r.totalCents + r.depositCents + r.kurtaxeCents)}</Td>
             <Td>
               <span
                 className={
-                  r.paidCents >= r.totalCents + r.depositCents
+                  r.paidCents >= r.totalCents + r.depositCents + r.kurtaxeCents
                     ? "text-[var(--color-wh-deep-green)] font-semibold"
                     : "text-[var(--color-wh-sunset)] font-semibold"
                 }
