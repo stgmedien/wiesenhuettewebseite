@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { bookings, customers, payments, inquiries } from "@/lib/db/schema";
+import { bookings, customers, inquiries } from "@/lib/db/schema";
 import { eq, gte, lte, and, desc, ne, sql, inArray } from "drizzle-orm";
 import Link from "next/link";
 import { formatEuro } from "@/lib/pricing";
@@ -8,7 +8,7 @@ import { StatusPill } from "@/components/manager/StatusPill";
 import { getUnresolvedMailFailures, dismissMailFailure } from "@/lib/mail-log";
 import { revalidatePath } from "next/cache";
 import { findMailTemplateMeta } from "@/lib/automatic-mail-templates";
-import { findPriceMismatches } from "@/lib/price-consistency";
+import { findBookingIssues } from "@/lib/payment-consistency";
 import {
   CalendarArrowDown,
   Mail,
@@ -45,11 +45,11 @@ export default async function Dashboard() {
   const in60dIso = in60d.toISOString().slice(0, 10);
 
   const mailFailuresPromise = getUnresolvedMailFailures();
-  const priceMismatchesPromise = findPriceMismatches();
+  const priceMismatchesPromise = findBookingIssues();
 
   // Alle unabhaengigen Queries parallel (Issue #86) — nur openPaymentBookings
   // und die Customer-Namen brauchen Ergebnisse aus dieser Stufe.
-  const [arrivalsSoon, departuresSoon, allBookings, openPaymentRows, openInquiries, recentBookings, kurtaxeSoon] =
+  const [arrivalsSoon, departuresSoon, allBookings, openInquiries, recentBookings, kurtaxeSoon] =
     await Promise.all([
       // Anreisen in den nächsten 2 Monaten
       db
@@ -83,14 +83,18 @@ export default async function Dashboard() {
 
       // KPIs
       db
-        .select({ id: bookings.id, status: bookings.status, paidCents: bookings.paidCents })
+        .select({
+          id: bookings.id,
+          status: bookings.status,
+          paidCents: bookings.paidCents,
+          bookingNumber: bookings.bookingNumber,
+          arrival: bookings.arrival,
+          customerId: bookings.customerId,
+          subtotalCents: bookings.subtotalCents,
+          depositCents: bookings.depositCents,
+          kurtaxeCents: bookings.kurtaxeCents,
+        })
         .from(bookings),
-
-      // Offene Zahlungen
-      db
-        .select({ bookingId: payments.bookingId, amountCents: payments.amountCents })
-        .from(payments)
-        .where(and(eq(payments.status, "offen"), ne(payments.kind, "kaution"), ne(payments.kind, "rueckerstattung"))),
 
       // Offene Anfragen (Inquiries)
       db
@@ -154,23 +158,22 @@ export default async function Dashboard() {
     .reduce((acc, b) => acc + b.paidCents, 0);
   const openRequests = allBookings.filter((b) => b.status === "angefragt").length;
 
-  const openPaymentTotalCents = openPaymentRows.reduce((a, p) => a + Math.max(0, p.amountCents), 0);
-  const openPaymentBookingIds = Array.from(new Set(openPaymentRows.map((p) => p.bookingId)));
-  const openPaymentBookings = openPaymentBookingIds.length
-    ? await db
-        .select({
-          id: bookings.id,
-          bookingNumber: bookings.bookingNumber,
-          arrival: bookings.arrival,
-          customerId: bookings.customerId,
-          subtotalCents: bookings.subtotalCents,
-          paidCents: bookings.paidCents,
-        })
-        .from(bookings)
-        .where(and(inArray(bookings.id, openPaymentBookingIds), lte(bookings.arrival, in30dIso)))
-        .orderBy(bookings.arrival)
-        .limit(10)
-    : [];
+  // Offene Zahlungen aus dem echten Saldo je Buchung (Zwischensumme + Kaution
+  // + Kurtaxe − bezahlt). Frueher aus den "offen"-Zahlungszeilen: Buchungen
+  // ohne solche Zeile (manuell angelegt, Ueberweiser) fehlten dann ganz, und
+  // Kaution/Kurtaxe waren nicht eingerechnet.
+  const withOpenBalance = allBookings
+    .filter((b) => ["bestaetigt", "bezahlt", "angereist"].includes(b.status))
+    .map((b) => ({
+      ...b,
+      openCents: b.subtotalCents + b.depositCents + b.kurtaxeCents - b.paidCents,
+    }))
+    .filter((b) => b.openCents > 0);
+  const openPaymentTotalCents = withOpenBalance.reduce((a, b) => a + b.openCents, 0);
+  const openPaymentBookings = withOpenBalance
+    .filter((b) => b.arrival <= in30dIso)
+    .sort((x, y) => x.arrival.localeCompare(y.arrival))
+    .slice(0, 10);
 
   // Customer-Namen für alle relevanten Buchungen laden
   const allCustomerIds = Array.from(
@@ -250,18 +253,19 @@ export default async function Dashboard() {
         </section>
       )}
 
-      {/* Inkonsistente Preisfelder — nur sichtbar, wenn es welche gibt */}
+      {/* Auffälligkeiten bei Preis oder Zahlung — nur sichtbar, wenn es welche gibt */}
       {priceMismatches.length > 0 && (
         <section className="mt-8 sm:mt-10 rounded-[var(--radius-card)] border-2 border-[var(--color-wh-sunset)] bg-[var(--color-wh-beige)] p-5 sm:p-6">
           <h3 className="text-[20px] m-0 mb-1 flex items-center gap-2 text-[var(--color-wh-sunset)]">
             <AlertTriangle size={20} />
             {priceMismatches.length === 1
-              ? "Eine Buchung hat inkonsistente Preisfelder"
-              : `${priceMismatches.length} Buchungen haben inkonsistente Preisfelder`}
+              ? "Eine Buchung braucht einen Blick"
+              : `${priceMismatches.length} Buchungen brauchen einen Blick`}
           </h3>
           <p className="text-sm text-[var(--color-wh-fg-muted)] m-0 mb-4">
-            Zwischensumme, Gesamtsumme oder Kurtaxe passen nicht mehr zu den gespeicherten
-            Einzelposten — bitte manuell prüfen, hier wird nichts automatisch korrigiert.
+            Preisfelder passen nicht zueinander, oder bei den Zahlungen stimmt etwas nicht —
+            z.&nbsp;B. Geld ist offen, wird aber nicht angefordert. Bitte manuell prüfen, hier
+            wird nichts automatisch korrigiert.
           </p>
           <div>
             {priceMismatches.map((m) => (
@@ -409,7 +413,7 @@ export default async function Dashboard() {
           ) : (
             openPaymentBookings.map((b) => {
               const c = b.customerId ? custMap.get(b.customerId) : null;
-              const open = b.subtotalCents - b.paidCents;
+              const open = b.openCents;
               return (
                 <Row
                   key={b.id}

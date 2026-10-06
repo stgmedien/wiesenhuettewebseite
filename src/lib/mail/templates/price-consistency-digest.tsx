@@ -78,21 +78,22 @@ export default function PriceConsistencyDigestEmail({ rows, baseUrl }: Props) {
     <Html lang="de">
       <Head />
       <Preview>
-        {`${rows.length} ${rows.length === 1 ? "Buchung" : "Buchungen"} mit inkonsistenten Preisfeldern`}
+        {`${rows.length} ${rows.length === 1 ? "Buchung" : "Buchungen"} mit Auffälligkeiten bei Preis oder Zahlung`}
       </Preview>
       <Body style={main}>
         <Container style={container}>
-          <Text style={eyebrow}>Intern · Preis-Konsistenz-Check</Text>
+          <Text style={eyebrow}>Intern · Preis- und Zahlungs-Check</Text>
           <Heading style={heading}>
             {rows.length === 1
-              ? "Eine Buchung hat inkonsistente Preisfelder."
-              : `${rows.length} Buchungen haben inkonsistente Preisfelder.`}
+              ? "Eine Buchung braucht einen Blick."
+              : `${rows.length} Buchungen brauchen einen Blick.`}
           </Heading>
           <Text style={text}>
-            Der tägliche Konsistenz-Check hat Buchungen gefunden, bei denen die gespeicherten
-            Preisfelder nicht mehr zueinander passen (z. B. Kurtaxe stimmt nicht mit der
-            aktuellen Personenzahl überein, oder Zwischensumme ≠ Gesamtsumme). Bitte einmal
-            manuell prüfen — hier wird nichts automatisch korrigiert.
+            Der tägliche Check hat Buchungen gefunden, bei denen Preisfelder nicht zueinander
+            passen oder bei denen Zahlungen nicht stimmen — z. B. Geld ist offen, wird aber
+            nicht angefordert, eine geplante Zahlung weicht vom offenen Betrag ab oder es wurde
+            zu viel gezahlt. Bitte einmal manuell prüfen — hier wird nichts automatisch
+            korrigiert.
           </Text>
           <Section style={box}>
             {rows.map((r) => (
