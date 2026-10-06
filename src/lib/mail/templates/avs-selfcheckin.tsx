@@ -103,12 +103,26 @@ export default function AvsSelfCheckinEmail({
           >
             <Text style={{ ...text, margin: 0 }}>
               <strong>Gut zu wissen:</strong>
+              <br />–{" "}
+              <strong>Bitte füllt den Meldeschein bis spätestens 14 Tage vor Anreise aus.</strong>{" "}
+              Wir brauchen danach noch Zeit, um Eure Kurkarten zu erstellen.
               <br />– Du als Buchende:r trägst Dich mit Namen und Anschrift ein.
               <br />– Bitte tragt dann <strong>alle Mitreisenden einzeln als Begleitpersonen</strong>{" "}
               ein, auch Kinder — jeweils mit Vor- und Nachname und der passenden Kategorie:
               Erwachsen (ab 16 Jahren), Kind (4–15 Jahre) oder Kleinkind (0–3 Jahre). Am besten
               legt Ihr Euch die Teilnehmerliste vorher bereit.
-              <br />– Kinder sind vom Kurbeitrag befreit.
+              <br />– <strong>Das lohnt sich auch für Kinder:</strong> Sie sind vom Kurbeitrag
+              befreit, bekommen aber eine eigene SauerlandCard. Damit fahrt Ihr alle kostenlos mit
+              Bus und Bahn im Sauerland und erhaltet Ermäßigungen bei vielen Freizeitangeboten.{" "}
+              <a
+                href="https://www.winterberg.de/service-kontakt/gaestekarten/sauerlandcard/"
+                style={{ color: "#2F4A35" }}
+              >
+                Mehr zur SauerlandCard
+              </a>
+              <br />– <strong>Es kommt noch jemand dazu oder fällt aus?</strong> Nach dem Absenden
+              könnt Ihr den Meldeschein nicht mehr selbst ändern. Schreibt uns einfach kurz, wir
+              tragen es für Euch nach.
               <br />– Eure <strong>Kurkarten</strong> schicken wir Euch vor der Anreise per E-Mail
               zu — bitte zur Anreise mitbringen (digital oder ausgedruckt).
             </Text>
