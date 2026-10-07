@@ -139,8 +139,8 @@ export default function PaymentReminderEmail({
           ) : (
             <>
               <Text style={text}>
-                Bitte zahle den Betrag rechtzeitig vor Anreise — die Buchung verfällt 48 Stunden
-                nach Fälligkeit, wenn keine Zahlung eingeht.
+                Bitte überweist den Betrag so, dass er spätestens 14 Tage vor Anreise bei uns
+                eingeht.
               </Text>
               {paymentLink ? (
                 <Section style={{ margin: "24px 0" }}>
