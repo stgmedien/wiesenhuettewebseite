@@ -524,10 +524,22 @@ export async function recordManualPayment(
     receivedAt: isAltRest ? null : new Date(),
   });
 
+  // Eine bestätigte Buchung gilt mit dem ersten erfassten Geldeingang intern
+  // als "bezahlt" — erst dann laufen Erinnerungen, Kurkarten-Versand (T-3) und
+  // die Info an den Hüttenwart (T-7). Vorher blieb sie auf "bestätigt" stehen,
+  // und die Automatik lief nie an (aufgefallen 10/2026 bei WH-2026-1363).
+  // Bewusst NUR für "bestaetigt": "angefragt" braucht die Bestätigung mit
+  // Gast-Mail (Häkchen "Buchung bestätigen und Automatik auslösen").
+  const promoteToPaid = !isAltRest && b.status === "bestaetigt";
+
   if (!isAltRest) {
     await db
       .update(bookings)
-      .set({ paidCents: b.paidCents + amountCents, updatedAt: new Date() })
+      .set({
+        paidCents: b.paidCents + amountCents,
+        ...(promoteToPaid ? { status: "bezahlt" as const } : {}),
+        updatedAt: new Date(),
+      })
       .where(eq(bookings.id, data.bookingId));
   }
 
@@ -535,7 +547,9 @@ export async function recordManualPayment(
     who,
     what: isAltRest
       ? `Altsystem-Restzahlungs-Marker angelegt: ${formatEuro(amountCents)} offen → T-14-Cron`
-      : `Manuelle Zahlung erfasst: ${formatEuro(amountCents)} (${data.kind}, ${data.method})`,
+      : `Manuelle Zahlung erfasst: ${formatEuro(amountCents)} (${data.kind}, ${data.method})${
+          promoteToPaid ? " — Status automatisch bestätigt → bezahlt" : ""
+        }`,
     bookingId: data.bookingId,
   });
 

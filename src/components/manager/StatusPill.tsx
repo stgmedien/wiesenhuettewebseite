@@ -24,6 +24,25 @@ const ANGEZAHLT = { bg: "#A8C29A", fg: "#2F4A35", label: "Angezahlt" };
 const BEZAHLT_MANUAL = { bg: "#7B5EA7", fg: "#F7F7F2", label: "Bezahlt (manuell)" };
 const ANGEZAHLT_MANUAL = { bg: "#C9B8E8", fg: "#4A3B6B", label: "Angezahlt (manuell)" };
 
+/**
+ * Angezeigter Zahlungsstand, rein aus dem Geldstand berechnet (nie
+ * gespeichert, kann also nicht veralten):
+ *  - etwas bezahlt, Rest offen  → "angezahlt"
+ *  - alles bezahlt              → "bezahlt"
+ * Gilt für "bezahlt" (der Webhook setzt das schon nach der Anzahlung) UND
+ * für "bestaetigt": Dort blieb die Anzeige bisher auf "Bestätigt", auch wenn
+ * längst Geld eingegangen war. Ohne Zahlungsstände oder bei anderen Status
+ * bleibt es beim gespeicherten Status.
+ */
+export const displayStatus = (status: string, paidCents?: number, dueCents?: number): string => {
+  if (typeof paidCents !== "number" || typeof dueCents !== "number") return status;
+  if (status === "bezahlt") return paidCents < dueCents ? "angezahlt" : "bezahlt";
+  if (status === "bestaetigt" && paidCents > 0) {
+    return paidCents < dueCents ? "angezahlt" : "bezahlt";
+  }
+  return status;
+};
+
 export const StatusPill = ({
   status,
   paidCents,
@@ -31,23 +50,22 @@ export const StatusPill = ({
   manual = false,
 }: {
   status: string;
-  /** Bisher gezahlter Betrag (optional — nur für die Angezahlt-Anzeige). */
+  /** Bisher gezahlter Betrag (optional — nur für die Angezahlt-/Bezahlt-Anzeige). */
   paidCents?: number;
-  /** Gesamtforderung inkl. Kaution (optional — nur für die Angezahlt-Anzeige). */
+  /** Gesamtforderung inkl. Kaution und Kurtaxe (optional — nur für die Angezahlt-/Bezahlt-Anzeige). */
   dueCents?: number;
   /** Kein Stripe-Zahlungsvorgang (Banküberweisung) — färbt "Bezahlt"/"Angezahlt" lila statt grün. */
   manual?: boolean;
 }) => {
-  const partial =
-    status === "bezahlt" &&
-    typeof paidCents === "number" &&
-    typeof dueCents === "number" &&
-    paidCents < dueCents;
-  const c = partial
-    ? (manual ? ANGEZAHLT_MANUAL : ANGEZAHLT)
-    : status === "bezahlt" && manual
-      ? BEZAHLT_MANUAL
-      : (COLORS[status] ?? { bg: "#EFE6D8", fg: "#8A5A38", label: status });
+  const shown = displayStatus(status, paidCents, dueCents);
+  const c =
+    shown === "angezahlt"
+      ? manual
+        ? ANGEZAHLT_MANUAL
+        : ANGEZAHLT
+      : shown === "bezahlt" && manual
+        ? BEZAHLT_MANUAL
+        : (COLORS[shown] ?? { bg: "#EFE6D8", fg: "#8A5A38", label: shown });
   return (
     <span
       className="inline-flex items-center px-3 py-1 text-xs font-semibold uppercase tracking-wider rounded-[var(--radius-pill)]"

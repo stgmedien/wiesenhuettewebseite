@@ -31,9 +31,6 @@ export const URGENT_DAYS_BEFORE_ARRIVAL = 21;
 export type ConsistencyBooking = {
   status: string;
   paymentMode: string;
-  /** "Portal" | "Manuell" | "Intern" … — manuell angelegte Buchungen haben
-   *  bewusst keine Zahlungszeilen, die Zahlung klärt der Vorstand direkt. */
-  source?: string | null;
   arrival: string; // YYYY-MM-DD
   subtotalCents: number;
   depositCents: number;
@@ -108,24 +105,18 @@ export function checkPaymentConsistency(
         `Automatische Abbuchung fehlgeschlagen oder nicht bestätigt — ${formatEuro(openCents)} offen.`
       );
     } else if (openRows.length === 0) {
-      // 4) Geld offen, aber nichts fordert es an. Schulgruppen mit
-      //    Zahlungsaufschub bekommen ihre Zeilen erst 30 Tage vor Anreise.
-      //    Von Hand geführte Buchungen sind KEIN Fehler: manuell angelegt
-      //    (source "Manuell") oder vom Vorstand ohne Zahlung auf "bestätigt"
-      //    gesetzt (online gebuchte Buchungen springen sonst direkt von
-      //    "angefragt" auf "bezahlt"). Dort klärt der Vorstand die Zahlung
-      //    selbst, Zahlungszeilen fehlen absichtlich. Sie tauchen erst kurz
-      //    vor der Anreise als Erinnerung auf, falls dann noch Geld fehlt.
-      const manuallyManaged = b.source === "Manuell" || b.status === "bestaetigt";
-      if (manuallyManaged) {
-        if (daysBetween(todayIso, b.arrival) <= URGENT_DAYS_BEFORE_ARRIVAL) {
-          issues.push(
-            `Von Hand geführte Buchung, Anreise in Kürze: noch ${formatEuro(openCents)} offen.`
-          );
-        }
-      } else if (b.paymentMode !== "school_deferred") {
+      // 4) Geld offen, aber nichts fordert es an. Das ist bei von Hand
+      //    geführten Buchungen normal (manuell angelegt, per Überweisung
+      //    bezahlt, vom Vorstand bestätigt) und deshalb KEIN Fehler — es
+      //    wird erst kurz vor der Anreise als Erinnerung gemeldet, falls dann
+      //    noch Geld fehlt. Kaputte automatische Pläne fängt Prüfung 2 ab.
+      //    Schulgruppen mit Zahlungsaufschub haben ihren eigenen Ablauf.
+      if (
+        b.paymentMode !== "school_deferred" &&
+        daysBetween(todayIso, b.arrival) <= URGENT_DAYS_BEFORE_ARRIVAL
+      ) {
         issues.push(
-          `${formatEuro(openCents)} offen, aber keine Zahlungsanforderung hinterlegt — das System fordert den Betrag nicht automatisch an.`
+          `Anreise in Kürze: noch ${formatEuro(openCents)} offen, aber keine Zahlungsanforderung hinterlegt — bitte von Hand anfordern.`
         );
       }
     } else {
