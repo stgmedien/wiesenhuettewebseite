@@ -172,12 +172,14 @@ const BF_COPY = {
     manualTransferButton: "Per klassischer Überweisung buchen",
     manualTransferSubmitting: "Buchung wird angelegt ...",
     manualTransferOverviewNote:
-      "Vereine, Klassenfahrten und Schulfahrten (z. B. AG, SV) können bei Stripe automatisch auch per SEPA-Überweisung zahlen. Wer stattdessen klassisch auf unser Vereinskonto überweisen möchte, kann das hier direkt tun — ohne Rückfrage per Mail.",
+      "Vereine, Klassenfahrten und Schulfahrten (z. B. AG, SV) können bei Stripe automatisch auch per SEPA-Überweisung zahlen. Wer stattdessen klassisch auf unser Vereinskonto überweisen möchte, kann das hier direkt tun — ohne Rückfrage per Mail. Die Anzahlung muss dann innerhalb von 7 Tagen bei uns eingehen, sonst wird der Termin automatisch wieder freigegeben.",
     manualTransferLeadTooShort:
       "Klassische Überweisung ist ab 21 Tagen Vorlauf bis zur Anreise möglich — dafür ist es hier schon zu kurzfristig. Bitte nutzt stattdessen Stripe (auch per SEPA-Überweisung möglich).",
     manualTransferConfirmTitle: "Buchung eingegangen!",
     manualTransferConfirmIntro: "Eure Buchungsnummer:",
-    manualTransferConfirmBankTitle: "Bitte überweist die Anzahlung zeitnah auf folgendes Konto:",
+    manualTransferConfirmBankTitle: "Bitte überweist die Anzahlung auf folgendes Konto:",
+    manualTransferConfirmDeadline: (date: string) =>
+      `Der Termin ist bis zum ${date} für Euch reserviert. Geht die Anzahlung bis dahin nicht bei uns ein, wird die Buchung automatisch storniert und der Termin wieder freigegeben. Alle Angaben bekommt Ihr auch per E-Mail.`,
     manualTransferConfirmBank: "Bank",
     manualTransferConfirmIban: "IBAN",
     manualTransferConfirmKontoinhaber: "Kontoinhaber",
@@ -350,12 +352,14 @@ const BF_COPY = {
     manualTransferButton: "Book via classic bank transfer",
     manualTransferSubmitting: "Creating booking ...",
     manualTransferOverviewNote:
-      "Clubs, class trips and school trips (e.g. clubs/societies) can also pay Stripe via SEPA bank transfer automatically. If you'd rather transfer directly to our club account, you can do that right here — no need to email us first.",
+      "Clubs, class trips and school trips (e.g. clubs/societies) can also pay Stripe via SEPA bank transfer automatically. If you'd rather transfer directly to our club account, you can do that right here — no need to email us first. The deposit must then reach us within 7 days, otherwise the dates are released again automatically.",
     manualTransferLeadTooShort:
       "Classic bank transfer is available from 21 days before arrival — this booking is too short-notice for that. Please use Stripe instead (SEPA transfer is also available there).",
     manualTransferConfirmTitle: "Booking received!",
     manualTransferConfirmIntro: "Your booking number:",
-    manualTransferConfirmBankTitle: "Please transfer the deposit soon to this account:",
+    manualTransferConfirmBankTitle: "Please transfer the deposit to this account:",
+    manualTransferConfirmDeadline: (date: string) =>
+      `The dates are reserved for you until ${date}. If the deposit has not reached us by then, the booking is cancelled automatically and the dates are released again. You will also receive all details by email.`,
     manualTransferConfirmBank: "Bank",
     manualTransferConfirmIban: "IBAN",
     manualTransferConfirmKontoinhaber: "Account holder",
@@ -524,12 +528,14 @@ const BF_COPY = {
     manualTransferButton: "Boeken via klassieke overschrijving",
     manualTransferSubmitting: "Boeking wordt aangemaakt ...",
     manualTransferOverviewNote:
-      "Verenigingen, klassenreizen en schoolreizen (bijv. AG, SV) kunnen bij Stripe ook automatisch per SEPA-overschrijving betalen. Wil je liever rechtstreeks naar onze verenigingsrekening overschrijven, dan kan dat hier direct — zonder eerst te mailen.",
+      "Verenigingen, klassenreizen en schoolreizen (bijv. AG, SV) kunnen bij Stripe ook automatisch per SEPA-overschrijving betalen. Wil je liever rechtstreeks naar onze verenigingsrekening overschrijven, dan kan dat hier direct — zonder eerst te mailen. De aanbetaling moet dan binnen 7 dagen bij ons binnen zijn, anders komt de periode automatisch weer vrij.",
     manualTransferLeadTooShort:
       "Klassieke overschrijving is mogelijk vanaf 21 dagen vóór aankomst — dat is hier al te kort dag. Gebruik in dat geval Stripe (SEPA-overschrijving is daar ook mogelijk).",
     manualTransferConfirmTitle: "Boeking ontvangen!",
     manualTransferConfirmIntro: "Je boekingsnummer:",
-    manualTransferConfirmBankTitle: "Maak de aanbetaling binnenkort over naar deze rekening:",
+    manualTransferConfirmBankTitle: "Maak de aanbetaling over naar deze rekening:",
+    manualTransferConfirmDeadline: (date: string) =>
+      `De periode is tot ${date} voor jullie gereserveerd. Is de aanbetaling dan nog niet bij ons binnen, dan wordt de boeking automatisch geannuleerd en komt de periode weer vrij. Alle gegevens ontvangen jullie ook per e-mail.`,
     manualTransferConfirmBank: "Bank",
     manualTransferConfirmIban: "IBAN",
     manualTransferConfirmKontoinhaber: "Rekeninghouder",
@@ -1786,6 +1792,14 @@ const ManualTransferConfirmationPanel = ({
     </div>
     <p className="m-0">
       <strong>{formatEuro(result.anzahlungCents, locale)}</strong> — {tt.manualTransferConfirmAnzahlung}
+    </p>
+    <p className="m-0 font-semibold">
+      {tt.manualTransferConfirmDeadline(
+        new Date(`${result.anzahlungDeadlineIso}T00:00:00`).toLocaleDateString(
+          locale === "de" ? "de-DE" : locale === "nl" ? "nl-NL" : "en-GB",
+          { day: "numeric", month: "long", year: "numeric" }
+        )
+      )}
     </p>
     <p className="m-0">
       <strong>{formatEuro(result.restzahlungCents, locale)}</strong> —{" "}
