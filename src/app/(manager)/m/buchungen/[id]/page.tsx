@@ -9,6 +9,8 @@ import { StatusPill } from "@/components/manager/StatusPill";
 import { StatusActions } from "./StatusActions";
 import { ManualPaymentForm } from "./ManualPaymentForm";
 import { ManualAutomationButtons } from "./ManualAutomationButtons";
+import { DepositReleaseControl } from "./DepositReleaseControl";
+import { DEPOSIT_RELEASE_METHOD } from "@/lib/deposit-release";
 import { AvsCheckinForm } from "./AvsCheckinForm";
 import { KurkartenUploadForm } from "./KurkartenUploadForm";
 import { PaymentsTable } from "./PaymentsTable";
@@ -111,6 +113,10 @@ export default async function BookingDetail({ params }: Props) {
     ]);
   const customer = customerRows[0] ?? null;
   const avsLastSentAt = avsSent[0] ? new Date(avsSent[0].sentAt).toLocaleString("de-DE") : null;
+
+  const openDepositRelease = pmts.find(
+    (p) => p.kind === "rueckerstattung" && p.status === "offen" && p.method === DEPOSIT_RELEASE_METHOD
+  );
 
   return (
     <div className="px-4 sm:px-8 py-8 sm:py-10 max-w-[1200px]">
@@ -301,8 +307,24 @@ export default async function BookingDetail({ params }: Props) {
               bookingId={b.id}
               status={b.status}
               hasStripePaymentIntent={!!b.stripePaymentIntentId}
+            />
+            <DepositReleaseControl
+              bookingId={b.id}
+              status={b.status}
+              hasStripePaymentIntent={!!b.stripePaymentIntentId}
               depositCents={b.depositCents}
-              hasRefund={pmts.some((p) => p.kind === "rueckerstattung")}
+              paidCents={b.paidCents}
+              openRelease={
+                openDepositRelease
+                  ? {
+                      amountCents: openDepositRelease.amountCents,
+                      releasedAtLabel: new Date(openDepositRelease.createdAt).toLocaleDateString("de-DE", {
+                        timeZone: "Europe/Berlin",
+                      }),
+                    }
+                  : null
+              }
+              hasOtherRefund={pmts.some((p) => p.kind === "rueckerstattung" && p !== openDepositRelease)}
             />
           </Section>
 

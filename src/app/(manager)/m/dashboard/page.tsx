@@ -9,6 +9,7 @@ import { getUnresolvedMailFailures, dismissMailFailure } from "@/lib/mail-log";
 import { revalidatePath } from "next/cache";
 import { findMailTemplateMeta } from "@/lib/automatic-mail-templates";
 import { findBookingIssues } from "@/lib/payment-consistency";
+import { findDepositReturnTodo } from "@/lib/deposit-release";
 import {
   CalendarArrowDown,
   Mail,
@@ -46,6 +47,7 @@ export default async function Dashboard() {
 
   const mailFailuresPromise = getUnresolvedMailFailures();
   const priceMismatchesPromise = findBookingIssues();
+  const depositTodoPromise = findDepositReturnTodo();
 
   // Alle unabhaengigen Queries parallel (Issue #86) — nur openPaymentBookings
   // und die Customer-Namen brauchen Ergebnisse aus dieser Stufe.
@@ -149,6 +151,7 @@ export default async function Dashboard() {
     ]);
   const mailFailures = await mailFailuresPromise;
   const priceMismatches = await priceMismatchesPromise;
+  const depositTodo = await depositTodoPromise;
 
   const arrivalsToday = arrivalsSoon.filter((b) => b.arrival === todayIso);
   const departuresToday = departuresSoon.filter((b) => b.departure === todayIso);
@@ -312,6 +315,38 @@ export default async function Dashboard() {
           tone={openPaymentTotalCents > 0 ? "warm" : "default"}
         />
       </div>
+
+      {/* Kautionen der Überweiser: Freigabe → Überweisung → Verbuchung */}
+      {(depositTodo.toRelease.length > 0 || depositTodo.awaitingTransfer.length > 0) && (
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+          {depositTodo.toRelease.length > 0 && (
+            <Section title={`Kaution freigeben (${depositTodo.toRelease.length})`}>
+              {depositTodo.toRelease.map((d) => (
+                <Row
+                  key={d.bookingId}
+                  href={`/m/buchungen/${d.bookingId}`}
+                  date={d.departure}
+                  title={d.guestName}
+                  subtitle={`${d.bookingNumber} · abgereist · ${formatEuro(d.amountCents)} Kaution noch nicht freigegeben`}
+                />
+              ))}
+            </Section>
+          )}
+          {depositTodo.awaitingTransfer.length > 0 && (
+            <Section title={`Kaution freigegeben, wartet auf Überweisung (${depositTodo.awaitingTransfer.length})`}>
+              {depositTodo.awaitingTransfer.map((d) => (
+                <Row
+                  key={d.bookingId}
+                  href={`/m/buchungen/${d.bookingId}`}
+                  date={d.departure}
+                  title={d.guestName}
+                  subtitle={`${d.bookingNumber} · ${formatEuro(d.amountCents)} bei den Finanzen in Auftrag`}
+                />
+              ))}
+            </Section>
+          )}
+        </div>
+      )}
 
       {/* Heute */}
       {(arrivalsToday.length > 0 || departuresToday.length > 0) && (

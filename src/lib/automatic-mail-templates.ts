@@ -345,6 +345,14 @@ export const AUTOMATIC_MAIL_TEMPLATES: AutomaticMailTemplate[] = [
     file: "src/app/api/stripe/webhook/route.ts",
   },
   {
+    key: "deposit-release-request",
+    label: "Kaution freigegeben — bitte zurücküberweisen",
+    category: "Zahlungen",
+    trigger: "Manager gibt bei einer abgereisten Überweiser-Buchung die Kaution zur Rückzahlung frei.",
+    audience: "Norbert Monscheidt (MAIL_FINANCE_TO)",
+    file: "src/app/(manager)/m/buchungen/[id]/deposit-release-actions.ts",
+  },
+  {
     key: "wapelbad-confirm",
     label: "Wapelbad-Anmeldung bestätigt",
     category: "Sonstiges",
