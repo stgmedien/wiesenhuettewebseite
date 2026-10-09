@@ -22,6 +22,8 @@ type Props = {
   /** Wenn gesetzt, wird eine kurze Feedback-Einladung mit diesem Link
    * angehängt — ersetzt die frühere eigene Feedback-Mail (T+2). */
   feedbackUrl?: string;
+  /** Überweiser: Kaution kommt per Banküberweisung zurück, nicht über Stripe. */
+  viaBankTransfer?: boolean;
 };
 
 const main = { backgroundColor: "#F7F7F2", padding: "40px 0" };
@@ -89,11 +91,12 @@ export default function DepositRefundedEmail({
   refundCents,
   baseUrl,
   feedbackUrl,
+  viaBankTransfer,
 }: Props) {
   return (
     <Html>
       <Head />
-      <Preview>Eure Kaution wurde zurückgebucht — {formatEuro(refundCents)}</Preview>
+      <Preview>{`Eure Kaution ist auf dem Rückweg — ${formatEuro(refundCents)}`}</Preview>
       <Body style={main}>
         <Container style={container}>
           <Text style={eyebrow}>Wiesenhütte · Skifreunde Gütersloh e.V.</Text>
@@ -105,8 +108,9 @@ export default function DepositRefundedEmail({
             Wiesenhütte hat sich gelohnt.
           </Text>
           <Text style={text}>
-            Wie versprochen haben wir Eure Kaution heute über Stripe zurückgebucht. Je nach Bank
-            dauert es 2–10 Werktage, bis das Geld wieder auf Eurer Zahlungsmethode auftaucht.
+            {viaBankTransfer
+              ? "Wie versprochen haben wir Eure Kaution heute zurücküberwiesen — auf das Konto, von dem Eure Zahlung kam. Je nach Bank dauert es 1–3 Werktage, bis das Geld bei Euch ankommt."
+              : "Wie versprochen haben wir Eure Kaution heute über Stripe zurückgebucht. Je nach Bank dauert es 2–10 Werktage, bis das Geld wieder auf Eurer Zahlungsmethode auftaucht."}
           </Text>
 
           <Section style={amountBox}>
