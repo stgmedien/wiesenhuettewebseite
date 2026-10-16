@@ -235,6 +235,11 @@ export default function BookingConfirmedEmail({
             Kurkarten kommen separat, sobald sie fertig sind. Falls ihr vorher Fragen habt,
             antwortet einfach auf diese Mail.
           </Text>
+          <Text style={text}>
+            Spätestens 2 Tage vor Anreise sprecht ihr eure Ankunftszeit mit unserem Hüttenwart
+            Toni Klauke ab: mobil <strong>0151 / 67 44 82 73</strong>, am besten erreichbar täglich
+            15–21 Uhr, gern auch per SMS. Wenn er nicht direkt drangeht, ruft er zurück.
+          </Text>
 
           <Section
             style={{

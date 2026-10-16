@@ -82,7 +82,8 @@ export default function ArrivalReminderEmail({
           <Text style={text}>
             Eure Anreise ({arrival}) steht kurz bevor. Falls Ihr Toni Klauke noch nicht Eure
             genaue Ankunftszeit mitgeteilt habt — bitte jetzt anrufen, damit er die
-            Schlüsselübergabe planen kann: <strong>01516 7448273</strong>.
+            Schlüsselübergabe planen kann: <strong>0151 / 67 44 82 73</strong>. Am besten
+            erreicht Ihr ihn täglich 15–21 Uhr, gern auch per SMS — er ruft zurück.
           </Text>
 
           {hasAttachments && (

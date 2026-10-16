@@ -126,7 +126,7 @@ export default function KeyHandoverEmail({
 
           <Hr style={{ borderColor: "#C8CEC4", margin: "32px 0 16px" }} />
           <Text style={muted}>
-            <strong>Notfall-Nummern:</strong> Hüttenwart Werner Klauke 01516 7448273 · Polizei 110
+            <strong>Notfall-Nummern:</strong> Hüttenwart Toni Klauke 0151 / 67 44 82 73 (täglich 15–21 Uhr, auch per SMS) · Polizei 110
             · Notarzt 112 · Ärztlicher Bereitschaftsdienst 116117 · St. Franziskus Hospital
             Winterberg 02981/8020.
           </Text>
