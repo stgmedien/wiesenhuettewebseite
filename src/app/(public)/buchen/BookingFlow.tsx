@@ -114,7 +114,8 @@ const BF_COPY = {
     firstName: "Vorname",
     lastName: "Nachname",
     email: "E-Mail",
-    phone: "Telefon *",
+    phone: "Handynummer *",
+    phoneHint: "Für den Hüttenwart: Er stimmt mit Euch die Ankunftszeit ab, auch per SMS.",
     company: "Firma / Verein",
     institution: "Institution / Einrichtung",
     institutionHint: "Name der Schule, des Vereins oder der Firma",
@@ -292,7 +293,8 @@ const BF_COPY = {
     firstName: "First name",
     lastName: "Last name",
     email: "Email",
-    phone: "Phone *",
+    phone: "Mobile number *",
+    phoneHint: "For our cabin warden, who arranges your arrival time with you, also by text message.",
     company: "Company / club",
     institution: "Institution / organisation",
     institutionHint: "Name of the school, club or company",
@@ -466,7 +468,8 @@ const BF_COPY = {
     firstName: "Voornaam",
     lastName: "Achternaam",
     email: "E-mail",
-    phone: "Telefoon *",
+    phone: "Mobiel nummer *",
+    phoneHint: "Voor de huttenbeheerder: hij spreekt de aankomsttijd met jullie af, ook per sms.",
     company: "Bedrijf / vereniging",
     institution: "Instelling / organisatie",
     institutionHint: "Naam van de school, vereniging of het bedrijf",
@@ -1043,7 +1046,7 @@ export const BookingFlow = ({
                 error={step2Tried && !lastNameValid ? tt.valRequired : undefined} />
               <Input id="email" type="email" label={tt.email} value={email} onChange={(e) => setEmail(e.target.value)} required
                 error={step2Tried && !emailValid ? tt.valEmail : undefined} />
-              <Input id="phone" type="tel" label={tt.phone} value={phone} onChange={(e) => setPhone(e.target.value)} required minLength={5}
+              <Input id="phone" type="tel" label={tt.phone} hint={tt.phoneHint} value={phone} onChange={(e) => setPhone(e.target.value)} required minLength={5}
                 error={step2Tried && !phoneValid ? tt.valPhone : undefined} />
               {institutionRequired ? (
                 <Input

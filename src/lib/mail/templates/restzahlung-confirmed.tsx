@@ -124,8 +124,9 @@ export default function RestzahlungConfirmedEmail({
             </Text>
             <Text style={{ ...text, margin: "0 0 8px 0" }}>
               <strong>Spätestens 2 Tage vor Anreise:</strong> teilt Toni Klauke telefonisch Eure
-              genaue Ankunftszeit mit (01516 7448273) — er nimmt Euch am {arrival} an der Hütte in
-              Empfang und überreicht die Schlüssel.
+              genaue Ankunftszeit mit (mobil 0151 / 67 44 82 73, am besten täglich 15–21 Uhr, gern
+              auch per SMS — er ruft zurück). Er nimmt Euch am {arrival} an der Hütte in Empfang
+              und überreicht die Schlüssel.
             </Text>
             <Text style={{ ...text, margin: 0 }}>
               <strong>Das Haus ist eine Nichtraucher-Unterkunft, Haustiere sind nicht gestattet.</strong>{" "}
@@ -144,7 +145,7 @@ export default function RestzahlungConfirmedEmail({
           <Hr style={{ borderColor: "#C8CEC4", margin: "28px 0 16px" }} />
           <Text style={muted}>
             Schlüsselübergabe regeln wir persönlich mit dem Hüttenwart Toni Klauke — er nimmt
-            Euch an der Hütte in Empfang. Notfall-Telefon Toni Klauke: 01516 7448273. Fragen?
+            Euch an der Hütte in Empfang. Notfall-Telefon Toni Klauke: 0151 / 67 44 82 73. Fragen?
             Einfach auf diese E-Mail antworten.
           </Text>
         </Container>

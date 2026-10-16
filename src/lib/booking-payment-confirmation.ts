@@ -410,6 +410,7 @@ export async function confirmDepositPayment(params: ConfirmDepositParams): Promi
         react: HuettenwartNewBookingEmail({
           bookingNumber: booking.bookingNumber,
           guestName,
+          guestPhone: customer.phone,
           arrival: formatDateLong(booking.arrival),
           departure: formatDateLong(booking.departure),
           nights: booking.nights,

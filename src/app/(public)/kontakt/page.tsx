@@ -17,7 +17,7 @@ type Copy = {
   cards: {
     booking: { label: string; info: string; cta: string };
     fragen: { label: string; info: string; oldDomainNote: string };
-    huettenwart: { label: string; address: string; info: string };
+    huettenwart: { label: string; address: string; info: string; reach: string };
   };
   notes: {
     h3: string;
@@ -46,12 +46,13 @@ const COPY: Record<Locale, Copy> = {
         label: "Hüttenwart vor Ort",
         address: "Vorm Rohrbach 1, 59955 Winterberg-Langewiese",
         info: "Schlüsselübergabe, Fragen vor Ort, Mängelmeldung",
+        reach: "Am besten erreichbar täglich 15–21 Uhr, gern auch per SMS — Toni ruft zurück.",
       },
     },
     notes: {
       h3: "Kurze Hinweise vor Eurer Anreise",
       items: [
-        "Spätestens **2 Tage vor Anreise** meldet Ihr Toni Klauke telefonisch Eure genaue Ankunftszeit.",
+        "Spätestens **2 Tage vor Anreise** meldet Ihr Toni Klauke telefonisch Eure genaue Ankunftszeit — am besten **täglich 15–21 Uhr** (mobil 0151 / 67 44 82 73), gern auch per SMS. Toni ruft zurück.",
         "Toni empfängt Euch an der Hütte und übergibt die Schlüssel. Eure Kurkarten bekommt Ihr vorab automatisch per E-Mail zugesendet.",
         "Mängel bitte sofort nach Anreise telefonisch melden — wird gemeinsam protokolliert.",
       ],
@@ -77,12 +78,13 @@ const COPY: Record<Locale, Copy> = {
         label: "On-site cabin keeper",
         address: "Vorm Rohrbach 1, 59955 Winterberg-Langewiese, Germany",
         info: "Key handover, questions on site, reporting defects",
+        reach: "Best reached daily 3–9 pm, text messages (SMS) welcome — Toni will call you back.",
       },
     },
     notes: {
       h3: "A few notes before your arrival",
       items: [
-        "At the latest **2 days before arrival** call Toni Klauke to tell him your exact arrival time.",
+        "At the latest **2 days before arrival** call Toni Klauke to tell him your exact arrival time — best **daily 3–9 pm** (mobile +49 151 67 44 82 73), text messages welcome. Toni will call you back.",
         "Toni meets you at the cabin and hands over the keys. Your visitor cards (Kurkarten) are emailed to you in advance.",
         "Please report any defects by phone right after arrival — we'll log them together.",
       ],
@@ -108,12 +110,13 @@ const COPY: Record<Locale, Copy> = {
         label: "Hutwacht ter plaatse",
         address: "Vorm Rohrbach 1, 59955 Winterberg-Langewiese, Duitsland",
         info: "Sleutel­overdracht, vragen ter plaatse, gebreken melden",
+        reach: "Het best bereikbaar dagelijks 15–21 uur, ook graag per sms — Toni belt terug.",
       },
     },
     notes: {
       h3: "Korte aanwijzingen vóór aankomst",
       items: [
-        "Uiterlijk **2 dagen vóór aankomst** bel je Toni Klauke om je precieze aankomsttijd door te geven.",
+        "Uiterlijk **2 dagen vóór aankomst** bel je Toni Klauke om je precieze aankomsttijd door te geven — het best **dagelijks 15–21 uur** (mobiel +49 151 67 44 82 73), ook graag per sms. Toni belt terug.",
         "Toni ontvangt jullie bij de hut en overhandigt de sleutels. Jullie kurkarten krijgen jullie vooraf automatisch per e-mail.",
         "Gebreken graag direct na aankomst telefonisch melden — leggen we samen vast.",
       ],
@@ -190,6 +193,7 @@ export default async function KontaktPage() {
               { kind: "info", value: c.cards.huettenwart.address },
               { kind: "phone", value: "02758 / 2014822" },
               { kind: "phone", value: "0151 / 67 44 82 73" },
+              { kind: "info", value: c.cards.huettenwart.reach },
               { kind: "info", value: c.cards.huettenwart.info },
             ]}
           />

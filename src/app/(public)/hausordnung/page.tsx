@@ -51,7 +51,8 @@ export default async function HausordnungPage() {
             <li>
               <strong>Ankunft:</strong> Es gibt keine feste Ankunftszeit. Meldet Euch bitte
               spätestens 2 Tage vorher telefonisch bei unserem Hüttenwart Toni Klauke und sprecht
-              die genaue Ankunftszeit mit ihm ab — die Hütte ist spätestens am Vortag geputzt, Toni
+              die genaue Ankunftszeit mit ihm ab. Am besten erreicht Ihr ihn täglich zwischen 15 und
+              21 Uhr, gern auch per SMS — Toni ruft zurück — die Hütte ist spätestens am Vortag geputzt, Toni
               richtet sich gerne nach Euch. Er nimmt Euch persönlich in Empfang und übergibt die
               Schlüssel.
             </li>
@@ -211,5 +212,7 @@ const Address = () => (
     Festnetz: <a href="tel:+4927582014822">02758 / 2014822</a>
     <br />
     Mobil: <a href="tel:+4915167448273">0151 / 67 44 82 73</a>
+    <br />
+    Am besten erreichbar täglich 15–21 Uhr, gern auch per SMS — Toni ruft zurück.
   </div>
 );

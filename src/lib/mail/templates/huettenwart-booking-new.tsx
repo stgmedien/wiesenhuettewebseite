@@ -14,6 +14,8 @@ import {
 type Props = {
   bookingNumber: string;
   guestName: string;
+  /** Für Rückfragen zur Ankunftszeit — fehlt bei manuell angelegten Buchungen evtl. */
+  guestPhone?: string | null;
   arrival: string;
   departure: string;
   nights: number;
@@ -69,6 +71,7 @@ const button = {
 export default function HuettenwartNewBookingEmail({
   bookingNumber,
   guestName,
+  guestPhone,
   arrival,
   departure,
   nights,
@@ -101,6 +104,8 @@ export default function HuettenwartNewBookingEmail({
               Buchung: <strong>{bookingNumber}</strong>
               <br />
               Gast: <strong>{guestName}</strong>
+              <br />
+              Telefon: <strong>{guestPhone || "nicht angegeben"}</strong>
               <br />
               Zeitraum: <strong>{arrival} – {departure}</strong> ({nights} {nights === 1 ? "Nacht" : "Nächte"})
               <br />

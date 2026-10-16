@@ -76,7 +76,7 @@ export default function ManualBookingForm({
         <Input id="firstName" name="firstName" label="Vorname" required />
         <Input id="lastName" name="lastName" label="Nachname" required />
         <Input id="email" name="email" type="email" label="E-Mail" required />
-        <Input id="phone" name="phone" type="tel" label="Telefon" />
+        <Input id="phone" name="phone" type="tel" label="Handynummer" hint="Bekommt Toni für die Absprache der Ankunftszeit." />
       </div>
 
       <Input id="purpose" name="purpose" label="Anlass (optional)" defaultValue={reservation?.label} />
