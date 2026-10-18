@@ -16,6 +16,13 @@
  */
 export const HEATING_BASE_C = 15;
 
+/**
+ * Ab so vielen Leertagen vor einer Gruppe gilt die Hütte als ausgekühlt —
+ * das Aufheizen treibt den Gasverbrauch der ersten Nächte hoch. Belegte
+ * Zeiträume werden deshalb nur mit solchen ähnlicher Vorlaufzeit verglichen.
+ */
+export const COLD_START_DAYS = 3;
+
 /** Ab diesem Vielfachen des üblichen Tagesverbrauchs gilt ein Zeitraum als auffällig. */
 export const HIGH_FACTOR = 1.8;
 
@@ -58,6 +65,12 @@ export type Interval = {
   occupiedNights: number;
   personNights: number;
   kind: "belegt" | "leer" | "gemischt";
+  /**
+   * Tage, die die Hütte vor Beginn des Zeitraums leer stand (0 = direkt
+   * nach einer Gruppe). Nur bei Zeiträumen mit Belegung; null, wenn davor
+   * keine Buchung bekannt ist.
+   */
+  emptyDaysBefore: number | null;
   /** Mittlere Außentemperatur im Zeitraum (°C), falls Wetterdaten vorliegen. */
   avgTemp: number | null;
   /** Summe der Heizgradtage (Basis HEATING_BASE_C), falls Wetterdaten vorliegen. */
@@ -93,6 +106,15 @@ function weather(from: string, to: string, temps: Map<string, number>) {
   const avg = values.reduce((a, b) => a + b, 0) / values.length;
   const hdd = values.reduce((a, v) => a + Math.max(0, HEATING_BASE_C - v), 0) * (days / values.length);
   return { avgTemp: Math.round(avg * 10) / 10, heatingDegreeDays: Math.round(hdd * 10) / 10 };
+}
+
+function emptyDaysBefore(from: string, stays: StayRange[]): number | null {
+  // Läuft über "from" hinweg noch eine Gruppe, war die Hütte nicht leer.
+  if (stays.some((s) => s.arrival < from && from < s.departure)) return 0;
+  const earlier = stays.filter((s) => s.departure <= from).map((s) => s.departure);
+  if (earlier.length === 0) return null;
+  const last = earlier.sort().at(-1)!;
+  return Math.round((toTime(from) - toTime(last)) / DAY);
 }
 
 function occupancy(from: string, to: string, stays: StayRange[]) {
@@ -141,23 +163,35 @@ export function buildIntervals(
         occupiedNights,
         personNights,
         kind,
+        emptyDaysBefore: occupiedNights > 0 ? emptyDaysBefore(prev.readOn, stays) : null,
         ...weather(prev.readOn, cur.readOn, temps),
         issues,
       });
     }
   }
 
-  // Auffällig hoch: gegenüber dem Median gleichartiger Zeiträume (belegt
-  // mit belegt, leer mit leer). Braucht mindestens drei Vergleichswerte.
+  // Auffällig hoch: gegenüber dem Median gleichartiger Zeiträume. Leer mit
+  // leer; belegt nur mit belegt bei ähnlicher Vorlaufzeit (ausgekühlte Hütte
+  // vs. direkt nach einer Gruppe). Braucht mindestens drei Vergleichswerte.
+  const groupKey = (x: Interval): string | null => {
+    if (x.kind === "leer") return "leer";
+    if (x.kind !== "belegt") return null;
+    return (x.emptyDaysBefore ?? 0) >= COLD_START_DAYS ? "belegt-kalt" : "belegt-warm";
+  };
+  const groupLabel: Record<string, string> = {
+    leer: "Leerstand",
+    "belegt-kalt": `belegt, vorher mind. ${COLD_START_DAYS} Tage leer`,
+    "belegt-warm": `belegt, vorher höchstens ${COLD_START_DAYS - 1} Tage leer`,
+  };
   for (const meter of ["electricity", "gas"] as const) {
-    for (const kind of ["belegt", "leer"] as const) {
-      const group = out.filter((x) => x.meter === meter && x.kind === kind && x.perDay !== null);
+    for (const key of Object.keys(groupLabel)) {
+      const group = out.filter((x) => x.meter === meter && groupKey(x) === key && x.perDay !== null);
       const m = median(group.map((x) => x.perDay!));
       if (m === null || group.length < 3 || m <= 0) continue;
       for (const x of group) {
         if (x.perDay! > m * HIGH_FACTOR) {
           x.issues.push(
-            `Auffällig hoch: ${formatAmount(x.perDay!, meter)}/Tag, sonst üblich ${formatAmount(m, meter)}/Tag (${kind === "leer" ? "Leerstand" : "belegt"}).`
+            `Auffällig hoch: ${formatAmount(x.perDay!, meter)}/Tag, sonst üblich ${formatAmount(m, meter)}/Tag (${groupLabel[key]}).`
           );
         }
       }

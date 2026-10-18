@@ -4,6 +4,7 @@ import { and, asc, gte, inArray, lte, notInArray } from "drizzle-orm";
 import { formatDateLong } from "@/lib/utils";
 import { formatEuro } from "@/lib/pricing";
 import {
+  COLD_START_DAYS,
   HEATING_BASE_C,
   buildIntervals,
   costCents,
@@ -128,13 +129,14 @@ export default async function EnergiePage() {
             {readings.length === 0 ? (
               <p className="text-sm text-[var(--color-wh-fg-muted)] m-0">Noch keine Zählerstände erfasst.</p>
             ) : (
-              <table className="w-full text-sm min-w-[760px]">
+              <table className="w-full text-sm min-w-[860px]">
                 <thead>
                   <tr className="text-left text-xs uppercase tracking-wider text-[var(--color-wh-fg-muted)]">
                     <th className="py-2 pr-3">Datum</th>
                     <th className="pr-3">Strom</th>
                     <th className="pr-3">Gas</th>
                     <th className="pr-3">Zeitraum davor</th>
+                    <th className="pr-3">Vorher leer</th>
                     <th className="pr-3">Ø Außen</th>
                     <th className="pr-3">Buchung / Notiz</th>
                     <th />
@@ -165,6 +167,16 @@ export default async function EnergiePage() {
                             </>
                           ) : (
                             <span className="text-[var(--color-wh-fg-muted)]">erste Ablesung</span>
+                          )}
+                        </td>
+                        <td className="pr-3 whitespace-nowrap">
+                          {ref?.emptyDaysBefore == null
+                            ? "—"
+                            : ref.emptyDaysBefore === 0
+                              ? "direkt nach Gruppe"
+                              : `${ref.emptyDaysBefore} ${ref.emptyDaysBefore === 1 ? "Tag" : "Tage"}`}
+                          {ref?.emptyDaysBefore != null && ref.emptyDaysBefore >= COLD_START_DAYS && (
+                            <div className="text-xs text-[var(--color-wh-fg-muted)]">Hütte ausgekühlt</div>
                           )}
                         </td>
                         <td className="pr-3 whitespace-nowrap">
