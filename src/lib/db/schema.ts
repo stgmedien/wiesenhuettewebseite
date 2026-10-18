@@ -698,6 +698,31 @@ export const mailTemplateVersions = pgTable(
 );
 
 // =============================================================
+// METER_READINGS — Zählerstände Strom/Gas der Hütte (10/2026)
+// Ganzzahlig gespeichert, damit nichts als String/Float zurückkommt:
+// Strom in Zehntel-kWh (Zählwerk hat 1 Nachkommastelle), Gas in
+// Hundertstel-m³ (rote Ziffern = 2 Nachkommastellen). Einer der beiden
+// Werte darf fehlen, wenn nur ein Zähler abgelesen wurde.
+// =============================================================
+
+export const meterReadings = pgTable(
+  "meter_readings",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    readOn: date("read_on").notNull(),
+    electricityKwhX10: integer("electricity_kwh_x10"),
+    gasM3X100: integer("gas_m3_x100"),
+    bookingId: uuid("booking_id").references(() => bookings.id, { onDelete: "set null" }),
+    note: text("note"),
+    createdBy: varchar("created_by", { length: 255 }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    readOnIdx: index("meter_readings_read_on_idx").on(t.readOn),
+  })
+);
+
+// =============================================================
 // DAMAGE_REPORTS — Schadensmeldungen (verknüpft mit Buchung + Kaution)
 // =============================================================
 
