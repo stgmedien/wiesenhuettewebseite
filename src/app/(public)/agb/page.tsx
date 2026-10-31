@@ -1,4 +1,5 @@
 import { DeOnlyBanner } from "@/components/public/DeOnlyBanner";
+import { PRICES, formatEuro } from "@/lib/pricing";
 import { getServerLocale } from "@/lib/i18n";
 
 export const metadata = {
@@ -18,7 +19,7 @@ export default async function AGB() {
           Allgemeine Geschäftsbedingungen
         </h1>
         <p className="text-sm text-[var(--color-wh-fg-muted)] mt-4">
-          Skifreunde Gütersloh e.V. · Stand: Juni 2026 · Version 1.1
+          Skifreunde Gütersloh e.V. · Stand: Oktober 2026 · Version 1.2
         </p>
 
         <Block title="§ 1 Geltungsbereich">
@@ -63,7 +64,12 @@ export default async function AGB() {
         <Block title="§ 4 Mietpreis & Zahlungsmodalitäten">
           <p>Der Mietpreis setzt sich zusammen aus:</p>
           <ul>
-            <li>Übernachtungspreis je Person und Nacht (gestaffelt nach Personentyp, inkl. Energie-/Verbrauchskosten)</li>
+            <li>Übernachtungspreis je Person und Nacht (gestaffelt nach Personentyp), einschließlich Strom, Wasser und Warmwasser</li>
+            <li>
+              Energiepauschale für die Beheizung der Hütte: {formatEuro(PRICES.energyFlatPerNightCents)} je Nacht
+              für Aufenthalte mit Anreise zwischen dem 1. Oktober und dem 31. März. Die Pauschale ist
+              unabhängig vom tatsächlichen Verbrauch; sie wird weder nachberechnet noch erstattet.
+            </li>
             <li>Endreinigung (Pflicht, einmalig)</li>
             <li>Ggf. Aufschlag Allein-/Exklusivnutzung</li>
             <li>Kaution (separat, wird zusammen mit der Restzahlung 14 Tage vor Anreise per Stripe eingezogen — bei kurzfristigen Buchungen unter 14 Tagen bereits sofort bei Buchung; Erstattung 14 Tage nach mangelfreier Abreise)</li>
@@ -72,6 +78,9 @@ export default async function AGB() {
           <p>
             Die jeweils gültigen Tarife werden im Buchungsvorgang transparent angezeigt
             (Mitglieder der Skifreunde Gütersloh erhalten 50 % Nachlass auf die Übernachtungspreise).
+            Es gelten die Preise, die bei Abschluss der Buchung angezeigt und in der
+            Buchungsbestätigung ausgewiesen werden; spätere Preisänderungen gelten nur für danach
+            geschlossene Buchungen.
             Mitglieder-Tarife gelten ausschließlich für aktive Vereinsmitglieder; Buchungen, bei
             denen unwahre Angaben zur Vereinsmitgliedschaft gemacht wurden, können vom Verein
             storniert oder auf den regulären Tarif nachberechnet werden.

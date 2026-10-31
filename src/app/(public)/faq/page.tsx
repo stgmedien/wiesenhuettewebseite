@@ -48,9 +48,9 @@ const FAQS: QA[] = [
       nl: "Wat kost een overnachting?",
     },
     a: {
-      de: "Pro Person und Nacht — Vereinsmitglieder zahlen die Hälfte. Dazu kommt einmalig die Endreinigung (190 €) sowie eine Kaution (300 €), die nach dem Aufenthalt zurückerstattet wird. Energie ist im Preis enthalten. Alle Tarife und Rechenbeispiele findest Du auf der Preis-Seite.",
-      en: "Per person and night — club members pay half. Plus a one-off final cleaning (€190) and a deposit (€300) that is refunded after your stay. Energy is included. All rates and examples are on the prices page.",
-      nl: "Per persoon per nacht — leden betalen de helft. Daarbij eenmalig de eindschoonmaak (€190) en een borg (€300) die na het verblijf wordt terugbetaald. Energie is inbegrepen. Alle tarieven en voorbeelden staan op de prijspagina.",
+      de: "Pro Person und Nacht — Vereinsmitglieder zahlen die Hälfte. Dazu kommt einmalig die Endreinigung (190 €) sowie eine Kaution (300 €), die nach dem Aufenthalt zurückerstattet wird. Strom und Warmwasser sind im Preis enthalten; für Aufenthalte mit Anreise von Oktober bis März kommt eine Energiepauschale fürs Heizen von 30 € pro Nacht dazu. Alle Tarife und Rechenbeispiele findest Du auf der Preis-Seite.",
+      en: "Per person and night — club members pay half. Plus a one-off final cleaning (€190) and a deposit (€300) that is refunded after your stay. Electricity and hot water are included; for stays arriving between October and March an energy flat rate for heating of €30 per night is added. All rates and examples are on the prices page.",
+      nl: "Per persoon per nacht — leden betalen de helft. Daarbij eenmalig de eindschoonmaak (€190) en een borg (€300) die na het verblijf wordt terugbetaald. Stroom en warm water zijn inbegrepen; voor verblijven met aankomst van oktober tot maart komt er een energiepakket voor de verwarming van €30 per nacht bij. Alle tarieven en voorbeelden staan op de prijspagina.",
     },
   },
   {
