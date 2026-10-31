@@ -270,6 +270,7 @@ async function computeIncrease(
     persons: newPersons,
     soloUse: booking.soloUse,
     tariffs,
+    bookedAt: booking.createdAt,
   });
 
   const deltaCents =
@@ -478,6 +479,7 @@ async function computeExtension(
     persons: currentPersons,
     soloUse: booking.soloUse,
     tariffs,
+    bookedAt: booking.createdAt,
   });
   const newCalc = calculatePrice({
     arrival: booking.arrival,
@@ -485,6 +487,7 @@ async function computeExtension(
     persons: currentPersons,
     soloUse: booking.soloUse,
     tariffs,
+    bookedAt: booking.createdAt,
   });
   const accommodationDeltaCents = newCalc.accommodationCents - oldCalc.accommodationCents;
   const minOccupancySurchargeDeltaCents =

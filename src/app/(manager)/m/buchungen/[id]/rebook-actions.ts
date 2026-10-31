@@ -159,6 +159,7 @@ export async function rebookBooking(raw: z.infer<typeof schema>): Promise<Rebook
     persons,
     soloUse: old.soloUse,
     tariffs: tariffsOverride,
+    bookedAt: newCreatedAt,
   });
 
   const newBookingNumber = generateBookingNumber();

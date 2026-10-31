@@ -19,7 +19,7 @@ export default async function AGB() {
           Allgemeine Geschäftsbedingungen
         </h1>
         <p className="text-sm text-[var(--color-wh-fg-muted)] mt-4">
-          Skifreunde Gütersloh e.V. · Stand: Oktober 2026 · Version 1.2
+          Skifreunde Gütersloh e.V. · Stand: November 2026 · Version 1.3
         </p>
 
         <Block title="§ 1 Geltungsbereich">
@@ -66,9 +66,14 @@ export default async function AGB() {
           <ul>
             <li>Übernachtungspreis je Person und Nacht (gestaffelt nach Personentyp), einschließlich Strom, Wasser und Warmwasser</li>
             <li>
-              Energiepauschale für die Beheizung der Hütte: {formatEuro(PRICES.energyFlatPerNightCents)} je Nacht
-              für Aufenthalte mit Anreise zwischen dem 1. Oktober und dem 31. März. Die Pauschale ist
-              unabhängig vom tatsächlichen Verbrauch; sie wird weder nachberechnet noch erstattet.
+              Energiepauschale für die Beheizung der Hütte je Nacht:{" "}
+              {formatEuro(PRICES.energyFlatWinterCents)} für Nächte von November bis März,{" "}
+              {formatEuro(PRICES.energyFlatShoulderCents)} für Nächte im Oktober und April; von Mai
+              bis September entfällt sie. Maßgeblich ist das Datum der jeweiligen Nacht. Die
+              Pauschale ist unabhängig vom tatsächlichen Verbrauch; sie wird weder nachberechnet
+              noch erstattet. Für Buchungen, die vor dem 1. November 2026 abgeschlossen wurden, gilt
+              die damals vereinbarte Pauschale von {formatEuro(PRICES.energyFlatPerNightCents)} je
+              Nacht bei Anreise zwischen dem 1. Oktober und dem 31. März.
             </li>
             <li>Endreinigung (Pflicht, einmalig)</li>
             <li>Ggf. Aufschlag Allein-/Exklusivnutzung</li>
