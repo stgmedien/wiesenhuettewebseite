@@ -92,6 +92,7 @@ type Copy = {
   flatHeading: string;
   flats: { label: string; value: string; note: string }[];
   kurtaxeNote: string;
+  energyNote: string;
   includedHeading: string;
   included: string[];
   examplesHeading: string;
@@ -121,7 +122,7 @@ const COPY: Record<Locale, Copy> = {
   de: {
     eyebrow: "Klar & ohne Überraschungen",
     h1: "Was die Wiesenhütte kostet.",
-    lead: "Ihr zahlt pro Person und Nacht — Vereinsmitglieder die Hälfte. Dazu kommt einmalig die Endreinigung. Keine versteckten Kosten, keine Energiezuschläge. Hier ist alles auf einen Blick.",
+    lead: "Ihr zahlt pro Person und Nacht — Vereinsmitglieder die Hälfte. Dazu kommt einmalig die Endreinigung, von Oktober bis März außerdem eine Energiepauschale fürs Heizen. Keine versteckten Kosten — hier ist alles auf einen Blick.",
     ratesHeading: "Übernachtung — pro Person & Nacht",
     rates: [
       { label: "Erwachsene", price: e(PRICES.adultNonMemberCents, "de"), sub: "ab 16 Jahren, inkl. Lehrkräfte" },
@@ -134,10 +135,11 @@ const COPY: Record<Locale, Copy> = {
       { label: "Endreinigung", value: e(PRICES.cleaningCents, "de"), note: "Pflicht — ihr reist entspannt ab." },
       { label: "Kaution", value: e(PRICES.depositCents, "de"), note: "Wird nach dem Aufenthalt zurückerstattet." },
     ],
+    energyNote: `Energiepauschale für die Heizung: ${e(PRICES.energyFlatPerNightCents, "de")} pro Nacht für Aufenthalte mit Anreise von Oktober bis März — pauschal, unabhängig vom tatsächlichen Verbrauch.`,
     kurtaxeNote: `Zusätzlich fällt die Kurtaxe Hochsauerland an: ${e(PRICES.kurtaxeRateCents, "de")} pro Person ab 16 Jahren und Nacht — wir führen sie an die Kurverwaltung Winterberg ab.`,
     includedHeading: "Im Preis enthalten",
     included: [
-      "Energie & Heizung — seit 2026 ohne Zuschlag",
+      "Strom, Wasser & Warmwasser",
       "Voll ausgestattete Selbstversorger-Küche",
       "33 Schlafplätze in 5 Zimmern",
       "Esszimmer und Wohnzimmer, Skikeller",
@@ -175,7 +177,7 @@ const COPY: Record<Locale, Copy> = {
   en: {
     eyebrow: "Clear & no surprises",
     h1: "What the Wiesenhütte costs.",
-    lead: "You pay per person and night — club members pay half. Plus a one-off final cleaning. No hidden costs, no energy surcharges. Here is everything at a glance.",
+    lead: "You pay per person and night — club members pay half. Plus a one-off final cleaning and, from October to March, an energy flat rate for heating. No hidden costs — here is everything at a glance.",
     ratesHeading: "Overnight — per person & night",
     rates: [
       { label: "Adults", price: e(PRICES.adultNonMemberCents, "en"), sub: "16+, incl. teachers" },
@@ -188,10 +190,11 @@ const COPY: Record<Locale, Copy> = {
       { label: "Final cleaning", value: e(PRICES.cleaningCents, "en"), note: "Mandatory — you leave relaxed." },
       { label: "Deposit", value: e(PRICES.depositCents, "en"), note: "Refunded after your stay." },
     ],
+    energyNote: `Energy flat rate for heating: ${e(PRICES.energyFlatPerNightCents, "en")} per night for stays arriving between October and March — a flat fee, independent of actual consumption.`,
     kurtaxeNote: `The Hochsauerland tourist tax (Kurtaxe) applies on top: ${e(PRICES.kurtaxeRateCents, "en")} per person aged 16+ and night — we pass it on to Winterberg's spa administration.`,
     includedHeading: "Included in the price",
     included: [
-      "Energy & heating — no surcharge since 2026",
+      "Electricity, water & hot water",
       "Fully equipped self-catering kitchen",
       "33 beds in 5 rooms",
       "Lounges, ski cellar",
@@ -229,7 +232,7 @@ const COPY: Record<Locale, Copy> = {
   nl: {
     eyebrow: "Helder & zonder verrassingen",
     h1: "Wat de Wiesenhütte kost.",
-    lead: "Je betaalt per persoon per nacht — leden de helft. Daarbij komt eenmalig de eindschoonmaak. Geen verborgen kosten, geen energietoeslagen. Hier is alles in één oogopslag.",
+    lead: "Je betaalt per persoon per nacht — leden de helft. Daarbij komt eenmalig de eindschoonmaak en van oktober tot maart een energiepakket voor de verwarming. Geen verborgen kosten — hier is alles in één oogopslag.",
     ratesHeading: "Overnachting — per persoon & nacht",
     rates: [
       { label: "Volwassenen", price: e(PRICES.adultNonMemberCents, "nl"), sub: "vanaf 16, incl. leerkrachten" },
@@ -242,10 +245,11 @@ const COPY: Record<Locale, Copy> = {
       { label: "Eindschoonmaak", value: e(PRICES.cleaningCents, "nl"), note: "Verplicht — jullie vertrekken ontspannen." },
       { label: "Borg", value: e(PRICES.depositCents, "nl"), note: "Wordt na het verblijf terugbetaald." },
     ],
+    energyNote: `Energiepakket voor de verwarming: ${e(PRICES.energyFlatPerNightCents, "nl")} per nacht voor verblijven met aankomst van oktober tot maart — een vast bedrag, ongeacht het werkelijke verbruik.`,
     kurtaxeNote: `Daarnaast geldt de toeristenbelasting Hochsauerland (Kurtaxe): ${e(PRICES.kurtaxeRateCents, "nl")} per persoon vanaf 16 jaar en nacht — we dragen die af aan de Kurverwaltung Winterberg.`,
     includedHeading: "Inbegrepen in de prijs",
     included: [
-      "Energie & verwarming — sinds 2026 zonder toeslag",
+      "Stroom, water & warm water",
       "Volledig uitgeruste zelfverzorgingskeuken",
       "33 slaapplaatsen in 5 kamers",
       "Verblijfsruimtes, skikelder",
@@ -347,7 +351,8 @@ export default async function PreisePage() {
               </div>
             ))}
           </div>
-          <p className="text-[13px] text-[var(--color-wh-fg-muted)] mt-3 max-w-[520px]">{c.kurtaxeNote}</p>
+          <p className="text-[13px] text-[var(--color-wh-fg-muted)] mt-3 max-w-[520px]">{c.energyNote}</p>
+          <p className="text-[13px] text-[var(--color-wh-fg-muted)] mt-2 max-w-[520px]">{c.kurtaxeNote}</p>
 
           {/* Pauschalen + Inklusivleistungen */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
