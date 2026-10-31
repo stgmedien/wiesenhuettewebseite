@@ -912,6 +912,7 @@ export async function editBookingPersons(
     persons: newPersons,
     soloUse: b.soloUse,
     tariffs,
+    bookedAt: b.createdAt,
   });
 
   const deltaCents =

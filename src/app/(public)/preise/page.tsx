@@ -122,7 +122,7 @@ const COPY: Record<Locale, Copy> = {
   de: {
     eyebrow: "Klar & ohne Überraschungen",
     h1: "Was die Wiesenhütte kostet.",
-    lead: "Ihr zahlt pro Person und Nacht — Vereinsmitglieder die Hälfte. Dazu kommt einmalig die Endreinigung, von Oktober bis März außerdem eine Energiepauschale fürs Heizen. Keine versteckten Kosten — hier ist alles auf einen Blick.",
+    lead: "Ihr zahlt pro Person und Nacht — Vereinsmitglieder die Hälfte. Dazu kommt einmalig die Endreinigung, von Oktober bis April außerdem eine Energiepauschale fürs Heizen. Keine versteckten Kosten — hier ist alles auf einen Blick.",
     ratesHeading: "Übernachtung — pro Person & Nacht",
     rates: [
       { label: "Erwachsene", price: e(PRICES.adultNonMemberCents, "de"), sub: "ab 16 Jahren, inkl. Lehrkräfte" },
@@ -135,7 +135,7 @@ const COPY: Record<Locale, Copy> = {
       { label: "Endreinigung", value: e(PRICES.cleaningCents, "de"), note: "Pflicht — ihr reist entspannt ab." },
       { label: "Kaution", value: e(PRICES.depositCents, "de"), note: "Wird nach dem Aufenthalt zurückerstattet." },
     ],
-    energyNote: `Energiepauschale für die Heizung: ${e(PRICES.energyFlatPerNightCents, "de")} pro Nacht für Aufenthalte mit Anreise von Oktober bis März — pauschal, unabhängig vom tatsächlichen Verbrauch.`,
+    energyNote: `Energiepauschale für die Heizung, pro Nacht: ${e(PRICES.energyFlatWinterCents, "de")} von November bis März, ${e(PRICES.energyFlatShoulderCents, "de")} im Oktober und April — pauschal, unabhängig vom tatsächlichen Verbrauch. Von Mai bis September entfällt sie.`,
     kurtaxeNote: `Zusätzlich fällt die Kurtaxe Hochsauerland an: ${e(PRICES.kurtaxeRateCents, "de")} pro Person ab 16 Jahren und Nacht — wir führen sie an die Kurverwaltung Winterberg ab.`,
     includedHeading: "Im Preis enthalten",
     included: [
@@ -177,7 +177,7 @@ const COPY: Record<Locale, Copy> = {
   en: {
     eyebrow: "Clear & no surprises",
     h1: "What the Wiesenhütte costs.",
-    lead: "You pay per person and night — club members pay half. Plus a one-off final cleaning and, from October to March, an energy flat rate for heating. No hidden costs — here is everything at a glance.",
+    lead: "You pay per person and night — club members pay half. Plus a one-off final cleaning and, from October to April, an energy flat rate for heating. No hidden costs — here is everything at a glance.",
     ratesHeading: "Overnight — per person & night",
     rates: [
       { label: "Adults", price: e(PRICES.adultNonMemberCents, "en"), sub: "16+, incl. teachers" },
@@ -190,7 +190,7 @@ const COPY: Record<Locale, Copy> = {
       { label: "Final cleaning", value: e(PRICES.cleaningCents, "en"), note: "Mandatory — you leave relaxed." },
       { label: "Deposit", value: e(PRICES.depositCents, "en"), note: "Refunded after your stay." },
     ],
-    energyNote: `Energy flat rate for heating: ${e(PRICES.energyFlatPerNightCents, "en")} per night for stays arriving between October and March — a flat fee, independent of actual consumption.`,
+    energyNote: `Energy flat rate for heating, per night: ${e(PRICES.energyFlatWinterCents, "en")} from November to March, ${e(PRICES.energyFlatShoulderCents, "en")} in October and April — a flat fee, independent of actual consumption. No flat rate from May to September.`,
     kurtaxeNote: `The Hochsauerland tourist tax (Kurtaxe) applies on top: ${e(PRICES.kurtaxeRateCents, "en")} per person aged 16+ and night — we pass it on to Winterberg's spa administration.`,
     includedHeading: "Included in the price",
     included: [
@@ -232,7 +232,7 @@ const COPY: Record<Locale, Copy> = {
   nl: {
     eyebrow: "Helder & zonder verrassingen",
     h1: "Wat de Wiesenhütte kost.",
-    lead: "Je betaalt per persoon per nacht — leden de helft. Daarbij komt eenmalig de eindschoonmaak en van oktober tot maart een energiepakket voor de verwarming. Geen verborgen kosten — hier is alles in één oogopslag.",
+    lead: "Je betaalt per persoon per nacht — leden de helft. Daarbij komt eenmalig de eindschoonmaak en van oktober tot april een energiepakket voor de verwarming. Geen verborgen kosten — hier is alles in één oogopslag.",
     ratesHeading: "Overnachting — per persoon & nacht",
     rates: [
       { label: "Volwassenen", price: e(PRICES.adultNonMemberCents, "nl"), sub: "vanaf 16, incl. leerkrachten" },
@@ -245,7 +245,7 @@ const COPY: Record<Locale, Copy> = {
       { label: "Eindschoonmaak", value: e(PRICES.cleaningCents, "nl"), note: "Verplicht — jullie vertrekken ontspannen." },
       { label: "Borg", value: e(PRICES.depositCents, "nl"), note: "Wordt na het verblijf terugbetaald." },
     ],
-    energyNote: `Energiepakket voor de verwarming: ${e(PRICES.energyFlatPerNightCents, "nl")} per nacht voor verblijven met aankomst van oktober tot maart — een vast bedrag, ongeacht het werkelijke verbruik.`,
+    energyNote: `Energiepakket voor de verwarming, per nacht: ${e(PRICES.energyFlatWinterCents, "nl")} van november tot maart, ${e(PRICES.energyFlatShoulderCents, "nl")} in oktober en april — een vast bedrag, ongeacht het werkelijke verbruik. Van mei tot september vervalt het.`,
     kurtaxeNote: `Daarnaast geldt de toeristenbelasting Hochsauerland (Kurtaxe): ${e(PRICES.kurtaxeRateCents, "nl")} per persoon vanaf 16 jaar en nacht — we dragen die af aan de Kurverwaltung Winterberg.`,
     includedHeading: "Inbegrepen in de prijs",
     included: [

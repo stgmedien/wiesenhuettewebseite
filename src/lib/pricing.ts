@@ -48,7 +48,7 @@ const PRICING_LABELS: Record<Locale, {
       `${missing} fehlende Personen × ${nights} Nächte (Durchschnittstarif)`,
     nights: "Nächte",
     detailNXN: (q, n) => `${q} × ${n} Nächte`,
-    detailNightsAt: (n, perNight) => `${n} Nächte × ${perNight}`,
+    detailNightsAt: (n, perNight) => `${n} ${n === 1 ? "Nacht" : "Nächte"} × ${perNight}`,
     validMinNights: (n) => `Mindestaufenthalt ${n} Nächte.`,
     validMinPersons: (n) => `Mindestens ${n} Person.`,
     validMaxPersons: (n) => `Maximalbelegung ${n} Personen.`,
@@ -68,7 +68,7 @@ const PRICING_LABELS: Record<Locale, {
       `${missing} missing guests × ${nights} nights (average rate)`,
     nights: "nights",
     detailNXN: (q, n) => `${q} × ${n} nights`,
-    detailNightsAt: (n, perNight) => `${n} nights × ${perNight}`,
+    detailNightsAt: (n, perNight) => `${n} ${n === 1 ? "night" : "nights"} × ${perNight}`,
     validMinNights: (n) => `Minimum stay ${n} nights.`,
     validMinPersons: (n) => `Minimum ${n} guest.`,
     validMaxPersons: (n) => `Maximum ${n} guests.`,
@@ -88,7 +88,7 @@ const PRICING_LABELS: Record<Locale, {
       `${missing} ontbrekende personen × ${nights} nachten (gemiddeld tarief)`,
     nights: "nachten",
     detailNXN: (q, n) => `${q} × ${n} nachten`,
-    detailNightsAt: (n, perNight) => `${n} nachten × ${perNight}`,
+    detailNightsAt: (n, perNight) => `${n} ${n === 1 ? "nacht" : "nachten"} × ${perNight}`,
     validMinNights: (n) => `Minimaal ${n} nachten.`,
     validMinPersons: (n) => `Minimaal ${n} persoon.`,
     validMaxPersons: (n) => `Maximaal ${n} personen.`,
@@ -105,8 +105,14 @@ export const PRICES = {
   pupilCents: 600,             // 6,00 € — Kinder/Schüler bis 16 J. · Vereinsmitglied (−50 %)
 
   // Pauschalen
-  // 30,00 € pro Nacht (gesamt) — nur in den Wintermonaten (Vorstandsbeschluss
-  // 09/2026, siehe calculatePrice() fuer die Saison-Logik).
+  // Energiepauschale (gesamt, nicht pro Person) — Staffel nach Monat der
+  // jeweiligen Nacht, Vorstandsbeschluss 10/2026, gilt fuer Buchungen ab
+  // ENERGY_FLAT_STAFFEL_FROM (siehe energyFlatForNight()):
+  energyFlatWinterCents: 6000,        // 60,00 € — Naechte November bis Maerz
+  energyFlatShoulderCents: 3000,      // 30,00 € — Naechte Oktober und April
+  // Vorher (Vorstandsbeschluss 09/2026): 30,00 € fuer ALLE Naechte, sobald
+  // die Anreise zwischen 1.10. und 31.3. liegt. Gilt weiter fuer Buchungen,
+  // die vor ENERGY_FLAT_STAFFEL_FROM angelegt wurden.
   energyFlatPerNightCents: 3000,
   cleaningCents: 19000,               // 190,00 € einmalig (PFLICHT)
   soloSurchargeCents: 5000,           // 50,00 € Aufschlag bei Allein-/Exklusivnutzung
@@ -200,8 +206,58 @@ export type PriceLine = {
   totalCents: number;
 };
 
+/** Ab hier gilt die Staffel 30/60 € — Buchungen davor behalten die alte Regel. */
+export const ENERGY_FLAT_STAFFEL_FROM = new Date("2026-11-01T00:00:00+01:00");
+
+/** Energiepauschale fuer eine einzelne Nacht nach Staffel (Monat 1–12). */
+export const energyFlatForMonth = (month: number): number => {
+  if (month >= 11 || month <= 3) return PRICES.energyFlatWinterCents;
+  if (month === 10 || month === 4) return PRICES.energyFlatShoulderCents;
+  return 0;
+};
+
+const isoDay = (d: Date | string): string =>
+  typeof d === "string"
+    ? d.slice(0, 10)
+    : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+/**
+ * Energiepauschale je Satz: { 6000: 2 } heisst 2 Naechte zu 60 €. Buchungen
+ * vor ENERGY_FLAT_STAFFEL_FROM: alte Regel (30 € fuer alle Naechte, wenn die
+ * Anreise zwischen 1.10. und 31.3. liegt — vertraglich so vereinbart).
+ */
+export const energyFlatNights = (
+  arrival: Date | string,
+  departure: Date | string,
+  bookedAt: Date | string = new Date()
+): Map<number, number> => {
+  const nightsByRate = new Map<number, number>();
+  const nights = nightsBetween(arrival, departure);
+  if (nights <= 0) return nightsByRate;
+  const start = isoDay(arrival);
+  if (new Date(bookedAt) < ENERGY_FLAT_STAFFEL_FROM) {
+    const md = start.slice(5, 10);
+    if (md >= "10-01" || md <= "03-31") nightsByRate.set(PRICES.energyFlatPerNightCents, nights);
+    return nightsByRate;
+  }
+  const t0 = new Date(`${start}T00:00:00Z`).getTime();
+  for (let i = 0; i < nights; i++) {
+    const month = new Date(t0 + i * 86_400_000).getUTCMonth() + 1;
+    const rate = energyFlatForMonth(month);
+    if (rate > 0) nightsByRate.set(rate, (nightsByRate.get(rate) ?? 0) + 1);
+  }
+  return nightsByRate;
+};
+
 export type PriceInput = {
   persons: Persons;
+  /**
+   * Wann die Buchung geschlossen wurde/wird (Default: jetzt). Bestimmt, ob
+   * die Energiepauschalen-Staffel oder die alte Regel gilt — bei Neu-
+   * berechnungen bestehender Buchungen (Personen, Verlaengerung, Umbuchung)
+   * immer booking.createdAt mitgeben.
+   */
+  bookedAt?: Date | string;
   arrival: Date | string;
   departure: Date | string;
   soloUse: boolean;
@@ -285,21 +341,12 @@ export const calculatePrice = (input: PriceInput): PriceBreakdown => {
     p.children * childCents * nights +
     p.pupils * pupilCents * nights;
 
-  // Energie-Zuschlag Winter (Vorstandsbeschluss 09/2026): 30,00 €/Nacht in den
-  // Wintermonaten Oktober-Maerz, fuer den GESAMTEN Aufenthalt sobald der
-  // Anreisetag in diesem Zeitraum liegt — keine Teil-Verrechnung bei
-  // Aufenthalten ueber die Grenze hinweg. Anreise-basiert wie die
-  // DB-Saison-Aufloesung fuer Tarife (siehe resolveActiveSeason() in
-  // pricing-tariffs.ts), hier aber bewusst als fester Code-Zeitraum statt
-  // DB-Saison, weil kein weiterer saisonaler Preis daran haengt.
-  const arrivalMonthDay =
-    typeof input.arrival === "string"
-      ? input.arrival.slice(5, 10)
-      : `${String(input.arrival.getMonth() + 1).padStart(2, "0")}-${String(
-          input.arrival.getDate()
-        ).padStart(2, "0")}`;
-  const isEnergySurchargeSeason = arrivalMonthDay >= "10-01" || arrivalMonthDay <= "03-31";
-  const energyFlatCents = isEnergySurchargeSeason ? PRICES.energyFlatPerNightCents * nights : 0;
+  // Energiepauschale: Staffel nach Monat jeder einzelnen Nacht (Vorstands-
+  // beschluss 10/2026), fuer aeltere Buchungen die damals vereinbarte Regel —
+  // siehe energyFlatNights(). Fester Code-Zeitraum statt DB-Saison, weil kein
+  // weiterer saisonaler Preis daran haengt.
+  const energyNights = energyFlatNights(input.arrival, input.departure, input.bookedAt);
+  const energyFlatCents = [...energyNights].reduce((sum, [rate, n]) => sum + rate * n, 0);
   const cleaningCents = PRICES.cleaningCents; // Pflicht
   const soloSurchargeCents = input.soloUse ? PRICES.soloSurchargeCents : 0;
   const extrasCents = (input.extras ?? []).reduce((acc, e) => acc + e.totalCents, 0);
@@ -386,13 +433,13 @@ export const calculatePrice = (input: PriceInput): PriceBreakdown => {
       totalCents: p.pupils * pupilCents * nights,
     });
   }
-  if (energyFlatCents > 0) {
+  for (const [rate, n] of [...energyNights].sort((a, b) => b[0] - a[0])) {
     lines.push({
       label: L.energyFlat,
-      detail: L.detailNightsAt(nights, formatEuro(PRICES.energyFlatPerNightCents, input.locale)),
-      qty: nights,
-      unitCents: PRICES.energyFlatPerNightCents,
-      totalCents: energyFlatCents,
+      detail: L.detailNightsAt(n, formatEuro(rate, input.locale)),
+      qty: n,
+      unitCents: rate,
+      totalCents: rate * n,
     });
   }
   lines.push({
