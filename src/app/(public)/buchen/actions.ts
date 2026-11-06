@@ -12,7 +12,8 @@ import {
   isBankTransferActive,
 } from "@/lib/stripe-bank-transfer";
 import { db } from "@/lib/db";
-import { bookings, customers, payments, activityLog, users, bookingAttempts } from "@/lib/db/schema";
+import { bookings, customers, payments, activityLog, users, bookingAttempts, notes } from "@/lib/db/schema";
+import { memberNamesSchema, checkMemberNames, memberNamesNoteBody } from "@/lib/member-names";
 import { auth } from "@/lib/auth";
 import { createMagicLinkToken } from "@/lib/magic-link";
 import { sendMail } from "@/lib/mail/send";
@@ -119,8 +120,8 @@ const ACTION_ERRORS: Record<Locale, {
   de: {
     invalidInput: "Ungültige Eingaben.",
     tooManyAttempts: "Zu viele Buchungs-Versuche von dieser Email-Adresse in kurzer Zeit. Bitte versuche es in einer Stunde erneut oder kontaktiere uns direkt.",
-    memberLocked: "Der Mitglieds-Tarif ist nur für verifizierte Vereinsmitglieder buchbar. Bitte logge Dich ein und beantrage die Mitgliedschaft im Konto-Profil.",
-    memberLockedField: "Mitglieds-Tarif gesperrt",
+    memberLocked: "Die Anzahl der Personen zum Mitgliedstarif passt nicht zu den eingetragenen Vereinsmitgliedern. Bitte trage jedes Mitglied mit Vor- und Nachnamen ein und bestätige die Mitgliedschaft.",
+    memberLockedField: "Vereinsmitglieder prüfen",
     rangeUnavailable: "Dieser Zeitraum ist leider nicht mehr verfügbar.",
     rangeBlocked: "Zeitraum belegt",
     voucherPrefix: "Gutschein",
@@ -132,8 +133,8 @@ const ACTION_ERRORS: Record<Locale, {
   en: {
     invalidInput: "Invalid input.",
     tooManyAttempts: "Too many booking attempts from this email address recently. Please try again in an hour or contact us directly.",
-    memberLocked: "The member rate is only bookable for verified club members. Please log in and apply for membership in your account profile.",
-    memberLockedField: "Member rate locked",
+    memberLocked: "The number of persons at the member rate does not match the club members entered. Please enter each member with first and last name and confirm the membership.",
+    memberLockedField: "Check club members",
     rangeUnavailable: "Sorry, this range is no longer available.",
     rangeBlocked: "Range booked",
     voucherPrefix: "Voucher",
@@ -145,8 +146,8 @@ const ACTION_ERRORS: Record<Locale, {
   nl: {
     invalidInput: "Ongeldige invoer.",
     tooManyAttempts: "Te veel boekingspogingen vanaf dit e-mailadres in korte tijd. Probeer het over een uur opnieuw of neem direct contact op.",
-    memberLocked: "Het ledentarief is alleen beschikbaar voor geverifieerde verenigingsleden. Log in en vraag lidmaatschap aan in je accountprofiel.",
-    memberLockedField: "Ledentarief geblokkeerd",
+    memberLocked: "Het aantal personen met ledentarief komt niet overeen met de ingevulde verenigingsleden. Vul elk lid in met voor- en achternaam en bevestig het lidmaatschap.",
+    memberLockedField: "Verenigingsleden controleren",
     rangeUnavailable: "Deze periode is helaas niet meer beschikbaar.",
     rangeBlocked: "Periode geboekt",
     voucherPrefix: "Cadeaubon",
@@ -193,6 +194,9 @@ const inputSchema = z.object({
   customerMessage: z.string().max(2000).optional().nullable(),
   discountCode: z.string().max(30).optional().nullable(),
   acceptedTerms: z.literal(true),
+  // Vereinsmitglieder in der Gruppe (am Ende des Flows eingetragen).
+  memberNames: memberNamesSchema,
+  memberConfirm: z.boolean().default(false),
   locale: z.enum(["de", "en", "nl"]).default("de"),
 });
 
@@ -278,16 +282,14 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
     isVerifiedMember = linked[0]?.status === "verified";
   }
 
-  if (persons.members > 0 && !isVerifiedMember) {
+  // Mitgliedstarif (Erwachsene UND Kinder) nur für namentlich eingetragene
+  // Vereinsmitglieder + Ehrlichkeitsbestätigung. Kein Login mehr nötig —
+  // Dana prüft die Namen im Manager (gepinnte Notiz).
+  if (checkMemberNames(persons, data.memberNames, data.memberConfirm)) {
     return {
       ok: false,
       error: T.memberLocked,
-      issues: [
-        {
-          field: "persons.members",
-          message: T.memberLockedField,
-        },
-      ],
+      issues: [{ field: "memberNames", message: T.memberLockedField }],
     };
   }
 
@@ -585,6 +587,22 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
     .returning({ id: bookings.id, bookingNumber: bookings.bookingNumber });
 
   const bookingId = inserted[0].id;
+
+  // Vereinsmitglieder-Namen als gepinnte Manager-Notiz (Dana prüft).
+  if (data.memberNames.length > 0) {
+    try {
+      await db.insert(notes).values({
+        scope: "booking",
+        refId: bookingId,
+        body: memberNamesNoteBody(data.memberNames),
+        pinned: true,
+        internal: true,
+        by: "Buchungsformular",
+      });
+    } catch (err) {
+      console.error("[booking] member-names note failed (non-blocking):", err);
+    }
+  }
 
   // Institution in den Kunden-Datensatz spiegeln (company), damit Rechnung /
   // Mietvertrag die Organisation zeigen. Nur wenn angegeben.
