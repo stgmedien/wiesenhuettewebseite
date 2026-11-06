@@ -339,8 +339,8 @@ function MembershipSection({ customer }: { customer: Customer | null }) {
                 <br />
               </>
             )}
-            Du erhältst beim Buchen automatisch den Mitglieds-Tarif (−50 %: 11,00 € statt 22,00 €
-            pro Erwachsenem und Nacht).
+            Beim Buchen trägst Du Dich am Ende unter „Vereinsmitglieder in Eurer Gruppe“ ein — dann
+            gilt für Dich der Mitglieds-Tarif (−50 %: 11,00 € statt 22,00 € pro Erwachsenem und Nacht).
           </p>
         </div>
       </Section>
@@ -357,8 +357,8 @@ function MembershipSection({ customer }: { customer: Customer | null }) {
           </p>
           <p className="text-amber-800 m-0">
             Wir gleichen Deine Daten mit dem Vereinsverzeichnis ab. Sobald wir bestätigt haben,
-            siehst Du den Mitglieds-Status hier — und kannst beim nächsten Buchen den
-            Mitglieds-Tarif wählen.
+            siehst Du den Mitglieds-Status hier. Den Mitglieds-Tarif bekommst Du beim Buchen
+            unabhängig davon: Trag Dich einfach am Ende als Vereinsmitglied ein.
           </p>
         </div>
         <form
@@ -394,7 +394,7 @@ function MembershipSection({ customer }: { customer: Customer | null }) {
       description={
         status === "rejected"
           ? "Dein vorheriger Antrag wurde abgelehnt. Du kannst einen neuen Antrag stellen."
-          : "Skifreunde-Mitglied? Beantrage hier die Verifizierung — wir prüfen das manuell. Bis zur Bestätigung gelten die Nichtmitglieds-Tarife."
+          : "Skifreunde-Mitglied? Beantrage hier die Verifizierung — wir prüfen das manuell. Den Mitglieds-Tarif bekommst Du beim Buchen, indem Du Dich am Ende als Vereinsmitglied einträgst."
       }
     >
       {status === "rejected" && customer.membershipRejectedReason && (

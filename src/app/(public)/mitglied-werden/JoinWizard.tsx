@@ -157,7 +157,7 @@ const COPY: Record<Locale, {
     ],
     alreadyTitle: "Du bist schon Mitglied! 🎉",
     alreadyBody:
-      "Deine Mitgliedschaft ist bestätigt — beim Buchen gelten für Dich automatisch die Mitgliederpreise.",
+      "Deine Mitgliedschaft ist bestätigt — beim Buchen trägst Du Dich am Ende als Vereinsmitglied ein, dann gelten für Dich die Mitgliederpreise.",
     alreadyCta: "Mit Mitgliederpreisen buchen",
     pendingHint:
       "Dein Mitglieds-Nachweis wird gerade geprüft. Wenn Du stattdessen direkt online beitreten möchtest, geht das hier — die Mitgliedschaft ist dann sofort aktiv.",
@@ -239,7 +239,7 @@ const COPY: Record<Locale, {
       "Active immediately — book at member rates right away",
     ],
     alreadyTitle: "You're already a member! 🎉",
-    alreadyBody: "Your membership is confirmed — member rates apply automatically when you book.",
+    alreadyBody: "Your membership is confirmed — when booking, enter yourself as a club member at the end and member rates apply to you.",
     alreadyCta: "Book at member rates",
     pendingHint:
       "Your membership proof is being reviewed. If you'd rather join online directly, you can do that here — membership is then active immediately.",
@@ -321,7 +321,7 @@ const COPY: Record<Locale, {
       "Meteen actief — direct boeken tegen ledentarieven",
     ],
     alreadyTitle: "Je bent al lid! 🎉",
-    alreadyBody: "Je lidmaatschap is bevestigd — bij het boeken gelden automatisch de ledentarieven.",
+    alreadyBody: "Je lidmaatschap is bevestigd — vul jezelf bij het boeken aan het eind in als verenigingslid, dan gelden voor jou de ledentarieven.",
     alreadyCta: "Boeken tegen ledentarieven",
     pendingHint:
       "Je lidmaatschapsbewijs wordt momenteel gecontroleerd. Wil je liever direct online lid worden, dan kan dat hier — het lidmaatschap is dan meteen actief.",
