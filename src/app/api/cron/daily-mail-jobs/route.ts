@@ -46,6 +46,13 @@ import { revalidateTag } from "next/cache";
 import { BOOKING_BLOCKS_TAG } from "@/lib/availability";
 import { formatDateLong } from "@/lib/utils";
 import { notifyWaitlistForRange } from "@/lib/waitlist";
+import ManualTransferDepositEmail from "@/lib/mail/templates/manual-transfer-deposit";
+import {
+  MANUAL_TRANSFER_DEADLINE_CUTOFF,
+  MANUAL_TRANSFER_DEPOSIT_DAYS,
+  manualTransferDepositDeadlineIso,
+  manualTransferReminderIso,
+} from "@/lib/manual-transfer-deadline";
 import crypto from "crypto";
 
 const BIRTHDAY_DISCOUNT_PERCENT = 10;
@@ -122,6 +129,8 @@ export async function GET(req: Request) {
     schoolDepositDueSent: 0,
     schoolWarningSent: 0,
     schoolCancelled: 0,
+    manualTransferReminderSent: 0,
+    manualTransferCancelled: 0,
     manualRestSent: 0,
     bankTransferRestLinkSent: 0,
     avsReminderSent: 0,
@@ -942,6 +951,101 @@ export async function GET(req: Request) {
     // benachrichtigen (best-effort, crasht den Cron nie).
     await notifyWaitlistForRange(b.arrival, b.departure);
     stats.schoolCancelled++;
+  }
+
+  // ---------- Klassische Ueberweisung: 7-Tage-Frist fuer die Anzahlung ----------
+  // Selbstbedienungs-Buchungen per klassischer Ueberweisung blockierten
+  // Termine bisher unbegrenzt. Jetzt: Erinnerung nach 5 Tagen, Auto-Storno,
+  // sobald der Fristtag (Buchung + 7 Tage) verstrichen ist. Gilt nur fuer
+  // Buchungen ab MANUAL_TRANSFER_DEADLINE_CUTOFF und nur, solange noch gar
+  // nichts gezahlt und der Status unveraendert "angefragt" ist — erfasst der
+  // Vorstand eine Zahlung oder bestaetigt die Buchung, ist sie raus.
+  const manualTransferOpen = await db
+    .select()
+    .from(bookings)
+    .where(
+      and(
+        eq(bookings.paymentMode, "manual_transfer"),
+        eq(bookings.status, "angefragt"),
+        eq(bookings.paidCents, 0),
+        gte(bookings.createdAt, MANUAL_TRANSFER_DEADLINE_CUTOFF)
+      )
+    );
+  // Kalendertag in deutscher Zeit — passend zu manualTransferDepositDeadlineIso.
+  const todayIso = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
+  for (const b of manualTransferOpen) {
+    const customer = b.customerId
+      ? (await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1))[0]
+      : null;
+    const deadlineIso = manualTransferDepositDeadlineIso(b.createdAt);
+    const anzahlungRow = (
+      await db
+        .select({ amountCents: payments.amountCents })
+        .from(payments)
+        .where(and(eq(payments.bookingId, b.id), eq(payments.kind, "anzahlung")))
+        .limit(1)
+    )[0];
+    const mailProps = {
+      firstName: customer?.firstName ?? "",
+      bookingNumber: b.bookingNumber,
+      arrival: formatDateLong(b.arrival),
+      departure: formatDateLong(b.departure),
+      depositLabel: formatEuro(anzahlungRow?.amountCents ?? 0),
+      deadlineLabel: formatDateLong(deadlineIso),
+    };
+
+    if (todayIso > deadlineIso) {
+      if (await alreadySent(b.id, "manual_transfer_cancelled")) continue;
+      await db
+        .update(bookings)
+        .set({ status: "storniert", updatedAt: new Date() })
+        .where(eq(bookings.id, b.id));
+      await db
+        .update(payments)
+        .set({ status: "fehlgeschlagen" })
+        .where(and(eq(payments.bookingId, b.id), eq(payments.status, "offen")));
+      revalidateTag(BOOKING_BLOCKS_TAG, "max");
+      if (customer) {
+        try {
+          await sendMail({
+            to: customer.email,
+            subject: `Buchung storniert — ${b.bookingNumber}`,
+            template: "manual_transfer_cancelled",
+            bookingId: b.id,
+            react: ManualTransferDepositEmail({ variant: "cancelled", ...mailProps }),
+          });
+        } catch (err) {
+          console.error("[cron] manual_transfer_cancelled mail failed:", err);
+        }
+      }
+      await db.insert(activityLog).values({
+        who: "Cron",
+        what: `Überweisungs-Buchung ${b.bookingNumber} automatisch storniert — Anzahlung bis ${formatDateLong(deadlineIso)} nicht eingegangen (${MANUAL_TRANSFER_DEPOSIT_DAYS}-Tage-Frist). Tage wieder frei.`,
+        bookingId: b.id,
+      });
+      await notifyWaitlistForRange(b.arrival, b.departure);
+      stats.manualTransferCancelled++;
+      continue;
+    }
+
+    if (
+      customer &&
+      todayIso >= manualTransferReminderIso(b.createdAt) &&
+      !(await alreadySent(b.id, "manual_transfer_reminder"))
+    ) {
+      try {
+        await sendMail({
+          to: customer.email,
+          subject: `Erinnerung: Anzahlung für Buchung ${b.bookingNumber}`,
+          template: "manual_transfer_reminder",
+          bookingId: b.id,
+          react: ManualTransferDepositEmail({ variant: "reminder", ...mailProps }),
+        });
+        stats.manualTransferReminderSent++;
+      } catch (err) {
+        console.error("[cron] manual_transfer_reminder mail failed:", err);
+      }
+    }
   }
 
   // ---------- T-1: Schlüsselübergabe ----------
