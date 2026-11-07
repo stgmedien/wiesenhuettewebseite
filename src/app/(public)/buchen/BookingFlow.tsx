@@ -201,7 +201,7 @@ const BF_COPY = {
     valTerms: "Bitte stimme den Bedingungen zu, um fortzufahren.",
     minOccupancyNoteTitle: "Aufschlag Mindestbelegung",
     minOccupancyNoteBody:
-      "Buchungen mit weniger als 15 Personen werden zum Preisniveau von 15 Personen abgerechnet — der pro-rata-Aufschlag erscheint live in der Preisübersicht.",
+      "Buchungen mit weniger als 15 Personen werden zum Preisniveau von 15 Personen abgerechnet — die fehlenden Plätze kosten den Normaltarif (Erwachsene, Nichtmitglied). Der Aufschlag erscheint live in der Preisübersicht.",
     endreinigungTitle: "Endreinigung — 190,00 € (Pflicht)",
     endreinigungBody: "Die finale Reinigung wird von uns durchgeführt und ist in jeder Buchung enthalten.",
     soloTitle: "Allein-/Exklusivnutzung — 50,00 €",
@@ -384,7 +384,7 @@ const BF_COPY = {
     valTerms: "Please accept the terms to continue.",
     minOccupancyNoteTitle: "Minimum-occupancy surcharge",
     minOccupancyNoteBody:
-      "Bookings below 15 guests are charged at the 15-guest price level — the pro-rata surcharge appears live in the price summary.",
+      "Bookings below 15 guests are charged at the 15-guest price level — the missing places are charged at the standard rate (adult, non-member). The surcharge appears live in the price summary.",
     endreinigungTitle: "Final cleaning — 190.00 € (mandatory)",
     endreinigungBody: "We carry out the final cleaning ourselves — it is included in every booking.",
     soloTitle: "Exclusive use — 50.00 €",
@@ -564,7 +564,7 @@ const BF_COPY = {
     valTerms: "Ga akkoord met de voorwaarden om door te gaan.",
     minOccupancyNoteTitle: "Toeslag minimale bezetting",
     minOccupancyNoteBody:
-      "Boekingen onder 15 personen worden afgerekend op het prijsniveau van 15 personen — de pro-rata-toeslag verschijnt live in het prijsoverzicht.",
+      "Boekingen onder 15 personen worden afgerekend op het prijsniveau van 15 personen — de ontbrekende plaatsen kosten het standaardtarief (volwassene, niet-lid). De toeslag verschijnt live in het prijsoverzicht.",
     endreinigungTitle: "Eindschoonmaak — € 190,00 (verplicht)",
     endreinigungBody: "De eindschoonmaak doen wij zelf — die zit in elke boeking inbegrepen.",
     soloTitle: "Exclusief gebruik — € 50,00",

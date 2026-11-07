@@ -55,8 +55,9 @@ export default async function AGB() {
             <li>Maximalbelegung: <strong>33 Personen</strong></li>
             <li>
               Buchungen unter 15 Personen sind möglich. Die Übernachtungen werden in diesem Fall
-              jedoch zum Preisniveau von 15 Personen abgerechnet (pro-rata-Aufschlag aus dem
-              tatsächlichen Personen-Mix; in der Preisübersicht transparent ausgewiesen).
+              jedoch zum Preisniveau von 15 Personen abgerechnet: Die fehlenden Plätze werden zum
+              Normaltarif (Erwachsene, Nichtmitglied) berechnet und in der Preisübersicht als
+              Aufschlag Mindestbelegung ausgewiesen.
             </li>
           </ul>
         </Block>
