@@ -93,8 +93,8 @@ export function ManualPaymentForm({
         />
         <span className="text-[13px] leading-snug text-[var(--color-wh-black)]">
           <strong>Altsystem-Restzahlung</strong> anlegen — offener Restbetrag, wird{" "}
-          <em>14 Tage vor Anreise</em> automatisch per Stripe-Link angefordert. Zählt noch
-          nicht zur Bezahlt-Summe.
+          <em>21 Tage vor Anreise</em> automatisch per Mail zur Überweisung angefordert
+          (Zahlungsziel 14 Tage vor Anreise). Zählt noch nicht zur Bezahlt-Summe.
         </span>
       </label>
 
