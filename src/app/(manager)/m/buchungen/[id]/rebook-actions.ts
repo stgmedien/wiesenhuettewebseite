@@ -160,6 +160,7 @@ export async function rebookBooking(raw: z.infer<typeof schema>): Promise<Rebook
     soloUse: old.soloUse,
     tariffs: tariffsOverride,
     bookedAt: newCreatedAt,
+    bookerIsMember: old.bookerIsMember,
   });
 
   const newBookingNumber = generateBookingNumber();
@@ -226,6 +227,7 @@ export async function rebookBooking(raw: z.infer<typeof schema>): Promise<Rebook
         paidCents: old.paidCents,
         cleaningOptedIn: old.cleaningOptedIn,
         soloUse: old.soloUse,
+        bookerIsMember: old.bookerIsMember,
         source: "Manuell",
         // Self-Check-in-Link ist an den Gast gebunden, nicht an Datum/
         // Personenzahl -- kann unveraendert weiterverwendet werden (siehe

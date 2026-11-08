@@ -102,6 +102,8 @@ export async function createManualBooking(formData: FormData): Promise<{ ok: boo
     departure: d.departure,
     persons,
     soloUse: d.soloUse,
+    // Kundentyp „Vereinsmitglied“ = Bucher/in ist Mitglied → keine Mindestbelegung.
+    bookerIsMember: d.customerType === "mitglied",
   });
 
   let customerId: string;
@@ -161,6 +163,7 @@ export async function createManualBooking(formData: FormData): Promise<{ ok: boo
       paidCents: 0,
       cleaningOptedIn: true,
       soloUse: d.soloUse,
+      bookerIsMember: d.customerType === "mitglied",
       source: "Manuell",
       internalNotes: d.internalNotes ?? null,
     })

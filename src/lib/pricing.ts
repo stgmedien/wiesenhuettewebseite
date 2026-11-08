@@ -25,7 +25,7 @@ const PRICING_LABELS: Record<Locale, {
   cleaning: string;
   soloSurcharge: string;
   minOccupancySurcharge: string;
-  minOccupancyDetail: (missing: number, nights: number) => string;
+  minOccupancyDetail: (missing: number, nights: number, rate: string | null) => string;
   nights: string;
   detailNXN: (q: number, n: number) => string;
   detailNightsAt: (n: number, perNight: string) => string;
@@ -44,8 +44,10 @@ const PRICING_LABELS: Record<Locale, {
     cleaning: "Endreinigung (Pflicht)",
     soloSurcharge: "Aufschlag Allein-/Exklusivnutzung",
     minOccupancySurcharge: "Aufschlag Mindestbelegung (15)",
-    minOccupancyDetail: (missing, nights) =>
-      `${missing} fehlende Personen × ${nights} Nächte (Durchschnittstarif)`,
+    minOccupancyDetail: (missing, nights, rate) =>
+      rate
+        ? `${missing} fehlende Personen × ${nights} Nächte × ${rate} (Normaltarif)`
+        : `${missing} fehlende Personen × ${nights} Nächte (Durchschnittstarif)`,
     nights: "Nächte",
     detailNXN: (q, n) => `${q} × ${n} Nächte`,
     detailNightsAt: (n, perNight) => `${n} ${n === 1 ? "Nacht" : "Nächte"} × ${perNight}`,
@@ -64,8 +66,10 @@ const PRICING_LABELS: Record<Locale, {
     cleaning: "Final cleaning (mandatory)",
     soloSurcharge: "Exclusive-use surcharge",
     minOccupancySurcharge: "Minimum-occupancy surcharge (15)",
-    minOccupancyDetail: (missing, nights) =>
-      `${missing} missing guests × ${nights} nights (average rate)`,
+    minOccupancyDetail: (missing, nights, rate) =>
+      rate
+        ? `${missing} missing guests × ${nights} nights × ${rate} (standard rate)`
+        : `${missing} missing guests × ${nights} nights (average rate)`,
     nights: "nights",
     detailNXN: (q, n) => `${q} × ${n} nights`,
     detailNightsAt: (n, perNight) => `${n} ${n === 1 ? "night" : "nights"} × ${perNight}`,
@@ -84,8 +88,10 @@ const PRICING_LABELS: Record<Locale, {
     cleaning: "Eindschoonmaak (verplicht)",
     soloSurcharge: "Toeslag exclusief gebruik",
     minOccupancySurcharge: "Toeslag minimale bezetting (15)",
-    minOccupancyDetail: (missing, nights) =>
-      `${missing} ontbrekende personen × ${nights} nachten (gemiddeld tarief)`,
+    minOccupancyDetail: (missing, nights, rate) =>
+      rate
+        ? `${missing} ontbrekende personen × ${nights} nachten × ${rate} (standaardtarief)`
+        : `${missing} ontbrekende personen × ${nights} nachten (gemiddeld tarief)`,
     nights: "nachten",
     detailNXN: (q, n) => `${q} × ${n} nachten`,
     detailNightsAt: (n, perNight) => `${n} ${n === 1 ? "nacht" : "nachten"} × ${perNight}`,
@@ -206,6 +212,14 @@ export type PriceLine = {
   totalCents: number;
 };
 
+/**
+ * Mindestbelegungs-Aufschlag: Ab hier werden fehlende Plätze zum Normaltarif
+ * (Erwachsene · Nichtmitglied) berechnet, Vorstandswunsch 11/2026. Buchungen
+ * davor behalten den Durchschnittstarif ihres Personen-Mixes (wichtig bei
+ * späteren Neuberechnungen, z. B. Personen nachbuchen).
+ */
+export const MIN_OCCUPANCY_NORMAL_RATE_FROM = new Date("2026-11-07T00:00:00+01:00");
+
 /** Ab hier gilt die Staffel 30/60 € — Buchungen davor behalten die alte Regel. */
 export const ENERGY_FLAT_STAFFEL_FROM = new Date("2026-11-01T00:00:00+01:00");
 
@@ -258,6 +272,12 @@ export type PriceInput = {
    * immer booking.createdAt mitgeben.
    */
   bookedAt?: Date | string;
+  /**
+   * Bucher/in ist Vereinsmitglied → kein Mindestbelegungs-Aufschlag
+   * (Vorstandswunsch 11/2026). Gilt unabhängig vom Buchungsdatum, weil das
+   * Flag nur für neue Buchungen bzw. bewusst vom Vorstand gesetzt wird.
+   */
+  bookerIsMember?: boolean;
   arrival: Date | string;
   departure: Date | string;
   soloUse: boolean;
@@ -352,24 +372,30 @@ export const calculatePrice = (input: PriceInput): PriceBreakdown => {
   const extrasCents = (input.extras ?? []).reduce((acc, e) => acc + e.totalCents, 0);
 
   // Mindestbelegungs-Aufschlag (15-Personen-Floor).
-  // Wenn die tatsächliche Personenzahl < minOccupancyFloor liegt, rechnen
-  // wir die fehlenden Personen zum DURCHSCHNITTSTARIF des tatsächlichen
-  // Mixes hinzu. So zahlt eine Gruppe mit 10 Vereinsmitgliedern weniger
-  // Aufschlag als 10 Nichtmitglieder, aber jede Buchung erreicht
-  // mindestens das 15-Personen-Preisniveau.
+  // Liegt die tatsächliche Personenzahl unter minOccupancyFloor, werden die
+  // fehlenden Plätze berechnet:
+  //  - Buchungen ab MIN_OCCUPANCY_NORMAL_RATE_FROM: zum NORMALTARIF
+  //    (Erwachsene · Nichtmitglied, aktiver Tarif) — Vorstandswunsch 11/2026,
+  //    leere Plätze sind keine Mitglieder- oder Kinderplätze.
+  //  - ältere Buchungen: zum DURCHSCHNITTSTARIF des tatsächlichen Mixes
+  //    (damals vereinbart, bleibt bei Neuberechnungen erhalten).
+  //  - Bucher/in ist Vereinsmitglied (input.bookerIsMember): KEIN Aufschlag.
   const totalPersonsActual = sumPersons(p);
+  const minOccupancyNormalRate =
+    new Date(input.bookedAt ?? new Date()) >= MIN_OCCUPANCY_NORMAL_RATE_FROM;
   let minOccupancySurchargeCents = 0;
   if (
+    !input.bookerIsMember &&
     totalPersonsActual > 0 &&
     totalPersonsActual < RULES.minOccupancyFloor &&
     nights > 0
   ) {
     const missing = RULES.minOccupancyFloor - totalPersonsActual;
-    // Durchschnittstarif je Person & Nacht (ganzzahlig in Cents).
-    const avgPerPersonPerNight = Math.round(
-      accommodationCents / (totalPersonsActual * nights)
-    );
-    minOccupancySurchargeCents = missing * avgPerPersonPerNight * nights;
+    const perPersonPerNight = minOccupancyNormalRate
+      ? adultNonMemberCents
+      : // Durchschnittstarif je Person & Nacht (ganzzahlig in Cents).
+        Math.round(accommodationCents / (totalPersonsActual * nights));
+    minOccupancySurchargeCents = missing * perPersonPerNight * nights;
   }
 
   const subtotalCents =
@@ -460,7 +486,11 @@ export const calculatePrice = (input: PriceInput): PriceBreakdown => {
     const missing = RULES.minOccupancyFloor - totalPersonsActual;
     lines.push({
       label: L.minOccupancySurcharge,
-      detail: L.minOccupancyDetail(missing, nights),
+      detail: L.minOccupancyDetail(
+        missing,
+        nights,
+        minOccupancyNormalRate ? formatEuro(adultNonMemberCents, input.locale ?? "de") : null
+      ),
       qty: 1,
       unitCents: minOccupancySurchargeCents,
       totalCents: minOccupancySurchargeCents,

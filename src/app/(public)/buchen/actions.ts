@@ -197,6 +197,8 @@ const inputSchema = z.object({
   // Vereinsmitglieder in der Gruppe (am Ende des Flows eingetragen).
   memberNames: memberNamesSchema,
   memberConfirm: z.boolean().default(false),
+  // Bucher/in ist selbst Vereinsmitglied → kein Mindestbelegungs-Aufschlag.
+  bookerIsMember: z.boolean().default(false),
   locale: z.enum(["de", "en", "nl"]).default("de"),
 });
 
@@ -285,7 +287,7 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
   // Mitgliedstarif (Erwachsene UND Kinder) nur für namentlich eingetragene
   // Vereinsmitglieder + Ehrlichkeitsbestätigung. Kein Login mehr nötig —
   // Dana prüft die Namen im Manager (gepinnte Notiz).
-  if (checkMemberNames(persons, data.memberNames, data.memberConfirm)) {
+  if (checkMemberNames(persons, data.memberNames, data.memberConfirm, data.bookerIsMember)) {
     return {
       ok: false,
       error: T.memberLocked,
@@ -331,6 +333,7 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
     soloUse: data.soloUse,
     tariffs: resolvedTariffs,
     locale,
+    bookerIsMember: data.bookerIsMember,
   });
 
   const totalPersons = breakdown.totalPersons;
@@ -575,6 +578,7 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
       paidCents: 0,
       cleaningOptedIn: true, // Pflicht
       soloUse: data.soloUse,
+      bookerIsMember: data.bookerIsMember,
       source: "Portal",
       customerMessage: data.customerMessage ?? null,
       // Hausordnung-Akzept (versioniert, fuer rechtliche Nachvollziehbarkeit)
@@ -589,12 +593,15 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
   const bookingId = inserted[0].id;
 
   // Vereinsmitglieder-Namen als gepinnte Manager-Notiz (Dana prüft).
-  if (data.memberNames.length > 0) {
+  if (data.memberNames.length > 0 || data.bookerIsMember) {
     try {
       await db.insert(notes).values({
         scope: "booking",
         refId: bookingId,
-        body: memberNamesNoteBody(data.memberNames),
+        body: memberNamesNoteBody(
+          data.memberNames,
+          data.bookerIsMember ? `${data.firstName} ${data.lastName}` : null
+        ),
         pinned: true,
         internal: true,
         by: "Buchungsformular",

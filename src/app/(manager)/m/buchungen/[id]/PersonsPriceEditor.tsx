@@ -23,14 +23,17 @@ export function PersonsPriceEditor({
   bookingId,
   initial,
   currentKurtaxePersons,
+  initialBookerIsMember,
 }: {
   bookingId: string;
   initial: P;
   currentKurtaxePersons: number;
+  initialBookerIsMember: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [p, setP] = useState<P>(initial);
   const [overrideKurtaxe, setOverrideKurtaxe] = useState(false);
+  const [bookerIsMember, setBookerIsMember] = useState(initialBookerIsMember);
   const [kurtaxePersons, setKurtaxePersons] = useState(String(currentKurtaxePersons));
   const [res, setRes] = useState<{
     deltaCents: number;
@@ -56,6 +59,7 @@ export function PersonsPriceEditor({
         ...p,
         teachers: 0,
         kurtaxeOverridePersons: overrideKurtaxe ? Number(kurtaxePersons) : undefined,
+        bookerIsMember,
       });
       if (r.ok) {
         setRes({
@@ -124,6 +128,21 @@ export function PersonsPriceEditor({
             />
           </label>
         ))}
+      </div>
+
+      <div className="mt-3 pt-3 border-t border-[var(--color-wh-winter-grey)]/60">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={bookerIsMember}
+            onChange={(e) => setBookerIsMember(e.target.checked)}
+            className="w-4 h-4 accent-[var(--color-wh-deep-green)]"
+          />
+          <span className="text-[12px] text-[var(--color-wh-fg-muted)]">
+            <strong className="text-[var(--color-wh-black)]">Bucher/in ist Vereinsmitglied</strong> —
+            dann entfällt der Aufschlag Mindestbelegung (unter 15 Personen).
+          </span>
+        </label>
       </div>
 
       <div className="mt-3 pt-3 border-t border-[var(--color-wh-winter-grey)]/60">
@@ -232,6 +251,7 @@ export function PersonsPriceEditor({
             setMsg(null);
             setRes(null);
             setP(initial);
+            setBookerIsMember(initialBookerIsMember);
           }}
           className="inline-flex items-center justify-center h-10 px-4 text-sm text-[var(--color-wh-fg-muted)] hover:text-[var(--color-wh-deep-green)] cursor-pointer"
         >

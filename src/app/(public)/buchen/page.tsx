@@ -16,7 +16,7 @@ const PAGE_COPY: Record<Locale, { eyebrow: string; h1: string; lead: string; log
   de: {
     eyebrow: "Buchen",
     h1: "Wann kommt ihr?",
-    lead: "Mindestaufenthalt 2 Nächte, maximal 33 Personen. Buchungen unter 15 Personen werden zum Preisniveau von 15 Personen abgerechnet. Preise und Pauschalen werden live berechnet.",
+    lead: "Mindestaufenthalt 2 Nächte, maximal 33 Personen. Buchungen unter 15 Personen werden zum Preisniveau von 15 Personen abgerechnet — außer, Du bist selbst Vereinsmitglied. Preise und Pauschalen werden live berechnet.",
     loggedIn: "Eingeloggt als",
     member: "Mitglied",
     pricesLink: "Preise & Rechenbeispiele ansehen",
@@ -24,7 +24,7 @@ const PAGE_COPY: Record<Locale, { eyebrow: string; h1: string; lead: string; log
   en: {
     eyebrow: "Book",
     h1: "When are you coming?",
-    lead: "Minimum stay 2 nights, maximum 33 guests. Bookings below 15 guests are billed at the 15-guest price level. Prices and flat-rates are calculated live.",
+    lead: "Minimum stay 2 nights, maximum 33 guests. Bookings below 15 guests are billed at the 15-guest price level — unless you are a club member yourself. Prices and flat-rates are calculated live.",
     loggedIn: "Signed in as",
     member: "Member",
     pricesLink: "See prices & example calculations",
@@ -32,7 +32,7 @@ const PAGE_COPY: Record<Locale, { eyebrow: string; h1: string; lead: string; log
   nl: {
     eyebrow: "Boeken",
     h1: "Wanneer komen jullie?",
-    lead: "Minimaal 2 nachten, maximaal 33 personen. Boekingen onder 15 personen worden afgerekend op het prijsniveau van 15 personen. Prijzen en pakketten worden live berekend.",
+    lead: "Minimaal 2 nachten, maximaal 33 personen. Boekingen onder 15 personen worden afgerekend op het prijsniveau van 15 personen — tenzij je zelf verenigingslid bent. Prijzen en pakketten worden live berekend.",
     loggedIn: "Ingelogd als",
     member: "Lid",
     pricesLink: "Bekijk prijzen & rekenvoorbeelden",
