@@ -310,6 +310,11 @@ export const bookings = pgTable(
 
     cleaningOptedIn: boolean("cleaning_opted_in").notNull().default(true),
     soloUse: boolean("solo_use").notNull().default(false),
+    // Bucher/in ist Vereinsmitglied → kein Mindestbelegungs-Aufschlag
+    // (Vorstandswunsch 11/2026: Hütte ist Teil des Vereinslebens, auch kleine
+    // Mitgliedergruppen sollen sie nutzen). Online per Selbstauskunft am Ende
+    // der Buchung (Dana prüft), manuell über Kundentyp/Manager-Häkchen.
+    bookerIsMember: boolean("booker_is_member").notNull().default(false),
 
     stripeSessionId: text("stripe_session_id"),
     stripePaymentIntentId: text("stripe_payment_intent_id"),

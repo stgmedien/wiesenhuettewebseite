@@ -272,6 +272,12 @@ export type PriceInput = {
    * immer booking.createdAt mitgeben.
    */
   bookedAt?: Date | string;
+  /**
+   * Bucher/in ist Vereinsmitglied → kein Mindestbelegungs-Aufschlag
+   * (Vorstandswunsch 11/2026). Gilt unabhängig vom Buchungsdatum, weil das
+   * Flag nur für neue Buchungen bzw. bewusst vom Vorstand gesetzt wird.
+   */
+  bookerIsMember?: boolean;
   arrival: Date | string;
   departure: Date | string;
   soloUse: boolean;
@@ -373,11 +379,13 @@ export const calculatePrice = (input: PriceInput): PriceBreakdown => {
   //    leere Plätze sind keine Mitglieder- oder Kinderplätze.
   //  - ältere Buchungen: zum DURCHSCHNITTSTARIF des tatsächlichen Mixes
   //    (damals vereinbart, bleibt bei Neuberechnungen erhalten).
+  //  - Bucher/in ist Vereinsmitglied (input.bookerIsMember): KEIN Aufschlag.
   const totalPersonsActual = sumPersons(p);
   const minOccupancyNormalRate =
     new Date(input.bookedAt ?? new Date()) >= MIN_OCCUPANCY_NORMAL_RATE_FROM;
   let minOccupancySurchargeCents = 0;
   if (
+    !input.bookerIsMember &&
     totalPersonsActual > 0 &&
     totalPersonsActual < RULES.minOccupancyFloor &&
     nights > 0

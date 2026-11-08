@@ -862,6 +862,9 @@ const editPersonsSchema = z.object({
   // nicht mehr nachpflegen lässt), deshalb hier separat als eigene
   // Personenzahl statt als Euro-Betrag angebbar.
   kurtaxeOverridePersons: z.coerce.number().int().min(0).max(200).optional(),
+  // Bucher/in ist Vereinsmitglied → kein Mindestbelegungs-Aufschlag.
+  // Optional: nicht übergeben = bisherigen Wert behalten.
+  bookerIsMember: z.boolean().optional(),
 });
 
 export type EditPersonsResult =
@@ -913,6 +916,7 @@ export async function editBookingPersons(
     soloUse: b.soloUse,
     tariffs,
     bookedAt: b.createdAt,
+    bookerIsMember: d.bookerIsMember ?? b.bookerIsMember,
   });
 
   const deltaCents =
@@ -952,6 +956,7 @@ export async function editBookingPersons(
       accommodationCents: nb.accommodationCents,
       minOccupancySurchargeCents: nb.minOccupancySurchargeCents,
       soloSurchargeCents: nb.soloSurchargeCents,
+      bookerIsMember: d.bookerIsMember ?? b.bookerIsMember,
       kurtaxeCents: finalKurtaxeCents,
       subtotalCents: newSubtotalCents,
       totalCents: newSubtotalCents,
@@ -961,7 +966,7 @@ export async function editBookingPersons(
 
   await db.insert(activityLog).values({
     who: session.user?.name ?? session.user?.email ?? "Manager",
-    what: `Personen angepasst (Mitgl ${d.members} · Erw ${d.adults} · Kind ${d.children} · Schü ${d.pupils} · Lehr ${d.teachers}) → Zwischensumme ${formatEuro(newSubtotalCents)} (${deltaCents >= 0 ? "+" : ""}${formatEuro(deltaCents)})${kurtaxeDeltaCents !== 0 ? `, Kurtaxe ${kurtaxeDeltaCents >= 0 ? "+" : ""}${formatEuro(kurtaxeDeltaCents)}${d.kurtaxeOverridePersons !== undefined ? ` (manuell, ${d.kurtaxeOverridePersons} Pers.)` : ""}` : ""}`,
+    what: `${d.bookerIsMember !== undefined && d.bookerIsMember !== b.bookerIsMember ? `Bucher/in ${d.bookerIsMember ? "als" : "nicht mehr als"} Vereinsmitglied markiert · ` : ""}Personen angepasst (Mitgl ${d.members} · Erw ${d.adults} · Kind ${d.children} · Schü ${d.pupils} · Lehr ${d.teachers}) → Zwischensumme ${formatEuro(newSubtotalCents)} (${deltaCents >= 0 ? "+" : ""}${formatEuro(deltaCents)})${kurtaxeDeltaCents !== 0 ? `, Kurtaxe ${kurtaxeDeltaCents >= 0 ? "+" : ""}${formatEuro(kurtaxeDeltaCents)}${d.kurtaxeOverridePersons !== undefined ? ` (manuell, ${d.kurtaxeOverridePersons} Pers.)` : ""}` : ""}`,
     bookingId: d.bookingId,
   });
 

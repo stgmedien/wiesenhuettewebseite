@@ -201,7 +201,7 @@ const BF_COPY = {
     valTerms: "Bitte stimme den Bedingungen zu, um fortzufahren.",
     minOccupancyNoteTitle: "Aufschlag Mindestbelegung",
     minOccupancyNoteBody:
-      "Buchungen mit weniger als 15 Personen werden zum Preisniveau von 15 Personen abgerechnet — die fehlenden Plätze kosten den Normaltarif (Erwachsene, Nichtmitglied). Der Aufschlag erscheint live in der Preisübersicht.",
+      "Buchungen mit weniger als 15 Personen werden zum Preisniveau von 15 Personen abgerechnet — die fehlenden Plätze kosten den Normaltarif (Erwachsene, Nichtmitglied). Bist Du selbst Vereinsmitglied, entfällt der Aufschlag — das gibst Du am Ende der Buchung an.",
     endreinigungTitle: "Endreinigung — 190,00 € (Pflicht)",
     endreinigungBody: "Die finale Reinigung wird von uns durchgeführt und ist in jeder Buchung enthalten.",
     soloTitle: "Allein-/Exklusivnutzung — 50,00 €",
@@ -224,8 +224,8 @@ const BF_COPY = {
     memberHonestyNote:
       "Mitglieder-Tarife gelten ausschließlich für aktive Mitglieder des Skifreunde Gütersloh e.V. Buchungen, bei denen unwahre Angaben zur Vereinsmitgliedschaft gemacht wurden, können storniert werden.",
     memberConfirmLabel:
-      "Ich bestätige, dass alle zum Mitgliedstarif gebuchten Personen aktive Mitglieder des Skifreunde Gütersloh e.V. sind.",
-    valMemberConfirm: "Bitte bestätige die Mitgliedschaft der zum Mitgliedstarif gebuchten Personen.",
+      "Ich bestätige, dass alle hier als Vereinsmitglieder angegebenen Personen aktive Mitglieder des Skifreunde Gütersloh e.V. sind.",
+    valMemberConfirm: "Bitte bestätige die Mitgliedschaft der angegebenen Personen.",
     memberLaterHint:
       "Vereinsmitglieder der Skifreunde Gütersloh dabei? Zählt sie hier ganz normal mit — am Ende der Buchung tragt Ihr ihre Namen ein, dann gilt für sie der Mitgliedstarif (−50 %).",
     memberNamesH: "Vereinsmitglieder in Eurer Gruppe",
@@ -241,7 +241,9 @@ const BF_COPY = {
     valMemberDuplicate: "Dieser Name steht schon in der Liste.",
     valMemberTooMany: (adults: number, children: number) =>
       `Ihr habt ${adults} Erwachsene und ${children} Kinder gebucht. Es können nicht mehr Mitglieder eingetragen werden, als Personen in der jeweiligen Gruppe sind.`,
-    memberSavings: "Ersparnis durch Mitgliedstarif",
+    memberSavings: "Ersparnis als Vereinsmitglied",
+    bookerMemberLabel: (name: string) =>
+      `Ich${name ? ` (${name})` : ""} bin selbst Vereinsmitglied — dann entfällt der Aufschlag Mindestbelegung.`,
     personsNoReduceNote:
       "Wichtig: Die Personenzahl kann nach der Buchung nur noch erhöht, nicht verringert werden. Auch bei kurzfristigem Ausfall einzelner Teilnehmer bleibt der volle Übernachtungspreis fällig. Tipp: Lieber knapp kalkulieren — Personen könnt ihr später jederzeit bequem über euer Konto nachbuchen.",
     ariaLess: "Weniger",
@@ -384,7 +386,7 @@ const BF_COPY = {
     valTerms: "Please accept the terms to continue.",
     minOccupancyNoteTitle: "Minimum-occupancy surcharge",
     minOccupancyNoteBody:
-      "Bookings below 15 guests are charged at the 15-guest price level — the missing places are charged at the standard rate (adult, non-member). The surcharge appears live in the price summary.",
+      "Bookings below 15 guests are charged at the 15-guest price level — the missing places are charged at the standard rate (adult, non-member). If you are a club member yourself, the surcharge does not apply — you state this at the end of the booking.",
     endreinigungTitle: "Final cleaning — 190.00 € (mandatory)",
     endreinigungBody: "We carry out the final cleaning ourselves — it is included in every booking.",
     soloTitle: "Exclusive use — 50.00 €",
@@ -406,8 +408,8 @@ const BF_COPY = {
     memberHonestyNote:
       "Member rates apply exclusively to active members of Skifreunde Gütersloh e.V. Bookings based on false membership statements may be cancelled.",
     memberConfirmLabel:
-      "I confirm that all persons booked at the member rate are active members of Skifreunde Gütersloh e.V.",
-    valMemberConfirm: "Please confirm the membership of all persons booked at the member rate.",
+      "I confirm that all persons stated here as club members are active members of Skifreunde Gütersloh e.V.",
+    valMemberConfirm: "Please confirm the membership of the persons stated.",
     memberLaterHint:
       "Club members of Skifreunde Gütersloh in your group? Just count them here as usual — at the end of the booking you enter their names and the member rate (−50%) applies to them.",
     memberNamesH: "Club members in your group",
@@ -423,7 +425,9 @@ const BF_COPY = {
     valMemberDuplicate: "This name is already on the list.",
     valMemberTooMany: (adults: number, children: number) =>
       `You booked ${adults} adults and ${children} children. You cannot enter more members than there are persons in each group.`,
-    memberSavings: "Savings from member rate",
+    memberSavings: "Savings as club member",
+    bookerMemberLabel: (name: string) =>
+      `I${name ? ` (${name})` : ""} am a club member myself — the minimum-occupancy surcharge then does not apply.`,
     personsNoReduceNote:
       "Important: after booking, the number of guests can only be increased, never reduced. The full accommodation price remains due even if individual participants drop out at short notice. Tip: book conservatively — you can add guests any time via your account.",
     ariaLess: "Less",
@@ -564,7 +568,7 @@ const BF_COPY = {
     valTerms: "Ga akkoord met de voorwaarden om door te gaan.",
     minOccupancyNoteTitle: "Toeslag minimale bezetting",
     minOccupancyNoteBody:
-      "Boekingen onder 15 personen worden afgerekend op het prijsniveau van 15 personen — de ontbrekende plaatsen kosten het standaardtarief (volwassene, niet-lid). De toeslag verschijnt live in het prijsoverzicht.",
+      "Boekingen onder 15 personen worden afgerekend op het prijsniveau van 15 personen — de ontbrekende plaatsen kosten het standaardtarief (volwassene, niet-lid). Ben je zelf verenigingslid, dan vervalt de toeslag — dat geef je aan het eind van de boeking aan.",
     endreinigungTitle: "Eindschoonmaak — € 190,00 (verplicht)",
     endreinigungBody: "De eindschoonmaak doen wij zelf — die zit in elke boeking inbegrepen.",
     soloTitle: "Exclusief gebruik — € 50,00",
@@ -586,8 +590,8 @@ const BF_COPY = {
     memberHonestyNote:
       "Ledentarieven gelden uitsluitend voor actieve leden van Skifreunde Gütersloh e.V. Boekingen met onjuiste opgaven over het lidmaatschap kunnen worden geannuleerd.",
     memberConfirmLabel:
-      "Ik bevestig dat alle personen met ledentarief actieve leden van Skifreunde Gütersloh e.V. zijn.",
-    valMemberConfirm: "Bevestig het lidmaatschap van alle personen met ledentarief.",
+      "Ik bevestig dat alle hier als verenigingslid opgegeven personen actieve leden van Skifreunde Gütersloh e.V. zijn.",
+    valMemberConfirm: "Bevestig het lidmaatschap van de opgegeven personen.",
     memberLaterHint:
       "Verenigingsleden van Skifreunde Gütersloh in jullie groep? Tel ze hier gewoon mee — aan het eind van de boeking vullen jullie hun namen in, dan geldt voor hen het ledentarief (−50%).",
     memberNamesH: "Verenigingsleden in jullie groep",
@@ -603,7 +607,9 @@ const BF_COPY = {
     valMemberDuplicate: "Deze naam staat al op de lijst.",
     valMemberTooMany: (adults: number, children: number) =>
       `Jullie hebben ${adults} volwassenen en ${children} kinderen geboekt. Er kunnen niet meer leden worden ingevuld dan er personen in de betreffende groep zijn.`,
-    memberSavings: "Besparing door ledentarief",
+    memberSavings: "Besparing als verenigingslid",
+    bookerMemberLabel: (name: string) =>
+      `Ik${name ? ` (${name})` : ""} ben zelf verenigingslid — dan vervalt de toeslag minimale bezetting.`,
     personsNoReduceNote:
       "Belangrijk: na de boeking kan het aantal personen alleen worden verhoogd, nooit verlaagd. Ook bij kortetermijnuitval van deelnemers blijft de volledige overnachtingsprijs verschuldigd. Tip: boek liever krap — personen bijboeken kan altijd via je account.",
     ariaLess: "Minder",
@@ -663,6 +669,8 @@ export const BookingFlow = ({
       : emptyPersons
   );
   const [memberNames, setMemberNames] = useState<MemberName[]>([]);
+  // Bucher/in ist selbst Vereinsmitglied → kein Mindestbelegungs-Aufschlag.
+  const [bookerIsMember, setBookerIsMember] = useState(!!prefill?.membershipVerified);
   const [memberTried, setMemberTried] = useState(false);
   // Allein-/Exklusivnutzung-Option wurde aus dem Flow entfernt (Vorstands-
   // Entscheidung). soloUse bleibt fix auf false, damit kein Aufschlag entsteht
@@ -748,6 +756,10 @@ export const BookingFlow = ({
     };
   }, [persons, memberKinds.adults, memberKinds.children]);
 
+  // Nur relevant (und nur abgefragt) unter der Mindestbelegung.
+  const belowFloor = totalPersons > 0 && totalPersons < RULES.minOccupancyFloor;
+  const bookerMemberEffective = belowFloor && bookerIsMember;
+
   const breakdown = useMemo(() => {
     if (!datesValid || !personsValid) return null;
     return calculatePrice({
@@ -756,15 +768,16 @@ export const BookingFlow = ({
       persons: pricedPersons,
       soloUse,
       locale,
+      bookerIsMember: bookerMemberEffective,
     });
-  }, [arrival, departure, pricedPersons, soloUse, datesValid, personsValid, locale]);
+  }, [arrival, departure, pricedPersons, soloUse, datesValid, personsValid, locale, bookerMemberEffective]);
 
   // Ersparnis ggü. Normalpreis (für die Anzeige im Mitglieder-Abschnitt).
   const memberSavingsCents = useMemo(() => {
-    if (!breakdown || memberNames.length === 0) return 0;
+    if (!breakdown || (memberNames.length === 0 && !bookerMemberEffective)) return 0;
     const base = calculatePrice({ arrival, departure, persons, soloUse, locale });
     return Math.max(0, base.subtotalCents - breakdown.subtotalCents);
-  }, [breakdown, memberNames.length, arrival, departure, persons, soloUse, locale]);
+  }, [breakdown, memberNames.length, bookerMemberEffective, arrival, departure, persons, soloUse, locale]);
 
   const normName = (n: string) => n.trim().toLowerCase().replace(/\s+/g, " ");
   const memberNameErrors = memberNames.map((m, i) => {
@@ -825,7 +838,7 @@ export const BookingFlow = ({
   // Ehrlichkeitsbestätigung (Issue #66): Pflicht, sobald Personen zum
   // Mitgliedstarif gebucht sind — schafft Storno-Recht bei Falschangaben.
   // Jetzt in der Übersicht (Schritt 4), sobald Mitglieder eingetragen sind.
-  const memberTariffUsed = memberNames.length > 0;
+  const memberTariffUsed = memberNames.length > 0 || bookerMemberEffective;
   const memberConfirmValid = !memberTariffUsed || memberConfirm;
   const memberSectionValid =
     memberCountValid && memberNameErrors.every((e) => e === null) && memberConfirmValid;
@@ -838,6 +851,7 @@ export const BookingFlow = ({
     persons: pricedPersons,
     memberNames: memberNames.map((m) => ({ name: m.name.trim().replace(/\s+/g, " "), kind: m.kind })),
     memberConfirm,
+    bookerIsMember: bookerMemberEffective,
   };
   // Vor dem Absenden: Mitglieder-Abschnitt prüfen, Fehler sichtbar machen.
   const guardMembers = () => {
@@ -1232,6 +1246,9 @@ export const BookingFlow = ({
               bookerName={`${firstName.trim()} ${lastName.trim()}`.trim()}
               confirm={memberConfirm}
               onConfirm={setMemberConfirm}
+              showBookerMember={belowFloor}
+              bookerIsMember={bookerIsMember}
+              onBookerIsMember={setBookerIsMember}
               tried={memberTried}
               savingsCents={memberSavingsCents}
               tt={tt}
@@ -1552,6 +1569,9 @@ const MemberNamesSection = ({
   bookerName,
   confirm,
   onConfirm,
+  showBookerMember,
+  bookerIsMember,
+  onBookerIsMember,
   tried,
   savingsCents,
   tt,
@@ -1566,6 +1586,9 @@ const MemberNamesSection = ({
   bookerName: string;
   confirm: boolean;
   onConfirm: (v: boolean) => void;
+  showBookerMember: boolean;
+  bookerIsMember: boolean;
+  onBookerIsMember: (v: boolean) => void;
   tried: boolean;
   savingsCents: number;
   tt: BfCopy;
@@ -1592,6 +1615,19 @@ const MemberNamesSection = ({
         <div className="font-semibold text-[var(--color-wh-deep-green)] text-base">{tt.memberNamesH}</div>
         <p className="m-0 mt-1 text-[var(--color-wh-fg-muted)]">{tt.memberNamesIntro}</p>
       </div>
+
+      {/* Bucher/in selbst Mitglied → keine Mindestbelegung (Vorstand 11/2026). */}
+      {showBookerMember && (
+        <label className="flex items-start gap-3 font-medium text-[var(--color-wh-deep-green)] cursor-pointer">
+          <input
+            type="checkbox"
+            checked={bookerIsMember}
+            onChange={(e) => onBookerIsMember(e.target.checked)}
+            className="mt-1"
+          />
+          <span>{tt.bookerMemberLabel(isFullName(bookerName) ? bookerName : "")}</span>
+        </label>
+      )}
 
       {names.length > 0 && (
         <ul className="list-none p-0 m-0 space-y-3">
@@ -1646,7 +1682,10 @@ const MemberNamesSection = ({
           {showSelf && (
             <button
               type="button"
-              onClick={() => onChange([...names, { name: bookerName, kind: "adult" }])}
+              onClick={() => {
+                onChange([...names, { name: bookerName, kind: "adult" }]);
+                onBookerIsMember(true);
+              }}
               className="h-10 px-4 rounded-md border border-[var(--color-wh-deep-green)] text-[var(--color-wh-deep-green)] font-semibold hover:bg-[var(--color-wh-green-soft)] cursor-pointer"
             >
               {tt.memberAddSelf(bookerName)}
@@ -1662,7 +1701,7 @@ const MemberNamesSection = ({
         </div>
       )}
 
-      {names.length > 0 && (
+      {(names.length > 0 || (showBookerMember && bookerIsMember)) && (
         <>
           {savingsCents > 0 && (
             <div className="flex justify-between font-semibold text-[var(--color-wh-deep-green)]">

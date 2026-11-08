@@ -57,7 +57,9 @@ export default async function AGB() {
               Buchungen unter 15 Personen sind möglich. Die Übernachtungen werden in diesem Fall
               jedoch zum Preisniveau von 15 Personen abgerechnet: Die fehlenden Plätze werden zum
               Normaltarif (Erwachsene, Nichtmitglied) berechnet und in der Preisübersicht als
-              Aufschlag Mindestbelegung ausgewiesen.
+              Aufschlag Mindestbelegung ausgewiesen. Ist der Mieter selbst Mitglied des Skifreunde
+              Gütersloh e.V., entfällt dieser Aufschlag; unwahre Angaben zur Mitgliedschaft
+              berechtigen den Vermieter zur Nachforderung oder Stornierung.
             </li>
           </ul>
         </Block>

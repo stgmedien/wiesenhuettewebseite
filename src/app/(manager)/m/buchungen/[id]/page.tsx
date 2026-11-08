@@ -364,6 +364,12 @@ export default async function BookingDetail({ params }: Props) {
                   <Dd className="text-right">{formatEuro(b.soloSurchargeCents)}</Dd>
                 </>
               )}
+              {b.bookerIsMember && b.persons < 15 && (
+                <>
+                  <Dt>Mindestbelegung</Dt>
+                  <Dd className="text-right">entfällt (Bucher/in Mitglied)</Dd>
+                </>
+              )}
               {b.minOccupancySurchargeCents > 0 && (
                 <>
                   <Dt>Aufschlag Mindestbelegung (15)</Dt>
@@ -428,6 +434,7 @@ export default async function BookingDetail({ params }: Props) {
                 pupils: b.pupils,
               }}
               currentKurtaxePersons={b.adults + b.members + b.teachers}
+              initialBookerIsMember={b.bookerIsMember}
             />
 
             {b.depositCents > 0 && (

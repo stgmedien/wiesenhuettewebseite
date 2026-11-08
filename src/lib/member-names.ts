@@ -40,24 +40,38 @@ export function countMemberKinds(names: MemberName[]) {
 export function checkMemberNames(
   persons: { members: number; pupils: number },
   names: MemberName[],
-  confirmed: boolean
+  confirmed: boolean,
+  bookerIsMember = false
 ): null | "mismatch" | "invalidName" | "duplicate" | "notConfirmed" {
   const { adults, children } = countMemberKinds(names);
   if (persons.members !== adults || persons.pupils !== children) return "mismatch";
   if (names.some((n) => !isFullName(n.name))) return "invalidName";
   const keys = names.map((n) => n.name.trim().toLowerCase().replace(/\s+/g, " "));
   if (new Set(keys).size !== keys.length) return "duplicate";
-  if (names.length > 0 && !confirmed) return "notConfirmed";
+  if ((names.length > 0 || bookerIsMember) && !confirmed) return "notConfirmed";
   return null;
 }
 
-/** Text der gepinnten Manager-Notiz für Dana. */
-export function memberNamesNoteBody(names: MemberName[]): string {
-  const lines = names.map(
-    (n, i) => `${i + 1}. ${n.name.trim()} (${n.kind === "adult" ? "Erwachsene/r" : "Kind unter 16"})`
-  );
-  return [
-    `Mitgliedstarif (−50 %) für ${names.length} Person${names.length === 1 ? "" : "en"} — bitte Mitgliedschaft prüfen:`,
-    ...lines,
-  ].join("\n");
+/**
+ * Text der gepinnten Manager-Notiz für Dana. `bookerMemberName` gesetzt =
+ * Bucher/in hat angegeben, Vereinsmitglied zu sein (kein Mindestbelegungs-
+ * Aufschlag) — ebenfalls zu prüfen.
+ */
+export function memberNamesNoteBody(names: MemberName[], bookerMemberName?: string | null): string {
+  const parts: string[] = [];
+  if (bookerMemberName) {
+    parts.push(
+      `Bucher/in ist laut Angabe Vereinsmitglied: ${bookerMemberName.trim()} — dadurch kein Mindestbelegungs-Aufschlag. Bitte Mitgliedschaft prüfen.`
+    );
+  }
+  if (names.length > 0) {
+    if (parts.length) parts.push("");
+    parts.push(
+      `Mitgliedstarif (−50 %) für ${names.length} Person${names.length === 1 ? "" : "en"} — bitte Mitgliedschaft prüfen:`,
+      ...names.map(
+        (n, i) => `${i + 1}. ${n.name.trim()} (${n.kind === "adult" ? "Erwachsene/r" : "Kind unter 16"})`
+      )
+    );
+  }
+  return parts.join("\n");
 }

@@ -1,0 +1,1 @@
+ALTER TABLE "bookings" ADD COLUMN "booker_is_member" boolean DEFAULT false NOT NULL;
