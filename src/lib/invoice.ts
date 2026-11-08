@@ -10,7 +10,7 @@ import { db } from "@/lib/db";
 import { invoices, bookings, customers } from "@/lib/db/schema";
 import { sql, eq, and, ne, desc } from "drizzle-orm";
 import { resolveBookingTariffs } from "@/lib/pricing-tariffs";
-import { PRICES } from "@/lib/pricing";
+import { PRICES, energyFlatNights, formatEuro } from "@/lib/pricing";
 import { toLocalIso } from "@/lib/utils";
 
 /**
@@ -132,12 +132,30 @@ export const createInvoiceForBooking = async (
     }
   }
   if (booking.energyFlatCents > 0) {
-    lineItems.push({
-      label: `Energiepauschale (${booking.nights} Nächte × 22,00 €)`,
-      qty: booking.nights,
-      unitCents: 2200,
-      totalCents: booking.energyFlatCents,
-    });
+    // Energiepauschale ist gestaffelt (Nov–März 60 €, Okt/Apr 30 € je Nacht,
+    // Altbuchungen: damals vereinbarter Satz). Aufschlüsselung nach Satz aus
+    // derselben Regel wie die Preisberechnung — aber nur, wenn sie exakt den
+    // gespeicherten Betrag ergibt (Manager kann Preise anpassen). Sonst eine
+    // ehrliche Sammelzeile ohne erfundenen Einzelpreis.
+    const byRate = [...energyFlatNights(booking.arrival, booking.departure, booking.createdAt)];
+    const computed = byRate.reduce((sum, [rate, n]) => sum + rate * n, 0);
+    if (byRate.length > 0 && computed === booking.energyFlatCents) {
+      for (const [rate, n] of byRate) {
+        lineItems.push({
+          label: `Energiepauschale (${n} ${n === 1 ? "Nacht" : "Nächte"} × ${formatEuro(rate)})`,
+          qty: n,
+          unitCents: rate,
+          totalCents: rate * n,
+        });
+      }
+    } else {
+      lineItems.push({
+        label: "Energiepauschale",
+        qty: 1,
+        unitCents: booking.energyFlatCents,
+        totalCents: booking.energyFlatCents,
+      });
+    }
   }
   if (booking.cleaningCents > 0) {
     lineItems.push({
