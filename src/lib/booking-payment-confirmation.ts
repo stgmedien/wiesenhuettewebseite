@@ -17,6 +17,7 @@ import { and, eq, inArray } from "drizzle-orm";
 import { sendMail } from "@/lib/mail/send";
 import { wasMailSent } from "@/lib/mail-log";
 import { createMagicLinkToken } from "@/lib/magic-link";
+import { ensureCustomerAccount } from "@/lib/customer-account";
 import BookingConfirmedEmail from "@/lib/mail/templates/booking-confirmed";
 import BookingInternalEmail from "@/lib/mail/templates/booking-internal";
 import HuettenwartNewBookingEmail from "@/lib/mail/templates/huettenwart-booking-new";
@@ -183,7 +184,12 @@ export async function resendWelcomeMail(bookingId: string): Promise<{ sent: bool
     ? (await db.select().from(customers).where(eq(customers.id, booking.customerId)).limit(1))[0]
     : null;
   if (!customer) return { sent: false, error: "Kein Kundendatensatz" };
-  if (!customer.userId) return { sent: false, error: "Zu dieser Buchung wurde kein Kundenkonto angelegt" };
+  // Manuell angelegte Altbuchungen haben evtl. noch kein Gastkonto — dann
+  // jetzt anlegen statt abzubrechen (Login läuft ohnehin per Magic-Link).
+  if (!customer.userId) {
+    const acc = await ensureCustomerAccount(customer.id);
+    if (!acc) return { sent: false, error: "Gastkonto konnte nicht angelegt werden (Konto zu dieser E-Mail wurde gelöscht)." };
+  }
 
   try {
     const tokenRes = await createMagicLinkToken(customer.email);

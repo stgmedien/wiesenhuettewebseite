@@ -238,7 +238,7 @@ export async function resendWelcome(
   await db.insert(activityLog).values({
     who: me,
     what: result.sent
-      ? "Willkommens-Mail erneut gesendet"
+      ? "Willkommens-Mail gesendet (Gastkonto ggf. angelegt)"
       : `Willkommens-Mail erneut senden fehlgeschlagen: ${result.error}`,
     bookingId: parsedId.data,
   });

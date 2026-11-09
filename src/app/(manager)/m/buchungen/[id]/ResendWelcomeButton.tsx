@@ -4,7 +4,14 @@ import { useState, useTransition } from "react";
 import { RefreshCw } from "lucide-react";
 import { resendWelcome } from "./notes-actions";
 
-export function ResendWelcomeButton({ bookingId }: { bookingId: string }) {
+export function ResendWelcomeButton({
+  bookingId,
+  hasAccount,
+}: {
+  bookingId: string;
+  // false = noch kein Gastkonto (z. B. alte manuelle Buchung) — wird beim Senden angelegt.
+  hasAccount: boolean;
+}) {
   const [pending, start] = useTransition();
   const [result, setResult] = useState<{ ok: boolean; text: string } | null>(null);
 
@@ -13,7 +20,10 @@ export function ResendWelcomeButton({ bookingId }: { bookingId: string }) {
     start(async () => {
       const r = await resendWelcome(bookingId);
       if (r.ok) {
-        setResult({ ok: true, text: "Willkommens-Mail gesendet" });
+        setResult({
+          ok: true,
+          text: hasAccount ? "Willkommens-Mail gesendet" : "Gastkonto angelegt und Willkommens-Mail gesendet",
+        });
       } else {
         setResult({ ok: false, text: r.error });
       }
@@ -29,7 +39,11 @@ export function ResendWelcomeButton({ bookingId }: { bookingId: string }) {
         className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[var(--color-wh-deep-green)] hover:underline cursor-pointer disabled:opacity-50"
       >
         <RefreshCw size={12} className={pending ? "animate-spin" : ""} />
-        {pending ? "Wird gesendet …" : "Willkommens-Mail (Konto-Login) erneut senden"}
+        {pending
+          ? "Wird gesendet …"
+          : hasAccount
+            ? "Willkommens-Mail (Konto-Login) erneut senden"
+            : "Gastkonto anlegen + Willkommens-Mail senden"}
       </button>
       {result && (
         <p
