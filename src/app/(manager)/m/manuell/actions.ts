@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { ensureCustomerAccount } from "@/lib/customer-account";
 import { bookings, customers, activityLog } from "@/lib/db/schema";
 import { calculatePrice, validateBookingInput } from "@/lib/pricing";
 import { isRangeAvailable } from "@/lib/availability";
@@ -129,6 +130,16 @@ export async function createManualBooking(formData: FormData): Promise<{ ok: boo
     customerId = ins[0].id;
   }
 
+  // Gastkonto automatisch hinterlegen (wie bei der Online-Buchung): Login per
+  // E-Mail-Link, Buchung erscheint im Konto, „Willkommen senden“ funktioniert.
+  let accountNote = "";
+  try {
+    const acc = await ensureCustomerAccount(customerId);
+    if (acc?.created) accountNote = " · Gastkonto angelegt";
+  } catch (err) {
+    console.error("[manual-booking] Gastkonto anlegen fehlgeschlagen (non-blocking):", err);
+  }
+
   const bookingNumber = generateBookingNumber();
   const totalPersons =
     persons.adults + persons.members + persons.children + persons.pupils + persons.teachers;
@@ -171,7 +182,7 @@ export async function createManualBooking(formData: FormData): Promise<{ ok: boo
 
   await db.insert(activityLog).values({
     who: session.user?.name ?? session.user?.email ?? "Manager",
-    what: `Manuelle Buchung ${bookingNumber} angelegt (${totalPersons} P · ${breakdown.nights} N)${d.skipCleaningBuffer ? " — ohne Reinigungspuffer" : ""}`,
+    what: `Manuelle Buchung ${bookingNumber} angelegt (${totalPersons} P · ${breakdown.nights} N)${d.skipCleaningBuffer ? " — ohne Reinigungspuffer" : ""}${accountNote}`,
     bookingId: inserted[0].id,
   });
 

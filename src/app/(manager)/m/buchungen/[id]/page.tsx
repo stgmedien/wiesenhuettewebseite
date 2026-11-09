@@ -218,7 +218,7 @@ export default async function BookingDetail({ params }: Props) {
               />
             )}
             {customer && <ResendMailsButton bookingId={b.id} />}
-            {customer && customer.userId && <ResendWelcomeButton bookingId={b.id} />}
+            {customer && <ResendWelcomeButton bookingId={b.id} hasAccount={!!customer.userId} />}
           </Section>
 
           <Section title="Aufenthalt">
