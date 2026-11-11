@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { ArrowRight, ArrowLeft, Check, Loader2 } from "lucide-react";
+import { ArrowRight, ArrowLeft, Check, Loader2, Users } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea, Select } from "@/components/ui/Input";
 import { calculatePrice, formatEuro, RULES, type Persons } from "@/lib/pricing";
@@ -226,8 +226,14 @@ const BF_COPY = {
     memberConfirmLabel:
       "Ich bestätige, dass alle hier als Vereinsmitglieder angegebenen Personen aktive Mitglieder des Skifreunde Gütersloh e.V. sind.",
     valMemberConfirm: "Bitte bestätige die Mitgliedschaft der angegebenen Personen.",
+    memberLaterHintH: "Vereinsmitglieder dabei?",
     memberLaterHint:
-      "Vereinsmitglieder der Skifreunde Gütersloh dabei? Zählt sie hier ganz normal mit — am Ende der Buchung tragt Ihr ihre Namen ein, dann gilt für sie der Mitgliedstarif (−50 %).",
+      "Zählt sie hier ganz normal mit. Im letzten Schritt tragt Ihr ihre Namen ein, dann gilt für sie der Mitgliedstarif (−50 %).",
+    memberQuestion: "Sind Vereinsmitglieder der Skifreunde dabei?",
+    memberQuestionSub: "Für jedes Mitglied gilt der Mitgliedstarif (−50 % auf die Übernachtung).",
+    memberYes: "Ja",
+    memberNo: "Nein",
+    memberSidebarHint: "Vereinsmitglieder dabei? Den Rabatt tragt Ihr im letzten Schritt ein.",
     memberNamesH: "Vereinsmitglieder in Eurer Gruppe",
     memberNamesIntro:
       "Sind aktive Mitglieder des Skifreunde Gütersloh e.V. dabei? Tragt sie hier mit Vor- und Nachnamen ein. Für jede eingetragene Person gilt der Mitgliedstarif (−50 % auf die Übernachtung). Wir prüfen die Angaben.",
@@ -410,8 +416,14 @@ const BF_COPY = {
     memberConfirmLabel:
       "I confirm that all persons stated here as club members are active members of Skifreunde Gütersloh e.V.",
     valMemberConfirm: "Please confirm the membership of the persons stated.",
+    memberLaterHintH: "Club members in your group?",
     memberLaterHint:
-      "Club members of Skifreunde Gütersloh in your group? Just count them here as usual — at the end of the booking you enter their names and the member rate (−50%) applies to them.",
+      "Just count them here as usual. In the last step you enter their names and the member rate (−50%) applies to them.",
+    memberQuestion: "Are club members of Skifreunde coming along?",
+    memberQuestionSub: "The member rate (−50% on the overnight stay) applies to every member.",
+    memberYes: "Yes",
+    memberNo: "No",
+    memberSidebarHint: "Club members in your group? You enter the discount in the last step.",
     memberNamesH: "Club members in your group",
     memberNamesIntro:
       "Are active members of Skifreunde Gütersloh e.V. coming along? Enter them here with first and last name. The member rate (−50% on the overnight stay) applies to every person entered. We check the details.",
@@ -592,8 +604,14 @@ const BF_COPY = {
     memberConfirmLabel:
       "Ik bevestig dat alle hier als verenigingslid opgegeven personen actieve leden van Skifreunde Gütersloh e.V. zijn.",
     valMemberConfirm: "Bevestig het lidmaatschap van de opgegeven personen.",
+    memberLaterHintH: "Verenigingsleden in jullie groep?",
     memberLaterHint:
-      "Verenigingsleden van Skifreunde Gütersloh in jullie groep? Tel ze hier gewoon mee — aan het eind van de boeking vullen jullie hun namen in, dan geldt voor hen het ledentarief (−50%).",
+      "Tel ze hier gewoon mee. In de laatste stap vullen jullie hun namen in, dan geldt voor hen het ledentarief (−50%).",
+    memberQuestion: "Gaan er verenigingsleden van Skifreunde mee?",
+    memberQuestionSub: "Voor elk lid geldt het ledentarief (−50% op de overnachting).",
+    memberYes: "Ja",
+    memberNo: "Nee",
+    memberSidebarHint: "Verenigingsleden in jullie groep? De korting vullen jullie in de laatste stap in.",
     memberNamesH: "Verenigingsleden in jullie groep",
     memberNamesIntro:
       "Gaan er actieve leden van Skifreunde Gütersloh e.V. mee? Vul ze hier in met voor- en achternaam. Voor elke ingevulde persoon geldt het ledentarief (−50% op de overnachting). Wij controleren de gegevens.",
@@ -1400,6 +1418,7 @@ export const BookingFlow = ({
           totalPersons={totalPersons}
           fullPayment={fullPaymentRequired}
           prepayPercent={prepayPercent}
+          memberHint={step < 3 && memberNames.length === 0 && !bookerMemberEffective}
           tt={tt}
           locale={locale}
         />
@@ -1553,9 +1572,13 @@ const PersonsEditor = ({
         eigenes Feld mehr, persons.teachers bleibt immer 0. */}
     {/* Mitglieder werden nicht mehr hier gezählt, sondern am Ende der
         Buchung namentlich eingetragen (MemberNamesSection). */}
-    <p className="text-xs text-[var(--color-wh-fg-muted)] border-t border-[var(--color-wh-winter-grey)]/50 mt-1 pt-3 mb-0">
-      {tt.memberLaterHint}
-    </p>
+    <div className="flex items-start gap-3 rounded-[var(--radius-card)] bg-[var(--color-wh-green-soft)] border border-[var(--color-wh-green)]/40 p-4 mt-1 text-sm">
+      <Users className="w-5 h-5 mt-0.5 shrink-0 text-[var(--color-wh-deep-green)]" aria-hidden />
+      <p className="m-0">
+        <strong className="text-[var(--color-wh-deep-green)]">{tt.memberLaterHintH}</strong>{" "}
+        {tt.memberLaterHint}
+      </p>
+    </div>
   </div>
 );
 
@@ -1609,12 +1632,55 @@ const MemberNamesSection = ({
   const fieldCls =
     "h-10 rounded-md border border-[var(--color-wh-winter-grey)] bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-wh-green)]";
 
+  // Ja/Nein-Frage statt kleinem Link — der Kasten wurde sonst übersehen
+  // (Rückmeldung Dana 11/2026). "Nein" verwirft bereits eingetragene Namen.
+  const [answer, setAnswer] = useState<"ja" | "nein" | null>(
+    names.length > 0 || bookerIsMember ? "ja" : null
+  );
+  const choose = (v: "ja" | "nein") => {
+    setAnswer(v);
+    if (v === "nein") {
+      onChange([]);
+      onBookerIsMember(false);
+      onConfirm(false);
+    }
+  };
+  const choiceCls = (active: boolean) =>
+    `h-10 min-w-[88px] px-5 rounded-full border font-semibold cursor-pointer transition-colors ${
+      active
+        ? "bg-[var(--color-wh-deep-green)] border-[var(--color-wh-deep-green)] text-white"
+        : "bg-white border-[var(--color-wh-winter-grey)] text-[var(--color-wh-deep-green)] hover:border-[var(--color-wh-deep-green)]"
+    }`;
+
   return (
-    <div className="bg-[var(--color-wh-snow)] border border-[var(--color-wh-winter-grey)] rounded-[var(--radius-card)] p-5 text-sm space-y-4">
-      <div>
-        <div className="font-semibold text-[var(--color-wh-deep-green)] text-base">{tt.memberNamesH}</div>
-        <p className="m-0 mt-1 text-[var(--color-wh-fg-muted)]">{tt.memberNamesIntro}</p>
+    <div
+      className={`rounded-[var(--radius-card)] p-5 text-sm space-y-4 border-2 ${
+        answer === null
+          ? "border-[var(--color-wh-green)] bg-[var(--color-wh-green-soft)]"
+          : "border-[var(--color-wh-winter-grey)] bg-[var(--color-wh-snow)]"
+      }`}
+    >
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex items-start gap-3">
+          <Users className="w-5 h-5 mt-0.5 shrink-0 text-[var(--color-wh-deep-green)]" aria-hidden />
+          <div>
+            <div className="font-semibold text-[var(--color-wh-deep-green)] text-base">{tt.memberQuestion}</div>
+            <p className="m-0 mt-0.5 text-[var(--color-wh-fg-muted)]">{tt.memberQuestionSub}</p>
+          </div>
+        </div>
+        <div className="flex gap-2 shrink-0" role="group" aria-label={tt.memberQuestion}>
+          <button type="button" aria-pressed={answer === "ja"} onClick={() => choose("ja")} className={choiceCls(answer === "ja")}>
+            {tt.memberYes}
+          </button>
+          <button type="button" aria-pressed={answer === "nein"} onClick={() => choose("nein")} className={choiceCls(answer === "nein")}>
+            {tt.memberNo}
+          </button>
+        </div>
       </div>
+
+      {answer === "ja" && (
+      <>
+      <p className="m-0 text-[var(--color-wh-fg-muted)]">{tt.memberNamesIntro}</p>
 
       {/* Bucher/in selbst Mitglied → keine Mindestbelegung (Vorstand 11/2026). */}
       {showBookerMember && (
@@ -1725,6 +1791,8 @@ const MemberNamesSection = ({
           )}
         </>
       )}
+      </>
+      )}
     </div>
   );
 };
@@ -1795,6 +1863,7 @@ const PriceSummary = ({
   totalPersons,
   fullPayment = false,
   prepayPercent = 50,
+  memberHint = false,
   tt,
   locale,
 }: {
@@ -1804,6 +1873,7 @@ const PriceSummary = ({
   totalPersons: number;
   fullPayment?: boolean;
   prepayPercent?: number;
+  memberHint?: boolean;
   tt: BfCopy;
   locale: "de" | "en" | "nl";
 }) => {
@@ -1841,6 +1911,12 @@ const PriceSummary = ({
           <span>{tt.bookingSum}</span>
           <span className="font-semibold">{formatEuro(breakdown.subtotalCents, locale)}</span>
         </div>
+        {memberHint && (
+          <p className="m-0 flex items-start gap-2 text-xs text-[var(--color-wh-deep-green)]">
+            <Users className="w-3.5 h-3.5 mt-px shrink-0" aria-hidden />
+            <span>{tt.memberSidebarHint}</span>
+          </p>
+        )}
       </div>
 
       {fullPayment ? (
