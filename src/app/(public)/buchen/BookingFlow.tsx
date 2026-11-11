@@ -4,7 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import { ArrowRight, ArrowLeft, Check, Loader2, Users } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea, Select } from "@/components/ui/Input";
-import { calculatePrice, formatEuro, RULES, type Persons } from "@/lib/pricing";
+import { calculatePrice, coversNewYearsEve, formatEuro, minNightsFor, RULES, type Persons } from "@/lib/pricing";
 import { toLocalIso, daysUntilLocalDate } from "@/lib/utils";
 import { daysUntil, getCancellationTier, getCancellationTiers } from "@/lib/cancellation";
 import { createBookingAndCheckout, previewDiscountAction } from "./actions";
@@ -192,6 +192,7 @@ const BF_COPY = {
     personsRange: (n: number, max: number) => `${n} Personen · Maximalbelegung ${max}.`,
     valDepartureMissing: "Bitte auch den Abreisetag im Kalender wählen.",
     valMinNights: "Mindestaufenthalt: 2 Nächte — bitte einen späteren Abreisetag wählen.",
+    valMinNightsNewYear: "Über Silvester gilt ein Mindestaufenthalt von 4 Nächten — der Zeitraum ist sehr gefragt. Bitte früher anreisen oder später abreisen.",
     valPersonsMin: "Bitte mindestens eine Person angeben.",
     valStep2Hint: "Bitte fülle die rot markierten Felder aus, um fortzufahren.",
     valRequired: "Pflichtfeld.",
@@ -383,6 +384,7 @@ const BF_COPY = {
     personsRange: (n: number, max: number) => `${n} guests · maximum ${max}.`,
     valDepartureMissing: "Please also pick the departure day in the calendar.",
     valMinNights: "Minimum stay: 2 nights — please pick a later departure day.",
+    valMinNightsNewYear: "Over New Year's Eve the minimum stay is 4 nights — this period is in high demand. Please arrive earlier or leave later.",
     valPersonsMin: "Please add at least one guest.",
     valStep2Hint: "Please complete the fields marked in red to continue.",
     valRequired: "Required.",
@@ -571,6 +573,7 @@ const BF_COPY = {
     personsRange: (n: number, max: number) => `${n} personen · maximaal ${max}.`,
     valDepartureMissing: "Kies ook de vertrekdag in de kalender.",
     valMinNights: "Minimaal 2 nachten — kies een latere vertrekdag.",
+    valMinNightsNewYear: "Rond oudejaarsavond geldt een minimum verblijf van 4 nachten — deze periode is erg gewild. Kom eerder aan of vertrek later.",
     valPersonsMin: "Voeg minstens één persoon toe.",
     valStep2Hint: "Vul de rood gemarkeerde velden in om door te gaan.",
     valRequired: "Verplicht veld.",
@@ -752,7 +755,7 @@ export const BookingFlow = ({
     Math.round(
       (new Date(departure).getTime() - new Date(arrival).getTime()) /
         (1000 * 60 * 60 * 24)
-    ) >= RULES.minNights;
+    ) >= minNightsFor(arrival, departure);
 
   const personsValid =
     totalPersons >= RULES.minPersons && totalPersons <= RULES.maxPersons;
@@ -1015,7 +1018,9 @@ export const BookingFlow = ({
             )}
             {!rangeBlocked && arrival && departure && !datesValid && (
               <div className="text-[var(--color-wh-sunset)] text-sm font-semibold">
-                {tt.valMinNights}
+                {new Date(departure) > new Date(arrival) && coversNewYearsEve(arrival, departure)
+                  ? tt.valMinNightsNewYear
+                  : tt.valMinNights}
               </div>
             )}
 

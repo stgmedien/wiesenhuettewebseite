@@ -13,7 +13,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/Input";
-import { formatEuro, RULES } from "@/lib/pricing";
+import { formatEuro, minNightsFor, RULES } from "@/lib/pricing";
 import { toLocalIso } from "@/lib/utils";
 import { quickPrice, type QuickPriceResult } from "@/app/(public)/quick-price/actions";
 
@@ -157,8 +157,8 @@ export const PriceQuickCheck = ({ locale = "de" }: { locale?: QcLocale }) => {
   // Clientseitige Vorpruefung — abgeleitet statt als State, damit der Effect
   // ausschliesslich den asynchronen Server-Call macht (kein sync setState).
   const precheckHint =
-    !arrival || !departure || nightsBetweenIso(arrival, departure) < RULES.minNights
-      ? tt.hintDates(RULES.minNights)
+    !arrival || !departure || nightsBetweenIso(arrival, departure) < minNightsFor(arrival, departure)
+      ? tt.hintDates(arrival && departure ? minNightsFor(arrival, departure) : RULES.minNights)
       : total < RULES.minPersons
         ? tt.hintPersons
         : total > RULES.maxPersons
