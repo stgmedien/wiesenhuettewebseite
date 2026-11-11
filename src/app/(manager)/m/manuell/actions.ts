@@ -69,12 +69,16 @@ export async function createManualBooking(formData: FormData): Promise<{ ok: boo
     teachers: d.teachers,
   };
 
-  const issues = validateBookingInput({
-    arrival: d.arrival,
-    departure: d.departure,
-    persons,
-    soloUse: d.soloUse,
-  });
+  // Silvester-Mindestaufenthalt gilt nur online — der Manager darf abweichen.
+  const issues = validateBookingInput(
+    {
+      arrival: d.arrival,
+      departure: d.departure,
+      persons,
+      soloUse: d.soloUse,
+    },
+    { ignoreNewYearMinimum: true }
+  );
   if (issues.length > 0) {
     return { ok: false, error: issues.map((i) => i.message).join(" ") };
   }

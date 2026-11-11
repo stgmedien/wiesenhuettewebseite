@@ -77,12 +77,16 @@ export async function rebookBooking(raw: z.infer<typeof schema>): Promise<Rebook
     teachers: old.teachers,
   };
 
-  const issues = validateBookingInput({
-    arrival: newArrival,
-    departure: newDeparture,
-    persons,
-    soloUse: old.soloUse,
-  });
+  // Silvester-Mindestaufenthalt gilt nur online — der Manager darf abweichen.
+  const issues = validateBookingInput(
+    {
+      arrival: newArrival,
+      departure: newDeparture,
+      persons,
+      soloUse: old.soloUse,
+    },
+    { ignoreNewYearMinimum: true }
+  );
   if (issues.length > 0) {
     return { ok: false, error: issues.map((i) => i.message).join(" ") };
   }

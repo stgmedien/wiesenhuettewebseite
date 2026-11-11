@@ -30,6 +30,7 @@ const PRICING_LABELS: Record<Locale, {
   detailNXN: (q: number, n: number) => string;
   detailNightsAt: (n: number, perNight: string) => string;
   validMinNights: (n: number) => string;
+  validMinNightsNewYear: (n: number) => string;
   validMinPersons: (n: number) => string;
   validMaxPersons: (n: number) => string;
   validDepartureAfter: string;
@@ -52,6 +53,7 @@ const PRICING_LABELS: Record<Locale, {
     detailNXN: (q, n) => `${q} × ${n} Nächte`,
     detailNightsAt: (n, perNight) => `${n} ${n === 1 ? "Nacht" : "Nächte"} × ${perNight}`,
     validMinNights: (n) => `Mindestaufenthalt ${n} Nächte.`,
+    validMinNightsNewYear: (n) => `Über Silvester gilt ein Mindestaufenthalt von ${n} Nächten.`,
     validMinPersons: (n) => `Mindestens ${n} Person.`,
     validMaxPersons: (n) => `Maximalbelegung ${n} Personen.`,
     validDepartureAfter: "Abreise muss nach Anreise liegen.",
@@ -74,6 +76,7 @@ const PRICING_LABELS: Record<Locale, {
     detailNXN: (q, n) => `${q} × ${n} nights`,
     detailNightsAt: (n, perNight) => `${n} ${n === 1 ? "night" : "nights"} × ${perNight}`,
     validMinNights: (n) => `Minimum stay ${n} nights.`,
+    validMinNightsNewYear: (n) => `Over New Year's Eve the minimum stay is ${n} nights.`,
     validMinPersons: (n) => `Minimum ${n} guest.`,
     validMaxPersons: (n) => `Maximum ${n} guests.`,
     validDepartureAfter: "Departure must be after arrival.",
@@ -96,6 +99,7 @@ const PRICING_LABELS: Record<Locale, {
     detailNXN: (q, n) => `${q} × ${n} nachten`,
     detailNightsAt: (n, perNight) => `${n} ${n === 1 ? "nacht" : "nachten"} × ${perNight}`,
     validMinNights: (n) => `Minimaal ${n} nachten.`,
+    validMinNightsNewYear: (n) => `Rond oudejaarsavond geldt een minimum verblijf van ${n} nachten.`,
     validMinPersons: (n) => `Minimaal ${n} persoon.`,
     validMaxPersons: (n) => `Maximaal ${n} personen.`,
     validDepartureAfter: "Vertrek moet na aankomst liggen.",
@@ -128,6 +132,10 @@ export const PRICES = {
 
 export const RULES = {
   minNights: 2,
+  // Silvester ist sehr gefragt: Wer die Nacht 31.12.→1.1. bucht, muss
+  // mindestens so viele Nächte bleiben (Johannes 11/2026, "5 Tage").
+  // Gilt nur für Buchungen über die Webseite, der Manager darf abweichen.
+  newYearMinNights: 4,
   // Absolute Untergrenze für Personenzahl (mindestens 1 Gast). Echte
   // Mindestabrechnungs-Grenze ist `minOccupancyFloor` — bei Unterschreitung
   // fällt ein Aufschlag an, die Buchung ist aber NICHT blockiert.
@@ -310,12 +318,29 @@ export const nightsBetween = (arrival: Date | string, departure: Date | string):
   return Math.round(ms / (1000 * 60 * 60 * 24));
 };
 
+/** Enthält der Aufenthalt die Silvesternacht (31.12. → 1.1.)? */
+export const coversNewYearsEve = (arrival: Date | string, departure: Date | string): boolean => {
+  const a = isoDay(arrival);
+  const d = isoDay(departure);
+  const year = Number(a.slice(0, 4));
+  return a <= `${year}-12-31` && d >= `${year + 1}-01-01`;
+};
+
+/** Mindestaufenthalt für genau diesen Zeitraum (über Silvester länger). */
+export const minNightsFor = (arrival: Date | string, departure: Date | string): number =>
+  coversNewYearsEve(arrival, departure)
+    ? Math.max(RULES.minNights, RULES.newYearMinNights)
+    : RULES.minNights;
+
 export const sumPersons = (p: Persons): number =>
   p.adults + p.members + p.children + p.pupils + p.teachers;
 
 export type ValidationIssue = { field: string; message: string };
 
-export const validateBookingInput = (input: PriceInput): ValidationIssue[] => {
+export const validateBookingInput = (
+  input: PriceInput,
+  opts: { ignoreNewYearMinimum?: boolean } = {}
+): ValidationIssue[] => {
   const issues: ValidationIssue[] = [];
   const nights = nightsBetween(input.arrival, input.departure);
   const persons = sumPersons(input.persons);
@@ -323,6 +348,11 @@ export const validateBookingInput = (input: PriceInput): ValidationIssue[] => {
 
   if (nights < RULES.minNights) {
     issues.push({ field: "dates", message: L.validMinNights(RULES.minNights) });
+  } else if (
+    !opts.ignoreNewYearMinimum &&
+    nights < minNightsFor(input.arrival, input.departure)
+  ) {
+    issues.push({ field: "dates", message: L.validMinNightsNewYear(RULES.newYearMinNights) });
   }
   if (persons < RULES.minPersons) {
     issues.push({ field: "persons", message: L.validMinPersons(RULES.minPersons) });

@@ -506,7 +506,12 @@ export default async function PreisePage() {
             {c.ctaButton} <ArrowRight size={19} />
           </Link>
           <p className="text-[12px] text-[var(--color-wh-fg-muted)] mt-4 m-0">
-            {RULES.minNights} {locale === "en" ? "nights minimum" : locale === "nl" ? "nachten minimum" : "Nächte Mindestaufenthalt"} ·{" "}
+            {RULES.minNights} {locale === "en" ? "nights minimum" : locale === "nl" ? "nachten minimum" : "Nächte Mindestaufenthalt"}{" "}
+            ({locale === "en"
+              ? `over New Year's Eve ${RULES.newYearMinNights}`
+              : locale === "nl"
+                ? `rond oudejaarsavond ${RULES.newYearMinNights}`
+                : `über Silvester ${RULES.newYearMinNights}`}) ·{" "}
             {locale === "en"
               ? "billed from 15 guests"
               : locale === "nl"

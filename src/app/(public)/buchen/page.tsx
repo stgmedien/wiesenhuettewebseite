@@ -9,7 +9,7 @@ import { eq, and } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { getServerLocale } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n-shared";
-import { RULES } from "@/lib/pricing";
+import { minNightsFor, RULES } from "@/lib/pricing";
 import { toLocalIso } from "@/lib/utils";
 
 const PAGE_COPY: Record<Locale, { eyebrow: string; h1: string; lead: string; loggedIn: string; member: string; pricesLink: string }> = {
@@ -131,7 +131,7 @@ export default async function BuchenPage({ searchParams }: Props) {
       isIsoDate(sp.arrival) &&
       isIsoDate(sp.departure) &&
       sp.arrival >= todayIso &&
-      nightsBetween(sp.arrival, sp.departure) >= RULES.minNights;
+      nightsBetween(sp.arrival, sp.departure) >= minNightsFor(sp.arrival, sp.departure);
 
     // Personen: fehlende Params zählen als 0; ein einziger kaputter Wert
     // macht die ganze Personen-Gruppe ungültig (kein Rate-Prefill).
