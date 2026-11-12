@@ -19,6 +19,7 @@ import {
   BadgeCheck,
   BarChart3,
   Zap,
+  Receipt,
   Database,
   MailIcon,
   BookOpen,
@@ -92,6 +93,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/m/reporting", label: "Reporting", Icon: BarChart3 },
       { href: "/m/energie", label: "Energie", Icon: Zap },
+      { href: "/m/avs-rechnungen", label: "AVS-Rechnungen", Icon: Receipt },
       { href: "/m/stammdaten", label: "Stammdaten", Icon: Database },
       { href: "/m/wartung", label: "Wartung", Icon: Wrench },
       { href: "/m/einstellungen", label: "Einstellungen", Icon: Settings },

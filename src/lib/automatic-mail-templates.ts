@@ -345,6 +345,14 @@ export const AUTOMATIC_MAIL_TEMPLATES: AutomaticMailTemplate[] = [
     file: "src/app/api/stripe/webhook/route.ts",
   },
   {
+    key: "avs-invoice-finance",
+    label: "AVS-Rechnung zur Zahlung",
+    category: "Zahlungen",
+    trigger: "Manager lädt unter /m/avs-rechnungen eine oder mehrere Rechnungs-PDFs hoch.",
+    audience: "Norbert Monscheidt (MAIL_FINANCE_TO)",
+    file: "src/app/(manager)/m/avs-rechnungen/actions.ts",
+  },
+  {
     key: "deposit-release-request",
     label: "Kaution freigegeben — bitte zurücküberweisen",
     category: "Zahlungen",
