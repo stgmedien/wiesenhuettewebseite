@@ -57,6 +57,20 @@ export default function ManualBookingForm({
       </label>
 
       <h3 className="text-[20px] m-0 mt-4">Gast</h3>
+      <label className="flex items-start gap-2 text-sm">
+        <input
+          type="checkbox"
+          name="sendGuestMails"
+          defaultChecked
+          className="w-4 h-4 mt-0.5 accent-[var(--color-wh-deep-green)]"
+        />
+        <span>
+          Bestätigung, Mietvertrag und Konto-Login an den Gast senden
+          <span className="block text-xs text-[var(--color-wh-fg-muted)]">
+            Wie bei einer Online-Buchung. Häkchen raus, wenn du erst noch etwas klären willst — die Mails lassen sich später in der Buchung verschicken.
+          </span>
+        </span>
+      </label>
 
       <div className="grid grid-cols-2 gap-4">
         <select
