@@ -113,7 +113,7 @@ export const isRangeAvailable = async (
     // Abreisetag als Wechseltag freigegeben (und Putztag(e) danach frei):
     // Die Buchung blockiert ihren Abreisetag nicht mehr — Anreise am selben
     // Tag ist möglich. Gilt nicht für Sperrzeiten (cleaningDays dort ohnehin 0).
-    // Nur wenn auch der Putztag danach frei ist (wird mit freigegeben).
+    // Nur wenn auch der Putztag danach freigegeben ist (getrennter Klick).
     if (
       cleaningForExisting === 0 &&
       !(c.status === "wartung" && !isReservation(c)) &&

@@ -10,7 +10,6 @@ import {
   unreleaseChangeoverDay,
   unreleaseCleaningDay,
 } from "@/lib/cleaning-overrides";
-import { getSiteSettings } from "@/lib/settings";
 import { db } from "@/lib/db";
 import { bookings } from "@/lib/db/schema";
 import { and, eq, ne } from "drizzle-orm";
@@ -54,7 +53,8 @@ export async function toggleCleaningReleaseAction(
 /**
  * Toggle: Abreisetag als Wechseltag freigeben ↔ wieder sperren. Nur für den
  * Vorstand: erst freigeben, wenn das Putzteam die Reinigung am selben Tag
- * zugesagt hat — dann ist der Tag (samt Putztag danach) öffentlich buchbar.
+ * zugesagt hat — online dann halb frei („Anreise erst ab 17 Uhr“). Den
+ * Putztag danach gibt man getrennt frei.
  * Zurücknehmen geht nur, solange an dem Tag noch niemand neu anreist.
  */
 export async function toggleChangeoverAction(
@@ -81,13 +81,7 @@ export async function toggleChangeoverAction(
       return { ok: true, released: false };
     }
 
-    const { cleaningDaysAfterDeparture } = await getSiteSettings();
-    const cleaningDays = Array.from({ length: cleaningDaysAfterDeparture }, (_, i) => {
-      const d = new Date(`${dateIso}T00:00:00Z`);
-      d.setUTCDate(d.getUTCDate() + i + 1);
-      return d.toISOString().slice(0, 10);
-    });
-    await releaseChangeoverDay(dateIso, cleaningDays, by);
+    await releaseChangeoverDay(dateIso, by);
     revalidatePath("/m/kalender");
     return { ok: true, released: true };
   } catch (err) {
