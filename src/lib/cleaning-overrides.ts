@@ -88,11 +88,15 @@ export async function isChangeoverReleased(dateIso: string): Promise<boolean> {
 }
 
 /**
- * Abreisetag als Wechseltag freigeben (idempotent). Wirkt nur für Manager-
- * Buchungen (allowChangeover); der Putztag danach wird dafür nicht gebraucht
- * und bleibt öffentlich gesperrt.
+ * Abreisetag als Wechseltag freigeben (idempotent) — erst nachdem das
+ * Putzteam die Reinigung am Wechseltag zugesagt hat. Die Reinigungstage danach
+ * werden mit freigegeben, damit der Zeitraum ab dem Wechseltag buchbar ist.
  */
-export async function releaseChangeoverDay(dateIso: string, by: string): Promise<void> {
+export async function releaseChangeoverDay(
+  dateIso: string,
+  cleaningDaysAfter: string[],
+  by: string
+): Promise<void> {
   if (!(await isChangeoverReleased(dateIso))) {
     await db.insert(blockedDates).values({
       fromDate: dateIso,
@@ -101,6 +105,17 @@ export async function releaseChangeoverDay(dateIso: string, by: string): Promise
       reason: CHANGEOVER_REASON,
       createdBy: by,
     });
+  }
+  for (const d of cleaningDaysAfter) {
+    if (!(await isCleaningDayReleased(d))) {
+      await db.insert(blockedDates).values({
+        fromDate: d,
+        toDate: d,
+        kind: RELEASE_KIND,
+        reason: RELEASE_REASON,
+        createdBy: by,
+      });
+    }
   }
   revalidateTag("booking-blocks", "max");
 }

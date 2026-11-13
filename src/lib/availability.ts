@@ -43,10 +43,7 @@ const BLOCKING_STATUSES = [
 export const isRangeAvailable = async (
   range: DateRange,
   excludeBookingId?: string,
-  // allowChangeover: Wechseltage (im Backend freigegebene Abreisetage) als
-  // Anreisetag zulassen. NUR für Manager-Pfade (Manuell buchen, Umbuchen) —
-  // Gäste sollen Wechseltage nicht selbst buchen können (Vorstand 11/2026).
-  opts?: { ignoreCleaningBuffer?: boolean; allowChangeover?: boolean }
+  opts?: { ignoreCleaningBuffer?: boolean }
 ): Promise<boolean> => {
   const arrival = toIso(range.arrival);
   const departure = toIso(range.departure);
@@ -72,9 +69,9 @@ export const isRangeAvailable = async (
   // jeweiligen Buchung — so ist eine direkt anschließende (Back-to-back-)
   // Buchung an einem freigegebenen Tag wieder möglich.
   const released = await getReleasedCleaningDates(broadFrom, broadTo);
-  const changeover = opts?.allowChangeover
-    ? await getReleasedChangeoverDates(broadFrom, broadTo)
-    : new Set<string>();
+  // Vom Vorstand als Wechseltag freigegebene Abreisetage (erst nachdem das
+  // Putzteam zugesagt hat) — dann darf jede Buchung dort anreisen.
+  const changeover = await getReleasedChangeoverDates(broadFrom, broadTo);
 
   const conflicts = await db
     .select({
@@ -116,9 +113,12 @@ export const isRangeAvailable = async (
     // Abreisetag als Wechseltag freigegeben (und Putztag(e) danach frei):
     // Die Buchung blockiert ihren Abreisetag nicht mehr — Anreise am selben
     // Tag ist möglich. Gilt nicht für Sperrzeiten (cleaningDays dort ohnehin 0).
-    // Der Putztag danach zählt dabei nicht — er bleibt öffentlich gesperrt,
-    // damit kein Gast der geplanten Wechselgruppe zuvorkommt.
-    if (!(c.status === "wartung" && !isReservation(c)) && changeover.has(depIso)) {
+    // Nur wenn auch der Putztag danach frei ist (wird mit freigegeben).
+    if (
+      cleaningForExisting === 0 &&
+      !(c.status === "wartung" && !isReservation(c)) &&
+      changeover.has(depIso)
+    ) {
       existingEffectiveEnd = depIso;
     }
     // Overlap
@@ -214,8 +214,8 @@ const getBookingBlocksRaw = unstable_cache(
     for (const d of released) cleaning.delete(d);
 
     // Als Wechseltag freigegebene Abreisetage, an denen noch niemand neu
-    // anreist. Bleiben im booked-Set (öffentlich grau); nur Manager-Ansichten
-    // holen sie über getBookingBlocks(..., { internal: true }) heraus.
+    // anreist — im Kalender als halbes Kästchen (Abreise vormittags, Anreise
+    // möglich).
     const changeover = await getReleasedChangeoverDates(fromIso, toIsoStr);
     const changeoverFree: string[] = [];
     if (changeover.size > 0) {
@@ -242,7 +242,7 @@ const getBookingBlocksRaw = unstable_cache(
   },
   // v2: Reinigungstag liegt jetzt NACH dem Abreisetag (Belegung inkl. Abreisetag).
   // Key-Bump erzwingt frische Berechnung nach Deploy statt alter gecachter Sets.
-  ["booking-blocks-v5"],
+  ["booking-blocks-v6"],
   { tags: [BOOKING_BLOCKS_TAG] }
 );
 
@@ -259,16 +259,13 @@ const getBookingBlocksRaw = unstable_cache(
 export const getBookingBlocks = async (
   from: Date | string,
   to: Date | string,
-  excludeBookingId?: string,
-  opts?: { internal?: boolean }
+  excludeBookingId?: string
 ): Promise<BookingBlocks> => {
   const raw = await getBookingBlocksRaw(toIso(from), toIso(to));
   const booked = new Set(raw.booked);
   const cleaning = new Set(raw.cleaning);
   const wartung = new Set(raw.wartung);
-  // Wechseltage nur in Manager-Ansichten als eigener Zustand — öffentlich
-  // bleiben sie belegt.
-  const changeover = new Set(opts?.internal ? raw.changeover ?? [] : []);
+  const changeover = new Set(raw.changeover ?? []);
   for (const d of changeover) booked.delete(d);
 
   if (excludeBookingId) {

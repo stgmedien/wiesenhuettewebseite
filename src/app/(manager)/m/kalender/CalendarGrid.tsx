@@ -164,7 +164,7 @@ export const CalendarGrid = ({
         </span>
         <span className="text-[var(--color-wh-deep-green)]">
           Tipp: Auf einem Reinigungstag „Freigeben“ klicken, wenn die Reinigung schon erledigt ist — dann kann die Hütte an dem Tag neu vermietet werden.
-          Am Abreisetag „Wechseltag“ klicken, wenn die nächste Gruppe schon am selben Tag anreisen darf — Gäste sehen den Tag weiter als belegt, die Gruppe dann unter „Manuell buchen“ eintragen.
+          Am Abreisetag „Wechseltag“ klicken, sobald das Putzteam die Reinigung am selben Tag zugesagt hat — dann ist der Tag (und der Putztag danach) online buchbar.
         </span>
       </div>
 
