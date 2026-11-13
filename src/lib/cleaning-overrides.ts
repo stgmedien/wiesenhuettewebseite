@@ -1,6 +1,6 @@
 import { db } from "./db";
 import { blockedDates } from "./db/schema";
-import { and, eq, gte, lte } from "drizzle-orm";
+import { and, eq, gte, isNull, lte, ne, or } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
 
 // =============================================================
@@ -21,6 +21,14 @@ import { revalidateTag } from "next/cache";
 
 const RELEASE_KIND = "reinigung" as const;
 const RELEASE_REASON = "Reinigungstag freigegeben (wieder buchbar)";
+// Abreisetag als Wechseltag: Die alte Gruppe reist morgens ab, die neue kommt
+// am selben Tag an (z. B. Wochenendgast Fr–So direkt nach einer Woche, die
+// Freitag endet). Gleiche Tabelle, gleiche kind, nur am reason unterscheidbar
+// — so bleibt es ohne Enum-Migration.
+const CHANGEOVER_REASON = "Abreisetag als Wechseltag freigegeben";
+
+const isCleaningRelease = or(isNull(blockedDates.reason), ne(blockedDates.reason, CHANGEOVER_REASON));
+const isChangeoverRelease = eq(blockedDates.reason, CHANGEOVER_REASON);
 
 /** Freigegebene Reinigungstage innerhalb [fromIso, toIso] (inkl.). */
 export async function getReleasedCleaningDates(
@@ -34,6 +42,7 @@ export async function getReleasedCleaningDates(
       .where(
         and(
           eq(blockedDates.kind, RELEASE_KIND),
+          isCleaningRelease,
           gte(blockedDates.fromDate, fromIso),
           lte(blockedDates.fromDate, toIso)
         )
@@ -45,12 +54,86 @@ export async function getReleasedCleaningDates(
   }
 }
 
+/** Als Wechseltag freigegebene Abreisetage innerhalb [fromIso, toIso] (inkl.). */
+export async function getReleasedChangeoverDates(
+  fromIso: string,
+  toIso: string
+): Promise<Set<string>> {
+  try {
+    const rows = await db
+      .select({ d: blockedDates.fromDate })
+      .from(blockedDates)
+      .where(
+        and(
+          eq(blockedDates.kind, RELEASE_KIND),
+          isChangeoverRelease,
+          gte(blockedDates.fromDate, fromIso),
+          lte(blockedDates.fromDate, toIso)
+        )
+      );
+    return new Set(rows.map((r) => r.d));
+  } catch (err) {
+    console.error("[cleaning-overrides] changeover read failed:", err);
+    return new Set();
+  }
+}
+
+export async function isChangeoverReleased(dateIso: string): Promise<boolean> {
+  const rows = await db
+    .select({ id: blockedDates.id })
+    .from(blockedDates)
+    .where(and(eq(blockedDates.kind, RELEASE_KIND), isChangeoverRelease, eq(blockedDates.fromDate, dateIso)))
+    .limit(1);
+  return rows.length > 0;
+}
+
+/**
+ * Abreisetag als Wechseltag freigeben (idempotent). Die Reinigungstage danach
+ * werden mit freigegeben — sonst bliebe der Wechseltag praktisch unbuchbar,
+ * weil jeder neue Aufenthalt ab dem Tag in den Putztag hineinliefe.
+ */
+export async function releaseChangeoverDay(
+  dateIso: string,
+  cleaningDaysAfter: string[],
+  by: string
+): Promise<void> {
+  if (!(await isChangeoverReleased(dateIso))) {
+    await db.insert(blockedDates).values({
+      fromDate: dateIso,
+      toDate: dateIso,
+      kind: RELEASE_KIND,
+      reason: CHANGEOVER_REASON,
+      createdBy: by,
+    });
+  }
+  for (const d of cleaningDaysAfter) {
+    if (!(await isCleaningDayReleased(d))) {
+      await db.insert(blockedDates).values({
+        fromDate: d,
+        toDate: d,
+        kind: RELEASE_KIND,
+        reason: RELEASE_REASON,
+        createdBy: by,
+      });
+    }
+  }
+  revalidateTag("booking-blocks", "max");
+}
+
+/** Wechseltag-Freigabe zurücknehmen (Putztag-Freigaben bleiben bestehen). */
+export async function unreleaseChangeoverDay(dateIso: string): Promise<void> {
+  await db
+    .delete(blockedDates)
+    .where(and(eq(blockedDates.kind, RELEASE_KIND), isChangeoverRelease, eq(blockedDates.fromDate, dateIso)));
+  revalidateTag("booking-blocks", "max");
+}
+
 /** Ist der Reinigungstag an diesem Datum freigegeben? */
 export async function isCleaningDayReleased(dateIso: string): Promise<boolean> {
   const rows = await db
     .select({ id: blockedDates.id })
     .from(blockedDates)
-    .where(and(eq(blockedDates.kind, RELEASE_KIND), eq(blockedDates.fromDate, dateIso)))
+    .where(and(eq(blockedDates.kind, RELEASE_KIND), isCleaningRelease, eq(blockedDates.fromDate, dateIso)))
     .limit(1);
   return rows.length > 0;
 }
@@ -75,6 +158,6 @@ export async function releaseCleaningDay(dateIso: string, by: string): Promise<v
 export async function unreleaseCleaningDay(dateIso: string): Promise<void> {
   await db
     .delete(blockedDates)
-    .where(and(eq(blockedDates.kind, RELEASE_KIND), eq(blockedDates.fromDate, dateIso)));
+    .where(and(eq(blockedDates.kind, RELEASE_KIND), isCleaningRelease, eq(blockedDates.fromDate, dateIso)));
   revalidateTag("booking-blocks", "max");
 }

@@ -3,7 +3,7 @@ import { bookings, customers } from "@/lib/db/schema";
 import { eq, gte, lte, and, ne } from "drizzle-orm";
 import { CalendarGrid } from "./CalendarGrid";
 import { getSiteSettings } from "@/lib/settings";
-import { getReleasedCleaningDates } from "@/lib/cleaning-overrides";
+import { getReleasedChangeoverDates, getReleasedCleaningDates } from "@/lib/cleaning-overrides";
 import { isReservation, sperrzeitLabel } from "@/lib/reservation";
 
 export const dynamic = "force-dynamic";
@@ -78,6 +78,7 @@ export default async function CalendarPage({ searchParams }: Props) {
   // Vom Wart bereits freigegebene Reinigungstage in diesem Monat — werden im
   // Grid als „freigegeben (buchbar)" markiert und lassen sich wieder sperren.
   const releasedDates = await getReleasedCleaningDates(fromIso, toIso);
+  const changeoverDates = await getReleasedChangeoverDates(fromIso, toIso);
 
   return (
     <div className="px-4 sm:px-8 py-8 sm:py-10 max-w-[1400px]">
@@ -89,6 +90,7 @@ export default async function CalendarPage({ searchParams }: Props) {
         events={events}
         cleaningDates={Array.from(cleaningDates)}
         releasedDates={Array.from(releasedDates)}
+        changeoverDates={Array.from(changeoverDates)}
       />
     </div>
   );
