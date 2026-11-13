@@ -93,7 +93,8 @@ export async function rebookBooking(raw: z.infer<typeof schema>): Promise<Rebook
 
   const free = await isRangeAvailable(
     { arrival: newArrival, departure: newDeparture },
-    old.id
+    old.id,
+    { allowChangeover: true }
   );
   if (!free) return { ok: false, error: "Neuer Zeitraum ist bereits belegt." };
 

@@ -12,6 +12,7 @@ type Props = {
   bookedDates: string[];
   cleaningDates: string[];
   wartungDates: string[];
+  changeoverDates?: string[];
 };
 
 const NOT_REBOOKABLE = new Set(["storniert", "abgereist", "angereist"]);
@@ -22,6 +23,7 @@ export function RebookControl({
   bookedDates,
   cleaningDates,
   wartungDates,
+  changeoverDates,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [newArrival, setNewArrival] = useState("");
@@ -83,6 +85,7 @@ export function RebookControl({
           bookedDates={bookedDates}
           cleaningDates={cleaningDates}
           wartungDates={wartungDates}
+          changeoverDates={changeoverDates}
           arrival={newArrival}
           departure={newDeparture}
           onSelect={(a, d) => {

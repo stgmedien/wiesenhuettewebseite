@@ -152,9 +152,19 @@ export const CalendarGrid = ({
           <span className="inline-block w-3.5 h-3.5 rounded bg-[var(--color-wh-green-soft)] border border-[var(--color-wh-green)]/40" />
           Freigegeben (buchbar)
         </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span
+            className="inline-block w-3.5 h-3.5 rounded border border-[var(--color-wh-winter-grey)]"
+            style={{
+              backgroundImage:
+                "linear-gradient(to bottom right, rgba(200,206,196,0.55) 50%, var(--color-wh-green-soft) 50%)",
+            }}
+          />
+          Wechseltag (Abreise vormittags, Anreise nachmittags)
+        </span>
         <span className="text-[var(--color-wh-deep-green)]">
           Tipp: Auf einem Reinigungstag „Freigeben“ klicken, wenn die Reinigung schon erledigt ist — dann kann die Hütte an dem Tag neu vermietet werden.
-          Am Abreisetag „Wechseltag“ klicken, wenn die nächste Gruppe schon am selben Tag anreisen darf (der Putztag danach wird mit freigegeben).
+          Am Abreisetag „Wechseltag“ klicken, wenn die nächste Gruppe schon am selben Tag anreisen darf — Gäste sehen den Tag weiter als belegt, die Gruppe dann unter „Manuell buchen“ eintragen.
         </span>
       </div>
 
@@ -184,6 +194,7 @@ export const CalendarGrid = ({
           const occupiedOvernight = dayEvents.some((e) => e.departure !== iso);
           const isChangeover = changeoverSet.has(iso);
           const canChangeover = departing && iso >= todayIso && (!occupiedOvernight || isChangeover);
+
           return (
             <div
               key={idx}
@@ -198,7 +209,14 @@ export const CalendarGrid = ({
                       backgroundImage:
                         "repeating-linear-gradient(45deg, rgba(138,90,56,0.10) 0 6px, transparent 6px 12px)",
                     }
-                  : undefined
+                  : isChangeover
+                    ? {
+                        // Wechseltag: oben links Abreise (vormittags), unten
+                        // rechts Anreise möglich (nachmittags).
+                        backgroundImage:
+                          "linear-gradient(to bottom right, rgba(200,206,196,0.55) 50%, var(--color-wh-green-soft) 50%)",
+                      }
+                    : undefined
               }
               title={
                 isReleased

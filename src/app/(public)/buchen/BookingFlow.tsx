@@ -96,6 +96,8 @@ const BF_COPY = {
     s2H: "Eure Daten",
     s3H: "Übersicht",
     rangeBlocked: "Mindestens ein Tag in diesem Zeitraum ist bereits belegt — bitte einen anderen Zeitraum wählen.",
+    changeoverHint: "Anreise am Abreisetag einer anderen Gruppe ist manchmal nach Absprache möglich —",
+    changeoverHintLink: "schreibt uns.",
     arrival: "Anreise",
     departure: "Abreise",
     purpose: "Anlass *",
@@ -281,6 +283,8 @@ const BF_COPY = {
     s2H: "Your details",
     s3H: "Summary",
     rangeBlocked: "At least one day in this range is already booked — please pick another range.",
+    changeoverHint: "Arriving on another group's departure day is sometimes possible by arrangement —",
+    changeoverHintLink: "get in touch.",
     arrival: "Arrival",
     departure: "Departure",
     purpose: "Purpose *",
@@ -462,6 +466,8 @@ const BF_COPY = {
     s2H: "Jullie gegevens",
     s3H: "Overzicht",
     rangeBlocked: "Minstens één dag in deze periode is al geboekt — kies een andere periode.",
+    changeoverHint: "Aankomen op de vertrekdag van een andere groep is soms mogelijk in overleg —",
+    changeoverHintLink: "neem contact op.",
     arrival: "Aankomst",
     departure: "Vertrek",
     purpose: "Aanleiding *",
@@ -969,6 +975,16 @@ export const BookingFlow = ({
               }}
               locale={locale}
             />
+
+            {/* Wechseltage (Anreise am Abreisetag der Vorgruppe) gibt es nur
+                nach Absprache — der Vorstand legt sie im Backend an und bucht
+                die Gruppe manuell ein. Gäste sehen den Tag weiter als belegt. */}
+            <p className="text-xs text-[var(--color-wh-fg-muted)] m-0 -mt-2">
+              {tt.changeoverHint}{" "}
+              <a href="/kontakt" className="underline text-[var(--color-wh-deep-green)]">
+                {tt.changeoverHintLink}
+              </a>
+            </p>
 
             {/* Datumsfelder bewusst entfernt — der Kalender oben ist die
                 alleinige Quelle (vermeidet Inkonsistenz zwischen Kalender und

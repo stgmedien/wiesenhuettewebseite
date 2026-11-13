@@ -10,7 +10,6 @@ import {
   unreleaseChangeoverDay,
   unreleaseCleaningDay,
 } from "@/lib/cleaning-overrides";
-import { getSiteSettings } from "@/lib/settings";
 import { db } from "@/lib/db";
 import { bookings } from "@/lib/db/schema";
 import { and, eq, ne } from "drizzle-orm";
@@ -51,16 +50,10 @@ export async function toggleCleaningReleaseAction(
   }
 }
 
-const addDays = (iso: string, n: number) => {
-  const d = new Date(`${iso}T00:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + n);
-  return d.toISOString().slice(0, 10);
-};
-
 /**
- * Toggle: Abreisetag als Wechseltag freigeben ↔ wieder sperren. Beim Freigeben
- * werden die Putztage danach mit freigegeben, damit eine Anreise am Abreisetag
- * tatsächlich buchbar ist. Zurücknehmen geht nur, solange an dem Tag noch
+ * Toggle: Abreisetag als Wechseltag freigeben ↔ wieder sperren. Danach kann
+ * die Gruppe unter „Manuell buchen“ am Abreisetag anreisen; Gäste sehen den
+ * Tag weiter als belegt. Zurücknehmen geht nur, solange an dem Tag noch
  * niemand neu anreist.
  */
 export async function toggleChangeoverAction(
@@ -87,11 +80,7 @@ export async function toggleChangeoverAction(
       return { ok: true, released: false };
     }
 
-    const { cleaningDaysAfterDeparture } = await getSiteSettings();
-    const cleaningDays = Array.from({ length: cleaningDaysAfterDeparture }, (_, i) =>
-      addDays(dateIso, i + 1)
-    );
-    await releaseChangeoverDay(dateIso, cleaningDays, by);
+    await releaseChangeoverDay(dateIso, by);
     revalidatePath("/m/kalender");
     return { ok: true, released: true };
   } catch (err) {

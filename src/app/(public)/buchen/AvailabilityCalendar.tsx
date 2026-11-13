@@ -18,6 +18,8 @@ const CAL_COPY: Record<Locale, {
   tipCleaning: string;
   tipWartung: string;
   tipBooked: string;
+  tipChangeover: string;
+  legendChangeover: string;
   legendFree: string;
   legendBooked: string;
   legendCleaning: string;
@@ -39,6 +41,8 @@ const CAL_COPY: Record<Locale, {
     tipCleaning: "Reinigungstag — nicht buchbar",
     tipWartung: "Wartung",
     tipBooked: "Belegt",
+    tipChangeover: "Wechseltag: Die Vorgruppe reist vormittags ab, Anreise am selben Tag möglich",
+    legendChangeover: "Wechseltag (Anreise möglich)",
     legendFree: "frei",
     legendBooked: "belegt",
     legendCleaning: "Reinigungstag",
@@ -60,6 +64,8 @@ const CAL_COPY: Record<Locale, {
     tipCleaning: "Cleaning day — not bookable",
     tipWartung: "Maintenance",
     tipBooked: "Booked",
+    tipChangeover: "Changeover day: the previous group leaves in the morning, arrival possible the same day",
+    legendChangeover: "Changeover day (arrival possible)",
     legendFree: "free",
     legendBooked: "booked",
     legendCleaning: "Cleaning day",
@@ -81,6 +87,8 @@ const CAL_COPY: Record<Locale, {
     tipCleaning: "Schoonmaakdag — niet boekbaar",
     tipWartung: "Onderhoud",
     tipBooked: "Geboekt",
+    tipChangeover: "Wisseldag: de vorige groep vertrekt 's ochtends, aankomst dezelfde dag mogelijk",
+    legendChangeover: "Wisseldag (aankomst mogelijk)",
     legendFree: "vrij",
     legendBooked: "geboekt",
     legendCleaning: "Schoonmaakdag",
@@ -92,12 +100,17 @@ const CAL_COPY: Record<Locale, {
 
 const todayIso = () => toLocalIso(new Date());
 
+// Wechseltag: obere linke Hälfte in „belegt“-Grau, untere rechte Hälfte frei.
+const CHANGEOVER_BG =
+  "linear-gradient(to bottom right, color-mix(in srgb, var(--color-wh-winter-grey) 60%, transparent) 50%, transparent 50%)";
+
 type State =
   | "past"
   | "booked"
   | "cleaning"
   | "wartung"
   | "free"
+  | "changeover"
   | "selected"
   | "in-range";
 
@@ -105,6 +118,8 @@ type Props = {
   bookedDates: string[];
   cleaningDates: string[];
   wartungDates: string[];
+  /** Abreisetage, an denen am selben Tag angereist werden darf (halbes Kästchen). */
+  changeoverDates?: string[];
   arrival: string;
   departure: string;
   onSelect: (arrival: string, departure: string) => void;
@@ -115,6 +130,7 @@ export const AvailabilityCalendar = ({
   bookedDates,
   cleaningDates,
   wartungDates,
+  changeoverDates = [],
   arrival,
   departure,
   onSelect,
@@ -133,6 +149,7 @@ export const AvailabilityCalendar = ({
   const bookedSet = useMemo(() => new Set(bookedDates), [bookedDates]);
   const cleaningSet = useMemo(() => new Set(cleaningDates), [cleaningDates]);
   const wartungSet = useMemo(() => new Set(wartungDates), [wartungDates]);
+  const changeoverSet = useMemo(() => new Set(changeoverDates), [changeoverDates]);
   const blockedSet = useMemo(() => {
     const all = new Set<string>();
     bookedSet.forEach((d) => all.add(d));
@@ -175,6 +192,7 @@ export const AvailabilityCalendar = ({
       if (wartungSet.has(iso)) return "wartung";
       if (cleaningSet.has(iso)) return "cleaning";
       if (bookedSet.has(iso)) return "booked";
+      if (changeoverSet.has(iso)) return "changeover";
       return "free";
     };
 
@@ -183,6 +201,7 @@ export const AvailabilityCalendar = ({
       if (cleaningSet.has(iso)) return c.tipCleaning;
       if (wartungSet.has(iso)) return c.tipWartung;
       if (bookedSet.has(iso)) return c.tipBooked;
+      if (changeoverSet.has(iso)) return c.tipChangeover;
       return undefined;
     };
 
@@ -242,6 +261,8 @@ export const AvailabilityCalendar = ({
           ? c.legendCleaning
           : s === "wartung"
           ? c.legendWartung
+          : s === "changeover"
+          ? c.legendChangeover
           : s === "selected" || s === "in-range"
           ? c.legendSelected
           : c.legendFree;
@@ -257,6 +278,10 @@ export const AvailabilityCalendar = ({
       wartung:
         "bg-[var(--color-wh-black)]/80 text-[var(--color-wh-snow)] cursor-not-allowed line-through",
       free: "text-[var(--color-wh-deep-green)] hover:bg-[var(--color-wh-green-soft)] cursor-pointer",
+      // Diagonal halbiert: oben links belegt (Abreise der Vorgruppe), unten
+      // rechts frei (Anreise möglich) — damit niemand denkt, die Vorgruppe
+      // reise schon am Vortag ab.
+      changeover: "text-[var(--color-wh-deep-green)] hover:brightness-95 cursor-pointer",
       selected:
         "bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] font-bold cursor-pointer",
       "in-range":
@@ -267,6 +292,7 @@ export const AvailabilityCalendar = ({
       if (!d) return <div key={idx} className="aspect-square" />;
       const state = stateOf(d);
       const isCleaning = state === "cleaning";
+      const isChangeover = state === "changeover";
       const base =
         "aspect-square flex items-center justify-center text-sm font-medium rounded-md transition-colors relative";
       return (
@@ -289,6 +315,8 @@ export const AvailabilityCalendar = ({
                   backgroundImage:
                     "repeating-linear-gradient(45deg, rgba(138,90,56,0.18) 0 4px, transparent 4px 8px)",
                 }
+              : isChangeover
+              ? { backgroundImage: CHANGEOVER_BG }
               : undefined
           }
         >
@@ -373,6 +401,15 @@ export const AvailabilityCalendar = ({
           }}
           label={c.legendCleaning}
         />
+        {changeoverDates.length > 0 && (
+          <Legend
+            swatchStyle={{
+              backgroundImage: CHANGEOVER_BG,
+              border: "1px solid var(--color-wh-winter-grey)",
+            }}
+            label={c.legendChangeover}
+          />
+        )}
         <Legend swatch="bg-[var(--color-wh-black)]/80" label={c.legendWartung} />
         <Legend swatch="bg-[var(--color-wh-green-soft)]" label={c.legendSelected} />
         <Legend swatch="bg-[var(--color-wh-deep-green)]" label={c.legendArrivalDeparture} />

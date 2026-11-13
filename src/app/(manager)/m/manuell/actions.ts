@@ -98,7 +98,7 @@ export async function createManualBooking(formData: FormData): Promise<{ ok: boo
   const free = await isRangeAvailable(
     { arrival: d.arrival, departure: d.departure },
     reservation?.id,
-    { ignoreCleaningBuffer: d.skipCleaningBuffer }
+    { ignoreCleaningBuffer: d.skipCleaningBuffer, allowChangeover: true }
   );
   if (!free) return { ok: false, error: "Zeitraum ist bereits belegt." };
 
