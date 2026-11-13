@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { ChevronLeft, ChevronRight, Sparkles, Undo2, Loader2 } from "lucide-react";
-import { toggleCleaningReleaseAction } from "./actions";
+import { ChevronLeft, ChevronRight, Sparkles, Undo2, Loader2, ArrowLeftRight } from "lucide-react";
+import { toggleChangeoverAction, toggleCleaningReleaseAction } from "./actions";
 import { toLocalIso } from "@/lib/utils";
 
 const MONTHS = [
@@ -48,15 +48,18 @@ export const CalendarGrid = ({
   events,
   cleaningDates = [],
   releasedDates = [],
+  changeoverDates = [],
 }: {
   year: number;
   monthIdx: number;
   events: Event[];
   cleaningDates?: string[];
   releasedDates?: string[];
+  changeoverDates?: string[];
 }) => {
   const cleaningSet = new Set(cleaningDates);
   const releasedSet = new Set(releasedDates);
+  const changeoverSet = new Set(changeoverDates);
 
   // Reinigungstag freigeben ↔ wieder sperren. revalidatePath in der Action
   // liefert frische Props zurück, daher kein lokaler optimistischer State nötig.
@@ -66,6 +69,14 @@ export const CalendarGrid = ({
     setPendingIso(iso);
     startTransition(async () => {
       await toggleCleaningReleaseAction(iso);
+      setPendingIso(null);
+    });
+  };
+  const toggleChangeover = (iso: string) => {
+    setPendingIso(iso);
+    startTransition(async () => {
+      const r = await toggleChangeoverAction(iso);
+      if (!r.ok && r.error) alert(r.error);
       setPendingIso(null);
     });
   };
@@ -142,7 +153,8 @@ export const CalendarGrid = ({
           Freigegeben (buchbar)
         </span>
         <span className="text-[var(--color-wh-deep-green)]">
-          Tipp: Auf einem Reinigungstag „Freigeben" klicken, wenn die Reinigung schon erledigt ist — dann kann die Hütte an dem Tag neu vermietet werden.
+          Tipp: Auf einem Reinigungstag „Freigeben“ klicken, wenn die Reinigung schon erledigt ist — dann kann die Hütte an dem Tag neu vermietet werden.
+          Am Abreisetag „Wechseltag“ klicken, wenn die nächste Gruppe schon am selben Tag anreisen darf (der Putztag danach wird mit freigegeben).
         </span>
       </div>
 
@@ -166,6 +178,12 @@ export const CalendarGrid = ({
           // an dem Tag) und nur ab heute — Vergangenes ist irrelevant.
           const canToggle = isCleaning && dayEvents.length === 0 && iso >= todayIso;
           const rowPending = pendingIso === iso && isPending;
+          // Wechseltag: an diesem Tag reist eine Gäste-Gruppe ab. Freigeben
+          // nur, solange niemand anderes an dem Tag anreist bzw. übernachtet.
+          const departing = dayEvents.some((e) => e.departure === iso && e.status !== "wartung");
+          const occupiedOvernight = dayEvents.some((e) => e.departure !== iso);
+          const isChangeover = changeoverSet.has(iso);
+          const canChangeover = departing && iso >= todayIso && (!occupiedOvernight || isChangeover);
           return (
             <div
               key={idx}
@@ -250,6 +268,33 @@ export const CalendarGrid = ({
                     <Sparkles size={11} />
                   )}
                   {isReleased ? "Wieder sperren" : "Freigeben"}
+                </button>
+              )}
+
+              {canChangeover && (
+                <button
+                  type="button"
+                  onClick={() => toggleChangeover(iso)}
+                  disabled={rowPending}
+                  className={`mt-auto inline-flex items-center justify-center gap-1 w-full text-[10px] font-semibold rounded px-1.5 py-1 transition-colors disabled:opacity-60 cursor-pointer ${
+                    isChangeover
+                      ? "border border-[var(--color-wh-deep-green)]/40 text-[var(--color-wh-deep-green)] bg-[var(--color-wh-green-soft)] hover:bg-white"
+                      : "border border-[var(--color-wh-deep-green)]/40 text-[var(--color-wh-deep-green)] bg-white hover:bg-[var(--color-wh-green-soft)]"
+                  }`}
+                  title={
+                    isChangeover
+                      ? "Wechseltag wieder sperren — Anreise erst nach dem Putztag"
+                      : "Abreisetag als Wechseltag freigeben — neue Gruppe kann am selben Tag anreisen"
+                  }
+                >
+                  {rowPending ? (
+                    <Loader2 size={11} className="animate-spin" />
+                  ) : isChangeover ? (
+                    <Undo2 size={11} />
+                  ) : (
+                    <ArrowLeftRight size={11} />
+                  )}
+                  {isChangeover ? "Wechseltag frei · sperren" : "Wechseltag"}
                 </button>
               )}
             </div>

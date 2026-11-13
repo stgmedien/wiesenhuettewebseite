@@ -3,7 +3,7 @@ import { db } from "./db";
 import { bookings } from "./db/schema";
 import { and, gte, lte, ne, or, eq } from "drizzle-orm";
 import { getSiteSettings } from "./settings";
-import { getReleasedCleaningDates } from "./cleaning-overrides";
+import { getReleasedChangeoverDates, getReleasedCleaningDates } from "./cleaning-overrides";
 import { isReservation } from "@/lib/reservation";
 
 /** Cache-Tag — bei jeder Buchungs-/Sperrzeit-Mutation via
@@ -69,6 +69,7 @@ export const isRangeAvailable = async (
   // jeweiligen Buchung — so ist eine direkt anschließende (Back-to-back-)
   // Buchung an einem freigegebenen Tag wieder möglich.
   const released = await getReleasedCleaningDates(broadFrom, broadTo);
+  const changeover = await getReleasedChangeoverDates(broadFrom, broadTo);
 
   const conflicts = await db
     .select({
@@ -106,6 +107,16 @@ export const isRangeAvailable = async (
     ) {
       existingEffectiveEnd = addDaysIso(existingEffectiveEnd, -1);
       cleaningForExisting--;
+    }
+    // Abreisetag als Wechseltag freigegeben (und Putztag(e) danach frei):
+    // Die Buchung blockiert ihren Abreisetag nicht mehr — Anreise am selben
+    // Tag ist möglich. Gilt nicht für Sperrzeiten (cleaningDays dort ohnehin 0).
+    if (
+      cleaningForExisting === 0 &&
+      !(c.status === "wartung" && !isReservation(c)) &&
+      changeover.has(depIso)
+    ) {
+      existingEffectiveEnd = depIso;
     }
     // Overlap
     if (toIso(c.arrival) < newEffectiveEnd && existingEffectiveEnd > arrival) {
@@ -197,6 +208,25 @@ const getBookingBlocksRaw = unstable_cache(
     );
     for (const d of released) cleaning.delete(d);
 
+    // Als Wechseltag freigegebene Abreisetage: öffentlich als frei anzeigen,
+    // damit dort eine neue Anreise gewählt werden kann. Nur wenn an dem Tag
+    // nicht zugleich jemand übernachtet (Anreise einer anderen Buchung).
+    const changeover = await getReleasedChangeoverDates(fromIso, toIsoStr);
+    if (changeover.size > 0) {
+      const occupiedNights = new Set<string>();
+      for (const row of rows) {
+        const cur = new Date(toIso(row.arrival));
+        const end = new Date(toIso(row.departure));
+        while (cur < end) {
+          occupiedNights.add(cur.toISOString().slice(0, 10));
+          cur.setDate(cur.getDate() + 1);
+        }
+      }
+      for (const d of changeover) {
+        if (!occupiedNights.has(d)) booked.delete(d);
+      }
+    }
+
     return {
       booked: Array.from(booked),
       cleaning: Array.from(cleaning),
@@ -205,7 +235,7 @@ const getBookingBlocksRaw = unstable_cache(
   },
   // v2: Reinigungstag liegt jetzt NACH dem Abreisetag (Belegung inkl. Abreisetag).
   // Key-Bump erzwingt frische Berechnung nach Deploy statt alter gecachter Sets.
-  ["booking-blocks-v2"],
+  ["booking-blocks-v3"],
   { tags: [BOOKING_BLOCKS_TAG] }
 );
 
