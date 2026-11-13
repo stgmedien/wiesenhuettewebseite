@@ -463,6 +463,7 @@ export default async function BookingDetail({ params }: Props) {
               bookedDates={Array.from(bookingBlocks.booked)}
               cleaningDates={Array.from(bookingBlocks.cleaning)}
               wartungDates={Array.from(bookingBlocks.wartung)}
+              changeoverDates={Array.from(bookingBlocks.changeover)}
             />
           </Section>
         </aside>

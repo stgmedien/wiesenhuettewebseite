@@ -80,6 +80,7 @@ type BookingFlowProps = {
   bookedDates: string[];
   cleaningDates: string[];
   wartungDates: string[];
+  changeoverDates?: string[];
   prefill?: Prefill;
   repeatHint?: RepeatHint;
   locale?: "de" | "en" | "nl";
@@ -641,6 +642,7 @@ export const BookingFlow = ({
   bookedDates,
   cleaningDates,
   wartungDates,
+  changeoverDates = [],
   prefill,
   repeatHint,
   locale = "de",
@@ -961,6 +963,7 @@ export const BookingFlow = ({
               bookedDates={bookedDates}
               cleaningDates={cleaningDates}
               wartungDates={wartungDates}
+              changeoverDates={changeoverDates}
               arrival={arrival}
               departure={departure}
               onSelect={(a, d) => {

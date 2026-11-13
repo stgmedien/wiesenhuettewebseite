@@ -66,7 +66,7 @@ export default async function BuchenPage({ searchParams }: Props) {
   // Unabhängige Calls parallel — vorher seriell (getBookingBlocks blockte
   // getBookingPrefill). getBookingBlocks ist zusätzlich gecacht (Tag
   // "booking-blocks"), Folge-Aufrufe sind damit nahezu sofort.
-  const [{ booked, cleaning, wartung }, prefill] = await Promise.all([
+  const [{ booked, cleaning, wartung, changeover }, prefill] = await Promise.all([
     getBookingBlocks(today, horizon),
     getBookingPrefill(),
   ]);
@@ -216,6 +216,7 @@ export default async function BuchenPage({ searchParams }: Props) {
             bookedDates={Array.from(booked)}
             cleaningDates={Array.from(cleaning)}
             wartungDates={Array.from(wartung)}
+            changeoverDates={Array.from(changeover)}
             prefill={prefill}
             repeatHint={repeatHint}
             locale={locale}

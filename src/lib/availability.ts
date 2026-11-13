@@ -133,6 +133,8 @@ export type BookingBlocks = {
   cleaning: Set<string>;
   /** Internal-only blocks (Wartung / Sperrzeit). */
   wartung: Set<string>;
+  /** Als Wechseltag freigegebene Abreisetage: Vorgruppe reist ab, Anreise am selben Tag möglich. */
+  changeover: Set<string>;
 };
 
 /**
@@ -145,7 +147,7 @@ const getBookingBlocksRaw = unstable_cache(
   async (
     fromIso: string,
     toIsoStr: string
-  ): Promise<{ booked: string[]; cleaning: string[]; wartung: string[] }> => {
+  ): Promise<{ booked: string[]; cleaning: string[]; wartung: string[]; changeover: string[] }> => {
     const settings = await getSiteSettings();
     const cleaningDays = settings.cleaningDaysAfterDeparture;
 
@@ -212,6 +214,7 @@ const getBookingBlocksRaw = unstable_cache(
     // damit dort eine neue Anreise gewählt werden kann. Nur wenn an dem Tag
     // nicht zugleich jemand übernachtet (Anreise einer anderen Buchung).
     const changeover = await getReleasedChangeoverDates(fromIso, toIsoStr);
+    const changeoverFree: string[] = [];
     if (changeover.size > 0) {
       const occupiedNights = new Set<string>();
       for (const row of rows) {
@@ -223,7 +226,10 @@ const getBookingBlocksRaw = unstable_cache(
         }
       }
       for (const d of changeover) {
-        if (!occupiedNights.has(d)) booked.delete(d);
+        if (!occupiedNights.has(d) && booked.has(d)) {
+          booked.delete(d);
+          changeoverFree.push(d);
+        }
       }
     }
 
@@ -231,11 +237,12 @@ const getBookingBlocksRaw = unstable_cache(
       booked: Array.from(booked),
       cleaning: Array.from(cleaning),
       wartung: Array.from(wartung),
+      changeover: changeoverFree,
     };
   },
   // v2: Reinigungstag liegt jetzt NACH dem Abreisetag (Belegung inkl. Abreisetag).
   // Key-Bump erzwingt frische Berechnung nach Deploy statt alter gecachter Sets.
-  ["booking-blocks-v3"],
+  ["booking-blocks-v4"],
   { tags: [BOOKING_BLOCKS_TAG] }
 );
 
@@ -258,6 +265,7 @@ export const getBookingBlocks = async (
   const booked = new Set(raw.booked);
   const cleaning = new Set(raw.cleaning);
   const wartung = new Set(raw.wartung);
+  const changeover = new Set(raw.changeover ?? []);
 
   if (excludeBookingId) {
     const found = await db
@@ -286,7 +294,7 @@ export const getBookingBlocks = async (
     }
   }
 
-  return { booked, cleaning, wartung };
+  return { booked, cleaning, wartung, changeover };
 };
 
 /**
