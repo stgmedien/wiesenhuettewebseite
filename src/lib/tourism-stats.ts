@@ -9,6 +9,9 @@ import { and, gt, lt, notInArray } from "drizzle-orm";
  * Sperrzeiten, kein Gast) und "storniert" (nie angereist) zaehlen nicht als
  * Gaeste-Aufenthalt.
  */
+/** Empfaengerin der monatlichen Statistik-Mail (Tanja). Ueberschreibbar per MAIL_TOURISM_STATS_TO. */
+export const TOURISM_STATS_TO_DEFAULT = "skifreunde-gt@wiesenhuette.de";
+
 const EXCLUDED_STATUSES: ("storniert" | "wartung")[] = ["storniert", "wartung"];
 
 const toUtcDate = (iso: string) => new Date(`${iso}T00:00:00Z`);
@@ -99,4 +102,24 @@ export async function computeTourismStats(monthIso: string): Promise<TourismStat
     overnightStays,
     bookings: detail,
   };
+}
+
+/** Die letzten `count` abgeschlossenen Monate als "YYYY-MM", neuester zuerst. */
+export function lastCompletedMonths(count: number, now = new Date()): string[] {
+  const out: string[] = [];
+  for (let i = 1; i <= count; i++) {
+    const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1));
+    out.push(`${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`);
+  }
+  return out;
+}
+
+/** CSV (Semikolon, für deutsches Excel) mit einer Zeile pro Monat. */
+export function tourismStatsCsv(stats: TourismStats[]): string {
+  const lines = ["Monat;Ankünfte (Gäste);Übernachtungen;Buchungen"];
+  for (const s of stats) {
+    const nums = s.bookings.map((b) => b.bookingNumber).join(", ");
+    lines.push(`${s.monthLabel};${s.arrivals};${s.overnightStays};"${nums}"`);
+  }
+  return "﻿" + lines.join("\r\n") + "\r\n";
 }

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { warmUpDb } from "@/lib/db/warmup";
 import { sendMail } from "@/lib/mail/send";
-import { computeTourismStats } from "@/lib/tourism-stats";
+import { computeTourismStats, TOURISM_STATS_TO_DEFAULT } from "@/lib/tourism-stats";
 import TourismStatsDigestEmail from "@/lib/mail/templates/tourism-stats-digest";
 
 export const runtime = "nodejs";
@@ -29,11 +29,12 @@ export async function GET(req: NextRequest) {
 
   const stats = await computeTourismStats(monthIso);
 
-  const internalTo = process.env.MAIL_INTERNAL_TO;
-  if (internalTo) {
+  // Tanja traegt die Zahlen bei IDEV ein (seit 11/2026, vorher ging die Mail an Dana).
+  const statsTo = process.env.MAIL_TOURISM_STATS_TO || TOURISM_STATS_TO_DEFAULT;
+  if (statsTo) {
     try {
       await sendMail({
-        to: internalTo,
+        to: statsTo,
         subject: `IT.NRW-Tourismusstatistik ${stats.monthLabel}: ${stats.arrivals} Ankünfte, ${stats.overnightStays} Übernachtungen`,
         template: "tourism-stats-digest",
         react: TourismStatsDigestEmail({ stats }),
