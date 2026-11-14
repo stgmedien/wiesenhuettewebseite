@@ -20,6 +20,7 @@ const CAL_COPY: Record<Locale, {
   tipBooked: string;
   tipChangeover: string;
   legendChangeover: string;
+  changeoverArrivalNote: (date: string) => string;
   legendFree: string;
   legendBooked: string;
   legendCleaning: string;
@@ -41,8 +42,9 @@ const CAL_COPY: Record<Locale, {
     tipCleaning: "Reinigungstag — nicht buchbar",
     tipWartung: "Wartung",
     tipBooked: "Belegt",
-    tipChangeover: "Wechseltag: Die Vorgruppe reist vormittags ab, Anreise am selben Tag möglich",
-    legendChangeover: "Wechseltag (Anreise möglich)",
+    tipChangeover: "Wechseltag: Anreise erst ab 17 Uhr",
+    legendChangeover: "Wechseltag (Anreise ab 17 Uhr)",
+    changeoverArrivalNote: (d) => `Hinweis: Am ${d} ist Wechseltag — Anreise erst ab 17 Uhr.`,
     legendFree: "frei",
     legendBooked: "belegt",
     legendCleaning: "Reinigungstag",
@@ -64,8 +66,9 @@ const CAL_COPY: Record<Locale, {
     tipCleaning: "Cleaning day — not bookable",
     tipWartung: "Maintenance",
     tipBooked: "Booked",
-    tipChangeover: "Changeover day: the previous group leaves in the morning, arrival possible the same day",
-    legendChangeover: "Changeover day (arrival possible)",
+    tipChangeover: "Changeover day: arrival from 5 pm",
+    legendChangeover: "Changeover day (arrival from 5 pm)",
+    changeoverArrivalNote: (d) => `Note: ${d} is a changeover day — arrival from 5 pm.`,
     legendFree: "free",
     legendBooked: "booked",
     legendCleaning: "Cleaning day",
@@ -87,8 +90,9 @@ const CAL_COPY: Record<Locale, {
     tipCleaning: "Schoonmaakdag — niet boekbaar",
     tipWartung: "Onderhoud",
     tipBooked: "Geboekt",
-    tipChangeover: "Wisseldag: de vorige groep vertrekt 's ochtends, aankomst dezelfde dag mogelijk",
-    legendChangeover: "Wisseldag (aankomst mogelijk)",
+    tipChangeover: "Wisseldag: aankomst pas vanaf 17.00 uur",
+    legendChangeover: "Wisseldag (aankomst vanaf 17.00 uur)",
+    changeoverArrivalNote: (d) => `Let op: ${d} is een wisseldag — aankomst pas vanaf 17.00 uur.`,
     legendFree: "vrij",
     legendBooked: "geboekt",
     legendCleaning: "Schoonmaakdag",
@@ -414,6 +418,20 @@ export const AvailabilityCalendar = ({
         <Legend swatch="bg-[var(--color-wh-green-soft)]" label={c.legendSelected} />
         <Legend swatch="bg-[var(--color-wh-deep-green)]" label={c.legendArrivalDeparture} />
       </div>
+
+      {arrival && changeoverSet.has(arrival) && (
+        <div
+          role="status"
+          className="mt-4 rounded-[var(--radius-md)] border-l-4 border-[var(--color-wh-deep-green)] bg-[var(--color-wh-green-soft)] px-4 py-2.5 text-sm text-[var(--color-wh-deep-green)]"
+        >
+          {c.changeoverArrivalNote(
+            new Date(`${arrival}T00:00:00`).toLocaleDateString(
+              locale === "en" ? "en-GB" : locale === "nl" ? "nl-NL" : "de-DE",
+              { day: "numeric", month: "long" }
+            )
+          )}
+        </div>
+      )}
 
       {resetHint && (
         <div

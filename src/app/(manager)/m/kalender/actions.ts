@@ -51,10 +51,11 @@ export async function toggleCleaningReleaseAction(
 }
 
 /**
- * Toggle: Abreisetag als Wechseltag freigeben ↔ wieder sperren. Danach kann
- * die Gruppe unter „Manuell buchen“ am Abreisetag anreisen; Gäste sehen den
- * Tag weiter als belegt. Zurücknehmen geht nur, solange an dem Tag noch
- * niemand neu anreist.
+ * Toggle: Abreisetag als Wechseltag freigeben ↔ wieder sperren. Nur für den
+ * Vorstand: erst freigeben, wenn das Putzteam die Reinigung am selben Tag
+ * zugesagt hat — online dann halb frei („Anreise erst ab 17 Uhr“). Den
+ * Putztag danach gibt man getrennt frei.
+ * Zurücknehmen geht nur, solange an dem Tag noch niemand neu anreist.
  */
 export async function toggleChangeoverAction(
   dateIso: string

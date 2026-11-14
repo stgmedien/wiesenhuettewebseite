@@ -88,9 +88,10 @@ export async function isChangeoverReleased(dateIso: string): Promise<boolean> {
 }
 
 /**
- * Abreisetag als Wechseltag freigeben (idempotent). Wirkt nur für Manager-
- * Buchungen (allowChangeover); der Putztag danach wird dafür nicht gebraucht
- * und bleibt öffentlich gesperrt.
+ * Abreisetag als Wechseltag freigeben (idempotent) — erst nachdem das
+ * Putzteam zugesagt hat. Online dann halb frei („Anreise erst ab 17 Uhr“).
+ * Den Putztag danach gibt der Vorstand getrennt frei (Dana 11/2026); erst
+ * wenn beide frei sind, ist eine Anreise am Wechseltag tatsächlich buchbar.
  */
 export async function releaseChangeoverDay(dateIso: string, by: string): Promise<void> {
   if (!(await isChangeoverReleased(dateIso))) {

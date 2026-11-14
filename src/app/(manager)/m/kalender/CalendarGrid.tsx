@@ -160,11 +160,11 @@ export const CalendarGrid = ({
                 "linear-gradient(to bottom right, rgba(200,206,196,0.55) 50%, var(--color-wh-green-soft) 50%)",
             }}
           />
-          Wechseltag (Abreise vormittags, Anreise nachmittags)
+          Wechseltag (Anreise ab 17 Uhr)
         </span>
         <span className="text-[var(--color-wh-deep-green)]">
           Tipp: Auf einem Reinigungstag „Freigeben“ klicken, wenn die Reinigung schon erledigt ist — dann kann die Hütte an dem Tag neu vermietet werden.
-          Am Abreisetag „Wechseltag“ klicken, wenn die nächste Gruppe schon am selben Tag anreisen darf — Gäste sehen den Tag weiter als belegt, die Gruppe dann unter „Manuell buchen“ eintragen.
+          Am Abreisetag „Wechseltag“ klicken, sobald das Putzteam zugesagt hat — online dann halb frei mit „Anreise erst ab 17 Uhr“. Damit dort wirklich gebucht werden kann, auch den Putztag danach freigeben.
         </span>
       </div>
 
