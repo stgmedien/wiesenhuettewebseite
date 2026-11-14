@@ -353,6 +353,14 @@ export const AUTOMATIC_MAIL_TEMPLATES: AutomaticMailTemplate[] = [
     file: "src/app/(manager)/m/avs-rechnungen/actions.ts",
   },
   {
+    key: "tourism-stats-digest",
+    label: "IT.NRW-Tourismusstatistik (Monatszahlen)",
+    category: "Buchung — Hüttenservice/intern",
+    trigger: "Am 2. jedes Monats: Ankünfte und Übernachtungen des Vormonats für die Meldung bei IDEV. Ältere Monate als Datei unter /m/tourismusstatistik.",
+    audience: "Tanja (skifreunde-gt@wiesenhuette.de, überschreibbar per MAIL_TOURISM_STATS_TO)",
+    file: "src/app/api/cron/tourism-stats-check/route.ts",
+  },
+  {
     key: "deposit-release-request",
     label: "Kaution freigegeben — bitte zurücküberweisen",
     category: "Zahlungen",
