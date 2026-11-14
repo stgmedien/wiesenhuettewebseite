@@ -169,6 +169,31 @@ export const AUTOMATIC_MAIL_TEMPLATES: AutomaticMailTemplate[] = [
     file: "src/app/api/cron/daily-mail-jobs/route.ts",
   },
 
+  // ---------- Klassische Überweisung (Selbstbedienung) ----------
+  {
+    key: "manual_transfer_received",
+    label: "Überweisungs-Buchung — bitte Anzahlung überweisen",
+    category: "Zahlungen",
+    trigger: "Sofort nach einer Selbstbedienungs-Buchung per klassischer Überweisung: Bankdaten und 7-Tage-Frist für die Anzahlung.",
+    audience: "Gast",
+    file: "src/app/(public)/buchen/manual-transfer-actions.ts",
+  },
+  {
+    key: "manual_transfer_reminder",
+    label: "Überweisungs-Buchung — Erinnerung Anzahlung",
+    category: "Zahlungen",
+    trigger: "5 Tage nach der Buchung, wenn noch keine Zahlung erfasst und der Status weiter „angefragt“ ist.",
+    audience: "Gast",
+    file: "src/app/api/cron/daily-mail-jobs/route.ts",
+  },
+  {
+    key: "manual_transfer_cancelled",
+    label: "Überweisungs-Buchung — automatisch storniert",
+    category: "Zahlungen",
+    trigger: "Nach Ablauf der 7-Tage-Frist ohne Zahlungseingang: Buchung wird storniert, Termin freigegeben.",
+    audience: "Gast",
+    file: "src/app/api/cron/daily-mail-jobs/route.ts",
+  },
   // ---------- Schulgruppen ----------
   {
     key: "school_deposit_due",
