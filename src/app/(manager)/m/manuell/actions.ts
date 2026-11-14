@@ -12,6 +12,7 @@ import { generateBookingNumber } from "@/lib/utils";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { BOOKING_BLOCKS_TAG } from "@/lib/availability";
 import { isReservation, sperrzeitLabel } from "@/lib/reservation";
+import { resendBookingConfirmationMails, resendWelcomeMail } from "@/lib/booking-payment-confirmation";
 
 const schema = z.object({
   arrival: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -23,6 +24,9 @@ const schema = z.object({
   teachers: z.coerce.number().int().min(0).default(0),
   soloUse: z.coerce.boolean().default(false),
   skipCleaningBuffer: z.coerce.boolean().default(false),
+  // Gast bekommt sofort Buchungsbestätigung + Mietvertrag und die
+  // Willkommens-Mail (Konto-Login) — wie bei einer Online-Buchung.
+  sendGuestMails: z.coerce.boolean().default(false),
   prepayPercent: z.coerce.number().int().refine((v) => v === 50 || v === 10).default(50),
   customerType: z.enum(["privat", "mitglied", "verein", "firma"]).default("privat"),
   firstName: z.string().min(1).max(120),
@@ -49,7 +53,7 @@ export async function createManualBooking(formData: FormData): Promise<{ ok: boo
 
   const raw: Record<string, unknown> = {};
   formData.forEach((v, k) => {
-    if (k === "soloUse" || k === "skipCleaningBuffer") {
+    if (k === "soloUse" || k === "skipCleaningBuffer" || k === "sendGuestMails") {
       raw[k] = v === "on" || v === "true";
     } else {
       raw[k] = v;
@@ -208,6 +212,30 @@ export async function createManualBooking(formData: FormData): Promise<{ ok: boo
       },
     ]);
     revalidatePath("/m/sperrzeiten");
+  }
+
+  // Gast-Mails wie bei der Online-Buchung (Häkchen im Formular, Standard an).
+  // Best-effort: Die Buchung steht auch, wenn der Versand scheitert — dann
+  // lassen sich die Mails über die Buttons in der Buchung nachholen.
+  if (d.sendGuestMails) {
+    const notes: string[] = [];
+    try {
+      const conf = await resendBookingConfirmationMails(inserted[0].id);
+      notes.push(...conf.sent, ...conf.errors.map((e) => `Fehler: ${e}`));
+    } catch (err) {
+      notes.push(`Fehler Bestätigung: ${err instanceof Error ? err.message : String(err)}`);
+    }
+    try {
+      const w = await resendWelcomeMail(inserted[0].id);
+      notes.push(w.sent ? "Willkommens-Mail" : `Fehler Willkommens-Mail: ${w.error ?? "unbekannt"}`);
+    } catch (err) {
+      notes.push(`Fehler Willkommens-Mail: ${err instanceof Error ? err.message : String(err)}`);
+    }
+    await db.insert(activityLog).values({
+      who: session.user?.name ?? session.user?.email ?? "Manager",
+      what: `Mails an Gast beim Anlegen: ${notes.join(", ")}`,
+      bookingId: inserted[0].id,
+    });
   }
 
   revalidatePath("/m/buchungen");
