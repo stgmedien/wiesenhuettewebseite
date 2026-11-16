@@ -131,7 +131,7 @@ const COPY: Record<Locale, Copy> = {
         heading: "Heizung & Verpflegung",
         items: [
           "Zentralheizung in allen Räumen",
-          "Selbstversorgung — Hygieneartikel bitte mitbringen",
+          "Selbstversorgung — Spülmittel, Spülmaschinen-Tabs, Spüllappen, Handseife und Küchenhandtücher sind da; Hygieneartikel bitte mitbringen",
           "Bäckerei Gerke direkt gegenüber",
           "Catering für Gruppen nach Absprache — Gasthof Graberhof, Hohenleye 1, Winterberg-Hoheleye (Tel. 02758 / 284, mobil 0160 7622508)",
         ],
@@ -270,7 +270,7 @@ const COPY: Record<Locale, Copy> = {
         heading: "Heating & catering",
         items: [
           "Central heating in all rooms",
-          "Self-catering — please bring your own hygiene items",
+          "Self-catering — washing-up liquid, dishwasher tabs, dishcloths, hand soap and kitchen towels are provided; please bring your own toiletries",
           "Bakery Gerke directly across the road",
           "Catering for groups on request — Gasthof Graberhof, Hohenleye 1, Winterberg-Hoheleye (phone 02758 / 284, mobile 0160 7622508)",
         ],
@@ -409,7 +409,7 @@ const COPY: Record<Locale, Copy> = {
         heading: "Verwarming & maaltijden",
         items: [
           "Centrale verwarming in alle ruimtes",
-          "Zelfvoorzienend — hygiëne-artikelen graag zelf meenemen",
+          "Zelfvoorzienend — afwasmiddel, vaatwastabletten, vaatdoekjes, handzeep en theedoeken zijn aanwezig; hygiëne-artikelen graag zelf meenemen",
           "Bakkerij Gerke direct tegenover",
           "Catering voor groepen op aanvraag — Gasthof Graberhof, Hohenleye 1, Winterberg-Hoheleye (tel. 02758 / 284, mobiel 0160 7622508)",
         ],

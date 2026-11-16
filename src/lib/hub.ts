@@ -22,7 +22,6 @@ const DEFAULT_PACKLIST: { title: string; details?: string }[] = [
   },
   { title: "Hausschuhe / dicke Socken für drinnen (jede:r selbst)" },
   { title: "Handtücher (jede:r selbst)" },
-  { title: "Spülmittel + Spültücher" },
   { title: "Müllbeutel" },
   {
     title: "Erste-Hilfe-Set",
