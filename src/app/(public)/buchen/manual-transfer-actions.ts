@@ -44,6 +44,8 @@ import { generateBookingNumber, formatDateLong, daysUntilLocalDate } from "@/lib
 import { CURRENT_HAUSORDNUNG_VERSION } from "@/lib/hausordnung";
 import { MANUAL_REST_MARKER } from "@/lib/payment-markers";
 import { CLUB_BANK_DETAILS } from "@/lib/bank-details";
+import { manualTransferDepositDeadlineIso } from "@/lib/manual-transfer-deadline";
+import ManualTransferDepositEmail from "@/lib/mail/templates/manual-transfer-deposit";
 import type { Locale } from "@/lib/i18n-shared";
 
 // Nur diese drei Anlaesse -- explizit OHNE "firma".
@@ -142,6 +144,8 @@ export type ManualTransferResult =
       ok: true;
       bookingNumber: string;
       anzahlungCents: number;
+      /** Letzter Tag, an dem die Anzahlung eingegangen sein muss (sonst Auto-Storno). */
+      anzahlungDeadlineIso: string;
       restzahlungCents: number;
       restzahlungDeadlineIso: string;
       bank: string;
@@ -515,6 +519,29 @@ export async function createManualTransferBooking(raw: unknown): Promise<ManualT
 
   revalidateTag(BOOKING_BLOCKS_TAG, "max");
 
+  // Gast-Mail mit Bankdaten und 7-Tage-Frist — bisher standen die Angaben nur
+  // einmalig auf der Bestaetigungsseite. Best-effort.
+  const anzahlungDeadlineIso = manualTransferDepositDeadlineIso(new Date());
+  try {
+    await sendMail({
+      to: effectiveEmail,
+      subject: `Eure Buchung ${bookingNumber} — bitte Anzahlung überweisen`,
+      template: "manual_transfer_received",
+      bookingId: result.bookingId,
+      react: ManualTransferDepositEmail({
+        variant: "received",
+        firstName: data.firstName,
+        bookingNumber,
+        arrival: formatDateLong(data.arrival),
+        departure: formatDateLong(data.departure),
+        depositLabel: formatEuro(effectivePrepayment),
+        deadlineLabel: formatDateLong(anzahlungDeadlineIso),
+      }),
+    });
+  } catch (err) {
+    console.error("[manual-transfer] guest confirmation failed (non-blocking):", err);
+  }
+
   // Interne Benachrichtigung -- ohne die weiss niemand, dass diese Buchung
   // existiert und wann der Kontoeingang zu erwarten ist. Best-effort.
   try {
@@ -539,7 +566,7 @@ export async function createManualTransferBooking(raw: unknown): Promise<ManualT
           totalCents: effectiveSubtotal,
           paidCents: 0,
           managerUrl: `${baseUrl}/m/buchungen/${result.bookingId}`,
-          notes: `Klassische Überweisung (Selbstbedienung), kein Stripe. Anzahlung ${formatEuro(effectivePrepayment)} und Restzahlung ${formatEuro(restzahlungCents)} (fällig bis ${formatDateLong(restzahlungDeadlineIso)}) sind als offene Zahlungen hinterlegt — die Restzahlung wird automatisch per T-21-Erinnerungsmail an den Gast angemahnt.`,
+          notes: `Klassische Überweisung (Selbstbedienung), kein Stripe. Anzahlung ${formatEuro(effectivePrepayment)} und Restzahlung ${formatEuro(restzahlungCents)} (fällig bis ${formatDateLong(restzahlungDeadlineIso)}) sind als offene Zahlungen hinterlegt — die Restzahlung wird automatisch per T-21-Erinnerungsmail an den Gast angemahnt. Die Anzahlung muss bis ${formatDateLong(anzahlungDeadlineIso)} eingehen, sonst storniert das System die Buchung automatisch (Erinnerung an den Gast nach 5 Tagen). Sobald Geld da ist: Zahlung im Manager erfassen.`,
         }),
       });
     }
@@ -551,6 +578,7 @@ export async function createManualTransferBooking(raw: unknown): Promise<ManualT
     ok: true,
     bookingNumber,
     anzahlungCents: effectivePrepayment,
+    anzahlungDeadlineIso,
     restzahlungCents,
     restzahlungDeadlineIso,
     bank: CLUB_BANK_DETAILS.bank,
