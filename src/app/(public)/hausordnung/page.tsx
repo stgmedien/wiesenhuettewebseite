@@ -109,6 +109,15 @@ export default async function HausordnungPage() {
               <strong>Küche:</strong> Den Backofen bitte nur mit Backpapier benutzen.
             </li>
             <li>
+              <strong>Was die Hütte stellt:</strong> Spülmittel, Spülmaschinen-Tabs, Spüllappen,
+              Handseife an den Waschbecken und zur Anreise eine Rolle Toilettenpapier pro Toilette.
+              Weiteres Toilettenpapier und Hygieneartikel bitte selbst mitbringen.
+            </li>
+            <li>
+              <strong>Küchenhandtücher:</strong> Die Küchenhandtücher dürft Ihr gern benutzen. Bitte
+              hängt sie nach Gebrauch zum Trocknen in der Küche auf.
+            </li>
+            <li>
               <strong>Schlafräume:</strong> Aus hygienischen Gründen bitte keine Lebensmittel,
               Süßigkeiten oder Getränke außer Wasser mit hineinnehmen und den Müll wieder heraus.
               Handys aus Sicherheitsgründen bitte auch nicht dort aufladen.
