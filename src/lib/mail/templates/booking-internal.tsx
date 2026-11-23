@@ -24,6 +24,8 @@ type Props = {
   paidCents: number;
   managerUrl: string;
   notes?: string;
+  /** Organisations-Buchung (Name), damit Dana Fantasie-Angaben sofort sieht. */
+  orgName?: string | null;
 };
 
 const main = { backgroundColor: "#F7F7F2", padding: "32px 0" };
@@ -65,6 +67,7 @@ export default function BookingInternalEmail({
   paidCents,
   managerUrl,
   notes,
+  orgName,
 }: Props) {
   return (
     <Html>
@@ -73,6 +76,23 @@ export default function BookingInternalEmail({
       <Body style={main}>
         <Container style={container}>
           <Heading style={heading}>📌 Neue Buchung eingegangen</Heading>
+          {orgName ? (
+            <Section
+              style={{
+                backgroundColor: "#EFE6D8",
+                borderLeft: "4px solid #C2562D",
+                padding: "10px 14px",
+                borderRadius: "8px",
+                margin: "0 0 12px 0",
+              }}
+            >
+              <Text style={{ ...text, margin: 0 }}>
+                🏫 <strong>Organisation: {orgName}</strong> — bitte kurz prüfen (10 % Anzahlung,
+                Organisations-Storno). Bei falschen Angaben gelten laut AGB die Bedingungen für
+                private Gruppen.
+              </Text>
+            </Section>
+          ) : null}
           <Text style={text}>
             <strong>{bookingNumber}</strong> — {guestName} ({customerType})
           </Text>

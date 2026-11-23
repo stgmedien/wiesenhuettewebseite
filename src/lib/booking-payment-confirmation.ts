@@ -389,6 +389,7 @@ export async function confirmDepositPayment(params: ConfirmDepositParams): Promi
             paidCents: amountCents,
             managerUrl: `${baseUrl}/m/buchungen/${bookingId}`,
             notes: booking.customerMessage ?? undefined,
+            orgName: isOrgBooking(booking) ? booking.institution : null,
           }),
         });
       } catch (err) {

@@ -139,7 +139,9 @@ export default async function AGB() {
             <strong>Abweichend gilt für Organisationen</strong> (Schulen, Vereine,
             Kirchen/Gemeinden, Städte/Jugendpflege, Bildungsträger): Bis 60 Tage vor Anreise ist
             die Stornierung kostenlos. Danach wird ausschließlich die Anzahlung in Höhe von 10 % der
-            Buchungssumme einbehalten; weitere Stornogebühren fallen nicht an.
+            Buchungssumme einbehalten; weitere Stornogebühren fallen nicht an. Werden unzutreffende
+            Angaben zur Organisation gemacht, gelten die Bedingungen für private Gruppen; der
+            Verein kann die Buchung entsprechend nachberechnen oder stornieren.
           </p>
           <p>
             Maßgeblich ist der Zeitpunkt des Eingangs der schriftlichen Stornierung beim
