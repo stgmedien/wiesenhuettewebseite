@@ -112,7 +112,7 @@ const BF_COPY = {
     paymentNotePrivat:
       "Zahlung online per Karte (Stripe): 50 % Anzahlung bei Buchung, die Restzahlung inkl. Kaution und Kurtaxe wird 14 Tage vor Anreise automatisch von derselben Karte abgebucht.",
     paymentNoteOrg:
-      "Zahlung wahlweise klassisch per Überweisung auf unser Vereinskonto oder online (Karte/SEPA über Stripe): 10 % Anzahlung bei Buchung, die Restzahlung inkl. Kaution und Kurtaxe ist 30 Tage vor Anreise fällig. Die Anzahlung wird bei einer Stornierung einbehalten.",
+      "Zahlung wahlweise klassisch per Überweisung auf unser Vereinskonto oder online (Karte/SEPA über Stripe): 10 % Anzahlung bei Buchung, die Restzahlung inkl. Kaution und Kurtaxe ist 30 Tage vor Anreise fällig. Storno: bis 60 Tage vor Anreise kostenlos, danach wird nur die Anzahlung einbehalten.",
     s1H: "Wer kommt?",
     s1AnlassH: "Anlass",
     s2H: "Eure Daten",
@@ -182,13 +182,12 @@ const BF_COPY = {
     kurtaxeLabel: "Kurtaxe",
     restzahlung: "Restzahlung von",
     restzahlungBody: (days: number) => `(inkl. Kaution + Kurtaxe) wird ${days} Tage vor Anreise fällig und automatisch eingezogen — eine Erinnerung kommt eine Woche vorher per Mail. Die Kaution wird innerhalb von 14 Tagen nach mangelfreier Abreise zurückerstattet.`,
-    orgStornoNote: "Wichtig: Bei einer Stornierung wird die Anzahlung von 10 % in jedem Fall einbehalten. Ergibt die Staffel unten einen höheren Betrag, gilt dieser.",
+    orgStornoNote: "Stornierung für Organisationen: bis 60 Tage vor Anreise kostenlos. Danach wird nur die Anzahlung von 10 % einbehalten — mehr nicht, auch nicht kurz vor Anreise. Stornierungen müssen schriftlich erfolgen.",
     kurtaxeNote: "Hinweis: Die Kurtaxe Hochsauerland (2,70 € pro Person ab 16 Jahren und Nacht) ist in der Restzahlung enthalten — wir führen sie an die Kurverwaltung Winterberg ab.",
     holdNotice: "Hinweis: Der Zeitraum ist ab jetzt 30 Minuten lang für Dich reserviert. Schließt Du die Buchung in dieser Zeit nicht ab, wird er danach automatisch wieder freigegeben.",
     stornoH: "Stornierungs-Regelwerk",
     stornoToday: (d: number, p: number) => `Bei Storno heute (${d} Tage vor Anreise): ${p}% Rückerstattung`,
     stornoTodayNoDays: (p: number) => `Bei Storno heute: ${p}% Rückerstattung`,
-    stornoTodayOrg: (d: number) => `Bei Storno heute (${d} Tage vor Anreise): nur die Anzahlung (10 %) wird einbehalten`,
     stornoVerfaellt: "— Buchung verfällt.",
     stornoBody: "Vollständige Stornogebühren-Staffel (gerechnet von der Anreise rückwärts):",
     stornoRefund: "Rückerstattung",
@@ -310,7 +309,7 @@ const BF_COPY = {
     paymentNotePrivat:
       "Online payment by card (Stripe): 50 % deposit when booking; the remaining balance incl. damage deposit and tourist tax is charged automatically to the same card 14 days before arrival.",
     paymentNoteOrg:
-      "Pay by classic bank transfer to our club account or online (card/SEPA via Stripe): 10 % deposit when booking; the remaining balance incl. damage deposit and tourist tax is due 30 days before arrival. The deposit is retained if you cancel.",
+      "Pay by classic bank transfer to our club account or online (card/SEPA via Stripe): 10 % deposit when booking; the remaining balance incl. damage deposit and tourist tax is due 30 days before arrival. Cancellation: free until 60 days before arrival; after that only the deposit is retained.",
     s1H: "Who's coming?",
     s1AnlassH: "Purpose",
     s2H: "Your details",
@@ -380,13 +379,12 @@ const BF_COPY = {
     kurtaxeLabel: "Tourist tax",
     restzahlung: "Remaining amount of",
     restzahlungBody: (days: number) => `(incl. damage deposit + tourist tax) is due ${days} days before arrival and charged automatically — a reminder is emailed a week before. The damage deposit is refunded within 14 days of a clean departure.`,
-    orgStornoNote: "Important: if you cancel, the 10 % deposit is always retained. If the scale below results in a higher amount, that applies.",
+    orgStornoNote: "Cancellation for organisations: free until 60 days before arrival. After that only the 10 % deposit is retained — nothing more, even shortly before arrival. Cancellations must be made in writing.",
     kurtaxeNote: "Note: The Hochsauerland tourist tax (€2.70 per guest aged 16+ per night) is included in the remaining payment — we remit it to the Winterberg tourist office.",
     holdNotice: "Note: This date range is reserved for you for 30 minutes from now. If you don't complete the booking within this time, it will automatically become available again.",
     stornoH: "Cancellation policy",
     stornoToday: (d: number, p: number) => `If cancelled today (${d} days before arrival): ${p}% refund`,
     stornoTodayNoDays: (p: number) => `If cancelled today: ${p}% refund`,
-    stornoTodayOrg: (d: number) => `If you cancel today (${d} days before arrival): only the deposit (10 %) is retained`,
     stornoVerfaellt: "— booking forfeits.",
     stornoBody: "Full cancellation tiers (counted backwards from arrival):",
     stornoRefund: "refund",
@@ -504,7 +502,7 @@ const BF_COPY = {
     paymentNotePrivat:
       "Online betalen per kaart (Stripe): 50 % aanbetaling bij boeking; het restbedrag incl. borg en toeristenbelasting wordt 14 dagen vóór aankomst automatisch van dezelfde kaart afgeschreven.",
     paymentNoteOrg:
-      "Betalen per klassieke overschrijving naar onze verenigingsrekening of online (kaart/SEPA via Stripe): 10 % aanbetaling bij boeking; het restbedrag incl. borg en toeristenbelasting is 30 dagen vóór aankomst verschuldigd. Bij annulering wordt de aanbetaling ingehouden.",
+      "Betalen per klassieke overschrijving naar onze verenigingsrekening of online (kaart/SEPA via Stripe): 10 % aanbetaling bij boeking; het restbedrag incl. borg en toeristenbelasting is 30 dagen vóór aankomst verschuldigd. Annulering: gratis tot 60 dagen vóór aankomst, daarna wordt alleen de aanbetaling ingehouden.",
     s1H: "Wie komt er?",
     s1AnlassH: "Aanleiding",
     s2H: "Jullie gegevens",
@@ -574,13 +572,12 @@ const BF_COPY = {
     kurtaxeLabel: "Toeristenbelasting",
     restzahlung: "Restbedrag van",
     restzahlungBody: (days: number) => `(incl. borg + toeristenbelasting) is ${days} dagen vóór aankomst verschuldigd en wordt automatisch geïncasseerd — een week vooraf volgt een herinnering per e-mail. De borg wordt binnen 14 dagen na schadevrije afreis terugbetaald.`,
-    orgStornoNote: "Belangrijk: bij annulering wordt de aanbetaling van 10 % altijd ingehouden. Levert de staffel hieronder een hoger bedrag op, dan geldt dat.",
+    orgStornoNote: "Annulering voor organisaties: gratis tot 60 dagen vóór aankomst. Daarna wordt alleen de aanbetaling van 10 % ingehouden — niet meer, ook niet kort voor aankomst. Annuleringen moeten schriftelijk gebeuren.",
     kurtaxeNote: "Let op: De toeristenbelasting Hochsauerland (€ 2,70 per persoon vanaf 16 jaar per nacht) zit in de restbetaling — wij dragen deze af aan de Kurverwaltung Winterberg.",
     holdNotice: "Let op: Deze periode is vanaf nu 30 minuten voor je gereserveerd. Rond je de boeking niet binnen deze tijd af, dan wordt de periode daarna automatisch weer vrijgegeven.",
     stornoH: "Annuleringsregeling",
     stornoToday: (d: number, p: number) => `Bij annulering vandaag (${d} dagen vóór aankomst): ${p}% terugbetaling`,
     stornoTodayNoDays: (p: number) => `Bij annulering vandaag: ${p}% terugbetaling`,
-    stornoTodayOrg: (d: number) => `Bij annulering vandaag (${d} dagen vóór aankomst): alleen de aanbetaling (10 %) wordt ingehouden`,
     stornoVerfaellt: "— boeking vervalt.",
     stornoBody: "Volledige annuleringsstaffel (gerekend terug vanaf aankomst):",
     stornoRefund: "terugbetaling",
@@ -1403,12 +1400,16 @@ export const BookingFlow = ({
             })()}
 
             {/* Storno-Regelwerk klar im UI */}
-            {isOrg && (
-              <div className="rounded-[var(--radius-md)] border-l-4 border-[var(--color-wh-sunset)] bg-[var(--color-wh-beige)] px-4 py-3 text-sm font-semibold text-[var(--color-wh-black)]">
-                {tt.orgStornoNote}
+            {isOrg ? (
+              <div className="rounded-[var(--radius-md)] border-l-4 border-[var(--color-wh-sunset)] bg-[var(--color-wh-beige)] px-4 py-3 text-sm text-[var(--color-wh-black)]">
+                <p className="m-0 text-xs uppercase tracking-wider text-[var(--color-wh-deep-green)] font-semibold mb-1">
+                  {tt.stornoH}
+                </p>
+                <p className="m-0">{tt.orgStornoNote}</p>
               </div>
+            ) : (
+              <CancellationPolicyBox arrival={arrival} tt={tt} locale={locale} />
             )}
-            <CancellationPolicyBox arrival={arrival} tt={tt} locale={locale} isOrg={isOrg} />
             <p className="m-0 text-sm text-[var(--color-wh-fg-muted)]">{tt.holdNotice}</p>
             {error && (
               <div className="bg-[var(--color-wh-sunset)]/10 text-[var(--color-wh-sunset)] rounded-[var(--radius-md)] p-4 text-sm font-medium">
@@ -2116,12 +2117,10 @@ const CancellationPolicyBox = ({
   arrival,
   tt,
   locale,
-  isOrg = false,
 }: {
   arrival: string;
   tt: BfCopy;
   locale: "de" | "en" | "nl";
-  isOrg?: boolean;
 }) => {
   if (!arrival) return null;
   const days = daysUntil(arrival);
@@ -2135,11 +2134,9 @@ const CancellationPolicyBox = ({
             {tt.stornoH}
           </div>
           <p className="m-0 text-[var(--color-wh-black)]">
-            {isOrg && days >= 0 && currentTier.refundPercent === 100
-              ? tt.stornoTodayOrg(days)
-              : days >= 0
-                ? tt.stornoToday(days, currentTier.refundPercent)
-                : tt.stornoTodayNoDays(currentTier.refundPercent)}{" "}
+            {days >= 0
+              ? tt.stornoToday(days, currentTier.refundPercent)
+              : tt.stornoTodayNoDays(currentTier.refundPercent)}{" "}
             {currentTier.refundPercent === 0 && tt.stornoVerfaellt}
           </p>
         </div>

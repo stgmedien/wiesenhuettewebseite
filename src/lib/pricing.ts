@@ -616,26 +616,27 @@ export const cancellationFeeForBooking = (booking: {
   feeCents: number;
   baseCents: number;
   isLegacy: boolean;
-  /** true, wenn die einbehaltene 10-%-Anzahlung (Organisationen) die Gebühr bestimmt. */
+  /** true, wenn statt der Staffel die 10-%-Anzahlung einbehalten wird (Organisationen, ≤ 60 Tage). */
   retainedPrepayment: boolean;
 } => {
   const isLegacy = booking.createdAt < CANCELLATION_POLICY_CUTOFF;
   const baseCents = isLegacy ? booking.subtotalCents : booking.accommodationCents;
   const tiers = isLegacy ? CANCELLATION_TIERS_LEGACY : CANCELLATION_TIERS;
   const { percent, feeCents } = feeFromTiers(baseCents, booking.arrival, tiers);
-  // Organisationen (AGB § 5): Die 10-%-Anzahlung wird bei Stornierung immer
-  // einbehalten — die Staffel greift erst, wenn sie mehr ergibt.
+  // Organisationen (AGB § 5, Vorstand 11/2026): bis 60 Tage vor Anreise
+  // kostenlos, danach wird nur die 10-%-Anzahlung einbehalten — nie mehr,
+  // weil z. B. Schulklassen höhere Stornokosten nicht tragen können.
   if (isOrgBooking(booking)) {
-    const retainedCents = Math.round((booking.subtotalCents * ORG_RETAINED_PERCENT) / 100);
-    if (retainedCents > feeCents) {
-      return {
-        percent: ORG_RETAINED_PERCENT,
-        feeCents: retainedCents,
-        baseCents: booking.subtotalCents,
-        isLegacy,
-        retainedPrepayment: true,
-      };
+    if (percent === 0) {
+      return { percent: 0, feeCents: 0, baseCents, isLegacy, retainedPrepayment: false };
     }
+    return {
+      percent: ORG_RETAINED_PERCENT,
+      feeCents: Math.round((booking.subtotalCents * ORG_RETAINED_PERCENT) / 100),
+      baseCents: booking.subtotalCents,
+      isLegacy,
+      retainedPrepayment: true,
+    };
   }
   return { percent, feeCents, baseCents, isLegacy, retainedPrepayment: false };
 };

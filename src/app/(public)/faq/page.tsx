@@ -96,9 +96,9 @@ const FAQS: QA[] = [
       nl: "Kan ik gratis annuleren?",
     },
     a: {
-      de: "Bis 60 Tage vor Anreise kostenlos. Danach gestaffelt: 60–31 Tage 30 %, 30–14 Tage 50 %, weniger als 14 Tage 100 % des Übernachtungspreises. Endreinigung und Kaution werden im Stornofall nicht fällig. Für Organisationen gilt: Die Anzahlung von 10 % wird in jedem Fall einbehalten. Maßgeblich ist der Eingang der Stornierung.",
-      en: "Free up to 60 days before arrival. After that, tiered: 60–31 days 30%, 30–14 days 50%, less than 14 days 100% of the accommodation price. Final cleaning and deposit are not charged if you cancel. For organisations, the 10% deposit is always retained. The date the cancellation is received applies.",
-      nl: "Gratis tot 60 dagen voor aankomst. Daarna getrapt: 60–31 dagen 30%, 30–14 dagen 50%, minder dan 14 dagen 100% van de overnachtingsprijs. Eindschoonmaak en borg vervallen bij annulering. Voor organisaties wordt de aanbetaling van 10% altijd ingehouden. De ontvangstdatum van de annulering geldt.",
+      de: "Bis 60 Tage vor Anreise kostenlos. Danach gestaffelt: 60–31 Tage 30 %, 30–14 Tage 50 %, weniger als 14 Tage 100 % des Übernachtungspreises. Endreinigung und Kaution werden im Stornofall nicht fällig. Für Organisationen gilt: bis 60 Tage vor Anreise kostenlos, danach wird nur die Anzahlung von 10 % einbehalten — mehr nicht. Maßgeblich ist der Eingang der Stornierung.",
+      en: "Free up to 60 days before arrival. After that, tiered: 60–31 days 30%, 30–14 days 50%, less than 14 days 100% of the accommodation price. Final cleaning and deposit are not charged if you cancel. For organisations: free until 60 days before arrival, after that only the 10% deposit is retained — nothing more. The date the cancellation is received applies.",
+      nl: "Gratis tot 60 dagen voor aankomst. Daarna getrapt: 60–31 dagen 30%, 30–14 dagen 50%, minder dan 14 dagen 100% van de overnachtingsprijs. Eindschoonmaak en borg vervallen bij annulering. Voor organisaties: gratis tot 60 dagen voor aankomst, daarna wordt alleen de aanbetaling van 10% ingehouden — niet meer. De ontvangstdatum van de annulering geldt.",
     },
   },
   {

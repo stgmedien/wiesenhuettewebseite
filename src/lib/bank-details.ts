@@ -1,3 +1,6 @@
+// Hüttenkonto (Vorstand 11/2026): das EINZIGE Konto, das auf Webseite, in
+// Buchungen und Mails auftauchen darf. Auch Kautions-Rücküberweisungen
+// gehen von hier raus.
 // Einzige Quelle fuer die Vereins-Kontodaten (bisher nur als Literal in
 // restzahlung-request.tsx vorhanden). Wird sowohl von der Erinnerungsmail
 // als auch von der neuen Selbstbedienungs-Ueberweisungs-Buchung genutzt.

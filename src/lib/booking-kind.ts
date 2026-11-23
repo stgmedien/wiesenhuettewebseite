@@ -7,8 +7,9 @@
 //  - "organisation"  → Schulen, Vereine, Kirchen/Gemeinden, Städte/
 //                       Jugendpflege, Bildungsträger. Stripe ODER klassische
 //                       Überweisung, 10 % Anzahlung sofort, Rest (+ Kaution +
-//                       Kurtaxe) 30 Tage vor Anreise. Die 10 % Anzahlung wird
-//                       bei Stornierung immer einbehalten (AGB § 5).
+//                       Kurtaxe) 30 Tage vor Anreise. Storno: bis 60 Tage vor
+//                       Anreise kostenlos, danach wird nur die 10-%-Anzahlung
+//                       einbehalten, nie mehr (AGB § 5).
 //
 // Kein eigenes DB-Feld: Eine Organisations-Buchung erkennt man an
 // source "Portal" + gesetzter Institution + prepayPercent 10, angelegt ab
@@ -59,5 +60,5 @@ export const isOrgBooking = (b: BookingLike): boolean =>
 export const restLeadDaysFor = (b: BookingLike): number =>
   isOrgBooking(b) ? ORG_REST_LEAD_DAYS : PRIVATE_REST_LEAD_DAYS;
 
-/** Bei Stornierung immer einbehaltener Anteil der Zwischensumme (nur Organisationen). */
+/** Bei Stornierung ab 60 Tagen vor Anreise einbehaltener Anteil (Obergrenze, nur Organisationen). */
 export const ORG_RETAINED_PERCENT = ORG_PREPAY_PERCENT;

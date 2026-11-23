@@ -124,15 +124,10 @@ export default async function AGB() {
 
         <Block title="§ 5 Stornobedingungen">
           <p>
-            Bei Rücktritt durch den Mieter werden folgende Stornogebühren auf den reinen
+            Bei Rücktritt durch den Mieter (private Gruppen) werden folgende Stornogebühren auf den reinen
             Übernachtungspreis erhoben. Endreinigung, Kaution und Kurtaxe werden im Stornofall
             nicht fällig bzw. vollständig zurückerstattet — für stornierte Aufenthalte stellt
             Winterberg keine Kurtaxe-Rechnung:
-          </p>
-          <p>
-            <strong>Organisationen:</strong> Die Anzahlung von 10 % der Buchungssumme wird bei
-            einer Stornierung in jedem Fall einbehalten. Ergibt die folgende Staffel einen höheren
-            Betrag, gilt dieser.
           </p>
           <ul>
             <li>mehr als 60 Tage vor Anreise: <strong>0 %</strong></li>
@@ -140,6 +135,12 @@ export default async function AGB() {
             <li>30 – 14 Tage vor Anreise: <strong>50 %</strong></li>
             <li>weniger als 14 Tage vor Anreise: <strong>100 %</strong></li>
           </ul>
+          <p>
+            <strong>Abweichend gilt für Organisationen</strong> (Schulen, Vereine,
+            Kirchen/Gemeinden, Städte/Jugendpflege, Bildungsträger): Bis 60 Tage vor Anreise ist
+            die Stornierung kostenlos. Danach wird ausschließlich die Anzahlung in Höhe von 10 % der
+            Buchungssumme einbehalten; weitere Stornogebühren fallen nicht an.
+          </p>
           <p>
             Maßgeblich ist der Zeitpunkt des Eingangs der schriftlichen Stornierung beim
             Vermieter. Eine Umbuchung auf einen anderen Zeitraum ist nach Verfügbarkeit möglich

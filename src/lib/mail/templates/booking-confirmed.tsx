@@ -427,24 +427,27 @@ export default function BookingConfirmedEmail({
           )}
 
           <Heading as="h4" style={h2}>§ 6 Stornobedingungen</Heading>
-          <Text style={smallText}>
-            Bei Rücktritt durch den Mieter werden folgende Stornogebühren auf den reinen
-            Übernachtungspreis erhoben. Endreinigung und Kaution werden im Stornofall nicht
-            fällig bzw. vollständig zurückerstattet:
-          </Text>
-          {orgBooking && (
-            <Text style={{ ...smallText, fontWeight: 700 }}>
-              Für Organisationen gilt: Die Anzahlung von 10 % der Buchungssumme wird bei einer
-              Stornierung in jedem Fall einbehalten. Ergibt die folgende Staffel einen höheren
-              Betrag, gilt dieser.
+          {orgBooking ? (
+            <Text style={smallText}>
+              Bis 60 Tage vor Anreise ist die Stornierung kostenlos. Danach wird ausschließlich die
+              Anzahlung in Höhe von 10 % der Buchungssumme einbehalten; weitere Stornogebühren
+              fallen nicht an. Kaution und Kurtaxe werden im Stornofall vollständig erstattet.
             </Text>
+          ) : (
+            <>
+              <Text style={smallText}>
+                Bei Rücktritt durch den Mieter werden folgende Stornogebühren auf den reinen
+                Übernachtungspreis erhoben. Endreinigung und Kaution werden im Stornofall nicht
+                fällig bzw. vollständig zurückerstattet:
+              </Text>
+              <ul style={{ margin: "0 0 8px 18px", padding: 0, color: "#111", fontFamily: "Inter, sans-serif", fontSize: "14px", lineHeight: 1.55 }}>
+                <li>mehr als 60 Tage vor Anreise: 0 %</li>
+                <li>60 – 31 Tage vor Anreise: 30 %</li>
+                <li>30 – 14 Tage vor Anreise: 50 %</li>
+                <li>weniger als 14 Tage vor Anreise: 100 %</li>
+              </ul>
+            </>
           )}
-          <ul style={{ margin: "0 0 8px 18px", padding: 0, color: "#111", fontFamily: "Inter, sans-serif", fontSize: "14px", lineHeight: 1.55 }}>
-            <li>mehr als 60 Tage vor Anreise: 0 %</li>
-            <li>60 – 31 Tage vor Anreise: 30 %</li>
-            <li>30 – 14 Tage vor Anreise: 50 %</li>
-            <li>weniger als 14 Tage vor Anreise: 100 %</li>
-          </ul>
 
           <Heading as="h4" style={h2}>§ 7 Hausordnung</Heading>
           <Text style={smallText}>
