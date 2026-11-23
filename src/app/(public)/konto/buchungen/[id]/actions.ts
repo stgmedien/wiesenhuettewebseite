@@ -76,7 +76,7 @@ export async function cancelOwnBooking(formData: FormData) {
         booking.internalNotes,
         `Storniert vom Kunden am ${new Date().toLocaleString("de-DE")}${
           reason ? ` — Grund: ${reason}` : ""
-        }. Storno-Gebühr ${fee.percent}% = ${formatEuro(fee.feeCents)}.`,
+        }. Storno-Gebühr ${fee.percent}% = ${formatEuro(fee.feeCents)}${fee.retainedPrepayment ? " (einbehaltene Anzahlung, Organisation)" : ""}.`,
       ]
         .filter(Boolean)
         .join("\n\n"),
@@ -115,7 +115,11 @@ export async function cancelOwnBooking(formData: FormData) {
         feePercent: fee.percent,
         feeCents: fee.feeCents,
         baseCents: fee.baseCents,
-        baseLabel: fee.isLegacy ? "Buchungssumme (ohne Kaution)" : "Übernachtungspreis",
+        baseLabel: fee.retainedPrepayment
+          ? "Buchungssumme (ohne Kaution) — Einbehalt der Anzahlung"
+          : fee.isLegacy
+            ? "Buchungssumme (ohne Kaution)"
+            : "Übernachtungspreis",
       }),
       bcc: process.env.MAIL_INTERNAL_TO ?? undefined,
     });

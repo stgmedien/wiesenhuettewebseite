@@ -299,17 +299,23 @@ export default async function BuchungDetailPage({ params }: Props) {
               feePercent={fee.percent}
               feeCents={fee.feeCents}
               baseCents={fee.baseCents}
-              isLegacy={fee.isLegacy}
+              // Einbehaltene Org-Anzahlung zählt wie die Alt-Basis auf die
+              // Buchungssumme (inkl. Endreinigung) — Texte bleiben so stimmig.
+              isLegacy={fee.isLegacy || fee.retainedPrepayment}
             />
           )}
         </div>
         {canCancel && (
           <p className="text-xs text-[var(--color-wh-black)]/60 mt-3">
-            Bei Stornierung jetzt: <strong>{fee.percent}%</strong> Storno-Gebühr
-            {fee.isLegacy ? " (auf die Zwischensumme)" : " (auf den Übernachtungspreis)"} ={" "}
-            <strong>{formatEuro(fee.feeCents)}</strong>. Erstattung:{" "}
+            Bei Stornierung jetzt: <strong>{fee.percent}%</strong>{" "}
+            {fee.retainedPrepayment
+              ? "einbehaltene Anzahlung (auf die Buchungssumme)"
+              : fee.isLegacy
+                ? "Storno-Gebühr (auf die Zwischensumme)"
+                : "Storno-Gebühr (auf den Übernachtungspreis)"}{" "}
+            = <strong>{formatEuro(fee.feeCents)}</strong>. Erstattung:{" "}
             <strong>{formatEuro(Math.max(0, fee.baseCents - fee.feeCents))}</strong>
-            {fee.isLegacy ? "" : " + Endreinigung"} + volle Kaution.
+            {fee.isLegacy || fee.retainedPrepayment ? "" : " + Endreinigung"} + volle Kaution.
           </p>
         )}
       </section>

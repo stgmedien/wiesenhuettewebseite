@@ -32,7 +32,7 @@ import { memberNamesSchema, checkMemberNames, memberNamesNoteBody } from "@/lib/
 import { auth } from "@/lib/auth";
 import { sendMail } from "@/lib/mail/send";
 import BookingInternalEmail from "@/lib/mail/templates/booking-internal";
-import { isSchoolDeferredPurpose } from "@/lib/school-deposit";
+import { isOrgPurpose, ORG_PREPAY_PERCENT, ORG_REST_LEAD_DAYS, MANUAL_TRANSFER_MIN_LEAD_DAYS } from "@/lib/booking-kind";
 import {
   validateDiscountCode,
   calculateDiscountCents,
@@ -46,12 +46,13 @@ import { MANUAL_REST_MARKER } from "@/lib/payment-markers";
 import { CLUB_BANK_DETAILS } from "@/lib/bank-details";
 import type { Locale } from "@/lib/i18n-shared";
 
-// Nur diese drei Anlaesse -- explizit OHNE "firma".
-const MANUAL_TRANSFER_PURPOSES = new Set(["klasse", "schul", "verein"]);
-// Unterhalb dieses Vorlaufs waere die T-14-Zahlungsfrist schon in der
-// Vergangenheit -- Button in BookingFlow.tsx wird ab hier ausgeblendet,
-// server-seitig hier nochmal hart geprueft.
-const MIN_LEAD_DAYS = 21;
+// Klassische Ueberweisung gibt es nur fuer Organisationen (Schule, Verein,
+// Kirche/Gemeinde, Stadt/Jugendpflege, Bildungstraeger) -- private Gruppen
+// zahlen ausschliesslich per Stripe (Vorstand 11/2026, lib/booking-kind.ts).
+// Mindestvorlauf: Restzahlungs-Frist (30 Tage vor Anreise) + 7 Tage, damit
+// zwischen Anzahlung und Rest-Frist Zeit fuer die Ueberweisung bleibt. Der
+// Button in BookingFlow.tsx wird darunter ausgeblendet, hier hart geprueft.
+const MIN_LEAD_DAYS = MANUAL_TRANSFER_MIN_LEAD_DAYS;
 
 const ERRORS: Record<Locale, {
   invalidInput: string;
@@ -124,7 +125,7 @@ const inputSchema = z.object({
   city: z.string().max(120).optional().nullable(),
   purpose: z.string().min(1).max(500),
   purposeCategory: z
-    .enum(["familie", "klasse", "schul", "verein", "firma", "sonstiges"])
+    .enum(["familie", "klasse", "schul", "verein", "kirche", "kommune", "bildung", "firma", "sonstiges"])
     .optional(),
   customerMessage: z.string().max(2000).optional().nullable(),
   discountCode: z.string().max(30).optional().nullable(),
@@ -172,7 +173,7 @@ export async function createManualTransferBooking(raw: unknown): Promise<ManualT
   const T = ERRORS[locale];
 
   // Defense in depth -- niemals nur dem Client-seitigen Gate vertrauen.
-  if (!MANUAL_TRANSFER_PURPOSES.has(data.purposeCategory ?? "")) {
+  if (!isOrgPurpose(data.purposeCategory) || (data.institution?.trim().length ?? 0) < 2) {
     return { ok: false, error: T.notEligible };
   }
   if (daysUntilLocalDate(data.arrival) < MIN_LEAD_DAYS) {
@@ -409,14 +410,15 @@ export async function createManualTransferBooking(raw: unknown): Promise<ManualT
   }
 
   const effectiveSubtotal = breakdown.subtotalCents - discountCents;
-  const isSchoolPurpose = isSchoolDeferredPurpose(data.purposeCategory);
-  const prepayPercent = isSchoolPurpose ? 10 : 50;
+  const prepayPercent = ORG_PREPAY_PERCENT;
   const effectivePrepayment = Math.round((effectiveSubtotal * prepayPercent) / 100);
   const effectiveRemainder = effectiveSubtotal - effectivePrepayment;
   const restzahlungCents = effectiveRemainder + breakdown.depositCents + breakdown.kurtaxeCents;
 
-  const restzahlungDeadlineDate = new Date(`${data.arrival}T00:00:00`);
-  restzahlungDeadlineDate.setDate(restzahlungDeadlineDate.getDate() - 14);
+  // In UTC rechnen — lokale Mitternacht + toISOString() verschiebt das Datum
+  // ausserhalb von UTC-Servern um einen Tag nach vorn.
+  const restzahlungDeadlineDate = new Date(`${data.arrival}T00:00:00Z`);
+  restzahlungDeadlineDate.setUTCDate(restzahlungDeadlineDate.getUTCDate() - ORG_REST_LEAD_DAYS);
   const restzahlungDeadlineIso = restzahlungDeadlineDate.toISOString().slice(0, 10);
 
   const result = await db.transaction(async (tx) => {
@@ -428,6 +430,8 @@ export async function createManualTransferBooking(raw: unknown): Promise<ManualT
         status: "angefragt",
         paymentMode: "manual_transfer",
         institution: data.institution?.trim() || null,
+        // Markiert die Buchung als Organisations-Buchung (isOrgBooking).
+        prepayPercent: ORG_PREPAY_PERCENT,
         arrival: data.arrival,
         departure: data.departure,
         nights: breakdown.nights,
@@ -539,7 +543,7 @@ export async function createManualTransferBooking(raw: unknown): Promise<ManualT
           totalCents: effectiveSubtotal,
           paidCents: 0,
           managerUrl: `${baseUrl}/m/buchungen/${result.bookingId}`,
-          notes: `Klassische Überweisung (Selbstbedienung), kein Stripe. Anzahlung ${formatEuro(effectivePrepayment)} und Restzahlung ${formatEuro(restzahlungCents)} (fällig bis ${formatDateLong(restzahlungDeadlineIso)}) sind als offene Zahlungen hinterlegt — die Restzahlung wird automatisch per T-21-Erinnerungsmail an den Gast angemahnt.`,
+          notes: `Klassische Überweisung (Selbstbedienung), kein Stripe. Anzahlung ${formatEuro(effectivePrepayment)} und Restzahlung ${formatEuro(restzahlungCents)} (fällig bis ${formatDateLong(restzahlungDeadlineIso)}) sind als offene Zahlungen hinterlegt — die Restzahlung wird automatisch eine Woche vor Fälligkeit (T-37) per Erinnerungsmail an den Gast angemahnt.`,
         }),
       });
     }

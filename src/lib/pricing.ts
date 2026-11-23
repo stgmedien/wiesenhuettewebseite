@@ -13,6 +13,7 @@
 // Endreinigung ist Pflicht.
 // =============================================================
 
+import { isOrgBooking, ORG_RETAINED_PERCENT } from "@/lib/booking-kind";
 import type { Locale } from "@/lib/i18n-shared";
 
 // Lokalisierte Bezeichnungen fuer Buchungs-Positions-Labels und Validierungs-Fehler.
@@ -607,10 +608,34 @@ export const cancellationFeeForBooking = (booking: {
   subtotalCents: number;
   arrival: Date | string;
   createdAt: Date;
-}): { percent: number; feeCents: number; baseCents: number; isLegacy: boolean } => {
+  source?: string | null;
+  institution?: string | null;
+  prepayPercent?: number | null;
+}): {
+  percent: number;
+  feeCents: number;
+  baseCents: number;
+  isLegacy: boolean;
+  /** true, wenn die einbehaltene 10-%-Anzahlung (Organisationen) die Gebühr bestimmt. */
+  retainedPrepayment: boolean;
+} => {
   const isLegacy = booking.createdAt < CANCELLATION_POLICY_CUTOFF;
   const baseCents = isLegacy ? booking.subtotalCents : booking.accommodationCents;
   const tiers = isLegacy ? CANCELLATION_TIERS_LEGACY : CANCELLATION_TIERS;
   const { percent, feeCents } = feeFromTiers(baseCents, booking.arrival, tiers);
-  return { percent, feeCents, baseCents, isLegacy };
+  // Organisationen (AGB § 5): Die 10-%-Anzahlung wird bei Stornierung immer
+  // einbehalten — die Staffel greift erst, wenn sie mehr ergibt.
+  if (isOrgBooking(booking)) {
+    const retainedCents = Math.round((booking.subtotalCents * ORG_RETAINED_PERCENT) / 100);
+    if (retainedCents > feeCents) {
+      return {
+        percent: ORG_RETAINED_PERCENT,
+        feeCents: retainedCents,
+        baseCents: booking.subtotalCents,
+        isLegacy,
+        retainedPrepayment: true,
+      };
+    }
+  }
+  return { percent, feeCents, baseCents, isLegacy, retainedPrepayment: false };
 };

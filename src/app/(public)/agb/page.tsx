@@ -19,7 +19,7 @@ export default async function AGB() {
           Allgemeine Geschäftsbedingungen
         </h1>
         <p className="text-sm text-[var(--color-wh-fg-muted)] mt-4">
-          Skifreunde Gütersloh e.V. · Stand: November 2026 · Version 1.3
+          Skifreunde Gütersloh e.V. · Stand: November 2026 · Version 1.4
         </p>
 
         <Block title="§ 1 Geltungsbereich">
@@ -36,7 +36,9 @@ export default async function AGB() {
           <p>
             Die Buchung erfolgt verbindlich über das Online-Buchungsportal unter
             wiesenhuette.de/buchen. Mit Abschluss der Online-Zahlung der Anzahlung kommt der
-            Mietvertrag zwischen dem Mieter und dem Vermieter zustande. Der Mieter erhält
+            Mietvertrag zwischen dem Mieter und dem Vermieter zustande. Wählt eine Organisation die
+            Zahlung per klassischer Überweisung, kommt der Vertrag mit der Buchungsbestätigung
+            durch den Vermieter zustande. Der Mieter erhält
             unverzüglich nach Vertragsschluss eine Bestätigung sowie den vollständigen Mietvertrag
             per E-Mail.
           </p>
@@ -80,7 +82,7 @@ export default async function AGB() {
             </li>
             <li>Endreinigung (Pflicht, einmalig)</li>
             <li>Ggf. Aufschlag Allein-/Exklusivnutzung</li>
-            <li>Kaution (separat, wird zusammen mit der Restzahlung 14 Tage vor Anreise per Stripe eingezogen — bei kurzfristigen Buchungen unter 14 Tagen bereits sofort bei Buchung; Erstattung 14 Tage nach mangelfreier Abreise)</li>
+            <li>Kaution (separat, wird zusammen mit der Restzahlung fällig — bei kurzfristigen Buchungen bereits sofort bei Buchung; Erstattung 14 Tage nach mangelfreier Abreise)</li>
             <li>Kurtaxe Hochsauerland (separat, wird ebenfalls zusammen mit der Restzahlung eingezogen und vom Verein an die Kurverwaltung Winterberg abgeführt)</li>
           </ul>
           <p>
@@ -98,11 +100,25 @@ export default async function AGB() {
             <strong>2,70 € pro Person und Nacht</strong>.
           </p>
           <p>
-            Die Bezahlung erfolgt in zwei Raten: <strong>50 % Anzahlung</strong> bei Buchung,{" "}
-            <strong>50 % Restzahlung</strong> spätestens 14 Tage vor Anreise (Auto-Einzug per Stripe, separate Zahlungsaufforderung kommt vorher per Mail). Kaution und Kurtaxe werden
-            zusammen mit der Restzahlung eingezogen. Bei Buchungen weniger als 14 Tage vor Anreise ist
-            die vollständige Zahlung inklusive Kaution und Kurtaxe sofort bei Buchung fällig. Zahlungsabwicklung über
-            Stripe (Kreditkarte / SEPA).
+            Die Bezahlung erfolgt in zwei Raten. Kaution und Kurtaxe werden jeweils zusammen mit
+            der Restzahlung fällig; vorher kommt eine Zahlungserinnerung per E-Mail.
+          </p>
+          <ul>
+            <li>
+              <strong>Private Gruppen:</strong> 50 % Anzahlung bei Buchung, 50 % Restzahlung
+              spätestens 14 Tage vor Anreise. Zahlung ausschließlich online über Stripe (Karte),
+              die Restzahlung wird automatisch eingezogen.
+            </li>
+            <li>
+              <strong>Organisationen</strong> (Schulen, Vereine, Kirchen/Gemeinden,
+              Städte/Jugendpflege, Bildungsträger): <strong>10 % Anzahlung</strong> bei Buchung,
+              90 % Restzahlung spätestens 30 Tage vor Anreise. Zahlung wahlweise online über
+              Stripe (Karte/SEPA) oder per klassischer Überweisung auf das Vereinskonto.
+            </li>
+          </ul>
+          <p>
+            Liegt die Anreise bei Buchung bereits innerhalb dieser Frist (14 bzw. 30 Tage), ist die
+            vollständige Zahlung inklusive Kaution und Kurtaxe sofort bei Buchung fällig.
           </p>
         </Block>
 
@@ -112,6 +128,11 @@ export default async function AGB() {
             Übernachtungspreis erhoben. Endreinigung, Kaution und Kurtaxe werden im Stornofall
             nicht fällig bzw. vollständig zurückerstattet — für stornierte Aufenthalte stellt
             Winterberg keine Kurtaxe-Rechnung:
+          </p>
+          <p>
+            <strong>Organisationen:</strong> Die Anzahlung von 10 % der Buchungssumme wird bei
+            einer Stornierung in jedem Fall einbehalten. Ergibt die folgende Staffel einen höheren
+            Betrag, gilt dieser.
           </p>
           <ul>
             <li>mehr als 60 Tage vor Anreise: <strong>0 %</strong></li>
