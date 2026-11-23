@@ -12,15 +12,28 @@ import { createManualTransferBooking, type ManualTransferResult } from "./manual
 import { track } from "@/lib/analytics";
 import { AvailabilityCalendar } from "./AvailabilityCalendar";
 import { countMemberKinds, isFullName, type MemberName } from "@/lib/member-names";
+import {
+  MANUAL_TRANSFER_MIN_LEAD_DAYS,
+  ORG_PREPAY_PERCENT,
+  ORG_PURPOSE_KEYS,
+  ORG_REST_LEAD_DAYS,
+  PRIVATE_PREPAY_PERCENT,
+  PRIVATE_PURPOSE_KEYS,
+  PRIVATE_REST_LEAD_DAYS,
+  type BookerKind,
+} from "@/lib/booking-kind";
 
 // Anlass-Kategorien. Sind Pflicht beim Buchen.
-const PURPOSE_KEYS = ["familie", "klasse", "schul", "verein", "firma", "sonstiges"] as const;
+const PURPOSE_KEYS = [
+  "familie", "klasse", "schul", "verein", "kirche", "kommune", "bildung", "firma", "sonstiges",
+] as const;
 type PurposeKey = (typeof PURPOSE_KEYS)[number];
-// Im Anlass-Dropdown auswählbar sind ausschließlich diese vier (Reihenfolge wie
-// gewünscht): Vereins-, Schul-, Klassen- und Gruppenfahrt. 'familie' fungiert als
-// generische „Gruppenfahrt" (Standard-Checkout, keine Institutionspflicht). Die
-// übrigen Keys bleiben nur für Bestandsbuchungen/Backend-Kompatibilität im Typ.
-const SELECTABLE_PURPOSE_KEYS = ["verein", "schul", "klasse", "familie"] as const;
+// Auswählbar je nach Antwort auf „Wer seid Ihr?" (lib/booking-kind.ts).
+// 'firma' bleibt nur für Bestandsbuchungen im Typ, wird nicht mehr angeboten.
+const PURPOSES_BY_KIND: Record<BookerKind, readonly PurposeKey[]> = {
+  privat: PRIVATE_PURPOSE_KEYS,
+  organisation: ORG_PURPOSE_KEYS,
+};
 
 // Erzeugt aus der Anlass-Kategorie den String fuers DB-Feld `purpose`.
 // Locale-Labels kommen aus dem Booking-Flow-Copy ("tt"), damit der Manager
@@ -90,8 +103,16 @@ const BF_COPY = {
   de: {
     steps: ["Zeitraum & Personen", "Anlass", "Kontakt", "Übersicht"],
     s0H: "Wann?",
-    paymentMethodNote:
-      "Zahlung per Kredit-/Debitkarte (Stripe): Ihr zahlt die Anzahlung jetzt online, die Restzahlung inkl. Kaution und Kurtaxe wird 14 Tage vor Anreise automatisch von derselben Karte abgebucht — ohne dass Ihr Euch noch einmal einloggen müsst. Vereine, Klassenfahrten und Schulfahrten (z. B. AG, SV) können bei Stripe auch per SEPA-Überweisung zahlen; wer stattdessen klassisch auf unser Vereinskonto überweisen möchte, findet diese Option am Ende der Buchung in der Übersicht.",
+    kindH: "Wer seid Ihr?",
+    kindPrivatTitle: "Private Gruppe",
+    kindPrivatBody: "Freunde, Familie, private Gruppenfahrt",
+    kindOrgTitle: "Organisation",
+    kindOrgBody: "Schule, Verein, Kirche/Gemeinde, Stadt/Jugendpflege, Bildungsträger",
+    kindMissing: "Bitte zuerst auswählen, wer bucht.",
+    paymentNotePrivat:
+      "Zahlung online per Karte (Stripe): 50 % Anzahlung bei Buchung, die Restzahlung inkl. Kaution und Kurtaxe wird 14 Tage vor Anreise automatisch von derselben Karte abgebucht.",
+    paymentNoteOrg:
+      "Zahlung wahlweise klassisch per Überweisung auf unser Vereinskonto oder online (Karte/SEPA über Stripe): 10 % Anzahlung bei Buchung, die Restzahlung inkl. Kaution und Kurtaxe ist 30 Tage vor Anreise fällig. Storno: bis 60 Tage vor Anreise kostenlos, danach wird nur die Anzahlung einbehalten.",
     s1H: "Wer kommt?",
     s1AnlassH: "Anlass",
     s2H: "Eure Daten",
@@ -102,10 +123,13 @@ const BF_COPY = {
     purpose: "Anlass *",
     purposePlaceholder: "Bitte wählen …",
     purposeOpts: {
-      familie: "Gruppenfahrt",
+      familie: "Private Gruppenfahrt",
       klasse: "Klassenfahrt",
       schul: "Schulfahrt",
       verein: "Vereinsfahrt",
+      kirche: "Kirche / Gemeinde",
+      kommune: "Stadt / Jugendpflege",
+      bildung: "Bildungsträger",
       firma: "Firmen-/Team-Event",
       sonstiges: "Sonstiges",
     },
@@ -119,16 +143,16 @@ const BF_COPY = {
     phone: "Handynummer *",
     phoneHint: "Für den Hüttenwart: Er stimmt mit Euch die Ankunftszeit ab, auch per SMS.",
     company: "Firma / Verein",
-    institution: "Institution / Einrichtung",
-    institutionHint: "Name der Schule, des Vereins oder der Firma",
+    institution: "Organisation / Einrichtung *",
+    institutionHint: "Name der Schule, des Vereins, der Gemeinde oder Einrichtung — steht so auf der Rechnung.",
     schoolPayTitle: "Anzahlung erst später — Schulgruppen-Aufschub",
     schoolPayBody:
       "Ihr müsst jetzt nichts zahlen. Wir reservieren den Zeitraum verbindlich. Die Anzahlung (10 %) wird automatisch rund 30 Tage vor Anreise per E-Mail mit Zahlungslink fällig, die Restzahlung inkl. Kaution + Kurtaxe 14 Tage vor Anreise. Wird die Anzahlung nicht fristgerecht (innerhalb von 14 Tagen) beglichen, fällt eine Stornogebühr an und die Buchung wird storniert.",
     schoolSubmit: "Reservierung verbindlich anfragen",
     schoolImmediateNote:
       "Da Eure Anreise weniger als 30 Tage entfernt ist, ist die Anzahlung sofort online zu leisten — ein Zahlungsaufschub ist so kurzfristig nicht möglich.",
-    fullPaymentNote:
-      "Da die Anreise in weniger als 14 Tagen ist, wird der gesamte Betrag (Miete + Kaution + Kurtaxe) jetzt sofort fällig.",
+    fullPaymentNote: (days: number) =>
+      `Da die Anreise in weniger als ${days} Tagen ist, wird der gesamte Betrag (Miete + Kaution + Kurtaxe) jetzt sofort fällig.`,
     fullAmountLabel: "Mietpreis (komplett)",
     street: "Straße",
     zip: "PLZ",
@@ -152,12 +176,13 @@ const BF_COPY = {
     discountAppliedPost: "angewendet",
     dueToday: "Heute fällig:",
     deposit: "Anzahlung",
-    bookingTotalAfter: "50 % der Buchungssumme",
+    bookingTotalAfter: (pct: number) => `${pct} % der Buchungssumme`,
     afterDiscount: "nach Rabatt",
     kaution: "Kaution",
     kurtaxeLabel: "Kurtaxe",
     restzahlung: "Restzahlung von",
-    restzahlungBody: "(inkl. Kaution + Kurtaxe) wird 14 Tage vor Anreise automatisch eingezogen — separate Zahlungsaufforderung kommt vorher per Mail. Die Kaution wird innerhalb von 14 Tagen nach mangelfreier Abreise zurückerstattet.",
+    restzahlungBody: (days: number) => `(inkl. Kaution + Kurtaxe) wird ${days} Tage vor Anreise fällig und automatisch eingezogen — eine Erinnerung kommt eine Woche vorher per Mail. Die Kaution wird innerhalb von 14 Tagen nach mangelfreier Abreise zurückerstattet.`,
+    orgStornoNote: "Stornierung für Organisationen: bis 60 Tage vor Anreise kostenlos. Danach wird nur die Anzahlung von 10 % einbehalten — mehr nicht, auch nicht kurz vor Anreise. Stornierungen müssen schriftlich erfolgen.",
     kurtaxeNote: "Hinweis: Die Kurtaxe Hochsauerland (2,70 € pro Person ab 16 Jahren und Nacht) ist in der Restzahlung enthalten — wir führen sie an die Kurverwaltung Winterberg ab.",
     holdNotice: "Hinweis: Der Zeitraum ist ab jetzt 30 Minuten lang für Dich reserviert. Schließt Du die Buchung in dieser Zeit nicht ab, wird er danach automatisch wieder freigegeben.",
     stornoH: "Stornierungs-Regelwerk",
@@ -175,9 +200,9 @@ const BF_COPY = {
     manualTransferButton: "Per klassischer Überweisung buchen",
     manualTransferSubmitting: "Buchung wird angelegt ...",
     manualTransferOverviewNote:
-      "Vereine, Klassenfahrten und Schulfahrten (z. B. AG, SV) können bei Stripe automatisch auch per SEPA-Überweisung zahlen. Wer stattdessen klassisch auf unser Vereinskonto überweisen möchte, kann das hier direkt tun — ohne Rückfrage per Mail.",
-    manualTransferLeadTooShort:
-      "Klassische Überweisung ist ab 21 Tagen Vorlauf bis zur Anreise möglich — dafür ist es hier schon zu kurzfristig. Bitte nutzt stattdessen Stripe (auch per SEPA-Überweisung möglich).",
+      "Ihr könnt oben online zahlen (Karte oder SEPA-Überweisung über Stripe) oder hier klassisch auf unser Vereinskonto überweisen — Ihr bekommt dann direkt die Kontodaten.",
+    manualTransferLeadTooShort: (days: number) =>
+      `Klassische Überweisung ist ab ${days} Tagen Vorlauf bis zur Anreise möglich — dafür ist es hier schon zu kurzfristig. Bitte nutzt stattdessen die Online-Zahlung (auch per SEPA-Überweisung möglich).`,
     manualTransferConfirmTitle: "Buchung eingegangen!",
     manualTransferConfirmIntro: "Eure Buchungsnummer:",
     manualTransferConfirmBankTitle: "Bitte überweist die Anzahlung zeitnah auf folgendes Konto:",
@@ -258,7 +283,7 @@ const BF_COPY = {
     prepayment50: "Anzahlung 50 %",
     plusKaution: "+ Kaution",
     todayToPay: "Heute zu zahlen",
-    remainderBefore: "Restzahlung (14 Tage vor Anreise, inkl. Kaution + Kurtaxe)",
+    remainderBefore: (days: number) => `Restzahlung (${days} Tage vor Anreise, inkl. Kaution + Kurtaxe)`,
     depositDueLater: "Anzahlung (~30 Tage vor Anreise)",
     schoolSummaryNote:
       "Du zahlst heute nichts. Die Anzahlung (10 %) wird rund 30 Tage vor Anreise per Zahlungslink fällig, die Restzahlung inkl. Kaution + Kurtaxe 14 Tage vor Anreise.",
@@ -275,8 +300,16 @@ const BF_COPY = {
   en: {
     steps: ["Dates & guests", "Purpose", "Contact", "Summary"],
     s0H: "When?",
-    paymentMethodNote:
-      "Payment by credit/debit card (Stripe): you pay the deposit online now, and the remaining balance (incl. damage deposit and tourist tax) is charged automatically to the same card 14 days before arrival — no need to log in again. Clubs, class trips and school trips (e.g. clubs/societies) can also pay via SEPA bank transfer through Stripe; if you'd rather transfer directly to our club account, you'll find that option at the end of the booking, in the summary.",
+    kindH: "Who are you?",
+    kindPrivatTitle: "Private group",
+    kindPrivatBody: "Friends, family, private group trip",
+    kindOrgTitle: "Organisation",
+    kindOrgBody: "School, club, church/parish, municipality/youth services, educational provider",
+    kindMissing: "Please choose who is booking first.",
+    paymentNotePrivat:
+      "Online payment by card (Stripe): 50 % deposit when booking; the remaining balance incl. damage deposit and tourist tax is charged automatically to the same card 14 days before arrival.",
+    paymentNoteOrg:
+      "Pay by classic bank transfer to our club account or online (card/SEPA via Stripe): 10 % deposit when booking; the remaining balance incl. damage deposit and tourist tax is due 30 days before arrival. Cancellation: free until 60 days before arrival; after that only the deposit is retained.",
     s1H: "Who's coming?",
     s1AnlassH: "Purpose",
     s2H: "Your details",
@@ -287,10 +320,13 @@ const BF_COPY = {
     purpose: "Purpose *",
     purposePlaceholder: "Please choose …",
     purposeOpts: {
-      familie: "Group trip",
+      familie: "Private group trip",
       klasse: "Class trip",
       schul: "School trip",
       verein: "Club trip",
+      kirche: "Church / parish",
+      kommune: "Municipality / youth services",
+      bildung: "Educational provider",
       firma: "Company / team event",
       sonstiges: "Other",
     },
@@ -304,16 +340,16 @@ const BF_COPY = {
     phone: "Mobile number *",
     phoneHint: "For our cabin warden, who arranges your arrival time with you, also by text message.",
     company: "Company / club",
-    institution: "Institution / organisation",
-    institutionHint: "Name of the school, club or company",
+    institution: "Organisation / institution *",
+    institutionHint: "Name of the school, club, parish or institution — shown on the invoice.",
     schoolPayTitle: "Deposit due later — school-group deferral",
     schoolPayBody:
       "You don't need to pay anything now. We hold the dates for you. The deposit (10 %) automatically becomes due about 30 days before arrival via an email payment link; the remainder incl. damage deposit + tourist tax 14 days before arrival. If the deposit isn't paid on time (within 14 days), a cancellation fee applies and the booking is cancelled.",
     schoolSubmit: "Request reservation (binding)",
     schoolImmediateNote:
       "As your arrival is less than 30 days away, the deposit must be paid online now — deferred payment isn't possible at such short notice.",
-    fullPaymentNote:
-      "As arrival is less than 14 days away, the full amount (rent + damage deposit + tourist tax) is due now.",
+    fullPaymentNote: (days: number) =>
+      `As arrival is less than ${days} days away, the full amount (rent + damage deposit + tourist tax) is due now.`,
     fullAmountLabel: "Full rental price",
     street: "Street",
     zip: "ZIP",
@@ -337,12 +373,13 @@ const BF_COPY = {
     discountAppliedPost: "applied",
     dueToday: "Due today:",
     deposit: "Deposit",
-    bookingTotalAfter: "50 % of booking total",
+    bookingTotalAfter: (pct: number) => `${pct} % of booking total`,
     afterDiscount: "after discount",
     kaution: "Damage deposit",
     kurtaxeLabel: "Tourist tax",
     restzahlung: "Remaining amount of",
-    restzahlungBody: "(incl. damage deposit + tourist tax) is charged automatically 14 days before arrival — a separate payment notice is emailed beforehand. The damage deposit is refunded within 14 days of a clean departure.",
+    restzahlungBody: (days: number) => `(incl. damage deposit + tourist tax) is due ${days} days before arrival and charged automatically — a reminder is emailed a week before. The damage deposit is refunded within 14 days of a clean departure.`,
+    orgStornoNote: "Cancellation for organisations: free until 60 days before arrival. After that only the 10 % deposit is retained — nothing more, even shortly before arrival. Cancellations must be made in writing.",
     kurtaxeNote: "Note: The Hochsauerland tourist tax (€2.70 per guest aged 16+ per night) is included in the remaining payment — we remit it to the Winterberg tourist office.",
     holdNotice: "Note: This date range is reserved for you for 30 minutes from now. If you don't complete the booking within this time, it will automatically become available again.",
     stornoH: "Cancellation policy",
@@ -360,9 +397,9 @@ const BF_COPY = {
     manualTransferButton: "Book via classic bank transfer",
     manualTransferSubmitting: "Creating booking ...",
     manualTransferOverviewNote:
-      "Clubs, class trips and school trips (e.g. clubs/societies) can also pay Stripe via SEPA bank transfer automatically. If you'd rather transfer directly to our club account, you can do that right here — no need to email us first.",
-    manualTransferLeadTooShort:
-      "Classic bank transfer is available from 21 days before arrival — this booking is too short-notice for that. Please use Stripe instead (SEPA transfer is also available there).",
+      "You can pay online above (card or SEPA transfer via Stripe) or transfer directly to our club account here — you'll get the bank details straight away.",
+    manualTransferLeadTooShort: (days: number) =>
+      `Classic bank transfer is available from ${days} days before arrival — this booking is too short-notice for that. Please use online payment instead (SEPA transfer is also available there).`,
     manualTransferConfirmTitle: "Booking received!",
     manualTransferConfirmIntro: "Your booking number:",
     manualTransferConfirmBankTitle: "Please transfer the deposit soon to this account:",
@@ -440,7 +477,7 @@ const BF_COPY = {
     prepayment50: "Deposit 50 %",
     plusKaution: "+ Damage deposit",
     todayToPay: "Due today",
-    remainderBefore: "Remaining amount (14 days before arrival, incl. damage deposit + tourist tax)",
+    remainderBefore: (days: number) => `Remaining amount (${days} days before arrival, incl. damage deposit + tourist tax)`,
     depositDueLater: "Deposit (~30 days before arrival)",
     schoolSummaryNote:
       "You pay nothing today. The deposit (10 %) falls due about 30 days before arrival via a payment link; the remainder incl. damage deposit + tourist tax 14 days before arrival.",
@@ -456,8 +493,16 @@ const BF_COPY = {
   nl: {
     steps: ["Periode & personen", "Aanleiding", "Contact", "Overzicht"],
     s0H: "Wanneer?",
-    paymentMethodNote:
-      "Betaling per krediet-/debitkaart (Stripe): je betaalt de aanbetaling nu online, het resterende bedrag (incl. borg en toeristenbelasting) wordt 14 dagen vóór aankomst automatisch van dezelfde kaart afgeschreven — je hoeft niet opnieuw in te loggen. Verenigingen, klassenreizen en schoolreizen (bijv. AG, SV) kunnen bij Stripe ook per SEPA-overschrijving betalen; wil je liever rechtstreeks naar onze verenigingsrekening overschrijven, dan vind je die optie aan het einde van de boeking, in het overzicht.",
+    kindH: "Wie zijn jullie?",
+    kindPrivatTitle: "Privégroep",
+    kindPrivatBody: "Vrienden, familie, privé-groepsreis",
+    kindOrgTitle: "Organisatie",
+    kindOrgBody: "School, vereniging, kerk/parochie, gemeente/jeugdwerk, onderwijsinstelling",
+    kindMissing: "Kies eerst wie er boekt.",
+    paymentNotePrivat:
+      "Online betalen per kaart (Stripe): 50 % aanbetaling bij boeking; het restbedrag incl. borg en toeristenbelasting wordt 14 dagen vóór aankomst automatisch van dezelfde kaart afgeschreven.",
+    paymentNoteOrg:
+      "Betalen per klassieke overschrijving naar onze verenigingsrekening of online (kaart/SEPA via Stripe): 10 % aanbetaling bij boeking; het restbedrag incl. borg en toeristenbelasting is 30 dagen vóór aankomst verschuldigd. Annulering: gratis tot 60 dagen vóór aankomst, daarna wordt alleen de aanbetaling ingehouden.",
     s1H: "Wie komt er?",
     s1AnlassH: "Aanleiding",
     s2H: "Jullie gegevens",
@@ -468,10 +513,13 @@ const BF_COPY = {
     purpose: "Aanleiding *",
     purposePlaceholder: "Maak een keuze …",
     purposeOpts: {
-      familie: "Groepsreis",
+      familie: "Privé-groepsreis",
       klasse: "Klassenreis",
       schul: "Schoolreis",
       verein: "Verenigingsreis",
+      kirche: "Kerk / parochie",
+      kommune: "Gemeente / jeugdwerk",
+      bildung: "Onderwijsinstelling",
       firma: "Bedrijf / team-event",
       sonstiges: "Anders",
     },
@@ -485,16 +533,16 @@ const BF_COPY = {
     phone: "Mobiel nummer *",
     phoneHint: "Voor de huttenbeheerder: hij spreekt de aankomsttijd met jullie af, ook per sms.",
     company: "Bedrijf / vereniging",
-    institution: "Instelling / organisatie",
-    institutionHint: "Naam van de school, vereniging of het bedrijf",
+    institution: "Organisatie / instelling *",
+    institutionHint: "Naam van de school, vereniging, parochie of instelling — staat zo op de factuur.",
     schoolPayTitle: "Aanbetaling later — uitstel voor schoolgroepen",
     schoolPayBody:
       "Jullie hoeven nu niets te betalen. We reserveren de periode vast. De aanbetaling (10 %) wordt automatisch ongeveer 30 dagen voor aankomst verschuldigd via een betaallink per e-mail; de restbetaling incl. borg + toeristenbelasting 14 dagen voor aankomst. Wordt de aanbetaling niet op tijd (binnen 14 dagen) voldaan, dan volgt een annuleringskost en wordt de boeking geannuleerd.",
     schoolSubmit: "Reservering bindend aanvragen",
     schoolImmediateNote:
       "Omdat jullie aankomst minder dan 30 dagen weg is, moet de aanbetaling nu online gebeuren — uitstel is op zo'n korte termijn niet mogelijk.",
-    fullPaymentNote:
-      "Omdat de aankomst binnen 14 dagen is, is het volledige bedrag (huur + borg + toeristenbelasting) nu direct verschuldigd.",
+    fullPaymentNote: (days: number) =>
+      `Omdat de aankomst binnen ${days} dagen is, is het volledige bedrag (huur + borg + toeristenbelasting) nu direct verschuldigd.`,
     fullAmountLabel: "Volledige huurprijs",
     street: "Straat",
     zip: "Postcode",
@@ -518,12 +566,13 @@ const BF_COPY = {
     discountAppliedPost: "toegepast",
     dueToday: "Vandaag te betalen:",
     deposit: "Aanbetaling",
-    bookingTotalAfter: "50 % van de boekingssom",
+    bookingTotalAfter: (pct: number) => `${pct} % van de boekingssom`,
     afterDiscount: "na korting",
     kaution: "Borg",
     kurtaxeLabel: "Toeristenbelasting",
     restzahlung: "Restbedrag van",
-    restzahlungBody: "(incl. borg + toeristenbelasting) wordt 14 dagen vóór aankomst automatisch geïncasseerd — een apart betaalverzoek volgt vooraf per e-mail. De borg wordt binnen 14 dagen na schadevrije afreis terugbetaald.",
+    restzahlungBody: (days: number) => `(incl. borg + toeristenbelasting) is ${days} dagen vóór aankomst verschuldigd en wordt automatisch geïncasseerd — een week vooraf volgt een herinnering per e-mail. De borg wordt binnen 14 dagen na schadevrije afreis terugbetaald.`,
+    orgStornoNote: "Annulering voor organisaties: gratis tot 60 dagen vóór aankomst. Daarna wordt alleen de aanbetaling van 10 % ingehouden — niet meer, ook niet kort voor aankomst. Annuleringen moeten schriftelijk gebeuren.",
     kurtaxeNote: "Let op: De toeristenbelasting Hochsauerland (€ 2,70 per persoon vanaf 16 jaar per nacht) zit in de restbetaling — wij dragen deze af aan de Kurverwaltung Winterberg.",
     holdNotice: "Let op: Deze periode is vanaf nu 30 minuten voor je gereserveerd. Rond je de boeking niet binnen deze tijd af, dan wordt de periode daarna automatisch weer vrijgegeven.",
     stornoH: "Annuleringsregeling",
@@ -541,9 +590,9 @@ const BF_COPY = {
     manualTransferButton: "Boeken via klassieke overschrijving",
     manualTransferSubmitting: "Boeking wordt aangemaakt ...",
     manualTransferOverviewNote:
-      "Verenigingen, klassenreizen en schoolreizen (bijv. AG, SV) kunnen bij Stripe ook automatisch per SEPA-overschrijving betalen. Wil je liever rechtstreeks naar onze verenigingsrekening overschrijven, dan kan dat hier direct — zonder eerst te mailen.",
-    manualTransferLeadTooShort:
-      "Klassieke overschrijving is mogelijk vanaf 21 dagen vóór aankomst — dat is hier al te kort dag. Gebruik in dat geval Stripe (SEPA-overschrijving is daar ook mogelijk).",
+      "Je kunt hierboven online betalen (kaart of SEPA-overschrijving via Stripe) of hier rechtstreeks naar onze verenigingsrekening overschrijven — je krijgt dan direct de rekeninggegevens.",
+    manualTransferLeadTooShort: (days: number) =>
+      `Klassieke overschrijving is mogelijk vanaf ${days} dagen vóór aankomst — dat is hier al te kort dag. Gebruik in dat geval de online betaling (SEPA-overschrijving is daar ook mogelijk).`,
     manualTransferConfirmTitle: "Boeking ontvangen!",
     manualTransferConfirmIntro: "Je boekingsnummer:",
     manualTransferConfirmBankTitle: "Maak de aanbetaling binnenkort over naar deze rekening:",
@@ -621,7 +670,7 @@ const BF_COPY = {
     prepayment50: "Aanbetaling 50 %",
     plusKaution: "+ Borg",
     todayToPay: "Vandaag te betalen",
-    remainderBefore: "Restbedrag (14 dagen vóór aankomst, incl. borg + toeristenbelasting)",
+    remainderBefore: (days: number) => `Restbedrag (${days} dagen vóór aankomst, incl. borg + toeristenbelasting)`,
     depositDueLater: "Aanbetaling (~30 dagen vóór aankomst)",
     schoolSummaryNote:
       "Je betaalt vandaag niets. De aanbetaling (10 %) wordt ongeveer 30 dagen vóór aankomst via een betaallink verschuldigd; de restbetaling incl. borg + toeristenbelasting 14 dagen vóór aankomst.",
@@ -651,6 +700,11 @@ export const BookingFlow = ({
   // Internal: union of all unavailable days for the rangeBlocked guard.
   const blockedDates = [...bookedDates, ...cleaningDates, ...wartungDates];
   const [step, setStep] = useState<Step>(0);
+  // Erste Frage: private Gruppe oder Organisation (bestimmt Anlässe,
+  // Zahlungswege, Anzahlung und Restzahlungs-Frist — lib/booking-kind.ts).
+  const [bookerKind, setBookerKind] = useState<BookerKind | "">(
+    prefill?.customerType === "verein" ? "organisation" : ""
+  );
   const [arrival, setArrival] = useState(repeatHint?.arrival ?? "");
   const [departure, setDeparture] = useState(repeatHint?.departure ?? "");
   // `persons` hält nur noch die Grund-Zählung (alle Erwachsenen / alle Kinder).
@@ -790,7 +844,7 @@ export const BookingFlow = ({
     return false;
   }, [arrival, departure, datesValid, blockedSet]);
 
-  const canGoStep1 = datesValid && personsValid && !rangeBlocked;
+  const canGoStep1 = !!bookerKind && datesValid && personsValid && !rangeBlocked;
   // Step 2: Anlass ist Pflicht. Grund-Pflichtfeld (min. 20 Z.) fuer ALLE
   // Anlaesse AUSSER Klassenfahrt — gibt dem Vorstand Kontext und schreckt
   // missbraeuchliche Anmeldungen ab.
@@ -799,27 +853,23 @@ export const BookingFlow = ({
   const purposeValid = !!purposeCategory && reasonValid;
   const canGoStep2 = breakdown !== null && purposeValid;
 
-  // Institutions-Feld: Pflicht bei Schul-/Gruppen-/Firmen-Anlaessen.
-  const institutionRequired =
-    purposeCategory === "klasse" ||
-    purposeCategory === "schul" ||
-    purposeCategory === "verein" ||
-    purposeCategory === "firma";
+  // Institutions-Feld: Pflicht für Organisationen (Rechnung + Erkennung).
+  const isOrg = bookerKind === "organisation";
+  const institutionRequired = isOrg;
   const institutionValid = !institutionRequired || institution.trim().length >= 2;
 
-  const isSchoolPurpose = purposeCategory === "klasse" || purposeCategory === "schul";
-  // Komplettzahlung: bei JEDER Buchung mit Anreise < 14 Tagen wird der gesamte
-  // Betrag sofort fällig. Schulgruppen zahlen sonst 10 %, alle anderen 50 %.
-  const fullPaymentRequired = !!arrival && daysUntilLocalDate(arrival) < 14;
-  const prepayPercent = isSchoolPurpose ? 10 : 50;
+  // Organisationen: 10 % sofort, Rest 30 Tage vor Anreise. Private Gruppen:
+  // 50 % sofort, Rest 14 Tage vor Anreise. Liegt die Anreise innerhalb dieser
+  // Frist, ist alles sofort fällig.
+  const restLeadDays = isOrg ? ORG_REST_LEAD_DAYS : PRIVATE_REST_LEAD_DAYS;
+  const fullPaymentRequired = !!arrival && daysUntilLocalDate(arrival) < restLeadDays;
+  const prepayPercent = isOrg ? ORG_PREPAY_PERCENT : PRIVATE_PREPAY_PERCENT;
 
-  // Klassische Ueberweisung (Selbstbedienung) -- nur fuer klasse/schul/verein,
-  // NICHT firma (siehe manual-transfer-actions.ts, MANUAL_TRANSFER_PURPOSES).
-  // Mindestvorlauf 21 Tage, sonst laege die dort kommunizierte T-14-Frist
-  // schon in der Vergangenheit.
-  const manualTransferEligible =
-    purposeCategory === "klasse" || purposeCategory === "schul" || purposeCategory === "verein";
-  const manualTransferLeadOk = !!arrival && daysUntilLocalDate(arrival) >= 21;
+  // Klassische Ueberweisung (Selbstbedienung) -- nur fuer Organisationen.
+  // Mindestvorlauf = Rest-Frist (30 Tage) + 1 Woche, siehe booking-kind.ts.
+  const manualTransferEligible = isOrg;
+  const manualTransferLeadOk =
+    !!arrival && daysUntilLocalDate(arrival) >= MANUAL_TRANSFER_MIN_LEAD_DAYS;
 
   // Feld-Validität (für Inline-Fehler in Schritt 2).
   const firstNameValid = firstName.trim().length > 0;
@@ -861,13 +911,13 @@ export const BookingFlow = ({
         departure,
         ...memberPayload,
         soloUse,
-        customerType,
+        customerType: isOrg ? "verein" : customerType === "firma" || customerType === "verein" ? "privat" : customerType,
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         email: email.trim().toLowerCase(),
         phone: phone.trim(),
         company: company.trim() || null,
-        institution: institution.trim() || null,
+        institution: isOrg ? institution.trim() || null : null,
         street: street.trim() || null,
         zip: zip.trim() || null,
         city: city.trim() || null,
@@ -905,13 +955,13 @@ export const BookingFlow = ({
         departure,
         ...memberPayload,
         soloUse,
-        customerType,
+        customerType: isOrg ? "verein" : customerType === "firma" || customerType === "verein" ? "privat" : customerType,
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         email: email.trim().toLowerCase(),
         phone: phone.trim(),
         company: company.trim() || null,
-        institution: institution.trim() || null,
+        institution: isOrg ? institution.trim() || null : null,
         street: street.trim() || null,
         zip: zip.trim() || null,
         city: city.trim() || null,
@@ -953,11 +1003,50 @@ export const BookingFlow = ({
 
         {step === 0 && (
           <div className="mt-8 space-y-6">
-            <h3 className="text-[22px] sm:text-[24px] m-0">{tt.s0H}</h3>
-
-            <div className="rounded-[var(--radius-card)] bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)] px-4 py-3 text-sm text-[var(--color-wh-fg-muted)]">
-              {tt.paymentMethodNote}
+            <h3 className="text-[22px] sm:text-[24px] m-0">{tt.kindH}</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" role="radiogroup" aria-label={tt.kindH}>
+              {(
+                [
+                  { kind: "privat" as const, title: tt.kindPrivatTitle, body: tt.kindPrivatBody },
+                  { kind: "organisation" as const, title: tt.kindOrgTitle, body: tt.kindOrgBody },
+                ]
+              ).map((o) => {
+                const active = bookerKind === o.kind;
+                return (
+                  <button
+                    key={o.kind}
+                    type="button"
+                    role="radio"
+                    aria-checked={active}
+                    onClick={() => {
+                      setBookerKind(o.kind);
+                      // Anlass zurücksetzen, wenn er nicht zum Pfad passt.
+                      if (purposeCategory && !PURPOSES_BY_KIND[o.kind].includes(purposeCategory)) {
+                        setPurposeCategory("");
+                      }
+                    }}
+                    className={`text-left rounded-[var(--radius-card)] border-2 px-4 py-3 transition-colors ${
+                      active
+                        ? "border-[var(--color-wh-deep-green)] bg-[var(--color-wh-green-soft)]"
+                        : "border-[var(--color-wh-winter-grey)] bg-white hover:border-[var(--color-wh-deep-green)]"
+                    }`}
+                  >
+                    <span className="flex items-center gap-2 font-semibold text-[var(--color-wh-black)]">
+                      {active && <Check size={16} className="text-[var(--color-wh-deep-green)]" />}
+                      {o.title}
+                    </span>
+                    <span className="block mt-1 text-sm text-[var(--color-wh-fg-muted)]">{o.body}</span>
+                  </button>
+                );
+              })}
             </div>
+            {bookerKind && (
+              <div className="rounded-[var(--radius-card)] bg-[var(--color-wh-beige)] border border-[var(--color-wh-winter-grey)] px-4 py-3 text-sm text-[var(--color-wh-fg-muted)]">
+                {bookerKind === "organisation" ? tt.paymentNoteOrg : tt.paymentNotePrivat}
+              </div>
+            )}
+
+            <h3 className="text-[22px] sm:text-[24px] mt-10 mb-0">{tt.s0H}</h3>
 
             <AvailabilityCalendar
               bookedDates={bookedDates}
@@ -1018,6 +1107,11 @@ export const BookingFlow = ({
               </div>
             )}
 
+            {!bookerKind && datesValid && personsValid && (
+              <div className="text-[var(--color-wh-sunset)] text-sm font-semibold text-right">
+                {tt.kindMissing}
+              </div>
+            )}
             <div className="flex justify-end pt-2">
               <Button
                 disabled={!canGoStep1}
@@ -1045,7 +1139,10 @@ export const BookingFlow = ({
                 if (v === "klasse") setPurposeReason("");
               }}
               required
-              options={SELECTABLE_PURPOSE_KEYS.map((k) => ({ value: k, label: tt.purposeOpts[k] }))}
+              options={(bookerKind ? PURPOSES_BY_KIND[bookerKind] : []).map((k) => ({
+                value: k,
+                label: tt.purposeOpts[k],
+              }))}
             />
 
             {purposeCategory && purposeCategory !== "klasse" && (
@@ -1090,19 +1187,17 @@ export const BookingFlow = ({
             <h3 className="text-[22px] sm:text-[24px] m-0">{tt.s2H}</h3>
 
             <div>
-              <SegmentedControl
-                label={tt.whoBooks}
-                value={customerType}
-                options={[
-                  { value: "privat", label: tt.ctPrivat },
-                  ...(prefill?.membershipVerified
-                    ? [{ value: "mitglied", label: tt.ctMitglied }]
-                    : []),
-                  { value: "verein", label: tt.ctVerein },
-                  { value: "firma", label: tt.ctFirma },
-                ]}
-                onChange={(v) => setCustomerType(v as typeof customerType)}
-              />
+              {!isOrg && prefill?.membershipVerified && (
+                <SegmentedControl
+                  label={tt.whoBooks}
+                  value={customerType === "mitglied" ? "mitglied" : "privat"}
+                  options={[
+                    { value: "privat", label: tt.ctPrivat },
+                    { value: "mitglied", label: tt.ctMitglied },
+                  ]}
+                  onChange={(v) => setCustomerType(v as typeof customerType)}
+                />
+              )}
               {!prefill?.loggedIn && (
                 <p className="text-xs text-[var(--color-wh-fg-muted)] mt-2">
                   {tt.loginHint1}{" "}
@@ -1133,8 +1228,6 @@ export const BookingFlow = ({
                   required
                   error={step2Tried && !institutionValid ? tt.valInstitution : undefined}
                 />
-              ) : customerType === "firma" || customerType === "verein" ? (
-                <Input id="company" label={tt.company} value={company} onChange={(e) => setCompany(e.target.value)} />
               ) : null}
               <Input id="street" label={tt.street} value={street} onChange={(e) => setStreet(e.target.value)} />
               <Input id="zip" label={tt.zip} value={zip} onChange={(e) => setZip(e.target.value)} />
@@ -1250,9 +1343,9 @@ export const BookingFlow = ({
             />
 
             {fullPaymentRequired ? (
-              /* Anreise < 14 Tage → kompletter Betrag sofort fällig. */
+              /* Anreise innerhalb der Rest-Frist → kompletter Betrag sofort fällig. */
               <div className="rounded-[var(--radius-md)] border-l-4 border-[var(--color-wh-sunset)] bg-[var(--color-wh-beige)] px-4 py-3 text-sm text-[var(--color-wh-black)]">
-                {tt.fullPaymentNote}
+                {tt.fullPaymentNote(restLeadDays)}
               </div>
             ) : null}
 
@@ -1272,7 +1365,7 @@ export const BookingFlow = ({
                   <p className="m-0">
                     <strong>{formatEuro(prepayAfter, locale)}</strong>{" "}
                     {fullPaymentRequired ? tt.fullAmountLabel : tt.deposit} (
-                    {fullPaymentRequired ? tt.bookingSum : tt.bookingTotalAfter})
+                    {fullPaymentRequired ? tt.bookingSum : tt.bookingTotalAfter(prepayPercent)})
                     {fullPaymentRequired && (
                       <>
                         {" + "}
@@ -1294,7 +1387,7 @@ export const BookingFlow = ({
                       <strong>
                         {formatEuro(remainAfter + breakdown.depositCents + breakdown.kurtaxeCents, locale)}
                       </strong>{" "}
-                      {tt.restzahlungBody}
+                      {tt.restzahlungBody(restLeadDays)}
                     </p>
                   )}
                   {breakdown.kurtaxeCents > 0 && (
@@ -1307,7 +1400,16 @@ export const BookingFlow = ({
             })()}
 
             {/* Storno-Regelwerk klar im UI */}
-            <CancellationPolicyBox arrival={arrival} tt={tt} locale={locale} />
+            {isOrg ? (
+              <div className="rounded-[var(--radius-md)] border-l-4 border-[var(--color-wh-sunset)] bg-[var(--color-wh-beige)] px-4 py-3 text-sm text-[var(--color-wh-black)]">
+                <p className="m-0 text-xs uppercase tracking-wider text-[var(--color-wh-deep-green)] font-semibold mb-1">
+                  {tt.stornoH}
+                </p>
+                <p className="m-0">{tt.orgStornoNote}</p>
+              </div>
+            ) : (
+              <CancellationPolicyBox arrival={arrival} tt={tt} locale={locale} />
+            )}
             <p className="m-0 text-sm text-[var(--color-wh-fg-muted)]">{tt.holdNotice}</p>
             {error && (
               <div className="bg-[var(--color-wh-sunset)]/10 text-[var(--color-wh-sunset)] rounded-[var(--radius-md)] p-4 text-sm font-medium">
@@ -1340,7 +1442,7 @@ export const BookingFlow = ({
                   </>
                 ) : (
                   <p className="m-0 text-[var(--color-wh-fg-muted)] italic">
-                    {tt.manualTransferLeadTooShort}
+                    {tt.manualTransferLeadTooShort(MANUAL_TRANSFER_MIN_LEAD_DAYS)}
                   </p>
                 )}
               </div>
@@ -1394,6 +1496,7 @@ export const BookingFlow = ({
           totalPersons={totalPersons}
           fullPayment={fullPaymentRequired}
           prepayPercent={prepayPercent}
+          restLeadDays={restLeadDays}
           tt={tt}
           locale={locale}
         />
@@ -1803,6 +1906,7 @@ const PriceSummary = ({
   totalPersons,
   fullPayment = false,
   prepayPercent = 50,
+  restLeadDays = 14,
   tt,
   locale,
 }: {
@@ -1812,6 +1916,7 @@ const PriceSummary = ({
   totalPersons: number;
   fullPayment?: boolean;
   prepayPercent?: number;
+  restLeadDays?: number;
   tt: BfCopy;
   locale: "de" | "en" | "nl";
 }) => {
@@ -1852,7 +1957,7 @@ const PriceSummary = ({
       </div>
 
       {fullPayment ? (
-        /* Anreise < 14 Tage: kompletter Mietpreis + Kaution sofort fällig. */
+        /* Anreise innerhalb der Rest-Frist: kompletter Mietpreis + Kaution sofort fällig. */
         <>
           <div className="border-t border-[var(--color-wh-winter-grey)] mt-4 pt-4 space-y-2 text-sm">
             <div className="text-xs uppercase tracking-wider text-[var(--color-wh-fg-muted)] mb-2">
@@ -1883,7 +1988,7 @@ const PriceSummary = ({
             </div>
           </div>
           <div className="border-t border-[var(--color-wh-winter-grey)] mt-4 pt-4 space-y-1 text-xs text-[var(--color-wh-fg-muted)]">
-            <div>{tt.fullPaymentNote}</div>
+            <div>{tt.fullPaymentNote(restLeadDays)}</div>
           </div>
         </>
       ) : (
@@ -1902,7 +2007,7 @@ const PriceSummary = ({
 
           <div className="border-t border-[var(--color-wh-winter-grey)] mt-4 pt-4 space-y-1 text-xs text-[var(--color-wh-fg-muted)]">
             <div className="flex justify-between">
-              <span>{tt.remainderBefore}</span>
+              <span>{tt.remainderBefore(restLeadDays)}</span>
               <span>
                 {formatEuro(
                   breakdown.subtotalCents -

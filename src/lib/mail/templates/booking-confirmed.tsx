@@ -28,6 +28,8 @@ type Props = {
    * Kaution und Kurtaxe bereits mit bezahlt; sonst werden sie erst bei der
    * Restzahlung (14 Tage vor Anreise) eingezogen. */
   kautionDueNow: boolean;
+  /** Organisations-Buchung: 10 % Anzahlung (bei Storno einbehalten), Rest 30 Tage vor Anreise. */
+  orgBooking?: boolean;
   baseUrl: string;
   // Mietvertrag-Inhalt (§1–§9) — dieselbe Mail dient als Buchungsbestätigung
   // UND als Mietvertrag, statt zwei getrennte Mails zu verschicken.
@@ -140,6 +142,7 @@ export default function BookingConfirmedEmail({
   kurtaxeCents,
   paidCents,
   kautionDueNow,
+  orgBooking = false,
   baseUrl,
   customer,
   personsBreakdown,
@@ -372,9 +375,11 @@ export default function BookingConfirmedEmail({
 
           <Heading as="h4" style={h2}>§ 5 Zahlungen, Kaution & Kurtaxe</Heading>
           <Text style={smallText}>
-            Die Mietzahlung wird in zwei Raten eingezogen: eine <strong>Anzahlung</strong> bei
-            Buchung sowie die <strong>Restzahlung</strong> spätestens 14 Tage vor Anreise
-            (Auto-Einzug per Stripe). {kautionDueNow
+            Die Mietzahlung erfolgt in zwei Raten: eine <strong>Anzahlung</strong> bei
+            Buchung sowie die <strong>Restzahlung</strong> spätestens{" "}
+            {orgBooking ? "30" : "14"} Tage vor Anreise
+            {orgBooking ? " (online über Stripe oder per Überweisung)" : " (Auto-Einzug per Stripe)"}.{" "}
+            {kautionDueNow
               ? "Kaution und Kurtaxe sind bereits mit der Anzahlung fällig"
               : "Kaution und Kurtaxe werden zusammen mit der Restzahlung eingezogen"}. Die
             Kaution wird nach mangelfreier Abreise innerhalb von 14 Tagen erstattet; die Kurtaxe
@@ -422,17 +427,27 @@ export default function BookingConfirmedEmail({
           )}
 
           <Heading as="h4" style={h2}>§ 6 Stornobedingungen</Heading>
-          <Text style={smallText}>
-            Bei Rücktritt durch den Mieter werden folgende Stornogebühren auf den reinen
-            Übernachtungspreis erhoben. Endreinigung und Kaution werden im Stornofall nicht
-            fällig bzw. vollständig zurückerstattet:
-          </Text>
-          <ul style={{ margin: "0 0 8px 18px", padding: 0, color: "#111", fontFamily: "Inter, sans-serif", fontSize: "14px", lineHeight: 1.55 }}>
-            <li>mehr als 60 Tage vor Anreise: 0 %</li>
-            <li>60 – 31 Tage vor Anreise: 30 %</li>
-            <li>30 – 14 Tage vor Anreise: 50 %</li>
-            <li>weniger als 14 Tage vor Anreise: 100 %</li>
-          </ul>
+          {orgBooking ? (
+            <Text style={smallText}>
+              Bis 60 Tage vor Anreise ist die Stornierung kostenlos. Danach wird ausschließlich die
+              Anzahlung in Höhe von 10 % der Buchungssumme einbehalten; weitere Stornogebühren
+              fallen nicht an. Kaution und Kurtaxe werden im Stornofall vollständig erstattet.
+            </Text>
+          ) : (
+            <>
+              <Text style={smallText}>
+                Bei Rücktritt durch den Mieter werden folgende Stornogebühren auf den reinen
+                Übernachtungspreis erhoben. Endreinigung und Kaution werden im Stornofall nicht
+                fällig bzw. vollständig zurückerstattet:
+              </Text>
+              <ul style={{ margin: "0 0 8px 18px", padding: 0, color: "#111", fontFamily: "Inter, sans-serif", fontSize: "14px", lineHeight: 1.55 }}>
+                <li>mehr als 60 Tage vor Anreise: 0 %</li>
+                <li>60 – 31 Tage vor Anreise: 30 %</li>
+                <li>30 – 14 Tage vor Anreise: 50 %</li>
+                <li>weniger als 14 Tage vor Anreise: 100 %</li>
+              </ul>
+            </>
+          )}
 
           <Heading as="h4" style={h2}>§ 7 Hausordnung</Heading>
           <Text style={smallText}>

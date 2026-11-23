@@ -9,7 +9,7 @@ import {
   activityLog,
   discountCodes,
 } from "@/lib/db/schema";
-import { and, eq, gte, lte, sql } from "drizzle-orm";
+import { and, eq, gte, inArray, lte, sql } from "drizzle-orm";
 import { stripe } from "@/lib/stripe";
 import { sendMail } from "@/lib/mail/send";
 import PaymentReminderEmail from "@/lib/mail/templates/payment-reminder";
@@ -42,6 +42,7 @@ import {
   SCHOOL_CANCEL_DAYS,
 } from "@/lib/school-deposit";
 import { cancellationFeeForBooking, formatEuro } from "@/lib/pricing";
+import { ORG_REST_LEAD_DAYS, restLeadDaysFor } from "@/lib/booking-kind";
 import { revalidateTag } from "next/cache";
 import { BOOKING_BLOCKS_TAG } from "@/lib/availability";
 import { formatDateLong } from "@/lib/utils";
@@ -129,12 +130,17 @@ export async function GET(req: Request) {
   };
 
   // ---------- T-21: Zahlungserinnerung (1 Woche vor Auto-Einzug bei T-14) ----------
+  // Eine Woche vor Faelligkeit der Restzahlung: privat T-21 (Rest bei T-14),
+  // Organisationen T-37 (Rest bei T-30, siehe lib/booking-kind.ts).
   const t21 = isoDayOffset(21);
+  const t37 = isoDayOffset(ORG_REST_LEAD_DAYS + 7);
   const t21Bookings = await db
     .select()
     .from(bookings)
-    .where(and(eq(bookings.arrival, t21), eq(bookings.status, "bezahlt")));
+    .where(and(inArray(bookings.arrival, [t21, t37]), eq(bookings.status, "bezahlt")));
   for (const b of t21Bookings) {
+    const restLead = restLeadDaysFor(b);
+    if (b.arrival !== isoDayOffset(restLead + 7)) continue;
     if (await alreadySent(b.id, "payment_reminder")) continue;
     // Offener Betrag = alles, was vor Anreise noch faellig ist: Rest-Miete +
     // Kaution + Kurtaxe. Frueher stand hier nur Zwischensumme − Gezahltes —
@@ -180,12 +186,13 @@ export async function GET(req: Request) {
           remainderCents,
           depositCents: extrasOpen ? b.depositCents : null,
           kurtaxeCents: extrasOpen ? b.kurtaxeCents : null,
-          daysUntilArrival: 21,
+          daysUntilArrival: restLead + 7,
+          restLeadDays: restLead,
           paymentLink: null,
           autoChargePlanned: !!b.stripePaymentIntentId,
           // Teilnehmer nachmelden geht bis Anreise−15 (Issue #60); bei T-21 ist
           // das heute+6 — letzter Hinweis.
-          increaseHintUntil: formatDateLong(isoDayOffset(6)),
+          increaseHintUntil: formatDateLong(isoDayOffset(restLead + 7 - 15)),
         }),
       });
       stats.paymentReminderSent++;
@@ -293,12 +300,16 @@ export async function GET(req: Request) {
   // Verein, der sie eintreiben muss). Kurzfristige Buchungen (< 14 Tage vor
   // Anreise) zahlen beides schon bei Buchung komplett mit und laufen wegen
   // der Anreise-Distanz nie durch diesen Cron-Block.
+  // Organisationen: gleiche Pipeline, aber 30 Tage vor Anreise (T-30).
   const t14 = isoDayOffset(14);
+  const t30 = isoDayOffset(ORG_REST_LEAD_DAYS);
   const t14Bookings = await db
     .select()
     .from(bookings)
-    .where(and(eq(bookings.arrival, t14), eq(bookings.status, "bezahlt")));
+    .where(and(inArray(bookings.arrival, [t14, t30]), eq(bookings.status, "bezahlt")));
   for (const b of t14Bookings) {
+    const restLead = restLeadDaysFor(b);
+    if (b.arrival !== isoDayOffset(restLead)) continue;
     const restPmts = await db
       .select()
       .from(payments)
@@ -391,14 +402,15 @@ export async function GET(req: Request) {
               bookingNumber: b.bookingNumber,
               arrival: formatDateLong(b.arrival),
               remainderCents: chargeCents,
-              daysUntilArrival: 14,
+              daysUntilArrival: restLead,
+              restLeadDays: restLead,
               paymentLink: linkSession.url,
               autoChargePlanned: false,
             }),
           });
           await db.insert(activityLog).values({
             who: "Cron",
-            what: `Restzahlung angefordert (T-14, Banküberweisungs-Buchung): ${(chargeCents / 100).toFixed(2)} € — Zahlungslink (Karte/Überweisung) an ${btCustomer.email}`,
+            what: `Restzahlung angefordert (T-${restLead}, Banküberweisungs-Buchung): ${(chargeCents / 100).toFixed(2)} € — Zahlungslink (Karte/Überweisung) an ${btCustomer.email}`,
             bookingId: b.id,
           });
           stats.bankTransferRestLinkSent++;
@@ -510,7 +522,7 @@ export async function GET(req: Request) {
         }
         await db.insert(activityLog).values({
           who: "Cron",
-          what: `Restzahlungs-Off-Session-Charge (T-14): ${(chargeCents / 100).toFixed(2)} € (davon ${(kautionCents / 100).toFixed(2)} € Kaution, ${(kurtaxeCents / 100).toFixed(2)} € Kurtaxe) — ${newPi.status}`,
+          what: `Restzahlungs-Off-Session-Charge (T-${restLead}): ${(chargeCents / 100).toFixed(2)} € (davon ${(kautionCents / 100).toFixed(2)} € Kaution, ${(kurtaxeCents / 100).toFixed(2)} € Kurtaxe) — ${newPi.status}`,
           bookingId: b.id,
         });
       } catch (err) {
@@ -526,7 +538,7 @@ export async function GET(req: Request) {
         });
         await db.insert(activityLog).values({
           who: "Cron",
-          what: `Restzahlungs-Off-Session-Charge FEHLGESCHLAGEN (T-14): ${msg.slice(0, 200)}`,
+          what: `Restzahlungs-Off-Session-Charge FEHLGESCHLAGEN (T-${restLead}): ${msg.slice(0, 200)}`,
           bookingId: b.id,
         });
         stats.autoChargeFailed++;
@@ -552,7 +564,6 @@ export async function GET(req: Request) {
   // umbenannt), damit bereits bestehende Altvertrags-Zeilen in der DB
   // weiterhin gefunden werden.
   const today0 = isoDayOffset(0);
-  const in21 = isoDayOffset(21);
   const manualRest = await db
     .select()
     .from(payments)
@@ -560,7 +571,9 @@ export async function GET(req: Request) {
   for (const pm of manualRest) {
     const b = (await db.select().from(bookings).where(eq(bookings.id, pm.bookingId)).limit(1))[0];
     if (!b || b.status === "storniert") continue;
-    if (b.arrival < today0 || b.arrival > in21) continue; // erst ab T-21, nicht rückwirkend
+    // Erst eine Woche vor der Frist (T-21 bzw. bei Organisationen T-37), nicht rückwirkend.
+    const restLead = restLeadDaysFor(b);
+    if (b.arrival < today0 || b.arrival > isoDayOffset(restLead + 7)) continue;
     if (await alreadySent(b.id, "restzahlung_request_manual")) continue;
     const customer = b.customerId
       ? (await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1))[0]
@@ -569,8 +582,8 @@ export async function GET(req: Request) {
     const remainderCents = pm.amountCents;
     if (remainderCents <= 0) continue;
     try {
-      const deadlineDate = new Date(`${b.arrival}T00:00:00`);
-      deadlineDate.setDate(deadlineDate.getDate() - 14);
+      const deadlineDate = new Date(`${b.arrival}T00:00:00Z`);
+      deadlineDate.setUTCDate(deadlineDate.getUTCDate() - restLead);
       // Echte Anzahlung-Zeile? (z.B. Selbstbedienungs-Ueberweisungs-Buchung
       // mit berechneter Anzahlung) -- sonst faellt das Template auf den
       // festen "100,00 €"-Text der alten Pauschal-Altvertraege zurueck.
@@ -595,6 +608,7 @@ export async function GET(req: Request) {
           remainderCents,
           depositCents: b.depositCents,
           deadline: formatDateLong(deadlineDate.toISOString().slice(0, 10)),
+          restLeadDays: restLead,
           avsCheckinLink: b.avsCheckinLink,
           prepaymentCents: anzahlungRow?.amountCents ?? null,
         }),

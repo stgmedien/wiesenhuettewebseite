@@ -18,7 +18,13 @@ import { auth } from "@/lib/auth";
 import { createMagicLinkToken } from "@/lib/magic-link";
 import { sendMail } from "@/lib/mail/send";
 import WelcomeEmail from "@/lib/mail/templates/welcome";
-import { isSchoolDeferredPurpose } from "@/lib/school-deposit";
+import {
+  isOrgPurpose,
+  ORG_PREPAY_PERCENT,
+  ORG_REST_LEAD_DAYS,
+  PRIVATE_PREPAY_PERCENT,
+  PRIVATE_REST_LEAD_DAYS,
+} from "@/lib/booking-kind";
 import {
   validateDiscountCode,
   calculateDiscountCents,
@@ -45,21 +51,23 @@ const STRIPE_LOCALE: Record<Locale, "de" | "en" | "nl"> = {
 };
 
 const CHECKOUT_LINES: Record<Locale, {
-  depositName: (arrival: string, departure: string) => string;
+  depositName: (arrival: string, departure: string, percent: number) => string;
   depositDescription: (
     persons: number,
     nights: number,
     bookingNumber: string,
     discount: string | null,
-    remainder: string
+    remainder: string,
+    restLeadDays: number
   ) => string;
-  // Komplettzahlung (Anreise < 14 Tage): gesamter Mietpreis sofort.
+  // Komplettzahlung (Anreise < Restzahlungs-Frist): gesamter Mietpreis sofort.
   fullName: (arrival: string, departure: string) => string;
   fullDescription: (
     persons: number,
     nights: number,
     bookingNumber: string,
-    discount: string | null
+    discount: string | null,
+    restLeadDays: number
   ) => string;
   kautionName: string;
   kautionDescription: string;
@@ -67,36 +75,36 @@ const CHECKOUT_LINES: Record<Locale, {
   kurtaxeDescription: (persons: number, nights: number) => string;
 }> = {
   de: {
-    depositName: (a, d) => `Anzahlung 50 % — Wiesenhütte ${a} bis ${d}`,
-    depositDescription: (p, n, bn, disc, rem) =>
-      `${p} Personen · ${n} Nächte · Buchung ${bn}${disc ? ` · Rabatt ${disc}` : ""} · Restzahlung ${rem} (inkl. Kaution + Kurtaxe) folgt 14 Tage vor Anreise.`,
+    depositName: (a, d, pct) => `Anzahlung ${pct} % — Wiesenhütte ${a} bis ${d}`,
+    depositDescription: (p, n, bn, disc, rem, lead) =>
+      `${p} Personen · ${n} Nächte · Buchung ${bn}${disc ? ` · Rabatt ${disc}` : ""} · Restzahlung ${rem} (inkl. Kaution + Kurtaxe) folgt ${lead} Tage vor Anreise.`,
     fullName: (a, d) => `Gesamtbetrag — Wiesenhütte ${a} bis ${d}`,
-    fullDescription: (p, n, bn, disc) =>
-      `${p} Personen · ${n} Nächte · Buchung ${bn}${disc ? ` · Rabatt ${disc}` : ""} · Komplettzahlung, da Anreise in weniger als 14 Tagen.`,
+    fullDescription: (p, n, bn, disc, lead) =>
+      `${p} Personen · ${n} Nächte · Buchung ${bn}${disc ? ` · Rabatt ${disc}` : ""} · Komplettzahlung, da Anreise in weniger als ${lead} Tagen.`,
     kautionName: "Kaution",
     kautionDescription: "Erstattung innerhalb 14 Tagen nach mangelfreier Abreise.",
     kurtaxeName: "Kurtaxe Hochsauerland",
     kurtaxeDescription: (p, n) => `${p} Personen (ab 16 J.) × ${n} Nächte. Wird vom Verein an Winterberg abgeführt.`,
   },
   en: {
-    depositName: (a, d) => `Deposit 50 % — Wiesenhütte ${a} to ${d}`,
-    depositDescription: (p, n, bn, disc, rem) =>
-      `${p} guests · ${n} nights · Booking ${bn}${disc ? ` · Discount ${disc}` : ""} · Remaining ${rem} (incl. deposit + tourist tax) due 14 days before arrival.`,
+    depositName: (a, d, pct) => `Deposit ${pct} % — Wiesenhütte ${a} to ${d}`,
+    depositDescription: (p, n, bn, disc, rem, lead) =>
+      `${p} guests · ${n} nights · Booking ${bn}${disc ? ` · Discount ${disc}` : ""} · Remaining ${rem} (incl. deposit + tourist tax) due ${lead} days before arrival.`,
     fullName: (a, d) => `Full amount — Wiesenhütte ${a} to ${d}`,
-    fullDescription: (p, n, bn, disc) =>
-      `${p} guests · ${n} nights · Booking ${bn}${disc ? ` · Discount ${disc}` : ""} · Paid in full because arrival is less than 14 days away.`,
+    fullDescription: (p, n, bn, disc, lead) =>
+      `${p} guests · ${n} nights · Booking ${bn}${disc ? ` · Discount ${disc}` : ""} · Paid in full because arrival is less than ${lead} days away.`,
     kautionName: "Damage deposit",
     kautionDescription: "Refunded within 14 days of a clean departure.",
     kurtaxeName: "Hochsauerland tourist tax",
     kurtaxeDescription: (p, n) => `${p} guests (16+) × ${n} nights. Remitted by the club to Winterberg.`,
   },
   nl: {
-    depositName: (a, d) => `Aanbetaling 50 % — Wiesenhütte ${a} t/m ${d}`,
-    depositDescription: (p, n, bn, disc, rem) =>
-      `${p} personen · ${n} nachten · Boeking ${bn}${disc ? ` · Korting ${disc}` : ""} · Restbedrag ${rem} (incl. borg + toeristenbelasting) 14 dagen vóór aankomst.`,
+    depositName: (a, d, pct) => `Aanbetaling ${pct} % — Wiesenhütte ${a} t/m ${d}`,
+    depositDescription: (p, n, bn, disc, rem, lead) =>
+      `${p} personen · ${n} nachten · Boeking ${bn}${disc ? ` · Korting ${disc}` : ""} · Restbedrag ${rem} (incl. borg + toeristenbelasting) ${lead} dagen vóór aankomst.`,
     fullName: (a, d) => `Totaalbedrag — Wiesenhütte ${a} t/m ${d}`,
-    fullDescription: (p, n, bn, disc) =>
-      `${p} personen · ${n} nachten · Boeking ${bn}${disc ? ` · Korting ${disc}` : ""} · Volledige betaling, want aankomst is binnen 14 dagen.`,
+    fullDescription: (p, n, bn, disc, lead) =>
+      `${p} personen · ${n} nachten · Boeking ${bn}${disc ? ` · Korting ${disc}` : ""} · Volledige betaling, want aankomst is binnen ${lead} dagen.`,
     kautionName: "Borg",
     kautionDescription: "Terugbetaling binnen 14 dagen na schadevrije afreis.",
     kurtaxeName: "Toeristenbelasting Hochsauerland",
@@ -189,7 +197,7 @@ const inputSchema = z.object({
   purpose: z.string().min(1).max(500),
   // Maschinenlesbare Anlass-Kategorie (optional fuer Abwaerts-Kompat).
   purposeCategory: z
-    .enum(["familie", "klasse", "schul", "verein", "firma", "sonstiges"])
+    .enum(["familie", "klasse", "schul", "verein", "kirche", "kommune", "bildung", "firma", "sonstiges"])
     .optional(),
   customerMessage: z.string().max(2000).optional().nullable(),
   discountCode: z.string().max(30).optional().nullable(),
@@ -235,6 +243,15 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
   const persons: Persons = { ...data.persons };
   const locale: Locale = data.locale;
   const T = ACTION_ERRORS[locale];
+
+  // Organisationen brauchen ihren Namen (Rechnung, isOrgBooking-Erkennung).
+  if (isOrgPurpose(data.purposeCategory) && (data.institution?.trim().length ?? 0) < 2) {
+    return {
+      ok: false,
+      error: T.invalidInput,
+      issues: [{ field: "institution", message: T.invalidInput }],
+    };
+  }
 
   // -----------------------------------------------------------------
   // Spam-Schutz: max 5 Buchungs-Versuche pro (Email, IP) pro Stunde.
@@ -535,11 +552,14 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
 
   // Effektive Werte nach Rabatt
   const effectiveSubtotal = breakdown.subtotalCents - discountCents;
-  const isSchoolPurpose = isSchoolDeferredPurpose(data.purposeCategory);
-  // Komplettzahlung erzwingen, wenn die Anreise in weniger als 14 Tagen ist.
-  // Schulgruppen zahlen 10 % Anzahlung, alle anderen 50 %.
-  const fullPaymentRequired = daysUntilLocalDate(data.arrival) < 14;
-  const prepayPercent = isSchoolPurpose ? 10 : 50;
+  // Zwei Pfade (siehe lib/booking-kind.ts): Organisationen zahlen 10 %
+  // sofort und den Rest 30 Tage vor Anreise, private Gruppen 50 % sofort und
+  // den Rest 14 Tage vor Anreise. Liegt die Anreise schon innerhalb dieser
+  // Frist, ist alles sofort fällig.
+  const isOrg = isOrgPurpose(data.purposeCategory);
+  const restLeadDays = isOrg ? ORG_REST_LEAD_DAYS : PRIVATE_REST_LEAD_DAYS;
+  const fullPaymentRequired = daysUntilLocalDate(data.arrival) < restLeadDays;
+  const prepayPercent = isOrg ? ORG_PREPAY_PERCENT : PRIVATE_PREPAY_PERCENT;
   const effectivePrepayment = fullPaymentRequired
     ? effectiveSubtotal
     : Math.round((effectiveSubtotal * prepayPercent) / 100);
@@ -553,6 +573,8 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
       status: "angefragt",
       paymentMode: "standard",
       institution: data.institution?.trim() || null,
+      // Markiert die Buchung als Organisations-Buchung (isOrgBooking).
+      prepayPercent: isOrg ? ORG_PREPAY_PERCENT : null,
       arrival: data.arrival,
       departure: data.departure,
       nights: breakdown.nights,
@@ -647,7 +669,7 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
     // … aber nur, wenn Stripe die Methode auch freigeschaltet hat (sonst
     // lehnt Stripe die ganze Session ab — Capability-Gate, siehe Helper).
     const offerBankTransfer =
-      isBankTransferEligible(data.customerType, isSchoolPurpose) && (await isBankTransferActive());
+      isBankTransferEligible(data.customerType, isOrg) && (await isBankTransferActive());
     const stripeCustomerId = offerBankTransfer
       ? await getOrCreateStripeCustomer(effectiveEmail, `${data.firstName} ${data.lastName}`)
       : null;
@@ -678,11 +700,9 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
             product_data: {
               name: fullPaymentRequired
                 ? CL.fullName(data.arrival, data.departure)
-                : isSchoolPurpose
-                  ? CL.depositName(data.arrival, data.departure).replace("50 %", "10 %").replace("50%", "10%")
-                  : CL.depositName(data.arrival, data.departure),
+                : CL.depositName(data.arrival, data.departure, prepayPercent),
               description: fullPaymentRequired
-                ? CL.fullDescription(totalPersons, breakdown.nights, bookingNumber, discountSnippet)
+                ? CL.fullDescription(totalPersons, breakdown.nights, bookingNumber, discountSnippet, restLeadDays)
                 : CL.depositDescription(
                     totalPersons,
                     breakdown.nights,
@@ -693,7 +713,8 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
                     formatEuro(
                       effectiveRemainder + breakdown.depositCents + breakdown.kurtaxeCents,
                       locale
-                    )
+                    ),
+                    restLeadDays
                   ),
             },
           },
@@ -859,7 +880,7 @@ export async function createBookingAndCheckout(raw: unknown): Promise<ActionResu
     who: "Portal",
     what: `Neue Buchung ${bookingNumber} angelegt — ${
       fullPaymentRequired
-        ? `Komplettzahlung ${formatEuro(effectivePrepayment)} (Anreise < 14 Tage)`
+        ? `Komplettzahlung ${formatEuro(effectivePrepayment)} (Anreise < ${restLeadDays} Tage)`
         : `Anzahlung ${formatEuro(effectivePrepayment)}; Restzahlung ${formatEuro(effectiveRemainder)} offen`
     } + Kaution ${formatEuro(breakdown.depositCents)} + Kurtaxe ${formatEuro(breakdown.kurtaxeCents)} via Stripe${
       discountCents > 0 ? ` · Rabatt ${formatEuro(discountCents)} (${appliedDiscountCode})` : ""

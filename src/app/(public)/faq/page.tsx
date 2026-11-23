@@ -84,9 +84,9 @@ const FAQS: QA[] = [
       nl: "Hoe betaal ik?",
     },
     a: {
-      de: "Sicher online über Stripe (Kreditkarte oder SEPA-Lastschrift). In der Regel zahlst Du bei der Buchung 50 % an, der Rest wird 14 Tage vor Anreise automatisch eingezogen. Die Kaution (300 €) wird vorgemerkt und nach dem Aufenthalt zurückerstattet.",
-      en: "Securely online via Stripe (credit card or SEPA direct debit). Usually you pay 50% on booking, the rest is charged automatically 14 days before arrival. The deposit (€300) is pre-authorised and refunded after your stay.",
-      nl: "Veilig online via Stripe (creditcard of SEPA-incasso). Meestal betaal je 50% bij de boeking, de rest wordt 14 dagen voor aankomst automatisch geïncasseerd. De borg (€300) wordt gereserveerd en na het verblijf terugbetaald.",
+      de: "Private Gruppen zahlen online über Stripe (Karte): 50 % bei der Buchung, der Rest wird 14 Tage vor Anreise automatisch eingezogen. Organisationen (Schule, Verein, Kirche/Gemeinde, Stadt/Jugendpflege, Bildungsträger) zahlen 10 % bei der Buchung und den Rest 30 Tage vor Anreise — wahlweise online oder per Überweisung auf unser Vereinskonto. Die Kaution (300 €) ist mit der Restzahlung fällig und wird nach dem Aufenthalt zurückerstattet.",
+      en: "Private groups pay online via Stripe (card): 50% on booking, the rest is charged automatically 14 days before arrival. Organisations (school, club, church/parish, municipality/youth services, educational provider) pay 10% on booking and the rest 30 days before arrival — online or by bank transfer to our club account. The damage deposit (€300) is due with the remaining payment and refunded after your stay.",
+      nl: "Privégroepen betalen online via Stripe (kaart): 50% bij de boeking, de rest wordt 14 dagen voor aankomst automatisch geïncasseerd. Organisaties (school, vereniging, kerk/parochie, gemeente/jeugdwerk, onderwijsinstelling) betalen 10% bij de boeking en de rest 30 dagen voor aankomst — online of per overschrijving naar onze verenigingsrekening. De borg (€300) is verschuldigd met de restbetaling en wordt na het verblijf terugbetaald.",
     },
   },
   {
@@ -96,9 +96,9 @@ const FAQS: QA[] = [
       nl: "Kan ik gratis annuleren?",
     },
     a: {
-      de: "Bis 60 Tage vor Anreise kostenlos. Danach gestaffelt: 60–31 Tage 30 %, 30–14 Tage 50 %, weniger als 14 Tage 100 % des Übernachtungspreises. Endreinigung und Kaution werden im Stornofall nicht fällig. Maßgeblich ist der Eingang der Stornierung.",
-      en: "Free up to 60 days before arrival. After that, tiered: 60–31 days 30%, 30–14 days 50%, less than 14 days 100% of the accommodation price. Final cleaning and deposit are not charged if you cancel. The date the cancellation is received applies.",
-      nl: "Gratis tot 60 dagen voor aankomst. Daarna getrapt: 60–31 dagen 30%, 30–14 dagen 50%, minder dan 14 dagen 100% van de overnachtingsprijs. Eindschoonmaak en borg vervallen bij annulering. De ontvangstdatum van de annulering geldt.",
+      de: "Bis 60 Tage vor Anreise kostenlos. Danach gestaffelt: 60–31 Tage 30 %, 30–14 Tage 50 %, weniger als 14 Tage 100 % des Übernachtungspreises. Endreinigung und Kaution werden im Stornofall nicht fällig. Für Organisationen gilt: bis 60 Tage vor Anreise kostenlos, danach wird nur die Anzahlung von 10 % einbehalten — mehr nicht. Maßgeblich ist der Eingang der Stornierung.",
+      en: "Free up to 60 days before arrival. After that, tiered: 60–31 days 30%, 30–14 days 50%, less than 14 days 100% of the accommodation price. Final cleaning and deposit are not charged if you cancel. For organisations: free until 60 days before arrival, after that only the 10% deposit is retained — nothing more. The date the cancellation is received applies.",
+      nl: "Gratis tot 60 dagen voor aankomst. Daarna getrapt: 60–31 dagen 30%, 30–14 dagen 50%, minder dan 14 dagen 100% van de overnachtingsprijs. Eindschoonmaak en borg vervallen bij annulering. Voor organisaties: gratis tot 60 dagen voor aankomst, daarna wordt alleen de aanbetaling van 10% ingehouden — niet meer. De ontvangstdatum van de annulering geldt.",
     },
   },
   {

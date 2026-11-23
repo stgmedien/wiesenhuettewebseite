@@ -22,6 +22,8 @@ type Props = {
   depositCents: number;
   /** Spätester Überweisungstermin (2 Wochen vor Anreise), formatiert. */
   deadline: string;
+  /** Frist in Tagen vor Anreise (Altverträge/privat 14, Organisationen 30). */
+  restLeadDays?: number;
   /** Zuletzt gespeicherter AVS-SelfCheck-in-Link, falls schon einer verschickt wurde. */
   avsCheckinLink?: string | null;
   /**
@@ -89,6 +91,7 @@ export default function RestzahlungRequestEmail({
   remainderCents,
   depositCents,
   deadline,
+  restLeadDays = 14,
   avsCheckinLink,
   prepaymentCents,
 }: Props) {
@@ -126,8 +129,9 @@ export default function RestzahlungRequestEmail({
             </Text>
           </Section>
           <Text style={text}>
-            Bitte überweist den Betrag bis spätestens <strong>{deadline}</strong> (2 Wochen vor
-            Anreise) auf folgendes Konto:
+            Bitte überweist den Betrag bis spätestens <strong>{deadline}</strong> (
+            {restLeadDays === 14 ? "2 Wochen" : `${restLeadDays} Tage`} vor Anreise) auf folgendes
+            Konto:
           </Text>
           <Section
             style={{

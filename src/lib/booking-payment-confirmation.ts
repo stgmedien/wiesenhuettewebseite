@@ -11,6 +11,7 @@
  * Huettenwart-Info mit iCal-Einladung.
  */
 
+import { isOrgBooking } from "@/lib/booking-kind";
 import { db } from "@/lib/db";
 import { bookings, customers, payments, activityLog } from "@/lib/db/schema";
 import { and, eq, inArray } from "drizzle-orm";
@@ -70,6 +71,7 @@ export function buildBookingConfirmedEmailProps(params: {
     kurtaxeCents: booking.kurtaxeCents,
     paidCents,
     kautionDueNow,
+    orgBooking: isOrgBooking(booking),
     baseUrl,
     customer: {
       firstName: customer.firstName,

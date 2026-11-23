@@ -22,6 +22,8 @@ type Props = {
   depositCents?: number | null;
   kurtaxeCents?: number | null;
   daysUntilArrival: number;
+  /** Restzahlung fällig so viele Tage vor Anreise (privat 14, Organisationen 30). */
+  restLeadDays?: number;
   paymentLink?: string | null;
   autoChargePlanned: boolean;
   /** Formatiertes Datum, bis zu dem Personen nachgemeldet werden können (Issue #60). */
@@ -83,6 +85,7 @@ export default function PaymentReminderEmail({
   depositCents,
   kurtaxeCents,
   daysUntilArrival,
+  restLeadDays = 14,
   paymentLink,
   autoChargePlanned,
   increaseHintUntil,
@@ -94,7 +97,11 @@ export default function PaymentReminderEmail({
       <Body style={main}>
         <Container style={container}>
           <Text style={eyebrow}>Wiesenhütte · Zahlungserinnerung</Text>
-          <Heading style={heading}>Restzahlung in {daysUntilArrival} Tagen.</Heading>
+          <Heading style={heading}>
+            {daysUntilArrival > restLeadDays
+              ? `Restzahlung in ${daysUntilArrival - restLeadDays} Tagen.`
+              : "Restzahlung jetzt fällig."}
+          </Heading>
           <Text style={text}>Hallo {firstName},</Text>
           <Text style={text}>
             Eure Anreise ist am <strong>{arrival}</strong>. Vor der Anreise wird die Restzahlung
@@ -131,7 +138,7 @@ export default function PaymentReminderEmail({
               }}
             >
               <Text style={{ ...text, margin: 0 }}>
-                <strong>Automatischer Einzug:</strong> Wir buchen den Betrag automatisch 14 Tage
+                <strong>Automatischer Einzug:</strong> Wir buchen den Betrag automatisch {restLeadDays} Tage
                 vor Anreise von der Karte ab, mit der Du die Anzahlung gemacht hast. Du musst
                 nichts weiter tun.
               </Text>
@@ -139,7 +146,7 @@ export default function PaymentReminderEmail({
           ) : (
             <>
               <Text style={text}>
-                Bitte überweist den Betrag so, dass er spätestens 14 Tage vor Anreise bei uns
+                Bitte überweist den Betrag so, dass er spätestens {restLeadDays} Tage vor Anreise bei uns
                 eingeht.
               </Text>
               {paymentLink ? (

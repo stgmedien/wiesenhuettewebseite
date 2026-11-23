@@ -1,3 +1,4 @@
+import { CLUB_BANK_DETAILS } from "@/lib/bank-details";
 import {
   Body,
   Button,
@@ -110,6 +111,10 @@ export default function DepositReleaseRequestEmail({
             </Text>
             <Text style={{ ...text, margin: "0 0 4px 0" }}>
               <strong>Verwendungszweck:</strong> {reference}
+            </Text>
+            <Text style={{ ...text, margin: "0 0 4px 0" }}>
+              <strong>Bitte vom Hüttenkonto überweisen:</strong> {CLUB_BANK_DETAILS.iban} (
+              {CLUB_BANK_DETAILS.bank})
             </Text>
             <Text style={{ ...text, margin: 0 }}>
               <strong>Buchung:</strong> {bookingNumber} · {stayLabel}
