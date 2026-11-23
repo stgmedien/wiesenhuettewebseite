@@ -543,6 +543,7 @@ export async function createManualTransferBooking(raw: unknown): Promise<ManualT
           totalCents: effectiveSubtotal,
           paidCents: 0,
           managerUrl: `${baseUrl}/m/buchungen/${result.bookingId}`,
+          orgName: data.institution?.trim() || null,
           notes: `Klassische Überweisung (Selbstbedienung), kein Stripe. Anzahlung ${formatEuro(effectivePrepayment)} und Restzahlung ${formatEuro(restzahlungCents)} (fällig bis ${formatDateLong(restzahlungDeadlineIso)}) sind als offene Zahlungen hinterlegt — die Restzahlung wird automatisch eine Woche vor Fälligkeit (T-37) per Erinnerungsmail an den Gast angemahnt.`,
         }),
       });
