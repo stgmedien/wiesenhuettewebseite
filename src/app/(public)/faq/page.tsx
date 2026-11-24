@@ -91,14 +91,14 @@ const FAQS: QA[] = [
   },
   {
     q: {
-      de: "Kann ich kostenlos stornieren?",
-      en: "Can I cancel free of charge?",
-      nl: "Kan ik gratis annuleren?",
+      de: "Was kostet eine Stornierung?",
+      en: "What does a cancellation cost?",
+      nl: "Wat kost een annulering?",
     },
     a: {
-      de: "Bis 60 Tage vor Anreise kostenlos. Danach gestaffelt: 60–31 Tage 30 %, 30–14 Tage 50 %, weniger als 14 Tage 100 % des Übernachtungspreises. Endreinigung und Kaution werden im Stornofall nicht fällig. Maßgeblich ist der Eingang der Stornierung.",
-      en: "Free up to 60 days before arrival. After that, tiered: 60–31 days 30%, 30–14 days 50%, less than 14 days 100% of the accommodation price. Final cleaning and deposit are not charged if you cancel. The date the cancellation is received applies.",
-      nl: "Gratis tot 60 dagen voor aankomst. Daarna getrapt: 60–31 dagen 30%, 30–14 dagen 50%, minder dan 14 dagen 100% van de overnachtingsprijs. Eindschoonmaak en borg vervallen bij annulering. De ontvangstdatum van de annulering geldt.",
+      de: "Eine Stornierung ist nie ganz kostenlos: Mehr als 60 Tage vor Anreise werden 10 % einbehalten, danach gestaffelt: 60–31 Tage 30 %, 30–14 Tage 50 %, weniger als 14 Tage 100 % des Übernachtungspreises. Endreinigung und Kaution werden im Stornofall nicht fällig. Maßgeblich ist der Eingang der Stornierung.",
+      en: "Cancellation is never entirely free: more than 60 days before arrival 10% is retained, after that tiered: 60–31 days 30%, 30–14 days 50%, less than 14 days 100% of the accommodation price. Final cleaning and deposit are not charged if you cancel. The date the cancellation is received applies.",
+      nl: "Annuleren is nooit helemaal gratis: meer dan 60 dagen voor aankomst wordt 10% ingehouden, daarna getrapt: 60–31 dagen 30%, 30–14 dagen 50%, minder dan 14 dagen 100% van de overnachtingsprijs. Eindschoonmaak en borg vervallen bij annulering. De ontvangstdatum van de annulering geldt.",
     },
   },
   {

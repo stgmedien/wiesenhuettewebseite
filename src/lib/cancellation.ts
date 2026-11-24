@@ -6,7 +6,7 @@
  *
  * Logik (von Anreise rückwärts gerechnet, Basis: reiner Übernachtungspreis;
  * Endreinigung und Kaution werden im Stornofall nicht fällig):
- *  - > 60 Tage vorher: 100 % Rückerstattung (kostenlos)
+ *  - > 60 Tage vorher:  90 % Rückerstattung (10 % werden immer einbehalten, seit 25.11.2026)
  *  - 60 - 31 Tage:      70 % Rückerstattung
  *  - 30 - 14 Tage:      50 % Rückerstattung
  *  -  < 14 Tage:         0 % (Übernachtungspreis verfällt)

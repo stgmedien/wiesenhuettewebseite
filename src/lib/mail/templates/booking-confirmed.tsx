@@ -30,6 +30,8 @@ type Props = {
   kautionDueNow: boolean;
   /** Organisations-Buchung: 10 % Anzahlung (bei Storno einbehalten), Rest 30 Tage vor Anreise. */
   orgBooking?: boolean;
+  /** Buchung ab 25.11.2026: Storno-Staffel mit mind. 10 % für alle. */
+  stornoMinTen?: boolean;
   baseUrl: string;
   // Mietvertrag-Inhalt (§1–§9) — dieselbe Mail dient als Buchungsbestätigung
   // UND als Mietvertrag, statt zwei getrennte Mails zu verschicken.
@@ -143,6 +145,7 @@ export default function BookingConfirmedEmail({
   paidCents,
   kautionDueNow,
   orgBooking = false,
+  stornoMinTen = false,
   baseUrl,
   customer,
   personsBreakdown,
@@ -427,7 +430,7 @@ export default function BookingConfirmedEmail({
           )}
 
           <Heading as="h4" style={h2}>§ 6 Stornobedingungen</Heading>
-          {orgBooking ? (
+          {orgBooking && !stornoMinTen ? (
             <Text style={smallText}>
               Bis 60 Tage vor Anreise ist die Stornierung kostenlos. Danach wird ausschließlich die
               Anzahlung in Höhe von 10 % der Buchungssumme einbehalten; weitere Stornogebühren
@@ -441,7 +444,7 @@ export default function BookingConfirmedEmail({
                 fällig bzw. vollständig zurückerstattet:
               </Text>
               <ul style={{ margin: "0 0 8px 18px", padding: 0, color: "#111", fontFamily: "Inter, sans-serif", fontSize: "14px", lineHeight: 1.55 }}>
-                <li>mehr als 60 Tage vor Anreise: 0 %</li>
+                <li>mehr als 60 Tage vor Anreise: {stornoMinTen ? "10" : "0"} %</li>
                 <li>60 – 31 Tage vor Anreise: 30 %</li>
                 <li>30 – 14 Tage vor Anreise: 50 %</li>
                 <li>weniger als 14 Tage vor Anreise: 100 %</li>

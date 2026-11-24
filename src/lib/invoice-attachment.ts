@@ -3,7 +3,7 @@ import { bookings, invoices } from "@/lib/db/schema";
 import { and, eq, ne, desc } from "drizzle-orm";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { InvoicePdf } from "@/lib/invoice-pdf";
-import { CANCELLATION_POLICY_CUTOFF } from "@/lib/pricing";
+import { CANCELLATION_POLICY_CUTOFF, hasMinTenPercentStorno } from "@/lib/pricing";
 import type { MailAttachment } from "@/lib/mail/send";
 
 /**
@@ -57,6 +57,7 @@ export async function buildInvoicePdfAttachment(
         kurtaxeCents: b.kurtaxeCents,
         kurtaxePersons: b.adults + b.members + b.teachers,
         isLegacy: b.createdAt < CANCELLATION_POLICY_CUTOFF,
+        stornoMinTen: hasMinTenPercentStorno(b),
         notes: activeInvoice.notes ?? undefined,
       })
     );

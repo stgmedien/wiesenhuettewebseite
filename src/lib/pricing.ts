@@ -157,13 +157,33 @@ export const RULES = {
 // wenige Anmeldungen bekommt und storniert) — gerechnet auf den REINEN
 // ÜBERNACHTUNGSPREIS (accommodationCents). Endreinigung und Kaution werden
 // im Stornofall gar nicht erst fällig.
-// > 60 Tage 0 %, 60–31 Tage 30 %, 30–14 Tage 50 %, < 14 Tage 100 %
+// Seit 25.11.2026 (Dana/Vorstand, wie bei den alten Verträgen): Storno ist
+// nie kostenlos — 10 % werden immer einbehalten. Gilt für private Gruppen
+// UND Organisationen gleichermaßen (die frühere Org-Obergrenze von 10 % ab
+// 60 Tagen entfällt für Neubuchungen).
+// > 60 Tage 10 %, 60–31 Tage 30 %, 30–14 Tage 50 %, < 14 Tage 100 %
 export const CANCELLATION_TIERS = [
+  { minDaysBefore: 60, percent: 10 },
+  { minDaysBefore: 31, percent: 30 },
+  { minDaysBefore: 14, percent: 50 },
+  { minDaysBefore: 0, percent: 100 },
+] as const;
+
+// Staffel für Buchungen vom 05.07.2026 bis 24.11.2026 (AGB 1.0–1.4):
+// > 60 Tage 0 %, danach wie oben; Organisationen (ab 23.11.2026) max. 10 %.
+export const CANCELLATION_TIERS_2026_07 = [
   { minDaysBefore: 60, percent: 0 },
   { minDaysBefore: 31, percent: 30 },
   { minDaysBefore: 14, percent: 50 },
   { minDaysBefore: 0, percent: 100 },
 ] as const;
+
+// Ab hier gilt CANCELLATION_TIERS (immer mind. 10 %, gleiche Regeln für alle).
+export const CANCELLATION_POLICY_V3_FROM = new Date("2026-11-25T00:00:00+01:00");
+
+/** Gilt für diese Buchung die Staffel „immer mind. 10 %“ (ab 25.11.2026)? */
+export const hasMinTenPercentStorno = (b: { createdAt: Date }): boolean =>
+  b.createdAt >= CANCELLATION_POLICY_V3_FROM;
 
 // Alt-Staffel für Buchungen VOR dem Stichtag (haben die alten AGB
 // akzeptiert): gerechnet auf die Zwischensumme inkl. Endreinigung.
@@ -621,9 +641,16 @@ export const cancellationFeeForBooking = (booking: {
 } => {
   const isLegacy = booking.createdAt < CANCELLATION_POLICY_CUTOFF;
   const baseCents = isLegacy ? booking.subtotalCents : booking.accommodationCents;
-  const tiers = isLegacy ? CANCELLATION_TIERS_LEGACY : CANCELLATION_TIERS;
+  const isV3 = hasMinTenPercentStorno(booking);
+  const tiers = isLegacy
+    ? CANCELLATION_TIERS_LEGACY
+    : isV3
+      ? CANCELLATION_TIERS
+      : CANCELLATION_TIERS_2026_07;
   const { percent, feeCents } = feeFromTiers(baseCents, booking.arrival, tiers);
-  // Organisationen (AGB § 5, Vorstand 11/2026): bis 60 Tage vor Anreise
+  // Ab 25.11.2026: eine Staffel für alle, keine Org-Sonderregel.
+  if (isV3) return { percent, feeCents, baseCents, isLegacy, retainedPrepayment: false };
+  // Organisationen (nur Buchungen 23.–24.11.2026) (AGB § 5, Vorstand 11/2026): bis 60 Tage vor Anreise
   // kostenlos, danach wird nur die 10-%-Anzahlung einbehalten — nie mehr,
   // weil z. B. Schulklassen höhere Stornokosten nicht tragen können.
   if (isOrgBooking(booking)) {

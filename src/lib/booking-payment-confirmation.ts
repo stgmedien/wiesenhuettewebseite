@@ -11,6 +11,7 @@
  * Huettenwart-Info mit iCal-Einladung.
  */
 
+import { hasMinTenPercentStorno } from "@/lib/pricing";
 import { isOrgBooking } from "@/lib/booking-kind";
 import { db } from "@/lib/db";
 import { bookings, customers, payments, activityLog } from "@/lib/db/schema";
@@ -72,6 +73,7 @@ export function buildBookingConfirmedEmailProps(params: {
     paidCents,
     kautionDueNow,
     orgBooking: isOrgBooking(booking),
+    stornoMinTen: hasMinTenPercentStorno(booking),
     baseUrl,
     customer: {
       firstName: customer.firstName,
