@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { parseEuroInput } from "@/lib/utils";
 import { recordManualPayment } from "./actions";
 import { MANUAL_REST_MARKER } from "@/lib/payment-markers";
+import { todayBerlinIso } from "@/lib/manual-final-payment";
 
 const KINDS = [
   { value: "anzahlung", label: "Anzahlung" },
@@ -29,6 +30,7 @@ export function ManualPaymentForm({
   const [kind, setKind] = useState<string>("anzahlung");
   const [altRest, setAltRest] = useState(false);
   const [confirmAndNotify, setConfirmAndNotify] = useState(false);
+  const [receivedOn, setReceivedOn] = useState(todayBerlinIso);
   const [err, setErr] = useState<string | null>(null);
   const [pending, start] = useTransition();
   const router = useRouter();
@@ -45,6 +47,10 @@ export function ManualPaymentForm({
       setErr("Bitte einen gültigen Betrag größer 0 angeben, z. B. 1.371,50.");
       return;
     }
+    if (!altRest && !receivedOn) {
+      setErr("Bitte das Datum der Überweisung angeben.");
+      return;
+    }
     start(async () => {
       const r = await recordManualPayment({
         bookingId,
@@ -53,12 +59,14 @@ export function ManualPaymentForm({
         kind: altRest ? "restzahlung" : (kind as "anzahlung" | "restzahlung" | "vollzahlung" | "kaution"),
         altsystemRest: altRest,
         confirmAndNotify: canConfirmAndNotify && confirmAndNotify,
+        receivedOn: altRest ? undefined : receivedOn,
       });
       if (r.ok) {
         setOpen(false);
         setAmount("");
         setAltRest(false);
         setConfirmAndNotify(false);
+        setReceivedOn(todayBerlinIso());
         router.refresh();
       } else {
         setErr(r.error);
@@ -98,7 +106,7 @@ export function ManualPaymentForm({
         </span>
       </label>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <label className="block">
           <span className="block text-xs text-[var(--color-wh-fg-muted)] mb-1">
             {altRest ? "Offener Restbetrag (€)" : "Betrag (€)"}
@@ -138,6 +146,20 @@ export function ManualPaymentForm({
             className={`${inputCls} ${altRest ? "opacity-60" : ""}`}
           />
         </label>
+        {!altRest && (
+          <label className="block">
+            <span className="block text-xs text-[var(--color-wh-fg-muted)] mb-1">
+              Überweisung eingegangen am
+            </span>
+            <input
+              type="date"
+              value={receivedOn}
+              max={todayBerlinIso()}
+              onChange={(e) => setReceivedOn(e.target.value)}
+              className={inputCls}
+            />
+          </label>
+        )}
       </div>
 
       {canConfirmAndNotify && (
@@ -150,7 +172,7 @@ export function ManualPaymentForm({
           />
           <span className="text-[13px] leading-snug text-[var(--color-wh-black)]">
             <strong>Buchung bestätigen und Automatik auslösen</strong> — setzt die Buchung auf
-            „Bezahlt", erstellt die Rechnung und verschickt Bestätigungsmail + Mietvertrag an den
+            „Anzahlung erhalten“, erstellt die Rechnung und verschickt Bestätigungsmail + Mietvertrag an den
             Gast sowie die Info-Mail mit Kalendereintrag an den Hüttenservice. Für Zahlungen per
             Überweisung direkt an den Verein (z. B. wenn der Gast keine Stripe-fähige
             Zahlungsmethode hat).

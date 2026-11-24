@@ -236,6 +236,8 @@ export type ConfirmDepositParams = {
    * (z. B. kurzfristige Buchung < 14 Tage vor Anreise). Nur relevant im
    * Fallback-Insert-Fall, siehe fallbackPaymentMethod. */
   fallbackPaymentKind?: "anzahlung" | "vollzahlung";
+  /** Tag des Geldeingangs (manuelle Erfassung mit Überweisungsdatum). Standard: jetzt. */
+  receivedAt?: Date;
 };
 
 /**
@@ -256,6 +258,7 @@ export async function confirmDepositPayment(params: ConfirmDepositParams): Promi
     sendInternalNotice = true,
     fallbackPaymentMethod = "Manuell bestätigt",
     fallbackPaymentKind = "anzahlung",
+    receivedAt = new Date(),
   } = params;
 
   const booking = (await db.select().from(bookings).where(eq(bookings.id, bookingId)).limit(1))[0];
@@ -284,7 +287,7 @@ export async function confirmDepositPayment(params: ConfirmDepositParams): Promi
   if (openDepositRows.length > 0) {
     await db
       .update(payments)
-      .set({ status: "erhalten", receivedAt: new Date(), stripePaymentIntentId })
+      .set({ status: "erhalten", receivedAt, stripePaymentIntentId })
       .where(
         inArray(
           payments.id,
@@ -302,7 +305,7 @@ export async function confirmDepositPayment(params: ConfirmDepositParams): Promi
       amountCents,
       method: fallbackPaymentMethod,
       stripePaymentIntentId,
-      receivedAt: new Date(),
+      receivedAt,
     });
   }
 
