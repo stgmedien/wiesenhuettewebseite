@@ -1,5 +1,6 @@
 "use server";
 
+import { openFinalPayment, parseReceivedOn } from "@/lib/manual-final-payment";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { bookings, customers, payments, activityLog } from "@/lib/db/schema";
@@ -445,6 +446,8 @@ const recordPaymentSchema = z.object({
   // Info mit iCal). Für Gäste, die per Überweisung direkt an den Verein
   // gezahlt haben (kein Stripe möglich) — z. B. Vereine ohne eigene Karte.
   confirmAndNotify: z.boolean().optional(),
+  // Tag des Geldeingangs (YYYY-MM-DD) laut Kontoauszug — leer = heute.
+  receivedOn: z.string().optional(),
 });
 
 export type RecordPaymentResult = { ok: true } | { ok: false; error: string };
@@ -465,6 +468,9 @@ export async function recordManualPayment(
   }
   const data = parsed.data;
   const amountCents = Math.round(data.amountEuros * 100);
+  const receivedAt = parseReceivedOn(data.receivedOn);
+  if (!(receivedAt instanceof Date)) return { ok: false, error: receivedAt.error };
+  const receivedLabel = receivedAt.toLocaleDateString("de-DE", { timeZone: "Europe/Berlin" });
 
   const b = (await db.select().from(bookings).where(eq(bookings.id, data.bookingId)).limit(1))[0];
   if (!b) return { ok: false, error: "Buchung nicht gefunden." };
@@ -490,6 +496,7 @@ export async function recordManualPayment(
         sendInternalNotice: false,
         fallbackPaymentMethod: data.method,
         fallbackPaymentKind: data.kind === "vollzahlung" ? "vollzahlung" : "anzahlung",
+        receivedAt,
       });
     } catch (err) {
       return {
@@ -499,7 +506,7 @@ export async function recordManualPayment(
     }
     await db.insert(activityLog).values({
       who,
-      what: `Zahlung manuell bestätigt (${data.method}): ${formatEuro(amountCents)} — Buchung auf „bezahlt" gesetzt, Gast- und Hüttenwart-Mail verschickt`,
+      what: `Zahlung manuell bestätigt (${data.method}, eingegangen am ${receivedLabel}): ${formatEuro(amountCents)} — Status „Anzahlung erhalten", Gast- und Hüttenwart-Mail verschickt`,
       bookingId: data.bookingId,
     });
     revalidatePath(`/m/buchungen/${data.bookingId}`);
@@ -521,7 +528,7 @@ export async function recordManualPayment(
     amountCents,
     method,
     stripePaymentIntentId: null,
-    receivedAt: isAltRest ? null : new Date(),
+    receivedAt: isAltRest ? null : receivedAt,
   });
 
   // Eine bestätigte Buchung gilt mit dem ersten erfassten Geldeingang intern
@@ -547,8 +554,8 @@ export async function recordManualPayment(
     who,
     what: isAltRest
       ? `Altsystem-Restzahlungs-Marker angelegt: ${formatEuro(amountCents)} offen → T-14-Cron`
-      : `Manuelle Zahlung erfasst: ${formatEuro(amountCents)} (${data.kind}, ${data.method})${
-          promoteToPaid ? " — Status automatisch bestätigt → bezahlt" : ""
+      : `Manuelle Zahlung erfasst: ${formatEuro(amountCents)} (${data.kind}, ${data.method}, eingegangen am ${receivedLabel})${
+          promoteToPaid ? " — Status automatisch bestätigt → Anzahlung erhalten" : ""
         }`,
     bookingId: data.bookingId,
   });
@@ -578,7 +585,8 @@ export type ManualFinalPaymentResult =
  * Buchung danach korrekt als "bereits bezahlt" überspringt.
  */
 export async function confirmManualFinalPayment(
-  bookingId: string
+  bookingId: string,
+  receivedOn?: string
 ): Promise<ManualFinalPaymentResult> {
   let session: Awaited<ReturnType<typeof requireManager>>;
   try {
@@ -587,46 +595,36 @@ export async function confirmManualFinalPayment(
     return { ok: false, error: "Nicht autorisiert" };
   }
 
+  const receivedAt = parseReceivedOn(receivedOn);
+  if (!(receivedAt instanceof Date)) return { ok: false, error: receivedAt.error };
+  const receivedLabel = receivedAt.toLocaleDateString("de-DE", { timeZone: "Europe/Berlin" });
+
   const b = (await db.select().from(bookings).where(eq(bookings.id, bookingId)).limit(1))[0];
   if (!b) return { ok: false, error: "Buchung nicht gefunden." };
   if (b.status !== "bezahlt") {
-    return { ok: false, error: `Nur bei Buchungen im Status „Bezahlt" möglich (aktuell „${b.status}").` };
+    return {
+      ok: false,
+      error: `Nur bei Buchungen im Status „Anzahlung erhalten" möglich (aktuell „${b.status}").`,
+    };
   }
 
-  const restPmts = await db
-    .select()
-    .from(payments)
-    .where(and(eq(payments.bookingId, b.id), eq(payments.kind, "restzahlung")));
-  if (restPmts.some((p) => p.status === "erhalten")) {
+  const pmts = await db.select().from(payments).where(eq(payments.bookingId, b.id));
+  const open = openFinalPayment(b, pmts);
+  if (open.restAlreadyReceived) {
     return { ok: false, error: "Die Restzahlung wurde bereits erfasst." };
   }
-  const originalRestRow = restPmts.find((p) => p.status === "offen");
-  const rentRemainderCents = originalRestRow
-    ? originalRestRow.amountCents
-    : Math.max(0, b.subtotalCents - Math.min(b.paidCents, b.subtotalCents));
-
-  const kautionPmts = await db
-    .select()
-    .from(payments)
-    .where(and(eq(payments.bookingId, b.id), eq(payments.kind, "kaution")));
-  const kautionCents = kautionPmts.some((p) => p.status === "erhalten") ? 0 : b.depositCents;
-
-  const kurtaxePmts = await db
-    .select()
-    .from(payments)
-    .where(and(eq(payments.bookingId, b.id), eq(payments.kind, "kurtaxe")));
-  const kurtaxeCents = kurtaxePmts.some((p) => p.status === "erhalten") ? 0 : b.kurtaxeCents;
-
-  const chargeCents = rentRemainderCents + kautionCents + kurtaxeCents;
+  const { rentRemainderCents, kautionCents, kurtaxeCents } = open;
+  const chargeCents = open.totalCents;
   if (chargeCents <= 0) {
     return { ok: false, error: "Kein offener Restbetrag gefunden — nichts zu bestätigen." };
   }
+  const originalRestRow = pmts.find((p) => p.kind === "restzahlung" && p.status === "offen");
 
   const method = "Banküberweisung (manuell bestätigt)";
   if (originalRestRow) {
     await db
       .update(payments)
-      .set({ status: "erhalten", method, receivedAt: new Date() })
+      .set({ status: "erhalten", method, receivedAt })
       .where(eq(payments.id, originalRestRow.id));
   } else {
     await db.insert(payments).values({
@@ -635,7 +633,7 @@ export async function confirmManualFinalPayment(
       status: "erhalten",
       amountCents: rentRemainderCents,
       method,
-      receivedAt: new Date(),
+      receivedAt,
     });
   }
   if (kautionCents > 0) {
@@ -645,7 +643,7 @@ export async function confirmManualFinalPayment(
       status: "erhalten",
       amountCents: kautionCents,
       method,
-      receivedAt: new Date(),
+      receivedAt,
     });
   }
   if (kurtaxeCents > 0) {
@@ -655,7 +653,7 @@ export async function confirmManualFinalPayment(
       status: "erhalten",
       amountCents: kurtaxeCents,
       method,
-      receivedAt: new Date(),
+      receivedAt,
     });
   }
   await db
@@ -665,7 +663,7 @@ export async function confirmManualFinalPayment(
 
   await db.insert(activityLog).values({
     who: session.user?.name ?? session.user?.email ?? "Manager",
-    what: `Restzahlung manuell bestätigt (Banküberweisung): ${formatEuro(chargeCents)} (davon ${formatEuro(kautionCents)} Kaution, ${formatEuro(kurtaxeCents)} Kurtaxe)`,
+    what: `Restzahlung manuell bestätigt (Banküberweisung, eingegangen am ${receivedLabel}): ${formatEuro(chargeCents)} (davon ${formatEuro(kautionCents)} Kaution, ${formatEuro(kurtaxeCents)} Kurtaxe)`,
     bookingId: b.id,
   });
 

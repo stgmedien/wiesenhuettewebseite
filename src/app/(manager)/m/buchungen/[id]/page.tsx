@@ -9,6 +9,7 @@ import { StatusPill } from "@/components/manager/StatusPill";
 import { StatusActions } from "./StatusActions";
 import { ManualPaymentForm } from "./ManualPaymentForm";
 import { ManualAutomationButtons } from "./ManualAutomationButtons";
+import { openFinalPayment, restDueDateIso } from "@/lib/manual-final-payment";
 import { DepositReleaseControl } from "./DepositReleaseControl";
 import { DEPOSIT_RELEASE_METHOD } from "@/lib/deposit-release";
 import { AvsCheckinForm } from "./AvsCheckinForm";
@@ -114,6 +115,7 @@ export default async function BookingDetail({ params }: Props) {
   const customer = customerRows[0] ?? null;
   const avsLastSentAt = avsSent[0] ? new Date(avsSent[0].sentAt).toLocaleString("de-DE") : null;
 
+  const finalOpen = openFinalPayment(b, pmts);
   const openDepositRelease = pmts.find(
     (p) => p.kind === "rueckerstattung" && p.status === "offen" && p.method === DEPOSIT_RELEASE_METHOD
   );
@@ -295,10 +297,12 @@ export default async function BookingDetail({ params }: Props) {
                   method: p.method,
                   status: p.status,
                   amountCents: p.amountCents,
+                  // Nur das Datum (Berlin): bei manuell erfassten Überweisungen
+                  // ist das der eingetragene Eingangstag laut Kontoauszug.
                   dateLabel: (p.receivedAt
                     ? new Date(p.receivedAt)
                     : new Date(p.createdAt)
-                  ).toLocaleString("de-DE"),
+                  ).toLocaleDateString("de-DE", { timeZone: "Europe/Berlin" }),
                 }))}
               />
             )}
@@ -307,6 +311,12 @@ export default async function BookingDetail({ params }: Props) {
               bookingId={b.id}
               status={b.status}
               hasStripePaymentIntent={!!b.stripePaymentIntentId}
+              restDueIso={restDueDateIso(b)}
+              openCents={finalOpen.totalCents}
+              rentRemainderCents={finalOpen.rentRemainderCents}
+              kautionCents={finalOpen.kautionCents}
+              kurtaxeCents={finalOpen.kurtaxeCents}
+              restAlreadyReceived={finalOpen.restAlreadyReceived}
             />
             <DepositReleaseControl
               bookingId={b.id}

@@ -6,7 +6,7 @@ const STATUSES = [
   { value: "", label: "Alle Status" },
   { value: "angefragt", label: "Angefragt" },
   { value: "bestaetigt", label: "Bestätigt" },
-  { value: "bezahlt", label: "Bezahlt" },
+  { value: "bezahlt", label: "Anzahlung erhalten" },
   { value: "angereist", label: "Angereist" },
   { value: "abgereist", label: "Abgereist" },
   { value: "storniert", label: "Storniert" },

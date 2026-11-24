@@ -146,7 +146,7 @@ export default async function DruckenPage() {
                             backgroundColor: r.status === "bezahlt" ? "#C0DD97" : "#FAC775",
                             color: r.status === "bezahlt" ? "#173404" : "#412402",
                           }}>
-                            {r.status === "bezahlt" ? "Bezahlt" : "Bestätigt"}
+                            {r.status === "bezahlt" ? "Anzahlung erhalten" : "Bestätigt"}
                           </span>
                         </div>
                       </Td>
