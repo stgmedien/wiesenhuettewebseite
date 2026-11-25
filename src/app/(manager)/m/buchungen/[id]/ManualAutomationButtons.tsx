@@ -23,6 +23,8 @@ type Props = {
   kautionCents: number;
   kurtaxeCents: number;
   restAlreadyReceived: boolean;
+  /** Cron hat den Stripe-Einzug schon ausgelöst → kein manuelles Verbuchen mehr. */
+  autoChargeAttempted: boolean;
 };
 
 /**
@@ -34,6 +36,11 @@ type Props = {
  * der Anzahlung sah der Knopf so aus, als sei schon alles bezahlt). Vorher
  * nur ein Hinweis mit Fälligkeitsdatum — plus ein kleiner Link für den
  * Sonderfall, dass ein Gast früher überweist.
+ *
+ * Kartenbuchungen (Stripe): nur der Link, und nur BIS zum Einzugstag — für
+ * Gäste, die den Rest lieber selbst aufs Hüttenkonto überweisen (Finn
+ * 11/2026). Verbucht Rest + Kaution + Kurtaxe, danach überspringt der Cron
+ * den Einzug komplett.
  */
 export function ManualAutomationButtons({
   bookingId,
@@ -45,6 +52,7 @@ export function ManualAutomationButtons({
   kautionCents,
   kurtaxeCents,
   restAlreadyReceived,
+  autoChargeAttempted,
 }: Props) {
   const [pending, start] = useTransition();
   const [msg, setMsg] = useState<string | null>(null);
@@ -53,12 +61,16 @@ export function ManualAutomationButtons({
   const [receivedOn, setReceivedOn] = useState(todayBerlinIso);
   const router = useRouter();
 
+  const isDue = todayBerlinIso() >= restDueIso;
+  const stripe = hasStripePaymentIntent;
   const relevant =
-    status === "bezahlt" && !hasStripePaymentIntent && !restAlreadyReceived && openCents > 0;
+    status === "bezahlt" &&
+    !restAlreadyReceived &&
+    openCents > 0 &&
+    (!stripe || (!isDue && !autoChargeAttempted));
   if (!relevant && !msg) return null;
 
-  const isDue = todayBerlinIso() >= restDueIso;
-  const showButton = isDue || early;
+  const showButton = stripe ? early : isDue || early;
 
   const breakdown = [
     `${euro(rentRemainderCents)} Restzahlung`,
@@ -94,22 +106,30 @@ export function ManualAutomationButtons({
   return (
     <div className="mt-4 rounded-xl border border-[#C9B8E8] bg-[#F2EEF9] p-4 space-y-3">
       <div className="text-xs uppercase tracking-wider font-semibold text-[#4A3B6B]">
-        Manuelle Buchung (Banküberweisung)
+        {stripe ? "Restzahlung per Überweisung statt Einzug" : "Manuelle Buchung (Banküberweisung)"}
       </div>
       {msg ? (
         <p className="text-xs text-[#4A3B6B] m-0">{msg}</p>
       ) : !showButton ? (
         <div className="text-[13px] text-[#4A3B6B] space-y-1">
           <p className="m-0">
-            Restzahlung fällig am <strong>{deDate(restDueIso)}</strong>: {euro(openCents)} ({breakdown}).
-            Der Knopf zum Verbuchen erscheint dann.
+            {stripe ? (
+              <>
+                Wird am <strong>{deDate(restDueIso)}</strong> automatisch eingezogen: {euro(openCents)} ({breakdown}).
+              </>
+            ) : (
+              <>
+                Restzahlung fällig am <strong>{deDate(restDueIso)}</strong>: {euro(openCents)} ({breakdown}).
+                Der Knopf zum Verbuchen erscheint dann.
+              </>
+            )}
           </p>
           <button
             type="button"
             onClick={() => setEarly(true)}
             className="text-xs text-[#7B5EA7] underline cursor-pointer"
           >
-            Rest ist schon früher eingegangen?
+            {stripe ? "Rest ist schon per Überweisung eingegangen?" : "Rest ist schon früher eingegangen?"}
           </button>
         </div>
       ) : (
@@ -117,6 +137,7 @@ export function ManualAutomationButtons({
           <p className="text-[13px] text-[#4A3B6B] m-0">
             Offen: <strong>{euro(openCents)}</strong> ({breakdown}) — fällig {isDue ? "seit" : "am"}{" "}
             {deDate(restDueIso)}.
+            {stripe && " Nach dem Verbuchen wird nichts mehr automatisch eingezogen."}
           </p>
           <label className="block max-w-[220px]">
             <span className="block text-xs text-[#4A3B6B] mb-1">Überweisung eingegangen am</span>

@@ -317,6 +317,7 @@ export default async function BookingDetail({ params }: Props) {
               kautionCents={finalOpen.kautionCents}
               kurtaxeCents={finalOpen.kurtaxeCents}
               restAlreadyReceived={finalOpen.restAlreadyReceived}
+              autoChargeAttempted={finalOpen.autoChargeAttempted}
             />
             <DepositReleaseControl
               bookingId={b.id}

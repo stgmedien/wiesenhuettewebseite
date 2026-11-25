@@ -1,6 +1,6 @@
 "use server";
 
-import { openFinalPayment, parseReceivedOn } from "@/lib/manual-final-payment";
+import { openFinalPayment, parseReceivedOn, restDueDateIso, todayBerlinIso } from "@/lib/manual-final-payment";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { bookings, customers, payments, activityLog } from "@/lib/db/schema";
@@ -612,6 +612,22 @@ export async function confirmManualFinalPayment(
   const open = openFinalPayment(b, pmts);
   if (open.restAlreadyReceived) {
     return { ok: false, error: "Die Restzahlung wurde bereits erfasst." };
+  }
+  // Kartenbuchungen (Stripe): nur VOR dem automatischen Einzug, sonst würde
+  // doppelt kassiert. Ab dem Fälligkeitstag zieht der Cron selbst ein.
+  if (b.stripePaymentIntentId) {
+    if (open.autoChargeAttempted) {
+      return {
+        ok: false,
+        error: "Der automatische Einzug der Restzahlung wurde bereits ausgelöst — bitte in Stripe prüfen.",
+      };
+    }
+    if (todayBerlinIso() >= restDueDateIso(b)) {
+      return {
+        ok: false,
+        error: `Die Restzahlung wird ab ${restDueDateIso(b).split("-").reverse().join(".")} automatisch eingezogen — eine Überweisung kann nur vorher verbucht werden.`,
+      };
+    }
   }
   const { rentRemainderCents, kautionCents, kurtaxeCents } = open;
   const chargeCents = open.totalCents;

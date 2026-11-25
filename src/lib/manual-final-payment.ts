@@ -8,7 +8,7 @@ import { restLeadDaysFor } from "@/lib/booking-kind";
 // noch nicht als erhalten verbucht).
 // =============================================================
 
-type PaymentLike = { kind: string; status: string; amountCents: number };
+type PaymentLike = { kind: string; status: string; amountCents: number; method?: string | null };
 
 type BookingLike = {
   arrival: string;
@@ -24,6 +24,8 @@ type BookingLike = {
 
 export type OpenFinalPayment = {
   restAlreadyReceived: boolean;
+  /** Der Cron hat den Stripe-Einzug schon versucht (läuft oder ist gescheitert). */
+  autoChargeAttempted: boolean;
   rentRemainderCents: number;
   kautionCents: number;
   kurtaxeCents: number;
@@ -33,6 +35,7 @@ export type OpenFinalPayment = {
 export function openFinalPayment(b: BookingLike, pmts: PaymentLike[]): OpenFinalPayment {
   const rest = pmts.filter((p) => p.kind === "restzahlung");
   const restAlreadyReceived = rest.some((p) => p.status === "erhalten");
+  const autoChargeAttempted = rest.some((p) => p.method === "Stripe Off-Session attempt");
   const openRestRow = rest.find((p) => p.status === "offen");
   const rentRemainderCents = openRestRow
     ? openRestRow.amountCents
@@ -45,6 +48,7 @@ export function openFinalPayment(b: BookingLike, pmts: PaymentLike[]): OpenFinal
     : b.kurtaxeCents;
   return {
     restAlreadyReceived,
+    autoChargeAttempted,
     rentRemainderCents,
     kautionCents,
     kurtaxeCents,
