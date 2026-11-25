@@ -9,6 +9,7 @@ import { StatusPill } from "@/components/manager/StatusPill";
 import { StatusActions } from "./StatusActions";
 import { ManualPaymentForm } from "./ManualPaymentForm";
 import { ManualAutomationButtons } from "./ManualAutomationButtons";
+import { TransferRequestMailButton } from "./TransferRequestMailButton";
 import { openFinalPayment, restDueDateIso } from "@/lib/manual-final-payment";
 import { DepositReleaseControl } from "./DepositReleaseControl";
 import { DEPOSIT_RELEASE_METHOD } from "@/lib/deposit-release";
@@ -138,6 +139,7 @@ export default async function BookingDetail({ params }: Props) {
               paidCents={b.paidCents}
               dueCents={b.subtotalCents + b.depositCents + b.kurtaxeCents}
               manual={!b.stripePaymentIntentId}
+              transferPending={b.paymentMode === "manual_transfer"}
             />
             <span className="text-[var(--color-wh-fg-muted)]">
               {formatDateLong(b.arrival)} → {formatDateLong(b.departure)} · {b.nights} Nächte
@@ -305,6 +307,9 @@ export default async function BookingDetail({ params }: Props) {
                   ).toLocaleDateString("de-DE", { timeZone: "Europe/Berlin" }),
                 }))}
               />
+            )}
+            {b.paymentMode === "manual_transfer" && b.status === "angefragt" && (
+              <TransferRequestMailButton bookingId={b.id} />
             )}
             <ManualPaymentForm bookingId={b.id} bookingStatus={b.status} />
             <ManualAutomationButtons

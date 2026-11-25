@@ -22,6 +22,9 @@ const ANGEZAHLT = { bg: "#A8C29A", fg: "#2F4A35", label: "Anzahlung erhalten" };
 // damit sie im Blick bleiben und nicht zwischen den automatisierten
 // Buchungen untergehen (Dana/Johannes-Wunsch).
 const BEZAHLT_MANUAL = { bg: "#7B5EA7", fg: "#F7F7F2", label: "Vollständig bezahlt (manuell)" };
+// Buchung per klassischer Überweisung, Anzahlung noch nicht da: in der DB
+// "angefragt", aber der Gast hat verbindlich gebucht (Dana 11/2026).
+const UEBERWEISUNG_OFFEN = { bg: "#F2EEF9", fg: "#4A3B6B", label: "Überweisung offen" };
 const ANGEZAHLT_MANUAL = { bg: "#C9B8E8", fg: "#4A3B6B", label: "Anzahlung erhalten (manuell)" };
 
 /**
@@ -48,6 +51,7 @@ export const StatusPill = ({
   paidCents,
   dueCents,
   manual = false,
+  transferPending = false,
 }: {
   status: string;
   /** Bisher gezahlter Betrag (optional — nur für die Angezahlt-/Bezahlt-Anzeige). */
@@ -56,10 +60,14 @@ export const StatusPill = ({
   dueCents?: number;
   /** Kein Stripe-Zahlungsvorgang (Banküberweisung) — färbt "Bezahlt"/"Angezahlt" lila statt grün. */
   manual?: boolean;
+  /** paymentMode "manual_transfer": "Angefragt" wird als "Überweisung offen" angezeigt. */
+  transferPending?: boolean;
 }) => {
   const shown = displayStatus(status, paidCents, dueCents);
   const c =
-    shown === "angezahlt"
+    shown === "angefragt" && transferPending
+      ? UEBERWEISUNG_OFFEN
+      : shown === "angezahlt"
       ? manual
         ? ANGEZAHLT_MANUAL
         : ANGEZAHLT

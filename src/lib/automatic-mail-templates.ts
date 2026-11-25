@@ -39,6 +39,14 @@ export const AUTOMATIC_MAIL_TEMPLATES: AutomaticMailTemplate[] = [
     file: "src/lib/booking-payment-confirmation.ts",
   },
   {
+    key: "booking_transfer_request",
+    label: "Buchung per Überweisung — Kontodaten für die Anzahlung",
+    category: "Buchung — Gast",
+    trigger: "Sofort nach einer Buchung per klassischer Überweisung (nur Organisationen). Kann im Manager bei „Überweisung offen“ erneut verschickt werden.",
+    audience: "Gast",
+    file: "src/app/(public)/buchen/manual-transfer-actions.ts, src/app/(manager)/m/buchungen/[id]/actions.ts",
+  },
+  {
     key: "booking-cancelled",
     label: "Stornierung bestätigt",
     category: "Buchung — Gast",

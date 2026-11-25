@@ -32,6 +32,7 @@ import { memberNamesSchema, checkMemberNames, memberNamesNoteBody } from "@/lib/
 import { auth } from "@/lib/auth";
 import { sendMail } from "@/lib/mail/send";
 import BookingInternalEmail from "@/lib/mail/templates/booking-internal";
+import BookingTransferRequestEmail, { transferRequestSubject } from "@/lib/mail/templates/booking-transfer-request";
 import { isOrgPurpose, ORG_PREPAY_PERCENT, ORG_REST_LEAD_DAYS, MANUAL_TRANSFER_MIN_LEAD_DAYS } from "@/lib/booking-kind";
 import {
   validateDiscountCode,
@@ -550,6 +551,29 @@ export async function createManualTransferBooking(raw: unknown): Promise<ManualT
     }
   } catch (err) {
     console.error("[manual-transfer] internal notice failed (non-blocking):", err);
+  }
+
+  // Gast-Mail mit Kontodaten — vorher stand das nur auf dem Bildschirm
+  // (Dana 11/2026). Best-effort: ein Mailfehler darf die Buchung nicht kippen.
+  try {
+    await sendMail({
+      to: effectiveEmail,
+      subject: transferRequestSubject(locale, bookingNumber),
+      template: "booking_transfer_request",
+      bookingId: result.bookingId,
+      react: BookingTransferRequestEmail({
+        locale,
+        firstName: data.firstName,
+        bookingNumber,
+        arrival: formatDateLong(data.arrival),
+        departure: formatDateLong(data.departure),
+        anzahlungCents: effectivePrepayment,
+        restzahlungCents,
+        restDeadline: formatDateLong(restzahlungDeadlineIso),
+      }),
+    });
+  } catch (err) {
+    console.error("[manual-transfer] guest transfer mail failed (non-blocking):", err);
   }
 
   return {

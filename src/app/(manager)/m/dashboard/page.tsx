@@ -121,6 +121,7 @@ export default async function Dashboard() {
           depositCents: bookings.depositCents,
           kurtaxeCents: bookings.kurtaxeCents,
           stripePaymentIntentId: bookings.stripePaymentIntentId,
+          paymentMode: bookings.paymentMode,
         })
         .from(bookings)
         .where(ne(bookings.status, "storniert"))
@@ -407,6 +408,7 @@ export default async function Dashboard() {
                       paidCents={b.paidCents}
                       dueCents={b.subtotalCents + b.depositCents + b.kurtaxeCents}
                       manual={!b.stripePaymentIntentId}
+                      transferPending={b.paymentMode === "manual_transfer"}
                     />
                   }
                 />
