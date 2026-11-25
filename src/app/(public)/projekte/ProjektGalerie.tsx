@@ -16,6 +16,20 @@ export function ProjektGalerie({ projekte }: { projekte: Projekt[] }) {
   const active = projekte.find((p) => p.key === activeKey) ?? null;
   const { auswahl, toggleProjekt } = usePlanungsAuswahl();
 
+  // Direktlink (QR-Code auf Plakaten): /projekte#tischtennis öffnet die Karte.
+  useEffect(() => {
+    const openFromHash = () => {
+      const key = decodeURIComponent(window.location.hash.slice(1));
+      if (key && projekte.some((p) => p.key === key)) setActiveKey(key);
+    };
+    const t = window.setTimeout(openFromHash, 0);
+    window.addEventListener("hashchange", openFromHash);
+    return () => {
+      window.clearTimeout(t);
+      window.removeEventListener("hashchange", openFromHash);
+    };
+  }, [projekte]);
+
   useEffect(() => {
     if (!active) return;
     const onKey = (e: KeyboardEvent) => {
@@ -54,6 +68,9 @@ export function ProjektGalerie({ projekte }: { projekte: Projekt[] }) {
               <img src={`/media/projekte/${p.key}.svg`} alt="" />
               <span className={styles.tileNr}>{p.nr}</span>
               {p.key === "plateau" && <span className={styles.tileFirst}>startet zuerst</span>}
+              {p.vergeben && (
+                <span className={styles.tileTaken}>In Planung · {p.vergeben.gruppe}</span>
+              )}
               <span
                 role="checkbox"
                 aria-checked={auswahl.projekte.includes(p.key)}
@@ -118,6 +135,7 @@ export function ProjektGalerie({ projekte }: { projekte: Projekt[] }) {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={active.bild} alt="" />
                 <div className={styles.heroShade} />
+                {active.bildHinweis && <span className={styles.heroNote}>{active.bildHinweis}</span>}
                 <div className={styles.heroContent}>
                   <div className={styles.heroTop}>
                     <span className={styles.plaque}>Projekt Nº {active.nr}</span>
@@ -132,6 +150,36 @@ export function ProjektGalerie({ projekte }: { projekte: Projekt[] }) {
               </div>
 
               <div className={styles.body}>
+                {active.vergeben && (
+                  <div className={styles.taken}>
+                    <p className={styles.eyebrow2}>Die {active.vergeben.gruppe} ist dran</p>
+                    <blockquote className={styles.takenQuote}>
+                      {active.vergeben.antwort.map((line) => (
+                        <p key={line}>{line}</p>
+                      ))}
+                      <footer>{active.vergeben.gruss}</footer>
+                    </blockquote>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={active.bild}
+                      alt={`Visualisierung: ${active.untertitel}`}
+                      className={styles.takenImg}
+                    />
+                    {active.bildHinweis && <p className={styles.takenImgNote}>{active.bildHinweis}</p>}
+                    <ol className={styles.steps}>
+                      {active.vergeben.schritte.map((st) => (
+                        <li key={st.label} className={styles[`step_${st.stand}`]}>
+                          <span className={styles.stepDot} aria-hidden="true">
+                            {st.stand === "fertig" ? <Check size={11} strokeWidth={3} /> : null}
+                          </span>
+                          {st.label}
+                          {st.stand === "aktuell" && <em> · gerade dran</em>}
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                )}
+
                 <div>
                   <p className={styles.eyebrow2}>Darum geht&apos;s</p>
                   <p className={styles.why}>{active.darumGehts}</p>
@@ -185,11 +233,13 @@ export function ProjektGalerie({ projekte }: { projekte: Projekt[] }) {
                   </div>
                 </div>
 
-                <ProjektAnfrageForm
-                  projektKey={active.key}
-                  projektNr={active.nr}
-                  projektTitel={active.titel}
-                />
+                {!active.vergeben && (
+                  <ProjektAnfrageForm
+                    projektKey={active.key}
+                    projektNr={active.nr}
+                    projektTitel={active.titel}
+                  />
+                )}
 
                 <p className={styles.thanks}>{active.danke}</p>
               </div>
@@ -201,7 +251,7 @@ export function ProjektGalerie({ projekte }: { projekte: Projekt[] }) {
                 </div>
                 <div className={styles.seal}>
                   <div className={styles.sealTop}>Patenschaft</div>
-                  <div className={styles.sealMid}>frei</div>
+                  <div className={styles.sealMid}>{active.vergeben ? "vergeben" : "frei"}</div>
                   <div className={styles.sealBot}>Nº&nbsp;{active.nr}</div>
                 </div>
               </div>

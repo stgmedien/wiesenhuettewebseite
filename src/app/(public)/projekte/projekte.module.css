@@ -920,3 +920,108 @@
 .planLink:hover {
   color: var(--pk-pine-deep);
 }
+
+/* ---------- Projekt übernommen (z. B. Partyraum / Klasse 8b) ---------- */
+.tileTaken {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  font-family: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-size: 12.5px;
+  background: var(--pk-pine);
+  color: var(--pk-cream);
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+.heroNote {
+  position: absolute;
+  right: 10px;
+  bottom: 8px;
+  z-index: 2;
+  font-family: var(--pk-mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  color: var(--pk-cream);
+  background: rgba(20, 26, 22, 0.55);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+.taken {
+  border: 1px solid rgba(47, 74, 58, 0.25);
+  background: rgba(47, 74, 58, 0.06);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.takenQuote {
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #3a352d;
+  font-style: italic;
+}
+.takenQuote p {
+  margin: 0 0 6px;
+}
+.takenQuote footer {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--pk-pine-deep);
+}
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12.5px;
+  color: #3a352d;
+}
+.steps li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.steps em {
+  color: var(--pk-wood-deep);
+  font-style: italic;
+}
+.stepDot {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  border: 1.5px solid var(--pk-pine);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.step_fertig .stepDot {
+  background: var(--pk-pine);
+  color: var(--pk-cream);
+}
+.step_aktuell {
+  font-weight: 600;
+}
+.step_aktuell .stepDot {
+  background: var(--pk-sun);
+  border-color: var(--pk-sun);
+}
+.step_offen {
+  opacity: 0.6;
+}
+.takenImg {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+}
+.takenImgNote {
+  font-family: var(--pk-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  color: var(--pk-wood-deep);
+  margin: 4px 0 10px;
+}
