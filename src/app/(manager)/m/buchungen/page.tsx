@@ -41,6 +41,7 @@ export default async function BookingsListPage({
       depositCents: bookings.depositCents,
       kurtaxeCents: bookings.kurtaxeCents,
       stripePaymentIntentId: bookings.stripePaymentIntentId,
+      paymentMode: bookings.paymentMode,
       createdAt: bookings.createdAt,
       avsCheckinLink: bookings.avsCheckinLink,
       kurkartenPdfUrl: bookings.kurkartenPdfUrl,
@@ -194,6 +195,7 @@ type BookingRow = {
   depositCents: number;
   kurtaxeCents: number;
   stripePaymentIntentId: string | null;
+  paymentMode: string;
   createdAt: Date;
   avsCheckinLink: string | null;
   kurkartenPdfUrl: string | null;
@@ -274,6 +276,7 @@ const BookingsTable = ({
                 paidCents={r.paidCents}
                 dueCents={r.totalCents + r.depositCents + r.kurtaxeCents}
                 manual={!r.stripePaymentIntentId}
+                transferPending={r.paymentMode === "manual_transfer"}
               />
             </Td>
             <Td>

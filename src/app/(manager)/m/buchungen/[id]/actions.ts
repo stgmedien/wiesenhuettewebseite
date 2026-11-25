@@ -35,6 +35,7 @@ import { notifyWaitlistForRange } from "@/lib/waitlist";
 import { generateFeuerwehrListePdf } from "@/lib/generate-feuerwehr-liste";
 import { buildInvoicePdfAttachment } from "@/lib/invoice-attachment";
 import DepositRefundedEmail from "@/lib/mail/templates/deposit-refunded";
+import BookingTransferRequestEmail, { transferRequestSubject } from "@/lib/mail/templates/booking-transfer-request";
 import { buildKurkartenFilename } from "@/lib/kurkarten";
 import type { MailAttachment } from "@/lib/mail/send";
 
@@ -1152,4 +1153,62 @@ export async function generateFeuerwehrListe(
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : "Fehler beim Erzeugen." };
   }
+}
+
+/**
+ * Kontodaten-Mail ("Anzahlung per Überweisung") an den Gast (erneut)
+ * schicken — für Überweisungs-Buchungen, deren Anzahlung noch offen ist.
+ * Anlass: ältere Buchungen (z. B. Leonie Neuhaus) haben diese Mail nie
+ * bekommen, weil es sie vor 11/2026 noch nicht gab.
+ */
+export async function sendTransferRequestMail(
+  bookingId: string
+): Promise<{ ok: true; to: string } | { ok: false; error: string }> {
+  let session: Awaited<ReturnType<typeof requireManager>>;
+  try {
+    session = await requireManager();
+  } catch {
+    return { ok: false, error: "Nicht autorisiert" };
+  }
+  const b = (await db.select().from(bookings).where(eq(bookings.id, bookingId)).limit(1))[0];
+  if (!b) return { ok: false, error: "Buchung nicht gefunden." };
+  if (b.paymentMode !== "manual_transfer" || b.status !== "angefragt") {
+    return { ok: false, error: "Nur bei Überweisungs-Buchungen mit offener Anzahlung möglich." };
+  }
+  const c = b.customerId
+    ? (await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1))[0]
+    : null;
+  if (!c?.email) return { ok: false, error: "Keine E-Mail-Adresse beim Gast hinterlegt." };
+
+  const pmts = await db.select().from(payments).where(eq(payments.bookingId, b.id));
+  const anzahlung = pmts.find((p) => p.kind === "anzahlung" && p.status === "offen");
+  const rest = pmts.find((p) => p.kind === "restzahlung" && p.status === "offen");
+  if (!anzahlung) return { ok: false, error: "Keine offene Anzahlung gefunden." };
+  const restCents = rest
+    ? rest.amountCents
+    : Math.max(0, b.subtotalCents - anzahlung.amountCents) + b.depositCents + b.kurtaxeCents;
+
+  await sendMail({
+    to: c.email,
+    subject: transferRequestSubject("de", b.bookingNumber),
+    template: "booking_transfer_request",
+    bookingId: b.id,
+    react: BookingTransferRequestEmail({
+      locale: "de",
+      firstName: c.firstName,
+      bookingNumber: b.bookingNumber,
+      arrival: formatDateLong(b.arrival),
+      departure: formatDateLong(b.departure),
+      anzahlungCents: anzahlung.amountCents,
+      restzahlungCents: restCents,
+      restDeadline: formatDateLong(restDueDateIso(b)),
+    }),
+  });
+  await db.insert(activityLog).values({
+    who: session.user?.name ?? session.user?.email ?? "Manager",
+    what: `Kontodaten-Mail (Anzahlung per Überweisung) an ${c.email} verschickt`,
+    bookingId: b.id,
+  });
+  revalidatePath(`/m/buchungen/${bookingId}`);
+  return { ok: true, to: c.email };
 }
