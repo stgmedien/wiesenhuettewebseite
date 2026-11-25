@@ -19,7 +19,7 @@ export default async function AGB() {
           Allgemeine Geschäftsbedingungen
         </h1>
         <p className="text-sm text-[var(--color-wh-fg-muted)] mt-4">
-          Skifreunde Gütersloh e.V. · Stand: November 2026 · Version 1.4
+          Skifreunde Gütersloh e.V. · Stand: November 2026 · Version 1.5
         </p>
 
         <Block title="§ 1 Geltungsbereich">
@@ -120,28 +120,29 @@ export default async function AGB() {
             Liegt die Anreise bei Buchung bereits innerhalb dieser Frist (14 bzw. 30 Tage), ist die
             vollständige Zahlung inklusive Kaution und Kurtaxe sofort bei Buchung fällig.
           </p>
+          <p>
+            Werden unzutreffende Angaben zur Organisation gemacht, gelten die Bedingungen für
+            private Gruppen; der Verein kann die Buchung entsprechend nachberechnen oder stornieren.
+          </p>
         </Block>
 
         <Block title="§ 5 Stornobedingungen">
           <p>
-            Bei Rücktritt durch den Mieter (private Gruppen) werden folgende Stornogebühren auf den reinen
+            Bei Rücktritt durch den Mieter werden folgende Stornogebühren auf den reinen
             Übernachtungspreis erhoben. Endreinigung, Kaution und Kurtaxe werden im Stornofall
             nicht fällig bzw. vollständig zurückerstattet — für stornierte Aufenthalte stellt
             Winterberg keine Kurtaxe-Rechnung:
           </p>
           <ul>
-            <li>mehr als 60 Tage vor Anreise: <strong>0 %</strong></li>
+            <li>mehr als 60 Tage vor Anreise: <strong>10 %</strong></li>
             <li>60 – 31 Tage vor Anreise: <strong>30 %</strong></li>
             <li>30 – 14 Tage vor Anreise: <strong>50 %</strong></li>
             <li>weniger als 14 Tage vor Anreise: <strong>100 %</strong></li>
           </ul>
           <p>
-            <strong>Abweichend gilt für Organisationen</strong> (Schulen, Vereine,
-            Kirchen/Gemeinden, Städte/Jugendpflege, Bildungsträger): Bis 60 Tage vor Anreise ist
-            die Stornierung kostenlos. Danach wird ausschließlich die Anzahlung in Höhe von 10 % der
-            Buchungssumme einbehalten; weitere Stornogebühren fallen nicht an. Werden unzutreffende
-            Angaben zur Organisation gemacht, gelten die Bedingungen für private Gruppen; der
-            Verein kann die Buchung entsprechend nachberechnen oder stornieren.
+            Die Staffel gilt für private Gruppen und Organisationen gleichermaßen. Für Buchungen,
+            die vor dem 25. November 2026 abgeschlossen wurden, gelten die zum Buchungszeitpunkt
+            vereinbarten Stornobedingungen.
           </p>
           <p>
             Maßgeblich ist der Zeitpunkt des Eingangs der schriftlichen Stornierung beim

@@ -5,7 +5,7 @@ import { invoices, customers, bookings } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { InvoicePdf } from "@/lib/invoice-pdf";
-import { CANCELLATION_POLICY_CUTOFF } from "@/lib/pricing";
+import { CANCELLATION_POLICY_CUTOFF, hasMinTenPercentStorno } from "@/lib/pricing";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -106,6 +106,7 @@ export async function GET(req: NextRequest, ctx: Params) {
       kurtaxeCents: booking.kurtaxeCents,
       kurtaxePersons: booking.adults + booking.members + booking.teachers,
       isLegacy: booking.createdAt < CANCELLATION_POLICY_CUTOFF,
+        stornoMinTen: hasMinTenPercentStorno(booking),
       notes: invoice.notes ?? undefined,
       })
     );
