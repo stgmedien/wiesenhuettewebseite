@@ -18,6 +18,15 @@ export type Projekt = {
   danke: string;
   kontakt: string;
   bild: string;
+  /** Kleiner Hinweis unten im Titelbild, z. B. wenn es eine Visualisierung ist. */
+  bildHinweis?: string;
+  /** Projekt ist von einer Gruppe übernommen — zeigt Antwort + Stand. */
+  vergeben?: {
+    gruppe: string;
+    antwort: string[];
+    gruss: string;
+    schritte: { label: string; stand: "fertig" | "aktuell" | "offen" }[];
+  };
 };
 
 // Reihenfolge = Priorität. Inhalte stammen aus Tanjas Planungs-Vorlage +
@@ -217,8 +226,24 @@ export const PROJEKTE: Projekt[] = [
     anpacken: "Raum einrichten, Regal bauen.",
     beitrag: "Tischtennisplatte oder Partybox als Sachspende.",
     danke: "Der Raum, in dem an Regentagen alles stattfindet.",
-    kontakt: "Ansprechpartner steht noch nicht fest",
-    bild: "/media/projekte/tischtennis.svg",
+    kontakt: "Klasse 8b des ESG",
+    bild: "/media/projekte/tischtennis.jpg",
+    bildHinweis: "Visualisierung – so könnte es aussehen",
+    vergeben: {
+      gruppe: "Klasse 8b",
+      antwort: [
+        "Hallo liebe Skifreunde,",
+        "wir, die Klasse 8b des ESG, übernehmen den Partyraum im Keller der Wiesenhütte! Im Moment messen wir den Raum aus, sammeln Ideen und planen, was alles hineinkommt: Tischtennisplatte, Sitzecke, Licht, Regal – und natürlich eine Discokugel. Unser Ziel ist ein Raum, in dem man bei Regen Tischtennis spielen und abends zusammen feiern kann.",
+        "Wir freuen uns drauf!",
+      ],
+      gruss: "Eure Klasse 8b",
+      schritte: [
+        { label: "Projekt übernommen", stand: "fertig" },
+        { label: "Raum ausmessen & Ideen sammeln", stand: "aktuell" },
+        { label: "Entwurf & Einkaufsliste", stand: "offen" },
+        { label: "Einrichten vor Ort", stand: "offen" },
+      ],
+    },
   },
   {
     key: "boxen",
