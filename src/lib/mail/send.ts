@@ -62,6 +62,13 @@ export const SENSITIVE_TEMPLATES = new Set([
   "2fa-enabled",
 ]);
 
+// Ausnahme beim Speichern: Willkommens-Mails an Gäste werden MIT Login-Link
+// in der Mail-Historie gespeichert, damit Dana nachfassen und den Text prüfen
+// kann (Johannes 11/2026). Vertretbar, weil der Link nach 15 Minuten abläuft
+// und nur einmal nutzbar ist, und die Historie nur für Manager lesbar ist.
+// Kein BCC-Archiv, keine Standard-Antwortadresse — das bleibt wie oben.
+export const STORE_BODY_DESPITE_SENSITIVE = new Set(["welcome", "welcome_with_booking"]);
+
 const HELLO_EMAIL = "hello@wiesenhuette.de";
 
 export const sendMail = async (args: SendMailArgs): Promise<void> => {
@@ -90,7 +97,8 @@ export const sendMail = async (args: SendMailArgs): Promise<void> => {
   // Verifizierungs-Links werden nicht im Klartext gespeichert — sonst waere
   // ein funktionierender Magic Link fuer jeden mit Manager-Zugriff auf die
   // Mail-Historie einsehbar.
-  const storedBodyHtml = SENSITIVE_TEMPLATES.has(args.template) ? null : html;
+  const storedBodyHtml =
+    SENSITIVE_TEMPLATES.has(args.template) && !STORE_BODY_DESPITE_SENSITIVE.has(args.template) ? null : html;
 
   try {
     const info = await getTransporter().sendMail({
