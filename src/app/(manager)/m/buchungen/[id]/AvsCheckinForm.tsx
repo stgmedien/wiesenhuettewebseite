@@ -98,9 +98,8 @@ export function AvsCheckinForm({ bookingId, guestEmail, lastSentAt }: Props) {
           className="mt-0.5"
         />
         <span>
-          <strong>Neuer Link wegen Systemumstellung</strong> — Mail erklärt dem Gast, dass er den
-          Meldeschein wegen der Umstellung bei AVS und im Verein noch einmal ausfüllen muss (mit
-          Entschuldigung).
+          <strong>Neuer Link wegen Systemumstellung</strong> — Mail sagt dem Gast, dass wir das
+          Meldeschein-System mit Winterberg umgestellt haben und er den alten Link ignorieren soll.
         </span>
       </label>
 

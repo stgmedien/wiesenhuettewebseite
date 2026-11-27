@@ -27,7 +27,7 @@ type Props = {
 
 export const avsSelfCheckinSubject = (reissue: boolean) =>
   reissue
-    ? "Neuer Link für Euren digitalen Check-in — bitte noch einmal ausfüllen"
+    ? "Neuer Link für Euren digitalen Check-in – bitte nur noch diesen nutzen"
     : "Euer digitaler Check-in für die Wiesenhütte — bitte vor der Anreise ausfüllen";
 
 const main = { backgroundColor: "#F7F7F2", padding: "40px 0" };
@@ -90,26 +90,24 @@ export default function AvsSelfCheckinEmail({
         <Container style={container}>
           <Text style={eyebrow}>Wiesenhütte · Digitaler Check-in</Text>
           <Heading style={heading}>
-            {reissue ? "Bitte noch einmal ausfüllen." : "Bitte vor der Anreise ausfüllen."}
+            {reissue ? "Euer neuer Check-in-Link." : "Bitte vor der Anreise ausfüllen."}
           </Heading>
           <Text style={text}>Hallo {guestName},</Text>
           {reissue && (
             <Section
               style={{
-                backgroundColor: "#FBEFE6",
-                borderLeft: "4px solid #B85C38",
+                backgroundColor: "#EEF3EA",
+                borderLeft: "4px solid #6FA05F",
                 padding: "16px 20px",
                 borderRadius: "12px",
                 margin: "8px 0 20px 0",
               }}
             >
               <Text style={{ ...text, margin: 0 }}>
-                <strong>Neuer Link – sorry für den doppelten Aufwand!</strong>
-                <br />
-                Wegen einer Systemumstellung beim Meldeschein-Anbieter AVS und bei uns im Skiverein
-                gilt Euer bisheriger Check-in-Link nicht mehr. Bitte füllt den Meldeschein über den
-                neuen Link unten <strong>noch einmal aus – auch wenn Ihr das schon gemacht habt</strong>.
-                Eure alten Angaben können wir leider nicht übernehmen. Danke für Euer Verständnis!
+                <strong>Kurzes Update:</strong> Gemeinsam mit der Stadt Winterberg haben wir unser
+                System für den digitalen Meldeschein umgestellt. Deshalb bekommt Ihr hier einen{" "}
+                <strong>neuen Link</strong>. Den Link aus unserer letzten Mail könnt Ihr einfach
+                ignorieren – bitte nutzt nur noch diesen hier.
               </Text>
             </Section>
           )}
