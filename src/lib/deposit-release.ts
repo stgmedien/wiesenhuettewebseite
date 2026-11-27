@@ -104,7 +104,7 @@ export async function completeDepositRelease(
   if (b?.customerId) {
     const c = (await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1))[0];
     if (c) {
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://wiesenhuette.vercel.app";
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.wiesenhuette.de";
       try {
         const attachment = await buildInvoicePdfAttachment(b.id);
         await sendMail({

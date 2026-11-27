@@ -4,7 +4,7 @@ import { blogPosts, hikingRoutes } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://wiesenhuette.vercel.app";
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.wiesenhuette.de";
   const now = new Date();
 
   const staticPaths: MetadataRoute.Sitemap = [

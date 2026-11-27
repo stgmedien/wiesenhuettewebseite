@@ -67,7 +67,7 @@ export default async function BlogPostPage({ params }: Props) {
     .orderBy(desc(blogPosts.publishedAt))
     .limit(3);
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://wiesenhuette.vercel.app";
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.wiesenhuette.de";
 
   return (
     <article className="bg-[var(--color-wh-snow)]">

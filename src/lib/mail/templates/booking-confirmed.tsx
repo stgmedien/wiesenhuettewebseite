@@ -32,6 +32,19 @@ type Props = {
   orgBooking?: boolean;
   /** Buchung ab 25.11.2026: Storno-Staffel mit mind. 10 % für alle. */
   stornoMinTen?: boolean;
+  /** Wie die Restzahlung läuft: "auto" = Einzug per Stripe, "transfer" =
+   * klassische Überweisung, "none" = bereits mit der Anzahlung bezahlt. */
+  restPayment?: "auto" | "transfer" | "none";
+  /** Tage vor Anreise, an denen die Restzahlung fällig ist (privat 14, Organisation 30). */
+  restLeadDays?: number;
+  /** Fälligkeit der Restzahlung, formatiert (z. B. "Do., 22. April 2027"). */
+  restDueDate?: string;
+  /** Datum der Zahlungserinnerung (eine Woche vor Fälligkeit), formatiert. */
+  restReminderDate?: string;
+  /** Frist für den digitalen Meldeschein (14 Tage vor Anreise), formatiert. */
+  checkinDeadline?: string;
+  /** Kurzfristige Buchung (Anreise in weniger als 14 Tagen): Meldeschein sofort ausfüllen. */
+  checkinUrgent?: boolean;
   baseUrl: string;
   // Mietvertrag-Inhalt (§1–§9) — dieselbe Mail dient als Buchungsbestätigung
   // UND als Mietvertrag, statt zwei getrennte Mails zu verschicken.
@@ -146,6 +159,12 @@ export default function BookingConfirmedEmail({
   kautionDueNow,
   orgBooking = false,
   stornoMinTen = false,
+  restPayment = "auto",
+  restLeadDays,
+  restDueDate,
+  restReminderDate,
+  checkinDeadline,
+  checkinUrgent = false,
   baseUrl,
   customer,
   personsBreakdown,
@@ -236,10 +255,51 @@ export default function BookingConfirmedEmail({
             Was als Nächstes passiert
           </Heading>
           <Text style={text}>
-            Etwa 14 Tage vor eurer Anreise ziehen wir automatisch die Restzahlung ein und
-            schicken euch dabei die Hausordnung-Erinnerung und Infos zur Schlüsselübergabe. Eure
-            Kurkarten kommen separat, sobald sie fertig sind. Falls ihr vorher Fragen habt,
-            antwortet einfach auf diese Mail.
+            <strong>1. Meldeschein & Kurkarten (Pflicht):</strong> Ihr bekommt von uns eine
+            separate Mail mit einem Link zum digitalen Meldeschein der Stadt Winterberg. Dort
+            tragt ihr alle Mitreisenden ein, auch Kinder.{" "}
+            {checkinUrgent ? (
+              <strong>Bitte füllt ihn direkt nach Erhalt aus, da eure Anreise kurz bevorsteht.</strong>
+            ) : (
+              <strong>
+                Bitte füllt ihn bis spätestens{" "}
+                {checkinDeadline ?? "14 Tage vor Anreise"} aus
+                {checkinDeadline ? " (14 Tage vor Anreise)" : ""}.
+              </strong>
+            )}{" "}
+            Ohne Meldeschein können wir keine Kurkarten erstellen.
+          </Text>
+          {restPayment === "auto" && (
+            <Text style={text}>
+              <strong>2. Restzahlung:</strong>{" "}
+              {restReminderDate ? `Am ${restReminderDate} erinnern wir euch per Mail. ` : ""}
+              {restDueDate ? `Am ${restDueDate}` : `Etwa ${restLeadDays ?? 14} Tage vor Anreise`}{" "}
+              ({restLeadDays ?? 14} Tage vor Anreise) ziehen wir die Restzahlung inkl. Kaution
+              und Kurtaxe automatisch über eure bei der Buchung hinterlegte Zahlungsart ein.
+            </Text>
+          )}
+          {restPayment === "transfer" && (
+            <Text style={text}>
+              <strong>2. Restzahlung per Überweisung:</strong> Bitte überweist die Restzahlung
+              inkl. Kaution und Kurtaxe bis spätestens{" "}
+              {restDueDate ?? `${restLeadDays ?? 30} Tage vor Anreise`}
+              {restDueDate ? ` (${restLeadDays ?? 30} Tage vor Anreise)` : ""}.{" "}
+              {restReminderDate
+                ? `Am ${restReminderDate} schicken wir euch dazu eine Erinnerung mit Betrag und Kontodaten.`
+                : "Eine Woche vorher schicken wir euch dazu eine Erinnerung mit Betrag und Kontodaten."}{" "}
+              Es wird nichts automatisch abgebucht.
+            </Text>
+          )}
+          {restPayment === "none" && (
+            <Text style={text}>
+              <strong>2. Zahlung:</strong> Restzahlung, Kaution und Kurtaxe habt ihr bereits mit
+              der Buchung bezahlt. Es kommt nichts mehr hinzu.
+            </Text>
+          )}
+          <Text style={text}>
+            <strong>3. Vor der Anreise:</strong> Ihr bekommt Adresse, Hausordnung und Infos zur
+            Schlüsselübergabe. Eure Kurkarten schicken wir euch spätestens 3 Tage vor Anreise.
+            Falls ihr vorher Fragen habt, antwortet einfach auf diese Mail.
           </Text>
           <Text style={text}>
             Spätestens 2 Tage vor Anreise sprecht ihr eure Ankunftszeit mit unserem Hüttenwart
@@ -380,11 +440,15 @@ export default function BookingConfirmedEmail({
           <Text style={smallText}>
             Die Mietzahlung erfolgt in zwei Raten: eine <strong>Anzahlung</strong> bei
             Buchung sowie die <strong>Restzahlung</strong> spätestens{" "}
-            {orgBooking ? "30" : "14"} Tage vor Anreise
-            {orgBooking ? " (online über Stripe oder per Überweisung)" : " (Auto-Einzug per Stripe)"}.{" "}
+            {restLeadDays ?? (orgBooking ? 30 : 14)} Tage vor Anreise
+            {restPayment === "transfer"
+              ? " (per Überweisung auf das Vereinskonto)"
+              : " (automatischer Einzug über die bei der Buchung hinterlegte Zahlungsart)"}.{" "}
             {kautionDueNow
               ? "Kaution und Kurtaxe sind bereits mit der Anzahlung fällig"
-              : "Kaution und Kurtaxe werden zusammen mit der Restzahlung eingezogen"}. Die
+              : restPayment === "transfer"
+                ? "Kaution und Kurtaxe werden zusammen mit der Restzahlung überwiesen"
+                : "Kaution und Kurtaxe werden zusammen mit der Restzahlung eingezogen"}. Die
             Kaution wird nach mangelfreier Abreise innerhalb von 14 Tagen erstattet; die Kurtaxe
             führt der Verein an die Kurverwaltung Winterberg ab.
           </Text>
@@ -461,7 +525,7 @@ export default function BookingConfirmedEmail({
           </Text>
           <Text style={smallMuted}>
             Vollständige Hausordnung:{" "}
-            <a href="https://wiesenhuette.vercel.app/hausordnung">https://wiesenhuette.vercel.app/hausordnung</a>
+            <a href={`${baseUrl}/hausordnung`}>{`${baseUrl}/hausordnung`}</a>
           </Text>
 
           <Heading as="h4" style={h2}>§ 8 Schäden & Haftung</Heading>

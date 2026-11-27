@@ -145,7 +145,7 @@ export async function releaseDepositForRefund(raw: z.infer<typeof releaseSchema>
     .returning({ id: payments.id });
 
   const who = managerName(session);
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://wiesenhuette.vercel.app";
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.wiesenhuette.de";
   try {
     await sendMail({
       to: financeTo,

@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
   if (sendDigest) {
     const internalTo = process.env.MAIL_INTERNAL_TO;
     if (internalTo) {
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://wiesenhuette.vercel.app";
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.wiesenhuette.de";
       try {
         await sendMail({
           to: internalTo,
