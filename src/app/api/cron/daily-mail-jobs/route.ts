@@ -65,6 +65,8 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://wiesenhuette.de";
+/** Interne Erinnerung „AVS-Link fehlt“ ab so vielen Tagen vor Anreise. */
+const AVS_REMINDER_LEAD_DAYS = 35;
 
 // Hüttenwart-Mails (T-7) gehen an die gemeinsame Konstante HUETTENWART_EMAIL
 // aus src/lib/huettenwart.ts (auch Webhook + Storno-Pfade nutzen sie, Issue #68).
@@ -205,14 +207,19 @@ export async function GET(req: Request) {
   // Der AVS-Link kann nicht automatisch erzeugt werden (Winterberg-Portal ist
   // manuell, keine API — Stand Telefonat mit Anika Emde, Juli 2026). Diese
   // Mail ersetzt die Automatisierung NICHT, sondern erinnert Dana + Johannes
-  // rechtzeitig (3 Wochen vor Anreise), damit der Link manuell erzeugt und
-  // in der Buchung eingetragen wird, bevor T-14 die Restzahlung anstößt.
+  // rechtzeitig, damit der Link manuell erzeugt und in der Buchung
+  // eingetragen wird. Seit 11/2026 ab 5 Wochen vor Anreise statt 3: Winterberg
+  // verlangt den ausgefüllten Meldeschein bis 14 Tage vor Anreise, die
+  // Buchungsbestätigung nennt diese Frist — bei T-21 blieb dem Gast nur eine
+  // Woche. Zeitfenster statt Stichtag, damit auch kurzfristige Buchungen
+  // (nach T-35 gebucht) einmal auftauchen; alreadySent verhindert Wiederholungen.
   const avsCandidates = await db
     .select()
     .from(bookings)
     .where(
       and(
-        eq(bookings.arrival, t21),
+        gte(bookings.arrival, isoDayOffset(0)),
+        lte(bookings.arrival, isoDayOffset(AVS_REMINDER_LEAD_DAYS)),
         sql`${bookings.status} IN ('bestaetigt', 'bezahlt')`
       )
     );
@@ -239,7 +246,7 @@ export async function GET(req: Request) {
         await sendMail({
           to: internalTo,
           bcc: "johannesleiskau@gmail.com",
-          subject: `AVS-Meldeschein-Link fehlt noch: ${avsMissing.length} ${avsMissing.length === 1 ? "Buchung" : "Buchungen"} (Anreise in 3 Wochen)`,
+          subject: `AVS-Meldeschein-Link fehlt noch: ${avsMissing.length} ${avsMissing.length === 1 ? "Buchung" : "Buchungen"}`,
           template: "avs-reminder-internal",
           react: AvsReminderInternalEmail({ bookings: avsMissing, baseUrl: BASE_URL }),
         });

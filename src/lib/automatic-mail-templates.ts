@@ -164,7 +164,7 @@ export const AUTOMATIC_MAIL_TEMPLATES: AutomaticMailTemplate[] = [
     key: "avs-reminder-internal",
     label: "Kurkarten-Link fehlt noch",
     category: "Buchung — Hüttenservice/intern",
-    trigger: "T-21, wenn für eine bestätigte/bezahlte Buchung noch kein AVS-Link verschickt wurde.",
+    trigger: "Einmalig ab T-35 (auch kurzfristige Buchungen am Tag nach der Buchung), wenn für eine bestätigte/bezahlte Buchung noch kein AVS-Link verschickt wurde. Gäste müssen bis T-14 ausfüllen.",
     audience: "Dana (MAIL_INTERNAL_TO) + BCC johannesleiskau@gmail.com",
     file: "src/app/api/cron/daily-mail-jobs/route.ts",
   },

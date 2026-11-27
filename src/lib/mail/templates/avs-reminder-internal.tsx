@@ -82,12 +82,12 @@ export default function AvsReminderInternalEmail({ bookings, baseUrl }: Props) {
       <Body style={main}>
         <Container style={container}>
           <Text style={eyebrow}>Intern · Kurkarten-Erinnerung</Text>
-          <Heading style={heading}>Noch 3 Wochen bis Anreise — AVS-Link fehlt.</Heading>
+          <Heading style={heading}>AVS-Link fehlt noch.</Heading>
           <Text style={text}>
             Bei den folgenden Buchungen wurde noch kein digitaler Meldeschein (AVS-SelfCheck-in)
-            an den Gast verschickt. Anreise ist in 21 Tagen — bitte rechtzeitig im AVS-Portal
-            (Link-Generator) einen Link erzeugen und in der Buchung eintragen, damit der Gast noch
-            genug Zeit zum Ausfüllen hat.
+            an den Gast verschickt. Die Gäste müssen ihn bis spätestens 14 Tage vor Anreise
+            ausfüllen — bitte jetzt im AVS-Portal (Link-Generator) einen Link erzeugen und in der
+            Buchung eintragen, damit sie genug Zeit haben.
           </Text>
           <Section style={box}>
             {bookings.map((b) => (
