@@ -92,10 +92,21 @@ export function buildBookingConfirmedEmailProps(params: {
     kautionDueNow,
     orgBooking: isOrgBooking(booking),
     stornoMinTen: hasMinTenPercentStorno(booking),
-    restPayment: kautionDueNow ? "none" : isTransferRest(restRow?.method) ? "transfer" : "auto",
+    // Ohne Stripe-Zahlungsvorgang (z. B. von Dana unter /m/manuell angelegt)
+    // gibt es nichts, wovon der Cron einziehen könnte → Überweisung.
+    restPayment: kautionDueNow
+      ? "none"
+      : isTransferRest(restRow?.method) || !booking.stripePaymentIntentId
+        ? "transfer"
+        : "auto",
     restLeadDays: restLead,
     restDueDate: formatDateLong(restDueIso),
-    restReminderDate: formatDateLong(isoMinusDays(booking.arrival, restLead + 7)),
+    // Erinnerung nur nennen, wenn sie noch kommt (kurzfristige Buchungen
+    // liegen schon hinter dem Erinnerungstag).
+    restReminderDate:
+      isoMinusDays(booking.arrival, restLead + 7) > new Date().toISOString().slice(0, 10)
+        ? formatDateLong(isoMinusDays(booking.arrival, restLead + 7))
+        : undefined,
     // Kurzfristige Buchung: Frist schon vorbei → Mail bittet um sofortiges Ausfüllen.
     checkinDeadline:
       isoMinusDays(booking.arrival, AVS_CHECKIN_LEAD_DAYS) >= new Date().toISOString().slice(0, 10)

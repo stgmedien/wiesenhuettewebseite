@@ -285,8 +285,10 @@ export default function BookingConfirmedEmail({
               {restDueDate ?? `${restLeadDays ?? 30} Tage vor Anreise`}
               {restDueDate ? ` (${restLeadDays ?? 30} Tage vor Anreise)` : ""}.{" "}
               {restReminderDate
-                ? `Am ${restReminderDate} schicken wir euch dazu eine Erinnerung mit Betrag und Kontodaten.`
-                : "Eine Woche vorher schicken wir euch dazu eine Erinnerung mit Betrag und Kontodaten."}{" "}
+                ? `Am ${restReminderDate} schicken wir euch dazu eine Erinnerung mit Betrag und Kontodaten. `
+                : restDueDate
+                  ? ""
+                  : "Eine Woche vorher schicken wir euch dazu eine Erinnerung mit Betrag und Kontodaten. "}
               Es wird nichts automatisch abgebucht.
             </Text>
           )}
