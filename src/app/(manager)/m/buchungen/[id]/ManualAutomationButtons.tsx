@@ -39,9 +39,10 @@ type Props = {
  * nur ein Hinweis mit Fälligkeitsdatum — plus ein kleiner Link für den
  * Sonderfall, dass ein Gast früher überweist.
  *
- * Kartenbuchungen (Stripe): nur der Link, und nur BIS zum Einzugstag — für
- * Gäste, die den Rest lieber selbst aufs Hüttenkonto überweisen (Finn
- * 11/2026). Verbucht Rest + Kaution + Kurtaxe, danach überspringt der Cron
+ * Kartenbuchungen (Stripe): nur der Link, solange kein Einzug läuft oder
+ * durch ist — für Gäste, die den Rest lieber selbst aufs Hüttenkonto
+ * überweisen (Finn 11/2026). Nach einem gescheiterten Einzug direkt mit
+ * Knopf. Verbucht Rest + Kaution + Kurtaxe, danach überspringt der Cron
  * den Einzug komplett.
  */
 export function ManualAutomationButtons({
@@ -70,7 +71,7 @@ export function ManualAutomationButtons({
     status === "bezahlt" &&
     !restAlreadyReceived &&
     openCents > 0 &&
-    (!stripe || autoChargeFailed || (!isDue && !autoChargeAttempted));
+    (!stripe || !autoChargeAttempted);
   if (!relevant && !msg) return null;
 
   const showButton = stripe ? early || autoChargeFailed : isDue || early;
@@ -122,7 +123,16 @@ export function ManualAutomationButtons({
           <p className="m-0">
             {stripe ? (
               <>
-                Wird am <strong>{deDate(restDueIso)}</strong> automatisch eingezogen: {euro(openCents)} ({breakdown}).
+                {isDue ? (
+                  <>
+                    Fällig seit <strong>{deDate(restDueIso)}</strong>, automatischer Einzug ist noch nicht gelaufen
+                  </>
+                ) : (
+                  <>
+                    Wird am <strong>{deDate(restDueIso)}</strong> automatisch eingezogen
+                  </>
+                )}
+                : {euro(openCents)} ({breakdown}).
               </>
             ) : (
               <>
