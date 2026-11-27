@@ -20,7 +20,7 @@ import { sendMail } from "@/lib/mail/send";
 import ManagerMessageEmail from "@/lib/mail/templates/manager-message";
 import BookingConfirmedEmail from "@/lib/mail/templates/booking-confirmed";
 import BookingCancelledEmail from "@/lib/mail/templates/booking-cancelled";
-import AvsSelfCheckinEmail from "@/lib/mail/templates/avs-selfcheckin";
+import AvsSelfCheckinEmail, { avsSelfCheckinSubject } from "@/lib/mail/templates/avs-selfcheckin";
 import HuettenwartCancellationEmail from "@/lib/mail/templates/huettenwart-cancellation";
 import { HUETTENWART_EMAIL, HUETTENWART_CC } from "@/lib/huettenwart";
 import { buildIcalCancel } from "@/lib/mail/ical";
@@ -1048,6 +1048,8 @@ export async function refundBookingDifference(
 const avsLinkSchema = z.object({
   bookingId: z.string().uuid(),
   link: z.string().trim().min(10).max(2000),
+  /** Neuer Link nach AVS-Systemumstellung → Mail mit Erklärung. */
+  reissue: z.boolean().optional(),
 });
 
 export async function sendAvsCheckinLink(
@@ -1061,7 +1063,7 @@ export async function sendAvsCheckinLink(
   }
   const parsed = avsLinkSchema.safeParse(raw);
   if (!parsed.success) return { ok: false, error: "Ungültige Eingabe." };
-  const { bookingId, link } = parsed.data;
+  const { bookingId, link, reissue = false } = parsed.data;
 
   // Nur echte AVS-Links akzeptieren — schützt vor Tippfehlern/falschem Paste.
   let url: URL;
@@ -1089,7 +1091,7 @@ export async function sendAvsCheckinLink(
   try {
     await sendMail({
       to: customer.email,
-      subject: "Euer digitaler Check-in für die Wiesenhütte — bitte vor der Anreise ausfüllen",
+      subject: avsSelfCheckinSubject(reissue),
       template: "avs-selfcheckin",
       bookingId: booking.id,
       react: AvsSelfCheckinEmail({
@@ -1098,6 +1100,7 @@ export async function sendAvsCheckinLink(
         arrival: formatDateLong(booking.arrival),
         departure: formatDateLong(booking.departure),
         checkinUrl: url.toString(),
+        reissue,
       }),
     });
   } catch (err) {
@@ -1112,7 +1115,7 @@ export async function sendAvsCheckinLink(
 
   await db.insert(activityLog).values({
     who: session.user?.name ?? session.user?.email ?? "Manager",
-    what: `AVS-SelfCheck-in-Link an ${customer.email} verschickt (digitaler Meldeschein/Kurkarten).`,
+    what: `${reissue ? "NEUER AVS-SelfCheck-in-Link (Systemumstellung)" : "AVS-SelfCheck-in-Link"} an ${customer.email} verschickt (digitaler Meldeschein/Kurkarten).`,
     bookingId: booking.id,
   });
 

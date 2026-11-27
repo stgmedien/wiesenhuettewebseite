@@ -18,7 +18,17 @@ type Props = {
   departure: string;
   /** Individueller AVS-SelfCheck-in-Link (im Manager eingetragen). */
   checkinUrl: string;
+  /**
+   * Neuer Link nach der AVS-Systemumstellung (11/2026): Gast hat schon einen
+   * alten Link bekommen und muss den Meldeschein noch einmal ausfüllen.
+   */
+  reissue?: boolean;
 };
+
+export const avsSelfCheckinSubject = (reissue: boolean) =>
+  reissue
+    ? "Neuer Link für Euren digitalen Check-in — bitte noch einmal ausfüllen"
+    : "Euer digitaler Check-in für die Wiesenhütte — bitte vor der Anreise ausfüllen";
 
 const main = { backgroundColor: "#F7F7F2", padding: "40px 0" };
 const container = {
@@ -70,16 +80,39 @@ export default function AvsSelfCheckinEmail({
   arrival,
   departure,
   checkinUrl,
+  reissue = false,
 }: Props) {
   return (
     <Html>
       <Head />
-      <Preview>Euer digitaler Check-in für die Wiesenhütte — bitte vor der Anreise ausfüllen</Preview>
+      <Preview>{avsSelfCheckinSubject(reissue)}</Preview>
       <Body style={main}>
         <Container style={container}>
           <Text style={eyebrow}>Wiesenhütte · Digitaler Check-in</Text>
-          <Heading style={heading}>Bitte vor der Anreise ausfüllen.</Heading>
+          <Heading style={heading}>
+            {reissue ? "Bitte noch einmal ausfüllen." : "Bitte vor der Anreise ausfüllen."}
+          </Heading>
           <Text style={text}>Hallo {guestName},</Text>
+          {reissue && (
+            <Section
+              style={{
+                backgroundColor: "#FBEFE6",
+                borderLeft: "4px solid #B85C38",
+                padding: "16px 20px",
+                borderRadius: "12px",
+                margin: "8px 0 20px 0",
+              }}
+            >
+              <Text style={{ ...text, margin: 0 }}>
+                <strong>Neuer Link – sorry für den doppelten Aufwand!</strong>
+                <br />
+                Wegen einer Systemumstellung beim Meldeschein-Anbieter AVS und bei uns im Skiverein
+                gilt Euer bisheriger Check-in-Link nicht mehr. Bitte füllt den Meldeschein über den
+                neuen Link unten <strong>noch einmal aus – auch wenn Ihr das schon gemacht habt</strong>.
+                Eure alten Angaben können wir leider nicht übernehmen. Danke für Euer Verständnis!
+              </Text>
+            </Section>
+          )}
           <Text style={text}>
             vielen Dank für Eure Buchung <strong>{bookingNumber}</strong> ({arrival} bis{" "}
             {departure})! Bitte füllt vor der Anreise den digitalen Meldeschein aus — das ist{" "}
