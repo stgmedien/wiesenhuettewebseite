@@ -615,7 +615,9 @@ export async function confirmManualFinalPayment(
     return { ok: false, error: "Die Restzahlung wurde bereits erfasst." };
   }
   // Kartenbuchungen (Stripe): nur VOR dem automatischen Einzug, sonst würde
-  // doppelt kassiert. Ab dem Fälligkeitstag zieht der Cron selbst ein.
+  // doppelt kassiert. Ab dem Fälligkeitstag zieht der Cron selbst ein —
+  // außer der Einzug ist gescheitert: dann versucht der Cron es nicht noch
+  // einmal, und die Überweisung muss verbucht werden können.
   if (b.stripePaymentIntentId) {
     if (open.autoChargeAttempted) {
       return {
@@ -623,7 +625,7 @@ export async function confirmManualFinalPayment(
         error: "Der automatische Einzug der Restzahlung wurde bereits ausgelöst — bitte in Stripe prüfen.",
       };
     }
-    if (todayBerlinIso() >= restDueDateIso(b)) {
+    if (!open.autoChargeFailed && todayBerlinIso() >= restDueDateIso(b)) {
       return {
         ok: false,
         error: `Die Restzahlung wird ab ${restDueDateIso(b).split("-").reverse().join(".")} automatisch eingezogen — eine Überweisung kann nur vorher verbucht werden.`,

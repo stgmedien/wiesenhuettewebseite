@@ -24,8 +24,13 @@ type BookingLike = {
 
 export type OpenFinalPayment = {
   restAlreadyReceived: boolean;
-  /** Der Cron hat den Stripe-Einzug schon versucht (läuft oder ist gescheitert). */
+  /** Der Cron hat den Stripe-Einzug ausgelöst und er läuft noch bzw. ist durch. */
   autoChargeAttempted: boolean;
+  /**
+   * Der Stripe-Einzug ist gescheitert (z. B. Kartenlimit) und nichts läuft
+   * mehr → Rest darf per Überweisung verbucht werden (Finn 11/2026).
+   */
+  autoChargeFailed: boolean;
   rentRemainderCents: number;
   kautionCents: number;
   kurtaxeCents: number;
@@ -35,7 +40,9 @@ export type OpenFinalPayment = {
 export function openFinalPayment(b: BookingLike, pmts: PaymentLike[]): OpenFinalPayment {
   const rest = pmts.filter((p) => p.kind === "restzahlung");
   const restAlreadyReceived = rest.some((p) => p.status === "erhalten");
-  const autoChargeAttempted = rest.some((p) => p.method === "Stripe Off-Session attempt");
+  const attempts = rest.filter((p) => p.method === "Stripe Off-Session attempt");
+  const autoChargeAttempted = attempts.some((p) => p.status !== "fehlgeschlagen");
+  const autoChargeFailed = !autoChargeAttempted && attempts.length > 0;
   const openRestRow = rest.find((p) => p.status === "offen");
   const rentRemainderCents = openRestRow
     ? openRestRow.amountCents
@@ -49,6 +56,7 @@ export function openFinalPayment(b: BookingLike, pmts: PaymentLike[]): OpenFinal
   return {
     restAlreadyReceived,
     autoChargeAttempted,
+    autoChargeFailed,
     rentRemainderCents,
     kautionCents,
     kurtaxeCents,

@@ -25,6 +25,8 @@ type Props = {
   restAlreadyReceived: boolean;
   /** Cron hat den Stripe-Einzug schon ausgelöst → kein manuelles Verbuchen mehr. */
   autoChargeAttempted: boolean;
+  /** Stripe-Einzug gescheitert → Kasten mit Verbuchen-Knopf zeigen. */
+  autoChargeFailed: boolean;
 };
 
 /**
@@ -53,6 +55,7 @@ export function ManualAutomationButtons({
   kurtaxeCents,
   restAlreadyReceived,
   autoChargeAttempted,
+  autoChargeFailed,
 }: Props) {
   const [pending, start] = useTransition();
   const [msg, setMsg] = useState<string | null>(null);
@@ -67,10 +70,10 @@ export function ManualAutomationButtons({
     status === "bezahlt" &&
     !restAlreadyReceived &&
     openCents > 0 &&
-    (!stripe || (!isDue && !autoChargeAttempted));
+    (!stripe || autoChargeFailed || (!isDue && !autoChargeAttempted));
   if (!relevant && !msg) return null;
 
-  const showButton = stripe ? early : isDue || early;
+  const showButton = stripe ? early || autoChargeFailed : isDue || early;
 
   const breakdown = [
     `${euro(rentRemainderCents)} Restzahlung`,
@@ -106,7 +109,11 @@ export function ManualAutomationButtons({
   return (
     <div className="mt-4 rounded-xl border border-[#C9B8E8] bg-[#F2EEF9] p-4 space-y-3">
       <div className="text-xs uppercase tracking-wider font-semibold text-[#4A3B6B]">
-        {stripe ? "Restzahlung per Überweisung statt Einzug" : "Manuelle Buchung (Banküberweisung)"}
+        {stripe && autoChargeFailed
+          ? "Automatischer Einzug fehlgeschlagen"
+          : stripe
+            ? "Restzahlung per Überweisung statt Einzug"
+            : "Manuelle Buchung (Banküberweisung)"}
       </div>
       {msg ? (
         <p className="text-xs text-[#4A3B6B] m-0">{msg}</p>
@@ -137,7 +144,9 @@ export function ManualAutomationButtons({
           <p className="text-[13px] text-[#4A3B6B] m-0">
             Offen: <strong>{euro(openCents)}</strong> ({breakdown}) — fällig {isDue ? "seit" : "am"}{" "}
             {deDate(restDueIso)}.
-            {stripe && " Nach dem Verbuchen wird nichts mehr automatisch eingezogen."}
+            {stripe && autoChargeFailed
+              ? " Der Einzug von der Karte bzw. dem Konto des Gastes hat nicht geklappt und wird nicht wiederholt. Wenn der Gast überwiesen hat, hier verbuchen."
+              : stripe && " Nach dem Verbuchen wird nichts mehr automatisch eingezogen."}
           </p>
           <label className="block max-w-[220px]">
             <span className="block text-xs text-[#4A3B6B] mb-1">Überweisung eingegangen am</span>
