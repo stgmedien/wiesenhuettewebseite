@@ -17,6 +17,9 @@ const inputCls =
 
 export function AvsCheckinForm({ bookingId, guestEmail, lastSentAt }: Props) {
   const [link, setLink] = useState("");
+  // Wer schon einen (alten) Link bekommen hat, bekommt nach der AVS-
+  // Systemumstellung (11/2026) die Mail mit Erklärung + Entschuldigung.
+  const [reissue, setReissue] = useState(!!lastSentAt);
   const [sentTo, setSentTo] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
@@ -25,7 +28,7 @@ export function AvsCheckinForm({ bookingId, guestEmail, lastSentAt }: Props) {
   const submit = () => {
     setError(null);
     start(async () => {
-      const res = await sendAvsCheckinLink({ bookingId, link });
+      const res = await sendAvsCheckinLink({ bookingId, link, reissue });
       if (res.ok) {
         setSentTo(res.sentTo);
         setLink("");
@@ -62,8 +65,8 @@ export function AvsCheckinForm({ bookingId, guestEmail, lastSentAt }: Props) {
           >
             AVS-Portal <ExternalLink size={11} />
           </a>{" "}
-          → Menü „Link-Generator" → E-Mail <span className="font-mono">{guestEmail}</span>{" "}
-          eintragen → „Link generieren".
+          → Menü „Link-Generator“ → E-Mail <span className="font-mono">{guestEmail}</span>{" "}
+          eintragen → „Link generieren“.
         </li>
         <li>Erzeugten SelfCheck-in-Link kopieren und hier einfügen — wir mailen ihn dem Gast.</li>
       </ol>
@@ -86,6 +89,19 @@ export function AvsCheckinForm({ bookingId, guestEmail, lastSentAt }: Props) {
           {lastSentAt || sentTo ? "Erneut senden" : "An Gast senden"}
         </button>
       </div>
+
+      <label className="mt-2 flex items-start gap-2 text-xs text-[var(--color-wh-fg-muted)] cursor-pointer">
+        <input
+          type="checkbox"
+          checked={reissue}
+          onChange={(e) => setReissue(e.target.checked)}
+          className="mt-0.5"
+        />
+        <span>
+          <strong>Neuer Link wegen Systemumstellung</strong> — Mail sagt dem Gast, dass wir das
+          Meldeschein-System mit Winterberg umgestellt haben und er den alten Link ignorieren soll.
+        </span>
+      </label>
 
       {error && <p className="text-[13px] text-[#7a3a20] mt-2">{error}</p>}
     </div>

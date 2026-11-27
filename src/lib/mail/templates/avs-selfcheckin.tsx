@@ -18,7 +18,17 @@ type Props = {
   departure: string;
   /** Individueller AVS-SelfCheck-in-Link (im Manager eingetragen). */
   checkinUrl: string;
+  /**
+   * Neuer Link nach der AVS-Systemumstellung (11/2026): Gast hat schon einen
+   * alten Link bekommen und muss den Meldeschein noch einmal ausfüllen.
+   */
+  reissue?: boolean;
 };
+
+export const avsSelfCheckinSubject = (reissue: boolean) =>
+  reissue
+    ? "Neuer Link für Euren digitalen Check-in – bitte nur noch diesen nutzen"
+    : "Euer digitaler Check-in für die Wiesenhütte — bitte vor der Anreise ausfüllen";
 
 const main = { backgroundColor: "#F7F7F2", padding: "40px 0" };
 const container = {
@@ -70,16 +80,37 @@ export default function AvsSelfCheckinEmail({
   arrival,
   departure,
   checkinUrl,
+  reissue = false,
 }: Props) {
   return (
     <Html>
       <Head />
-      <Preview>Euer digitaler Check-in für die Wiesenhütte — bitte vor der Anreise ausfüllen</Preview>
+      <Preview>{avsSelfCheckinSubject(reissue)}</Preview>
       <Body style={main}>
         <Container style={container}>
           <Text style={eyebrow}>Wiesenhütte · Digitaler Check-in</Text>
-          <Heading style={heading}>Bitte vor der Anreise ausfüllen.</Heading>
+          <Heading style={heading}>
+            {reissue ? "Euer neuer Check-in-Link." : "Bitte vor der Anreise ausfüllen."}
+          </Heading>
           <Text style={text}>Hallo {guestName},</Text>
+          {reissue && (
+            <Section
+              style={{
+                backgroundColor: "#EEF3EA",
+                borderLeft: "4px solid #6FA05F",
+                padding: "16px 20px",
+                borderRadius: "12px",
+                margin: "8px 0 20px 0",
+              }}
+            >
+              <Text style={{ ...text, margin: 0 }}>
+                <strong>Kurzes Update:</strong> Gemeinsam mit der Stadt Winterberg haben wir unser
+                System für den digitalen Meldeschein umgestellt. Deshalb bekommt Ihr hier einen{" "}
+                <strong>neuen Link</strong>. Den Link aus unserer letzten Mail könnt Ihr einfach
+                ignorieren – bitte nutzt nur noch diesen hier.
+              </Text>
+            </Section>
+          )}
           <Text style={text}>
             vielen Dank für Eure Buchung <strong>{bookingNumber}</strong> ({arrival} bis{" "}
             {departure})! Bitte füllt vor der Anreise den digitalen Meldeschein aus — das ist{" "}
