@@ -89,7 +89,7 @@ export async function createUser(raw: z.infer<typeof createSchema>): Promise<Cre
   });
 
   if (data.sendWelcomeMail) {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://wiesenhuette.vercel.app";
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.wiesenhuette.de";
     try {
       await sendMail({
         to: email,
@@ -208,7 +208,7 @@ export async function resetUserPassword(
   });
 
   if (shouldSendMail && target[0].email) {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://wiesenhuette.vercel.app";
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.wiesenhuette.de";
     try {
       await sendMail({
         to: target[0].email,

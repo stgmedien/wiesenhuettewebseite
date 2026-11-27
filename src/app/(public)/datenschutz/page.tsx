@@ -22,8 +22,8 @@ export default async function Datenschutz() {
           </div>
           <div>
             <strong>Geltungsbereich:</strong>{" "}
-            <a href="https://wiesenhuette.vercel.app">wiesenhuette.vercel.app</a>{" "}
-            (zukünftig www.skifreunde-gt.de) und alle Unterseiten
+            <a href="https://www.wiesenhuette.de">www.wiesenhuette.de</a> und alle
+            Unterseiten
           </div>
         </div>
 

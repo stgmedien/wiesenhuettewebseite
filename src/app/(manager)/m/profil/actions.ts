@@ -134,7 +134,7 @@ export async function requestEmailChange(
     .values({ userId: me.id, newEmail, tokenHash, expiresAt })
     .returning({ id: emailChangeRequests.id });
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://wiesenhuette.vercel.app";
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.wiesenhuette.de";
   const verifyUrl = `${baseUrl}/m/profil/verify-email?id=${inserted[0].id}&token=${token}`;
 
   try {

@@ -12,7 +12,8 @@
  */
 
 import { hasMinTenPercentStorno } from "@/lib/pricing";
-import { isOrgBooking } from "@/lib/booking-kind";
+import { isOrgBooking, restLeadDaysFor } from "@/lib/booking-kind";
+import { MANUAL_REST_MARKER } from "@/lib/payment-markers";
 import { db } from "@/lib/db";
 import { bookings, customers, payments, activityLog } from "@/lib/db/schema";
 import { and, eq, inArray } from "drizzle-orm";
@@ -34,7 +35,22 @@ const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.wiesenhuette.de
 
 type BookingRow = typeof bookings.$inferSelect;
 type CustomerRow = typeof customers.$inferSelect;
-type PmtRow = { kind: string; amountCents: number };
+type PmtRow = { kind: string; amountCents: number; method?: string | null };
+
+/** Meldeschein (digitaler Check-in) muss laut Kurbeitragsmanagement Winterberg
+ * spätestens so viele Tage vor Anreise ausgefüllt sein. */
+const AVS_CHECKIN_LEAD_DAYS = 14;
+
+/** ISO-Datum (YYYY-MM-DD) minus n Tage. */
+const isoMinusDays = (iso: string, days: number): string => {
+  const d = new Date(`${iso}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - days);
+  return d.toISOString().slice(0, 10);
+};
+
+/** Wird die Restzahlung per Überweisung erwartet (statt Auto-Einzug per Stripe)? */
+const isTransferRest = (method?: string | null): boolean =>
+  !!method && (method === MANUAL_REST_MARKER || /überweisung/i.test(method));
 
 /**
  * Baut die vollstaendigen Props fuer BookingConfirmedEmail — dieselbe Mail
@@ -60,6 +76,8 @@ export function buildBookingConfirmedEmailProps(params: {
     firstPayment?.amountCents ??
     Math.round((subtotal * prepayPercentForBooking(booking)) / 100);
   const remainder = restRow?.amountCents ?? subtotal - prepayment;
+  const restLead = restLeadDaysFor(booking);
+  const restDueIso = isoMinusDays(booking.arrival, restLead);
   return {
     bookingNumber: booking.bookingNumber,
     guestName: `${customer.firstName} ${customer.lastName}`.trim(),
@@ -74,6 +92,17 @@ export function buildBookingConfirmedEmailProps(params: {
     kautionDueNow,
     orgBooking: isOrgBooking(booking),
     stornoMinTen: hasMinTenPercentStorno(booking),
+    restPayment: kautionDueNow ? "none" : isTransferRest(restRow?.method) ? "transfer" : "auto",
+    restLeadDays: restLead,
+    restDueDate: formatDateLong(restDueIso),
+    restReminderDate: formatDateLong(isoMinusDays(booking.arrival, restLead + 7)),
+    // Kurzfristige Buchung: Frist schon vorbei → Mail bittet um sofortiges Ausfüllen.
+    checkinDeadline:
+      isoMinusDays(booking.arrival, AVS_CHECKIN_LEAD_DAYS) >= new Date().toISOString().slice(0, 10)
+        ? formatDateLong(isoMinusDays(booking.arrival, AVS_CHECKIN_LEAD_DAYS))
+        : undefined,
+    checkinUrgent:
+      isoMinusDays(booking.arrival, AVS_CHECKIN_LEAD_DAYS) < new Date().toISOString().slice(0, 10),
     baseUrl,
     customer: {
       firstName: customer.firstName,
@@ -149,7 +178,7 @@ export async function resendBookingConfirmationMails(
   if (!customer) return { sent: [], errors: ["Kein Kundendatensatz"] };
 
   const pmtRows = await db
-    .select({ kind: payments.kind, amountCents: payments.amountCents })
+    .select({ kind: payments.kind, amountCents: payments.amountCents, method: payments.method })
     .from(payments)
     .where(eq(payments.bookingId, bookingId));
   const kautionDueNow = pmtRows.some((p) => p.kind === "kaution");
@@ -352,7 +381,7 @@ export async function confirmDepositPayment(params: ConfirmDepositParams): Promi
   const guestName = `${customer.firstName} ${customer.lastName}`.trim();
 
   const pmtRows = await db
-    .select({ kind: payments.kind, amountCents: payments.amountCents })
+    .select({ kind: payments.kind, amountCents: payments.amountCents, method: payments.method })
     .from(payments)
     .where(eq(payments.bookingId, bookingId));
   const kautionDueNow = pmtRows.some((p) => p.kind === "kaution");

@@ -66,7 +66,7 @@ export async function holdDepositRefund(raw: z.infer<typeof holdSchema>): Promis
       )[0]
     : null;
   if (customer) {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://wiesenhuette.vercel.app";
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.wiesenhuette.de";
     try {
       await sendMail({
         to: customer.email,

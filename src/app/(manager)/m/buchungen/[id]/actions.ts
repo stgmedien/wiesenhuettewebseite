@@ -91,7 +91,7 @@ export async function setBookingStatus(
       if (c?.email) {
         if (status === "bestaetigt") {
           const pmtRows = await db
-            .select({ kind: payments.kind, amountCents: payments.amountCents })
+            .select({ kind: payments.kind, amountCents: payments.amountCents, method: payments.method })
             .from(payments)
             .where(eq(payments.bookingId, bookingId));
           await sendMail({
@@ -736,7 +736,7 @@ export async function confirmManualDepositReturn(
   if (b.customerId) {
     const c = (await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1))[0];
     if (c) {
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://wiesenhuette.vercel.app";
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.wiesenhuette.de";
       const attachment = await buildInvoicePdfAttachment(b.id);
       try {
         await sendMail({
