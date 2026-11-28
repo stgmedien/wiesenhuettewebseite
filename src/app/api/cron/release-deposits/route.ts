@@ -8,7 +8,7 @@ import { sendMail } from "@/lib/mail/send";
 import DepositRefundedEmail from "@/lib/mail/templates/deposit-refunded";
 import { formatDateLong } from "@/lib/utils";
 import { formatEuro } from "@/lib/pricing";
-import { buildInvoicePdfAttachment } from "@/lib/invoice-attachment";
+import { buildFinalInvoicePdfAttachment } from "@/lib/invoice-attachment";
 import {
   generateFeedbackToken,
   hashFeedbackToken,
@@ -149,7 +149,7 @@ export async function GET(req: NextRequest) {
           // bisher der einzige Moment, in dem die Rechnung aktiv verschickt
           // wird (sonst nur Selbstbedienung im Konto). Best-effort: schlägt
           // das PDF fehl, geht die Mail trotzdem ohne Anhang raus.
-          const attachment = await buildInvoicePdfAttachment(b.id);
+          const attachment = await buildFinalInvoicePdfAttachment(b.id);
 
           // Feedback-Einladung an dieselbe Mail hängen statt eigenem Versand
           // (frühere T+2-Mail) — kein eigener feedback_entries-Eintrag, wenn

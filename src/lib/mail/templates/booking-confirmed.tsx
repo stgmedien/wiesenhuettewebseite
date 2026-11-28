@@ -301,7 +301,11 @@ export default function BookingConfirmedEmail({
           <Text style={text}>
             <strong>3. Vor der Anreise:</strong> Ihr bekommt Adresse, Hausordnung und Infos zur
             Schlüsselübergabe. Eure Kurkarten schicken wir euch spätestens 3 Tage vor Anreise.
-            Falls ihr vorher Fragen habt, antwortet einfach auf diese Mail.
+          </Text>
+          <Text style={text}>
+            <strong>4. Nach der Abreise:</strong> Wir überweisen euch die Kaution zurück und
+            schicken euch dabei automatisch die Rechnung zu eurem Aufenthalt per Mail. Falls ihr
+            vorher Fragen habt, antwortet einfach auf diese Mail.
           </Text>
           <Text style={text}>
             Spätestens 2 Tage vor Anreise sprecht ihr eure Ankunftszeit mit unserem Hüttenwart

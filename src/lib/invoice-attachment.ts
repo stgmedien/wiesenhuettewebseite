@@ -1,10 +1,11 @@
 import { db } from "@/lib/db";
-import { bookings, invoices } from "@/lib/db/schema";
+import { activityLog, bookings, invoices } from "@/lib/db/schema";
 import { and, eq, ne, desc } from "drizzle-orm";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { InvoicePdf } from "@/lib/invoice-pdf";
 import { CANCELLATION_POLICY_CUTOFF, hasMinTenPercentStorno } from "@/lib/pricing";
 import type { MailAttachment } from "@/lib/mail/send";
+import { refreshInvoiceIfOutdated } from "@/lib/invoice";
 
 /**
  * Rendert die aktive Rechnung einer Buchung als PDF-Mail-Anhang — oder
@@ -71,4 +72,31 @@ export async function buildInvoicePdfAttachment(
     console.error(`[invoice-attachment] PDF-Rendering fehlgeschlagen für Buchung ${bookingId}:`, err);
     return null;
   }
+}
+
+/**
+ * Abschlussrechnung für die Mail „Kaution zurücküberwiesen“: bringt die
+ * Rechnung vorher auf den aktuellen Buchungsstand (erstellt bzw. stellt neu
+ * aus, siehe refreshInvoiceIfOutdated) und hängt sie dann an. Best-effort —
+ * scheitert die Aktualisierung, geht die bisherige Rechnung mit.
+ */
+export async function buildFinalInvoicePdfAttachment(
+  bookingId: string
+): Promise<MailAttachment | null> {
+  try {
+    const r = await refreshInvoiceIfOutdated(bookingId);
+    if (r.action !== "unchanged") {
+      await db.insert(activityLog).values({
+        who: "System",
+        what:
+          r.action === "reissued"
+            ? `Rechnung ${r.cancelledNumbers.join(", ")} storniert und als ${r.invoiceNumber} neu ausgestellt — Buchung hatte sich seit der Ausstellung geändert (vor Versand mit der Kautionsrückzahlung).`
+            : `Abschlussrechnung ${r.invoiceNumber} erstellt (vor Versand mit der Kautionsrückzahlung).`,
+        bookingId,
+      });
+    }
+  } catch (err) {
+    console.error(`[invoice] Aktualisierung vor Abschlussmail fehlgeschlagen (${bookingId}):`, err);
+  }
+  return buildInvoicePdfAttachment(bookingId);
 }

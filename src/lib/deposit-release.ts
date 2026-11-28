@@ -4,7 +4,7 @@ import { bookings, customers, payments, activityLog } from "@/lib/db/schema";
 import { and, eq, gte, inArray, isNull } from "drizzle-orm";
 import { sendMail } from "@/lib/mail/send";
 import DepositRefundedEmail from "@/lib/mail/templates/deposit-refunded";
-import { buildInvoicePdfAttachment } from "@/lib/invoice-attachment";
+import { buildFinalInvoicePdfAttachment } from "@/lib/invoice-attachment";
 import { formatEuro } from "@/lib/pricing";
 import { formatDateLong } from "@/lib/utils";
 
@@ -106,7 +106,7 @@ export async function completeDepositRelease(
     if (c) {
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.wiesenhuette.de";
       try {
-        const attachment = await buildInvoicePdfAttachment(b.id);
+        const attachment = await buildFinalInvoicePdfAttachment(b.id);
         await sendMail({
           to: c.email,
           subject: `Kaution zurücküberwiesen — Buchung ${b.bookingNumber}`,
