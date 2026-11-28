@@ -38,6 +38,7 @@ export function KurkartenUploadForm({
     initialFeuerwehrNames.length > 0 ? initialFeuerwehrNames : [""]
   );
   const [feuerwehrListeUrl, setFeuerwehrListeUrl] = useState(initialFeuerwehrListeUrl);
+  const [meldescheinNote, setMeldescheinNote] = useState<string | null>(null);
   const [editingNames, setEditingNames] = useState(false);
   const [generatePending, startGenerate] = useTransition();
   const [generateError, setGenerateError] = useState<string | null>(null);
@@ -59,6 +60,14 @@ export function KurkartenUploadForm({
       setKurkartenUrl(data.url);
       setNames(data.suggestedNames?.length > 0 ? data.suggestedNames : [""]);
       setFeuerwehrListeUrl(data.feuerwehrListeUrl ?? null);
+      const nats: string[] = data.foreignNationalities ?? [];
+      setMeldescheinNote(
+        nats.length === 0
+          ? null
+          : data.meldescheinMailedTo
+            ? `Ausländische Gäste erkannt (${nats.join(", ")}) — Toni hat den Meldeschein zum Unterschreiben per Mail bekommen.`
+            : `Ausländische Gäste erkannt (${nats.join(", ")}) — die Mail an Toni ist fehlgeschlagen, bitte den Meldeschein selbst weiterleiten.`
+      );
       setEditingNames(false);
       router.refresh();
     });
@@ -162,6 +171,9 @@ export function KurkartenUploadForm({
         </>
       )}
 
+      {meldescheinNote && (
+        <p className="text-[13px] text-[var(--color-wh-deep-green)] mt-2">{meldescheinNote}</p>
+      )}
       {error && <p className="text-[13px] text-[#7a3a20] mt-2">{error}</p>}
 
       {kurkartenUrl && (

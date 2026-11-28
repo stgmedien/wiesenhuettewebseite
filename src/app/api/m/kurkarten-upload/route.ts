@@ -2,10 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { put, del } from "@vercel/blob";
 import { db } from "@/lib/db";
-import { bookings, customers } from "@/lib/db/schema";
+import { activityLog, bookings, customers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { buildKurkartenFilename } from "@/lib/kurkarten";
-import { extractNamesFromKurkartenPdf } from "@/lib/kurkarten-names";
+import { extractNamesFromKurkartenPdf, hasForeignGuests } from "@/lib/kurkarten-names";
+import HuettenwartMeldescheinAuslaenderEmail, {
+  meldescheinAuslaenderSubject,
+} from "@/lib/mail/templates/huettenwart-meldeschein-auslaender";
 import { generateFeuerwehrListePdf } from "@/lib/generate-feuerwehr-liste";
 import { sendMail } from "@/lib/mail/send";
 import ArrivalReminderEmail from "@/lib/mail/templates/arrival-reminder";
@@ -54,6 +57,7 @@ export async function POST(req: NextRequest) {
       departure: bookings.departure,
       customerId: bookings.customerId,
       bookingNumber: bookings.bookingNumber,
+      persons: bookings.persons,
     })
     .from(bookings)
     .where(eq(bookings.id, bookingId))
@@ -87,7 +91,8 @@ export async function POST(req: NextRequest) {
   // direkt automatisch daraus erzeugen — Dana kann sie danach im Manager-Tool
   // noch korrigieren, muss dafuer aber nicht mehr selbst einen Erzeugen-Schritt
   // anstossen.
-  const suggestedNames = await extractNamesFromKurkartenPdf(Buffer.from(await file.arrayBuffer()));
+  const pdfInfo = await extractNamesFromKurkartenPdf(Buffer.from(await file.arrayBuffer()));
+  const suggestedNames = pdfInfo.names;
 
   let feuerwehrListeUrl: string | null = null;
   if (suggestedNames.length > 0) {
@@ -113,6 +118,47 @@ export async function POST(req: NextRequest) {
         : { kurkartenPdfUrl: blob.url, feuerwehrNames: suggestedNames }
     )
     .where(eq(bookings.id, bookingId));
+
+  // Ausländische Gäste: Meldeschein muss am Anreisetag auf Papier
+  // unterschrieben werden (§ 29 BMG) → Toni bekommt die PDF sofort mit
+  // Anleitung, unabhängig vom T-3-Versand. Bei jedem Upload neu, damit nach
+  // einer korrigierten PDF die aktuelle Fassung bei ihm liegt.
+  let meldescheinMailedTo: string | null = null;
+  if (hasForeignGuests(pdfInfo)) {
+    const guestName = customer ? `${customer.firstName} ${customer.lastName}`.trim() : booking.bookingNumber;
+    const foreign = [...new Set(pdfInfo.nationalities.filter((n) => !/^deutsch/i.test(n)))];
+    try {
+      await sendMail({
+        to: HUETTENWART_EMAIL,
+        bcc: HUETTENWART_CC,
+        subject: meldescheinAuslaenderSubject(guestName, booking.bookingNumber, formatDateLong(booking.arrival)),
+        template: "huettenwart_meldeschein_auslaender",
+        bookingId,
+        attachments: [
+          {
+            filename: displayName,
+            content: Buffer.from(await file.arrayBuffer()),
+            contentType: "application/pdf",
+          },
+        ],
+        react: HuettenwartMeldescheinAuslaenderEmail({
+          bookingNumber: booking.bookingNumber,
+          guestName,
+          arrival: formatDateLong(booking.arrival),
+          persons: booking.persons,
+          nationalities: foreign,
+        }),
+      });
+      meldescheinMailedTo = HUETTENWART_EMAIL;
+      await db.insert(activityLog).values({
+        who: session.user?.name ?? session.user?.email ?? "Manager",
+        what: `Ausländische Gäste erkannt (${foreign.join(", ")}) — Meldeschein zum Unterschreiben an den Hüttenwart geschickt.`,
+        bookingId,
+      });
+    } catch (err) {
+      console.error("[kurkarten-upload] Meldeschein-Mail an Hüttenwart fehlgeschlagen:", err);
+    }
+  }
 
   // Kurkarten werden NICHT sofort verschickt — sie warten planmaessig auf
   // die T-3-Erinnerung (arrival_reminder/huettenwart_arrival_reminder), die
@@ -190,7 +236,13 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({ url: blob.url, suggestedNames, feuerwehrListeUrl });
+  return NextResponse.json({
+    url: blob.url,
+    suggestedNames,
+    feuerwehrListeUrl,
+    foreignNationalities: hasForeignGuests(pdfInfo) ? pdfInfo.nationalities : [],
+    meldescheinMailedTo,
+  });
 }
 
 export async function DELETE(req: NextRequest) {
