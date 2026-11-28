@@ -84,9 +84,9 @@ const FAQS: QA[] = [
       nl: "Hoe betaal ik?",
     },
     a: {
-      de: "Sicher online über Stripe — bei der Buchung leistest Du eine Anzahlung, der Rest ist vor der Anreise fällig. Die Kaution (300 €) ist mit der Restzahlung fällig und wird nach dem Aufenthalt zurückerstattet. Die genauen Zahlungs- und Stornobedingungen siehst Du im Buchungsformular und in den AGB.",
-      en: "Securely online via Stripe — you pay a deposit when booking and the rest before arrival. The damage deposit (€300) is due with the remaining payment and refunded after your stay. The exact payment and cancellation terms are shown in the booking form and in our terms.",
-      nl: "Veilig online via Stripe — bij de boeking betaal je een aanbetaling, de rest vóór aankomst. De borg (€300) is verschuldigd met de restbetaling en wordt na het verblijf terugbetaald. De precieze betalings- en annuleringsvoorwaarden zie je in het boekingsformulier en in de algemene voorwaarden.",
+      de: "Sicher online über Stripe — bei der Buchung leistest Du eine Anzahlung, der Rest ist vor der Anreise fällig. Die Kaution (300 €) ist mit der Restzahlung fällig und wird nach dem Aufenthalt zurückerstattet. Die Rechnung bekommst Du nach dem Aufenthalt automatisch per Mail, zusammen mit der Rückzahlung der Kaution. Die genauen Zahlungs- und Stornobedingungen siehst Du im Buchungsformular und in den AGB.",
+      en: "Securely online via Stripe — you pay a deposit when booking and the rest before arrival. The damage deposit (€300) is due with the remaining payment and refunded after your stay. You will automatically receive the invoice by email after your stay, together with the refund of the damage deposit. The exact payment and cancellation terms are shown in the booking form and in our terms.",
+      nl: "Veilig online via Stripe — bij de boeking betaal je een aanbetaling, de rest vóór aankomst. De borg (€300) is verschuldigd met de restbetaling en wordt na het verblijf terugbetaald. De factuur ontvang je na het verblijf automatisch per e-mail, samen met de terugbetaling van de borg. De precieze betalings- en annuleringsvoorwaarden zie je in het boekingsformulier en in de algemene voorwaarden.",
     },
   },
   {

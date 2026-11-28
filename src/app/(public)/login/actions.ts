@@ -1,5 +1,6 @@
 "use server";
 
+import { resolveLoginEmail } from "@/lib/email-canonical";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { users, customers } from "@/lib/db/schema";
@@ -35,7 +36,8 @@ export async function requestMagicLinkAction(formData: FormData): Promise<MagicR
   if (!parsed.success) {
     return { ok: false, error: "Bitte eine gültige E-Mail-Adresse eingeben." };
   }
-  const email = parsed.data.toLowerCase();
+  // Gmail mit/ohne Punkt → auf die Schreibweise der Buchung abbilden.
+  const email = await resolveLoginEmail(parsed.data.toLowerCase());
 
   const h = await headers();
   const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || undefined;

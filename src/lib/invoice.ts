@@ -29,66 +29,28 @@ export const allocateInvoiceNumber = async (
   return { number: `WH-${year}-${String(n).padStart(5, "0")}`, n };
 };
 
-export type ActiveInvoice = {
-  id: string;
-  invoiceNumber: string;
-  status: string;
-  issueDate: string | null;
+type BookingRow = typeof bookings.$inferSelect;
+type CustomerRow = typeof customers.$inferSelect;
+type InvoiceLineItem = { label: string; qty: number; unitCents: number; totalCents: number };
+type InvoiceCustomerSnapshot = {
+  name: string;
+  company?: string;
+  street?: string;
+  zip?: string;
+  city?: string;
+  country?: string;
+  email?: string;
 };
 
 /**
- * Kanonischer Lookup der AKTIVEN (nicht stornierten) Rechnung einer Buchung.
- * Nach einer Neuausstellung existieren storniert + aktiv nebeneinander —
- * alle Anzeige-/Mail-/Export-Pfade muessen diese Funktion nutzen, damit
- * nirgends die stornierte Rechnung auftaucht.
+ * Inhalt einer Rechnung aus dem AKTUELLEN Buchungsstand (Positionen +
+ * Anschrift). Von createInvoiceForBooking und vom Aktualitäts-Check
+ * (refreshInvoiceIfOutdated) gemeinsam genutzt.
  */
-export const getActiveInvoiceForBooking = async (
-  bookingId: string,
-  dbx: Dbx = db
-): Promise<ActiveInvoice | null> => {
-  const rows = await dbx
-    .select({
-      id: invoices.id,
-      invoiceNumber: invoices.invoiceNumber,
-      status: invoices.status,
-      issueDate: invoices.issueDate,
-    })
-    .from(invoices)
-    .where(and(eq(invoices.bookingId, bookingId), ne(invoices.status, "storniert")))
-    .orderBy(desc(invoices.createdAt))
-    .limit(1);
-  return rows[0] ?? null;
-};
-
-/**
- * Erzeugt eine atomare Invoice-Row fuer eine Buchung.
- * Idempotent: wenn fuer die Buchung schon eine aktive Invoice existiert,
- * wird diese zurueckgegeben.
- */
-export const createInvoiceForBooking = async (
-  bookingId: string,
-  dbx: Dbx = db
-): Promise<{ id: string; invoiceNumber: string; isNew: boolean }> => {
-  // Existing invoice? Stornierte zaehlen nicht — nach einer Neuausstellung
-  // (reissueInvoiceForBooking) muss hier die aktive Rechnung gefunden bzw.
-  // eine neue erstellt werden.
-  const existing = await getActiveInvoiceForBooking(bookingId, dbx);
-  if (existing) {
-    return { id: existing.id, invoiceNumber: existing.invoiceNumber, isNew: false };
-  }
-
-  const bookingRows = await dbx.select().from(bookings).where(eq(bookings.id, bookingId)).limit(1);
-  const booking = bookingRows[0];
-  if (!booking) throw new Error("Buchung nicht gefunden");
-
-  const customerRows = booking.customerId
-    ? await dbx.select().from(customers).where(eq(customers.id, booking.customerId)).limit(1)
-    : [];
-  const customer = customerRows[0];
-
-  const { number: invoiceNumber } = await allocateInvoiceNumber(dbx);
-  const today = toLocalIso(new Date());
-
+async function buildInvoiceContent(
+  booking: BookingRow,
+  customer: CustomerRow | undefined
+): Promise<{ lineItems: InvoiceLineItem[]; customerSnapshot: InvoiceCustomerSnapshot }> {
   // Line items snapshot
   const lineItems: { label: string; qty: number; unitCents: number; totalCents: number }[] = [];
   if (booking.accommodationCents > 0) {
@@ -201,6 +163,126 @@ export const createInvoiceForBooking = async (
     country: customer?.country ?? "DE",
     email: customer?.email ?? undefined,
   };
+
+  return { lineItems, customerSnapshot };
+}
+
+/** JSON mit sortierten Schlüsseln, ohne undefined — jsonb speichert Schlüssel umsortiert. */
+const stableJson = (v: unknown): string =>
+  JSON.stringify(v, (_k, val) =>
+    val && typeof val === "object" && !Array.isArray(val)
+      ? Object.fromEntries(
+          Object.keys(val as Record<string, unknown>)
+            .sort()
+            .filter((k) => (val as Record<string, unknown>)[k] !== undefined)
+            .map((k) => [k, (val as Record<string, unknown>)[k]])
+        )
+      : val
+  );
+
+/**
+ * Sorgt vor dem Versand der Abschlussrechnung (Mail „Kaution
+ * zurücküberwiesen“) dafür, dass die Rechnung zum aktuellen Buchungsstand
+ * passt: keine Rechnung → wird erstellt; Personen/Preise/Anschrift seit der
+ * Ausstellung geändert → Neuausstellung (alte wird storniert). Vorher blieb
+ * die bei der Anzahlung erzeugte Rechnung stehen, Dana musste jede von Hand
+ * prüfen (11/2026).
+ */
+export const refreshInvoiceIfOutdated = async (
+  bookingId: string
+): Promise<
+  | { action: "unchanged" | "created"; invoiceNumber: string }
+  | { action: "reissued"; invoiceNumber: string; cancelledNumbers: string[] }
+> => {
+  const active = (
+    await db
+      .select()
+      .from(invoices)
+      .where(and(eq(invoices.bookingId, bookingId), ne(invoices.status, "storniert")))
+      .orderBy(desc(invoices.createdAt))
+      .limit(1)
+  )[0];
+  if (!active) {
+    const created = await createInvoiceForBooking(bookingId);
+    return { action: "created", invoiceNumber: created.invoiceNumber };
+  }
+
+  const booking = (await db.select().from(bookings).where(eq(bookings.id, bookingId)).limit(1))[0];
+  if (!booking) return { action: "unchanged", invoiceNumber: active.invoiceNumber };
+  const customer = booking.customerId
+    ? (await db.select().from(customers).where(eq(customers.id, booking.customerId)).limit(1))[0]
+    : undefined;
+  const current = await buildInvoiceContent(booking, customer);
+  const same =
+    active.subtotalCents === booking.subtotalCents &&
+    stableJson(active.lineItems) === stableJson(current.lineItems) &&
+    stableJson(active.customerSnapshot) === stableJson(current.customerSnapshot);
+  if (same) return { action: "unchanged", invoiceNumber: active.invoiceNumber };
+
+  const re = await reissueInvoiceForBooking(bookingId);
+  return { action: "reissued", invoiceNumber: re.invoiceNumber, cancelledNumbers: re.cancelledNumbers };
+};
+
+export type ActiveInvoice = {
+  id: string;
+  invoiceNumber: string;
+  status: string;
+  issueDate: string | null;
+};
+
+/**
+ * Kanonischer Lookup der AKTIVEN (nicht stornierten) Rechnung einer Buchung.
+ * Nach einer Neuausstellung existieren storniert + aktiv nebeneinander —
+ * alle Anzeige-/Mail-/Export-Pfade muessen diese Funktion nutzen, damit
+ * nirgends die stornierte Rechnung auftaucht.
+ */
+export const getActiveInvoiceForBooking = async (
+  bookingId: string,
+  dbx: Dbx = db
+): Promise<ActiveInvoice | null> => {
+  const rows = await dbx
+    .select({
+      id: invoices.id,
+      invoiceNumber: invoices.invoiceNumber,
+      status: invoices.status,
+      issueDate: invoices.issueDate,
+    })
+    .from(invoices)
+    .where(and(eq(invoices.bookingId, bookingId), ne(invoices.status, "storniert")))
+    .orderBy(desc(invoices.createdAt))
+    .limit(1);
+  return rows[0] ?? null;
+};
+
+/**
+ * Erzeugt eine atomare Invoice-Row fuer eine Buchung.
+ * Idempotent: wenn fuer die Buchung schon eine aktive Invoice existiert,
+ * wird diese zurueckgegeben.
+ */
+export const createInvoiceForBooking = async (
+  bookingId: string,
+  dbx: Dbx = db
+): Promise<{ id: string; invoiceNumber: string; isNew: boolean }> => {
+  // Existing invoice? Stornierte zaehlen nicht — nach einer Neuausstellung
+  // (reissueInvoiceForBooking) muss hier die aktive Rechnung gefunden bzw.
+  // eine neue erstellt werden.
+  const existing = await getActiveInvoiceForBooking(bookingId, dbx);
+  if (existing) {
+    return { id: existing.id, invoiceNumber: existing.invoiceNumber, isNew: false };
+  }
+
+  const bookingRows = await dbx.select().from(bookings).where(eq(bookings.id, bookingId)).limit(1);
+  const booking = bookingRows[0];
+  if (!booking) throw new Error("Buchung nicht gefunden");
+
+  const customerRows = booking.customerId
+    ? await dbx.select().from(customers).where(eq(customers.id, booking.customerId)).limit(1)
+    : [];
+  const customer = customerRows[0];
+
+  const { lineItems, customerSnapshot } = await buildInvoiceContent(booking, customer);
+  const { number: invoiceNumber } = await allocateInvoiceNumber(dbx);
+  const today = toLocalIso(new Date());
 
   // Gemeinnütziger Verein: keine USt fuer Vereinszweck-Vermietung
   const inserted = await dbx

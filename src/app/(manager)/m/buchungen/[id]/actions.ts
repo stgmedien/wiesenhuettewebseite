@@ -33,7 +33,7 @@ import { buildBookingVars } from "@/lib/mail-template-vars";
 import { confirmDepositPayment, buildBookingConfirmedEmailProps } from "@/lib/booking-payment-confirmation";
 import { notifyWaitlistForRange } from "@/lib/waitlist";
 import { generateFeuerwehrListePdf } from "@/lib/generate-feuerwehr-liste";
-import { buildInvoicePdfAttachment } from "@/lib/invoice-attachment";
+import { buildFinalInvoicePdfAttachment } from "@/lib/invoice-attachment";
 import DepositRefundedEmail from "@/lib/mail/templates/deposit-refunded";
 import BookingTransferRequestEmail, { transferRequestSubject } from "@/lib/mail/templates/booking-transfer-request";
 import { buildKurkartenFilename } from "@/lib/kurkarten";
@@ -737,7 +737,7 @@ export async function confirmManualDepositReturn(
     const c = (await db.select().from(customers).where(eq(customers.id, b.customerId)).limit(1))[0];
     if (c) {
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.wiesenhuette.de";
-      const attachment = await buildInvoicePdfAttachment(b.id);
+      const attachment = await buildFinalInvoicePdfAttachment(b.id);
       try {
         await sendMail({
           to: c.email,
