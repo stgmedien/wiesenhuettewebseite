@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { deleteExpiredSignedMeldescheine } from "@/lib/meldeschein-signiert";
 import { db } from "@/lib/db";
 import { warmUpDb } from "@/lib/db/warmup";
 import {
@@ -1039,6 +1040,15 @@ export async function GET(req: Request) {
     }
   } catch (err) {
     console.error("[cron] birthday query failed:", err);
+  }
+
+  // ---------- Fotos unterschriebener Meldescheine: 1 Jahr nach Abreise löschen ----------
+  // § 30 Abs. 4 BMG. Löschdatum steckt im Blob-Pfad (siehe meldeschein-signiert.ts).
+  try {
+    const deleted = await deleteExpiredSignedMeldescheine(isoDayOffset(0));
+    if (deleted > 0) console.info(`[cron] ${deleted} Meldeschein-Foto(s) nach Ablauf gelöscht`);
+  } catch (err) {
+    console.error("[cron] Meldeschein-Fotos löschen fehlgeschlagen:", err);
   }
 
   return NextResponse.json({ ok: true, date: isoDayOffset(0), stats });

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { put, del } from "@vercel/blob";
+import { PDFDocument } from "pdf-lib";
 import { db } from "@/lib/db";
 import { activityLog, bookings, customers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
@@ -16,6 +17,18 @@ import HuettenwartArrivalReminderEmail from "@/lib/mail/templates/huettenwart-ar
 import { HUETTENWART_EMAIL, HUETTENWART_CC } from "@/lib/huettenwart";
 import { formatDateLong } from "@/lib/utils";
 import { wasMailSent } from "@/lib/mail-log";
+
+/** Fügt mehrere PDFs in der gegebenen Reihenfolge zu einer zusammen (1 PDF → unverändert). */
+async function mergePdfs(buffers: Buffer[]): Promise<Buffer> {
+  if (buffers.length === 1) return buffers[0];
+  const out = await PDFDocument.create();
+  for (const buf of buffers) {
+    const src = await PDFDocument.load(buf);
+    const pages = await out.copyPages(src, src.getPageIndices());
+    pages.forEach((p) => out.addPage(p));
+  }
+  return Buffer.from(await out.save());
+}
 
 // Tage bis zur Anreise (lokale Kalendertage, unabhaengig von Uhrzeit).
 function daysUntil(arrivalIso: string): number {
@@ -43,12 +56,23 @@ export async function POST(req: NextRequest) {
 
   const form = await req.formData();
   const bookingId = form.get("bookingId");
-  const file = form.get("file");
-  if (typeof bookingId !== "string" || !(file instanceof Blob)) {
+  // Mehrere PDFs möglich: z. B. zwei AVS-Meldescheine einer Gruppe (Finn
+  // 11/2026: einer für den deutschen Buchenden, einer für 32 Niederländer).
+  // Sie werden zu EINER Kurkarten-PDF zusammengefügt — alle nachfolgenden
+  // Schritte (Namen, Feuerwehr-Liste, Mails) laufen dann über alle Gäste.
+  const files = form.getAll("file").filter((f): f is File => f instanceof Blob);
+  if (typeof bookingId !== "string" || files.length === 0) {
     return NextResponse.json({ error: "bookingId + file erforderlich" }, { status: 400 });
   }
-  if ((file as File).type !== "application/pdf") {
+  if (files.some((f) => f.type !== "application/pdf")) {
     return NextResponse.json({ error: "Nur PDF-Dateien erlaubt." }, { status: 400 });
+  }
+  let pdfBuffer: Buffer;
+  try {
+    pdfBuffer = await mergePdfs(await Promise.all(files.map(async (f) => Buffer.from(await f.arrayBuffer()))));
+  } catch (err) {
+    console.error("[kurkarten-upload] PDFs zusammenfügen fehlgeschlagen:", err);
+    return NextResponse.json({ error: "Die PDFs konnten nicht zusammengefügt werden." }, { status: 400 });
   }
 
   const [booking] = await db
@@ -81,7 +105,7 @@ export async function POST(req: NextRequest) {
   const displayName = buildKurkartenFilename(customer?.lastName ?? "Gast", booking.arrival);
   const filename = `kurkarten/${bookingId}/${displayName}`;
 
-  const blob = await put(filename, file, {
+  const blob = await put(filename, pdfBuffer, {
     access: "public",
     addRandomSuffix: false,
     contentType: "application/pdf",
@@ -91,7 +115,7 @@ export async function POST(req: NextRequest) {
   // direkt automatisch daraus erzeugen — Dana kann sie danach im Manager-Tool
   // noch korrigieren, muss dafuer aber nicht mehr selbst einen Erzeugen-Schritt
   // anstossen.
-  const pdfInfo = await extractNamesFromKurkartenPdf(Buffer.from(await file.arrayBuffer()));
+  const pdfInfo = await extractNamesFromKurkartenPdf(pdfBuffer);
   const suggestedNames = pdfInfo.names;
 
   let feuerwehrListeUrl: string | null = null;
@@ -137,7 +161,7 @@ export async function POST(req: NextRequest) {
         attachments: [
           {
             filename: displayName,
-            content: Buffer.from(await file.arrayBuffer()),
+            content: pdfBuffer,
             contentType: "application/pdf",
           },
         ],
@@ -172,7 +196,7 @@ export async function POST(req: NextRequest) {
     const sharedAttachments: { filename: string; content: Buffer; contentType: string }[] = [
       {
         filename: displayName,
-        content: Buffer.from(await file.arrayBuffer()),
+        content: pdfBuffer,
         contentType: "application/pdf",
       },
     ];

@@ -27,7 +27,7 @@ export function KurkartenUploadForm({
   initialFeuerwehrNames,
   initialFeuerwehrListeUrl,
 }: Props) {
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [uploadPending, startUpload] = useTransition();
   const [deletePending, startDelete] = useTransition();
@@ -44,19 +44,19 @@ export function KurkartenUploadForm({
   const [generateError, setGenerateError] = useState<string | null>(null);
 
   const upload = () => {
-    if (!file) return;
+    if (files.length === 0) return;
     setError(null);
     startUpload(async () => {
       const form = new FormData();
       form.set("bookingId", bookingId);
-      form.set("file", file);
+      files.forEach((f) => form.append("file", f));
       const res = await fetch("/api/m/kurkarten-upload", { method: "POST", body: form });
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Upload fehlgeschlagen.");
         return;
       }
-      setFile(null);
+      setFiles([]);
       setKurkartenUrl(data.url);
       setNames(data.suggestedNames?.length > 0 ? data.suggestedNames : [""]);
       setFeuerwehrListeUrl(data.feuerwehrListeUrl ?? null);
@@ -155,19 +155,25 @@ export function KurkartenUploadForm({
             <input
               type="file"
               accept="application/pdf"
-              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              multiple
+              onChange={(e) => setFiles(Array.from(e.target.files ?? []))}
               className="text-sm"
             />
             <button
               type="button"
               onClick={upload}
-              disabled={uploadPending || !file}
+              disabled={uploadPending || files.length === 0}
               className="inline-flex shrink-0 items-center justify-center gap-2 h-11 px-5 rounded-[var(--radius-btn)] bg-[var(--color-wh-deep-green)] text-[var(--color-wh-snow)] text-sm font-semibold cursor-pointer hover:bg-[var(--color-wh-deep-green-hover)] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {uploadPending ? <Loader2 size={15} className="animate-spin" /> : <FileUp size={15} />}
-              Hochladen
+              {files.length > 1 ? `${files.length} PDFs zusammen hochladen` : "Hochladen"}
             </button>
           </div>
+          <p className="text-xs text-[var(--color-wh-fg-muted)] mt-2">
+            Mehrere Meldescheine für eine Buchung (z. B. einer für den Buchenden, einer für die
+            Gruppe)? Alle PDFs gleichzeitig auswählen — sie werden zu einer Kurkarten-PDF
+            zusammengefügt und alle Namen landen auf einer Feuerwehr-Liste.
+          </p>
         </>
       )}
 

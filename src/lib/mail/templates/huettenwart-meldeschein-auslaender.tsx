@@ -104,8 +104,8 @@ export default function HuettenwartMeldescheinAuslaenderEmail({
               <br />
               3. Den <strong>Ausweis</strong> der unterschreibenden Person zeigen lassen.
               <br />
-              4. Den unterschriebenen Meldeschein an Johannes geben — er muss ein Jahr
-              aufbewahrt werden.
+              4. Ein <strong>Foto vom unterschriebenen Meldeschein</strong> an Johannes schicken
+              (WhatsApp oder Mail) — er lädt es ins Backend hoch.
             </Text>
           </Section>
           <Text style={text}>

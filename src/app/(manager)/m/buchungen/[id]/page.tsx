@@ -16,6 +16,8 @@ import { DEPOSIT_RELEASE_METHOD } from "@/lib/deposit-release";
 import { AvsCheckinForm } from "./AvsCheckinForm";
 import { AVS_SWITCH_AT } from "@/lib/avs";
 import { KurkartenUploadForm } from "./KurkartenUploadForm";
+import { SignedMeldescheinUpload } from "./SignedMeldescheinUpload";
+import { listSignedMeldescheine } from "@/lib/meldeschein-signiert";
 import { PaymentsTable } from "./PaymentsTable";
 import { PersonsPriceEditor } from "./PersonsPriceEditor";
 import { ManagerMessage } from "./ManagerMessage";
@@ -134,6 +136,7 @@ export default async function BookingDetail({ params }: Props) {
         ? "alt"
         : "neu";
 
+  const signedMeldescheine = await listSignedMeldescheine(b.id);
   const finalOpen = openFinalPayment(b, pmts);
   const openDepositRelease = pmts.find(
     (p) => p.kind === "rueckerstattung" && p.status === "offen" && p.method === DEPOSIT_RELEASE_METHOD
@@ -377,6 +380,7 @@ export default async function BookingDetail({ params }: Props) {
                 initialFeuerwehrNames={b.feuerwehrNames ?? []}
                 initialFeuerwehrListeUrl={b.feuerwehrListePdfUrl}
               />
+              <SignedMeldescheinUpload bookingId={b.id} items={signedMeldescheine} />
             </Section>
           )}
         </div>
