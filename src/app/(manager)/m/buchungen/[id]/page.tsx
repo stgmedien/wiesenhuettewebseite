@@ -14,6 +14,7 @@ import { openFinalPayment, restDueDateIso } from "@/lib/manual-final-payment";
 import { DepositReleaseControl } from "./DepositReleaseControl";
 import { DEPOSIT_RELEASE_METHOD } from "@/lib/deposit-release";
 import { AvsCheckinForm } from "./AvsCheckinForm";
+import { AVS_SWITCH_AT } from "@/lib/avs";
 import { KurkartenUploadForm } from "./KurkartenUploadForm";
 import { PaymentsTable } from "./PaymentsTable";
 import { PersonsPriceEditor } from "./PersonsPriceEditor";
@@ -79,9 +80,15 @@ export default async function BookingDetail({ params }: Props) {
       getInvoiceForBooking(id),
       // Letzter Versand des AVS-SelfCheck-in-Links (digitaler Meldeschein/Kurkarten)
       db
-        .select({ sentAt: emailLog.sentAt })
+        .select({ sentAt: emailLog.sentAt, subject: emailLog.subject })
         .from(emailLog)
-        .where(and(eq(emailLog.bookingId, id), eq(emailLog.template, "avs-selfcheckin")))
+        .where(
+          and(
+            eq(emailLog.bookingId, id),
+            eq(emailLog.template, "avs-selfcheckin"),
+            eq(emailLog.status, "sent")
+          )
+        )
         .orderBy(desc(emailLog.sentAt))
         .limit(1),
       // Verfuegbare Mail-Templates fuer den ManagerMessage-Picker (nur die mit aktiver Version)
@@ -114,7 +121,18 @@ export default async function BookingDetail({ params }: Props) {
       getBookingBlocks(today, horizon, id),
     ]);
   const customer = customerRows[0] ?? null;
-  const avsLastSentAt = avsSent[0] ? new Date(avsSent[0].sentAt).toLocaleString("de-DE") : null;
+  const avsLastSentAt = avsSent[0]
+    ? new Date(avsSent[0].sentAt).toLocaleString("de-DE", { timeZone: "Europe/Berlin" })
+    : null;
+  // AVS-Umstellung 27.11.2026: Links von davor gelten nicht mehr. "neu-umstellung"
+  // = Ersatzlink mit Hinweis verschickt, "alt" = nur ein alter Link.
+  const avsLastSentKind: "alt" | "neu" | "neu-umstellung" | null = !avsSent[0]
+    ? null
+    : avsSent[0].subject.startsWith("Neuer Link")
+      ? "neu-umstellung"
+      : new Date(avsSent[0].sentAt) < AVS_SWITCH_AT
+        ? "alt"
+        : "neu";
 
   const finalOpen = openFinalPayment(b, pmts);
   const openDepositRelease = pmts.find(
@@ -351,6 +369,7 @@ export default async function BookingDetail({ params }: Props) {
                 bookingId={b.id}
                 guestEmail={customer.email}
                 lastSentAt={avsLastSentAt}
+                lastSentKind={avsLastSentKind}
               />
               <KurkartenUploadForm
                 bookingId={b.id}
