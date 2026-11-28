@@ -39,6 +39,7 @@ export function KurkartenUploadForm({
   );
   const [feuerwehrListeUrl, setFeuerwehrListeUrl] = useState(initialFeuerwehrListeUrl);
   const [meldescheinNote, setMeldescheinNote] = useState<string | null>(null);
+  const [nameWarning, setNameWarning] = useState<string | null>(null);
   const [editingNames, setEditingNames] = useState(false);
   const [generatePending, startGenerate] = useTransition();
   const [generateError, setGenerateError] = useState<string | null>(null);
@@ -60,6 +61,19 @@ export function KurkartenUploadForm({
       setKurkartenUrl(data.url);
       setNames(data.suggestedNames?.length > 0 ? data.suggestedNames : [""]);
       setFeuerwehrListeUrl(data.feuerwehrListeUrl ?? null);
+      const dups: string[] = data.duplicateNames ?? [];
+      const found: number = data.suggestedNames?.length ?? 0;
+      const booked: number | undefined = data.bookedPersons;
+      const warnings: string[] = [];
+      if (dups.length > 0) {
+        warnings.push(
+          `Achtung: ${dups.join(", ")} ${dups.length === 1 ? "steht" : "stehen"} doppelt in den Kurkarten — bitte im AVS prüfen (sonst doppelter Kurbeitrag). Auf der Feuerwehr-Liste nur einmal.`
+        );
+      }
+      if (found > 0 && booked && found !== booked) {
+        warnings.push(`${found} Namen erkannt, gebucht sind ${booked} Personen.`);
+      }
+      setNameWarning(warnings.length > 0 ? warnings.join(" ") : null);
       const nats: string[] = data.foreignNationalities ?? [];
       setMeldescheinNote(
         nats.length === 0
@@ -177,6 +191,9 @@ export function KurkartenUploadForm({
         </>
       )}
 
+      {nameWarning && (
+        <p className="text-[13px] font-medium text-[var(--color-wh-sunset)] mt-2">{nameWarning}</p>
+      )}
       {meldescheinNote && (
         <p className="text-[13px] text-[var(--color-wh-deep-green)] mt-2">{meldescheinNote}</p>
       )}

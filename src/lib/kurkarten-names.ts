@@ -77,3 +77,28 @@ export async function extractNamesFromKurkartenPdf(buffer: Buffer): Promise<Kurk
     return { names: [], nationalities: [] };
   }
 }
+
+const normName = (n: string) =>
+  n
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+
+/**
+ * Doppelte Namen entfernen (erste Schreibweise bleibt). Doppelte entstehen,
+ * wenn eine Person auf zwei AVS-Meldescheinen steht (Finn 11/2026) — dann
+ * hat sie zwei Kurkarten und Winterberg berechnet den Kurbeitrag doppelt.
+ */
+export function dedupeNames(names: string[]): { unique: string[]; duplicates: string[] } {
+  const seen = new Map<string, string>();
+  const dups = new Set<string>();
+  for (const n of names) {
+    const key = normName(n);
+    if (!key) continue;
+    if (seen.has(key)) dups.add(seen.get(key)!);
+    else seen.set(key, n.trim());
+  }
+  return { unique: [...seen.values()], duplicates: [...dups] };
+}

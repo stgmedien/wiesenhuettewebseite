@@ -6,7 +6,7 @@ import { db } from "@/lib/db";
 import { activityLog, bookings, customers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { buildKurkartenFilename } from "@/lib/kurkarten";
-import { extractNamesFromKurkartenPdf, hasForeignGuests } from "@/lib/kurkarten-names";
+import { dedupeNames, extractNamesFromKurkartenPdf, hasForeignGuests } from "@/lib/kurkarten-names";
 import HuettenwartMeldescheinAuslaenderEmail, {
   meldescheinAuslaenderSubject,
 } from "@/lib/mail/templates/huettenwart-meldeschein-auslaender";
@@ -116,7 +116,16 @@ export async function POST(req: NextRequest) {
   // noch korrigieren, muss dafuer aber nicht mehr selbst einen Erzeugen-Schritt
   // anstossen.
   const pdfInfo = await extractNamesFromKurkartenPdf(pdfBuffer);
-  const suggestedNames = pdfInfo.names;
+  // Doppelte Namen nur einmal auf die Feuerwehr-Liste — und warnen, weil
+  // eine doppelt eingetragene Person zwei Kurkarten (= doppelter Kurbeitrag) hat.
+  const { unique: suggestedNames, duplicates: duplicateNames } = dedupeNames(pdfInfo.names);
+  if (duplicateNames.length > 0) {
+    await db.insert(activityLog).values({
+      who: session.user?.name ?? session.user?.email ?? "Manager",
+      what: `Kurkarten: doppelt eingetragen — ${duplicateNames.join(", ")}. Bitte im AVS prüfen (doppelter Kurbeitrag). Auf der Feuerwehr-Liste nur einmal.`,
+      bookingId,
+    });
+  }
 
   let feuerwehrListeUrl: string | null = null;
   if (suggestedNames.length > 0) {
@@ -266,6 +275,8 @@ export async function POST(req: NextRequest) {
     feuerwehrListeUrl,
     foreignNationalities: hasForeignGuests(pdfInfo) ? pdfInfo.nationalities : [],
     meldescheinMailedTo,
+    duplicateNames,
+    bookedPersons: booking.persons,
   });
 }
 
