@@ -78,13 +78,16 @@ export async function extractNamesFromKurkartenPdf(buffer: Buffer): Promise<Kurk
   }
 }
 
+// Vergleichsschlüssel: nur Buchstaben und Ziffern, ohne Akzente, klein.
+// PDF-Text enthält teils unsichtbare Zeichen (geschützte/schmale Leerzeichen,
+// weiche Trennstriche, Zero-Width) — zwei für das Auge identische Namen
+// wurden sonst nicht als doppelt erkannt (Finn 11/2026).
 const normName = (n: string) =>
   n
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
+    .normalize("NFKD")
+    .replace(/\p{M}/gu, "")
     .toLowerCase()
-    .replace(/\s+/g, " ")
-    .trim();
+    .replace(/[^\p{L}\p{N}]/gu, "");
 
 /**
  * Doppelte Namen entfernen (erste Schreibweise bleibt). Doppelte entstehen,
