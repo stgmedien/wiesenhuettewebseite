@@ -11,7 +11,21 @@ const client = new Anthropic();
  * fehler o. ä.), wird eine leere Liste zurückgegeben — der Kurkarten-Upload
  * selbst darf davon nie abhängen.
  */
-export async function extractNamesFromKurkartenPdf(buffer: Buffer): Promise<string[]> {
+export type KurkartenInfo = {
+  names: string[];
+  /**
+   * Staatsangehörigkeiten aus dem Meldeschein-Teil (z. B. "niederländisch").
+   * Leer, wenn nicht erkennbar. Für die Meldeschein-Mail an Toni bei
+   * ausländischen Gästen (Unterschrift auf Papier, § 29 BMG).
+   */
+  nationalities: string[];
+};
+
+/** Mindestens eine nicht-deutsche Staatsangehörigkeit erkannt? */
+export const hasForeignGuests = (info: KurkartenInfo): boolean =>
+  info.nationalities.some((n) => n.trim() !== "" && !/^deutsch/i.test(n.trim()));
+
+export async function extractNamesFromKurkartenPdf(buffer: Buffer): Promise<KurkartenInfo> {
   try {
     const response = await client.messages.create({
       model: "claude-haiku-4-5",
@@ -30,7 +44,7 @@ export async function extractNamesFromKurkartenPdf(buffer: Buffer): Promise<stri
             },
             {
               type: "text",
-              text: "Dies ist ein AVS-Kurkarten-PDF mit einer Gästekarte pro Person. Extrahiere die vollständigen Namen aller Gäste in der Reihenfolge, in der sie im Dokument erscheinen. Gib nur die Namen zurück — keine Preise, Orte, Kategorien oder Kartencodes.",
+              text: "Dies ist ein AVS-Kurkarten-PDF mit einer Gästekarte pro Person und einem Meldeschein-Block (Anschrift, darunter \"Land - Staatsangehörigkeit\", z. B. \"Niederlande - niederländisch\" oder \"Deutschland - deutsch\"). 1) names: die vollständigen Namen aller Gäste in der Reihenfolge, in der sie im Dokument erscheinen — nur Namen, keine Preise, Orte, Kategorien oder Kartencodes. 2) nationalities: alle im Dokument genannten Staatsangehörigkeiten (nur das Adjektiv nach dem Bindestrich, kleingeschrieben, ohne Duplikate, z. B. \"niederländisch\"); leere Liste, wenn keine genannt ist.",
             },
           ],
         },
@@ -42,8 +56,9 @@ export async function extractNamesFromKurkartenPdf(buffer: Buffer): Promise<stri
             type: "object",
             properties: {
               names: { type: "array", items: { type: "string" } },
+              nationalities: { type: "array", items: { type: "string" } },
             },
-            required: ["names"],
+            required: ["names", "nationalities"],
             additionalProperties: false,
           },
         },
@@ -51,11 +66,14 @@ export async function extractNamesFromKurkartenPdf(buffer: Buffer): Promise<stri
     });
 
     const textBlock = response.content.find((b) => b.type === "text");
-    if (!textBlock || textBlock.type !== "text") return [];
-    const parsed = JSON.parse(textBlock.text) as { names: string[] };
-    return parsed.names.filter((n) => n.trim().length > 0);
+    if (!textBlock || textBlock.type !== "text") return { names: [], nationalities: [] };
+    const parsed = JSON.parse(textBlock.text) as { names: string[]; nationalities?: string[] };
+    return {
+      names: parsed.names.filter((n) => n.trim().length > 0),
+      nationalities: (parsed.nationalities ?? []).map((n) => n.trim().toLowerCase()).filter(Boolean),
+    };
   } catch (err) {
     console.error("[kurkarten-names] KI-Extraktion fehlgeschlagen:", err);
-    return [];
+    return { names: [], nationalities: [] };
   }
 }

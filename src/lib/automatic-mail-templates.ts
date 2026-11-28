@@ -153,6 +153,14 @@ export const AUTOMATIC_MAIL_TEMPLATES: AutomaticMailTemplate[] = [
     file: "src/app/api/cron/daily-mail-jobs/route.ts",
   },
   {
+    key: "huettenwart_meldeschein_auslaender",
+    label: "Meldeschein unterschreiben lassen (ausländische Gäste) — Hüttenservice",
+    category: "Buchung — Hüttenservice/intern",
+    trigger: "Beim Hochladen der Kurkarten-PDF, wenn darin eine nicht-deutsche Staatsangehörigkeit steht (KI-Auslesung). Mit Kurkarten-PDF im Anhang; Unterschrift der Reiseleitung bei Gruppen über 10 Personen, sonst jeder erwachsenen ausländischen Person (§ 29 BMG).",
+    audience: "Toni Klauke + Brandenburg-Team",
+    file: "src/app/api/m/kurkarten-upload/route.ts",
+  },
+  {
     key: "huettenwart_arrival_reminder",
     label: "Letzte Erinnerung vor Anreise + Kurkarten — Hüttenservice",
     category: "Buchung — Hüttenservice/intern",
