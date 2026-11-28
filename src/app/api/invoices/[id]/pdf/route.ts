@@ -119,11 +119,14 @@ export async function GET(req: NextRequest, ctx: Params) {
   }
 
   const filename = `Rechnung_${invoice.invoiceNumber}.pdf`;
+  const forceDownload = req.nextUrl.searchParams.get("download") === "1";
   return new NextResponse(new Uint8Array(buffer), {
     status: 200,
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="${filename}"`,
+      // Standard: im Browser anzeigen (Dana 11/2026: Kontrolle ohne Download).
+      // ?download=1 erzwingt den Download.
+      "Content-Disposition": `${forceDownload ? "attachment" : "inline"}; filename="${filename}"`,
       "Cache-Control": "no-store",
     },
   });
