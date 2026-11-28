@@ -1,7 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { FileText, Loader2, ExternalLink, Check, RefreshCw } from "lucide-react";
+import {
+  FileText,
+  Loader2,
+  ExternalLink,
+  Check,
+  RefreshCw,
+} from "lucide-react";
 import {
   createInvoiceForBookingAction,
   reissueInvoiceForBookingAction,
@@ -53,7 +59,7 @@ export function InvoiceControl({ bookingId, existing }: Props) {
   const reissue = () => {
     if (
       !window.confirm(
-        `Rechnung ${invoice?.invoiceNumber} wird storniert und mit dem aktuellen Buchungsstand (Personen, Preise) neu ausgestellt — mit neuer Rechnungsnummer. Fortfahren?`
+        `Rechnung ${invoice?.invoiceNumber} wird storniert und mit dem aktuellen Buchungsstand (Personen, Preise) neu ausgestellt — mit neuer Rechnungsnummer. Fortfahren?`,
       )
     )
       return;
@@ -90,7 +96,10 @@ export function InvoiceControl({ bookingId, existing }: Props) {
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-sm">
             {justCreated && (
-              <Check size={14} className="text-[var(--color-wh-deep-green)] shrink-0" />
+              <Check
+                size={14}
+                className="text-[var(--color-wh-deep-green)] shrink-0"
+              />
             )}
             <span className="font-semibold text-[var(--color-wh-deep-green)]">
               {invoice.invoiceNumber}
@@ -100,16 +109,24 @@ export function InvoiceControl({ bookingId, existing }: Props) {
             </span>
           </div>
           {pdfUrl && (
-            <a
-              href={pdfUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5 text-sm text-[var(--color-wh-deep-green)] underline underline-offset-2 hover:no-underline"
-            >
-              <FileText size={13} />
-              PDF herunterladen
-              <ExternalLink size={11} />
-            </a>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+              <a
+                href={pdfUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 text-sm text-[var(--color-wh-deep-green)] underline underline-offset-2 hover:no-underline"
+              >
+                <FileText size={13} />
+                Rechnung ansehen
+                <ExternalLink size={11} />
+              </a>
+              <a
+                href={`${pdfUrl}?download=1`}
+                className="inline-flex items-center gap-1.5 text-sm text-[var(--color-wh-fg-muted)] underline underline-offset-2 hover:no-underline"
+              >
+                PDF herunterladen
+              </a>
+            </div>
           )}
           <div>
             <button
@@ -127,9 +144,13 @@ export function InvoiceControl({ bookingId, existing }: Props) {
             </button>
           </div>
           {reissueInfo && (
-            <p className="text-xs text-[var(--color-wh-fg-muted)] m-0">{reissueInfo}</p>
+            <p className="text-xs text-[var(--color-wh-fg-muted)] m-0">
+              {reissueInfo}
+            </p>
           )}
-          {error && <p className="text-xs text-[var(--color-wh-sunset)] m-0">{error}</p>}
+          {error && (
+            <p className="text-xs text-[var(--color-wh-sunset)] m-0">{error}</p>
+          )}
         </div>
       ) : (
         <div className="space-y-2">
