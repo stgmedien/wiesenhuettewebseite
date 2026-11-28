@@ -10,16 +10,18 @@ type Props = {
   guestEmail: string;
   /** Formatiertes Datum des letzten Versands — null, wenn noch nie verschickt. */
   lastSentAt: string | null;
+  /** Art des letzten Versands (AVS-Umstellung 27.11.2026). */
+  lastSentKind: "alt" | "neu" | "neu-umstellung" | null;
 };
 
 const inputCls =
   "w-full rounded-lg border border-[var(--color-wh-winter-grey)] bg-white px-3 py-2 text-sm font-mono focus:border-[var(--color-wh-deep-green)] focus:outline-none";
 
-export function AvsCheckinForm({ bookingId, guestEmail, lastSentAt }: Props) {
+export function AvsCheckinForm({ bookingId, guestEmail, lastSentAt, lastSentKind }: Props) {
   const [link, setLink] = useState("");
   // Wer schon einen (alten) Link bekommen hat, bekommt nach der AVS-
   // Systemumstellung (11/2026) die Mail mit Erklärung + Entschuldigung.
-  const [reissue, setReissue] = useState(!!lastSentAt);
+  const [reissue, setReissue] = useState(lastSentKind === "alt");
   const [sentTo, setSentTo] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
@@ -41,12 +43,26 @@ export function AvsCheckinForm({ bookingId, guestEmail, lastSentAt }: Props) {
 
   return (
     <div>
-      {lastSentAt || sentTo ? (
+      {sentTo ? (
         <p className="text-sm text-emerald-700 flex items-center gap-1.5 mb-3">
           <Check size={14} />
-          {sentTo
-            ? `Check-in-Link gerade an ${sentTo} verschickt.`
-            : `Check-in-Link verschickt am ${lastSentAt}.`}
+          {reissue ? "Neuer Link (nach der AVS-Umstellung)" : "Check-in-Link"} gerade an {sentTo}{" "}
+          verschickt.
+        </p>
+      ) : lastSentKind === "neu-umstellung" ? (
+        <p className="text-sm text-emerald-700 flex items-center gap-1.5 mb-3">
+          <Check size={14} />
+          Neuer Link (nach der AVS-Umstellung) verschickt am {lastSentAt}. Nichts weiter zu tun.
+        </p>
+      ) : lastSentKind === "neu" ? (
+        <p className="text-sm text-emerald-700 flex items-center gap-1.5 mb-3">
+          <Check size={14} />
+          Check-in-Link verschickt am {lastSentAt}. Nichts weiter zu tun.
+        </p>
+      ) : lastSentKind === "alt" ? (
+        <p className="text-sm text-[var(--color-wh-sunset)] font-medium mb-3">
+          Nur der alte Link (vor der AVS-Umstellung) wurde verschickt, am {lastSentAt}. Bitte einen
+          neuen Link erzeugen und senden — das Häkchen unten ist schon gesetzt.
         </p>
       ) : (
         <p className="text-sm text-[var(--color-wh-sunset)] font-medium mb-3">
@@ -98,8 +114,8 @@ export function AvsCheckinForm({ bookingId, guestEmail, lastSentAt }: Props) {
           className="mt-0.5"
         />
         <span>
-          <strong>Neuer Link wegen Systemumstellung</strong> — Mail sagt dem Gast, dass wir das
-          Meldeschein-System mit Winterberg umgestellt haben und er den alten Link ignorieren soll.
+          <strong>Hinweis „alten Link ignorieren“ mitschicken</strong> — nur nötig, wenn der Gast
+          schon einen Link von vor der AVS-Umstellung hat (dann automatisch gesetzt).
         </span>
       </label>
 
